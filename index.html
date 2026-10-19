@@ -1,0 +1,360 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>DOMI 2: PANCHO</title>
+    <meta name="theme-color" content="#0c1013" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="./css/arcade.css" />
+    <link rel="stylesheet" href="./css/polish.css" />
+    <link rel="stylesheet" href="./css/shop.css" />
+    <link rel="stylesheet" href="./css/gameplay.css" />
+  </head>
+  <body>
+    <main id="app" class="app">
+      <canvas id="gameCanvas" width="960" height="540" aria-label="DOMI 2: PANCHO"></canvas>
+
+      <section id="authScreen" class="screen screen--active auth-screen">
+        <div class="auth-brand"><span>DOMI <b>2</b></span><strong>PANCHO</strong><small>ARCADE CLUB / TU TURNO EMPIEZA ACÁ</small><p class="auth-intro">Sobreviví al turno. Armá tu combo.<br />Volvé por más.</p><span class="keyboard-note">Juego para teclado y mouse</span></div>
+        <form id="authForm" class="auth-panel screen__panel">
+          <p class="eyebrow">TARJETA DE SOCIO</p><h2 id="authTitle">Entrar al local.</h2>
+          <label class="field" for="authName">Usuario<input id="authName" name="username" autocomplete="username" autocapitalize="none" spellcheck="false" minlength="3" maxlength="16" aria-describedby="authNameHint" required /></label>
+          <p id="authNameHint" class="field-hint" hidden>De 3 a 16 caracteres: letras, números, espacios, guion o guion bajo.</p>
+          <div class="field"><label for="authPassword">Contraseña</label><div class="password-field"><input id="authPassword" name="password" type="password" autocomplete="current-password" minlength="6" aria-describedby="authPasswordHint authCapsLock" required /><button id="authPasswordToggle" class="password-toggle" type="button" aria-controls="authPassword" aria-label="Mostrar contraseña" aria-pressed="false">Mostrar</button></div></div>
+          <p id="authPasswordHint" class="field-hint" hidden>Usá al menos 6 caracteres. Elegí una contraseña exclusiva para este juego.</p>
+          <p id="authCapsLock" class="field-hint caps-lock" role="status" hidden>Bloq Mayús está activado.</p>
+          <p id="authError" class="form-error" role="alert" tabindex="-1" hidden></p>
+          <button class="pixel-button" type="submit" id="authSubmit">INICIAR SESIÓN</button>
+          <button class="text-button" type="button" id="authSwitch">Crear una cuenta nueva</button>
+          <small class="save-note">Tu cuenta y progreso se guardan solo en este navegador. Si borrás sus datos o cambiás de dispositivo, no se trasladan. No hay recuperación de contraseña.</small>
+        </form>
+      </section>
+
+      <section id="lobbyScreen" class="screen lobby-screen">
+        <header class="lobby-header"><span class="brand-mark">D<span>2</span></span><div><strong id="lobbyWelcome">PANCHO</strong><small>SOCIO DEL CLUB / EN EL LOCAL</small></div><span class="wallet"><i data-lucide="coins"></i><b id="lobbyBank">0</b><small>PT</small></span><button id="lobbyAchievements" class="lobby-achievements" title="Ver logros" aria-label="Ver logros y progreso"><i data-lucide="trophy"></i><span>LOGROS <b id="lobbyAchievementCount">0 / 6</b></span></button><button id="lobbyOptions" class="icon-button" title="Opciones" aria-label="Opciones"><i data-lucide="settings-2"></i></button><button id="logoutButton" class="icon-button" title="Cerrar sesion" aria-label="Cerrar sesion"><i data-lucide="log-out"></i></button></header>
+        <div class="lobby-stage"><canvas id="lobbyCanvas" width="960" height="540" aria-label="Lobby interactivo"></canvas><p class="lobby-controls"><kbd>WASD</kbd> / flechas: moverte <span>·</span> <kbd>E</kbd>: interactuar <span>·</span> También podés hacer clic en los lugares.</p><div class="lobby-tip" id="lobbyTip" hidden></div>
+          <aside id="lobbyDialogue" class="lobby-dialogue" role="dialog" aria-labelledby="dialogueTitle" hidden><div class="dialogue-speaker">DON DOMI <span>EL DUEÑO DE LA CASA</span></div><button id="dialogueClose" class="icon-button" title="Cerrar" aria-label="Cerrar consejo"><i data-lucide="x"></i></button><h3 id="dialogueTitle"></h3><p id="dialogueText"></p><button id="dialogueNext" class="text-button">Otra receta <i data-lucide="arrow-right"></i></button></aside>
+        </div>
+        <nav class="lobby-nav" aria-label="Lugares del local"><button data-station="portal" title="Preparar partida"><i data-lucide="door-open"></i><span>PARTIDA</span></button><button data-station="wardrobe" title="Tu coleccion"><i data-lucide="shirt"></i><span>ARMARIO</span></button><button data-station="pets" title="Mascotas"><i data-lucide="paw-print"></i><span>MASCOTAS</span></button><button data-station="shop" title="Tienda"><i data-lucide="store"></i><span>TIENDA</span></button><button data-station="npc" title="Hablar con Don Domi"><i data-lucide="message-circle"></i><span>DON DOMI</span></button><button data-station="ranking" title="Tus partidas"><i data-lucide="chart-no-axes-column"></i><span>HISTORIAL</span></button></nav>
+      </section>
+
+      <section id="shopScreen" class="screen shop-screen" aria-labelledby="shopTitle">
+        <div class="screen__panel shop-panel">
+          <header class="shop-heading">
+            <button id="shopBackButton" class="icon-button" title="Volver al local" aria-label="Volver al local"><i data-lucide="arrow-left"></i></button>
+            <div class="shop-heading-copy"><p class="eyebrow">DOMI / CLUB DE COLECCIONISTAS</p><h2 id="shopTitle">Fuera de carta.</h2><p id="shopSubtitle">Elegí tu próximo favorito. Probalo antes de equiparlo.</p></div>
+            <div class="shop-balance"><small>TUS PUNTOS</small><span class="wallet"><i data-lucide="coins"></i><b id="shopBank">0</b><small>PT</small></span></div>
+          </header>
+          <div id="shopTabs" class="shop-tabs" role="group" aria-label="Categorías de artículos"></div>
+          <div class="shop-layout"><div class="shop-catalog"><div class="shop-catalog-heading"><h3 id="shopCategory">Personajes</h3><span id="shopCount" role="status"></span></div><div id="shopGrid" class="shop-grid"></div></div><aside id="shopDetail" class="shop-detail" aria-label="Probador del artículo"></aside></div>
+          <p id="shopFeedback" class="shop-feedback" role="status" aria-live="polite"></p>
+        </div>
+      </section>
+
+      <section id="menuScreen" class="screen">
+        <header class="brand-bar"><span class="brand-mark">D<span>2</span></span><span>DOMI / ARCADE CLUB</span><span class="edition">EDICION 02 <i></i> EN SERVICIO</span></header>
+        <div class="screen__panel menu-panel">
+          <p class="eyebrow"><span class="live-dot"></span> EL ULTIMO TURNO</p>
+          <h1>DOMI 2<span>PANCHO</span></h1>
+          <p class="menu-copy">La cocina cerro.<br />El menu se levanto.</p>
+          <div class="menu-actions">
+            <button id="playButton" class="pixel-button play-button">A LA COCINA <span aria-hidden="true">&#8599;</span></button>
+            <button id="rankingButton" class="text-button">Ver ranking <span aria-hidden="true">&#8594;</span></button>
+          </div>
+          <nav class="menu-links" aria-label="Extras">
+            <button id="skinsButton" class="text-button">Personajes</button>
+            <button id="achievementsButton" class="text-button">Logros</button>
+            <button id="optionsButton" class="text-button">Opciones</button>
+          </nav>
+        </div>
+        <aside class="scene-caption"><span>01 / LOCAL DOMI</span><strong>COMBO DEL DIA:<br />SOBREVIVIR.</strong><span class="scene-status">PEDIDOS PENDIENTES <b>99+</b></span></aside>
+        <div class="menu-footer"><span>FAST FOOD. FAST TROUBLE.</span><span>RECORD LOCAL <b id="menuBest">000000</b></span><span>ABIERTO HASTA EL ULTIMO PEDIDO</span></div>
+      </section>
+
+      <section id="setupScreen" class="screen">
+        <div class="screen__panel setup-panel">
+          <div class="setup-header">
+            <div>
+              <p class="eyebrow">ORDEN 0002 / NUEVA PARTIDA</p>
+              <h2>Arma tu combo.</h2>
+            </div>
+            <div class="setup-profile-pill">
+              <span class="setup-badge-label">SOCIO ACTIVO</span>
+              <div class="setup-badge-content">
+                <i data-lucide="user"></i>
+                <input id="playerNameInput" maxlength="16" value="Pancho" readonly />
+                <span class="live-dot" title="En servicio"></span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Variante 3: 4 Tarjetas principales en grid 2x2 exacta al mockup -->
+          <div class="setup-cards-grid">
+            <!-- MODO -->
+            <button type="button" class="setup-card setup-card--amber" id="cardMode" aria-label="Cambiar modo de juego">
+              <div class="setup-card__icon-box">
+                <svg viewBox="0 0 24 24" class="card-icon-pixel" shape-rendering="crispEdges" aria-hidden="true">
+                  <!-- Ball Top -->
+                  <rect x="10" y="2" width="4" height="1" fill="#fff"/>
+                  <rect x="9" y="3" width="6" height="4" fill="#ffcc00"/>
+                  <rect x="10" y="3" width="2" height="2" fill="#fff"/>
+                  <rect x="10" y="7" width="4" height="1" fill="#cc8800"/>
+                  <!-- Shaft -->
+                  <rect x="11" y="8" width="2" height="5" fill="#f0f0f0"/>
+                  <rect x="12" y="8" width="1" height="5" fill="#888888"/>
+                  <!-- Washer -->
+                  <rect x="9" y="13" width="6" height="2" fill="#222222"/>
+                  <rect x="10" y="13" width="4" height="1" fill="#555555"/>
+                  <!-- Isometric Pixel Base -->
+                  <rect x="5" y="15" width="14" height="1" fill="#ffcc00"/>
+                  <rect x="3" y="16" width="18" height="2" fill="#ffaa00"/>
+                  <rect x="2" y="18" width="20" height="2" fill="#cc7700"/>
+                  <rect x="2" y="20" width="20" height="1" fill="#884400"/>
+                  <rect x="4" y="21" width="16" height="1" fill="#111111"/>
+                </svg>
+              </div>
+              <div class="setup-card__content">
+                <span class="setup-card__label">Modo</span>
+                <strong class="setup-card__value" id="cardModeVal">8 oleadas</strong>
+                <span class="setup-card__hint">Clic para alternar</span>
+              </div>
+            </button>
+
+            <!-- MAPA -->
+            <button type="button" class="setup-card setup-card--mint" id="cardMap" aria-label="Cambiar mapa de juego">
+              <div class="setup-card__icon-box">
+                <svg viewBox="0 0 24 24" class="card-icon-pixel" shape-rendering="crispEdges" aria-hidden="true">
+                  <!-- Pin Head -->
+                  <rect x="9" y="2" width="6" height="1" fill="#00ff88"/>
+                  <rect x="7" y="3" width="10" height="1" fill="#00ff88"/>
+                  <rect x="6" y="4" width="12" height="4" fill="#00e577"/>
+                  <rect x="8" y="4" width="2" height="2" fill="#ffffff"/>
+                  <rect x="7" y="8" width="10" height="2" fill="#00cc66"/>
+                  <!-- Center Hole -->
+                  <rect x="10" y="5" width="4" height="3" fill="#082315"/>
+                  <!-- Pin Point -->
+                  <rect x="8" y="10" width="8" height="2" fill="#00b355"/>
+                  <rect x="9" y="12" width="6" height="2" fill="#009944"/>
+                  <rect x="10" y="14" width="4" height="2" fill="#008038"/>
+                  <rect x="11" y="16" width="2" height="2" fill="#00662d"/>
+                  <!-- Pixel Shadow -->
+                  <rect x="8" y="19" width="8" height="2" fill="#00ff88" opacity="0.3"/>
+                  <rect x="6" y="20" width="12" height="1" fill="#00ff88" opacity="0.15"/>
+                </svg>
+              </div>
+              <div class="setup-card__content">
+                <span class="setup-card__label">Mapa</span>
+                <strong class="setup-card__value" id="cardMapVal">01 / Local DOMI</strong>
+                <span class="setup-card__hint">Clic para alternar</span>
+              </div>
+            </button>
+
+            <!-- MASCOTA (Companero) -->
+            <button type="button" class="setup-card setup-card--cyan" id="cardCompanion" aria-label="Cambiar mascota o companero">
+              <div class="setup-card__icon-box">
+                <svg viewBox="0 0 24 24" class="card-icon-pixel" shape-rendering="crispEdges" aria-hidden="true">
+                  <!-- Toe Beans -->
+                  <rect x="4" y="7" width="3" height="4" fill="#00e5ff"/>
+                  <rect x="5" y="8" width="1" height="1" fill="#fff"/>
+                  <rect x="8" y="3" width="3" height="4" fill="#00e5ff"/>
+                  <rect x="9" y="4" width="1" height="1" fill="#fff"/>
+                  <rect x="13" y="3" width="3" height="4" fill="#00e5ff"/>
+                  <rect x="14" y="4" width="1" height="1" fill="#fff"/>
+                  <rect x="17" y="7" width="3" height="4" fill="#00e5ff"/>
+                  <rect x="18" y="8" width="1" height="1" fill="#fff"/>
+                  <!-- Main Pad -->
+                  <rect x="8" y="10" width="8" height="2" fill="#00e5ff"/>
+                  <rect x="6" y="12" width="12" height="4" fill="#00d0e8"/>
+                  <rect x="9" y="12" width="2" height="2" fill="#fff"/>
+                  <rect x="7" y="16" width="10" height="2" fill="#009db0"/>
+                  <rect x="9" y="18" width="6" height="1" fill="#006b78"/>
+                  <!-- Shadow -->
+                  <rect x="6" y="20" width="12" height="1" fill="#00e5ff" opacity="0.3"/>
+                </svg>
+              </div>
+              <div class="setup-card__content">
+                <span class="setup-card__label">Mascota</span>
+                <strong class="setup-card__value" id="cardCompanionVal">Sin companero</strong>
+                <span class="setup-card__hint">Clic para alternar</span>
+              </div>
+            </button>
+
+            <!-- DIFICULTAD -->
+            <button type="button" class="setup-card setup-card--red" id="cardDifficulty" aria-label="Cambiar dificultad">
+              <div class="setup-card__icon-box">
+                <svg viewBox="0 0 24 24" class="card-icon-pixel" shape-rendering="crispEdges" aria-hidden="true">
+                  <!-- Cranium Top -->
+                  <rect x="8" y="2" width="8" height="1" fill="#ff4455"/>
+                  <rect x="6" y="3" width="12" height="2" fill="#ff4455"/>
+                  <rect x="8" y="3" width="2" height="1" fill="#ffffff"/>
+                  <rect x="4" y="5" width="16" height="5" fill="#ea2e40"/>
+                  <!-- Eye Sockets with Glowing Red Pupils -->
+                  <rect x="6" y="8" width="4" height="4" fill="#180508"/>
+                  <rect x="7" y="9" width="2" height="2" fill="#ff0022"/>
+                  <rect x="14" y="8" width="4" height="4" fill="#180508"/>
+                  <rect x="15" y="9" width="2" height="2" fill="#ff0022"/>
+                  <!-- Nose Cavity -->
+                  <rect x="11" y="12" width="2" height="2" fill="#180508"/>
+                  <!-- Cheekbones -->
+                  <rect x="5" y="11" width="3" height="3" fill="#c01c2c"/>
+                  <rect x="16" y="11" width="3" height="3" fill="#c01c2c"/>
+                  <!-- Teeth / Jaw -->
+                  <rect x="7" y="15" width="10" height="1" fill="#ea2e40"/>
+                  <rect x="8" y="16" width="8" height="3" fill="#ffffff"/>
+                  <rect x="9" y="16" width="1" height="3" fill="#180508"/>
+                  <rect x="11" y="16" width="2" height="3" fill="#180508"/>
+                  <rect x="14" y="16" width="1" height="3" fill="#180508"/>
+                  <rect x="8" y="19" width="8" height="1" fill="#880011"/>
+                </svg>
+              </div>
+              <div class="setup-card__content">
+                <span class="setup-card__label">Dificultad</span>
+                <strong class="setup-card__value" id="cardDifficultyVal">Picante</strong>
+                <span class="setup-card__hint">Clic para alternar</span>
+              </div>
+            </button>
+          </div>
+
+          <!-- Accesorio card compact -->
+          <div class="setup-accessory-bar">
+            <button type="button" class="setup-card setup-card--purple setup-card--compact" id="cardAccessory" aria-label="Cambiar accesorio">
+              <div class="setup-card__icon-box">
+                <svg viewBox="0 0 24 24" class="card-icon-pixel" shape-rendering="crispEdges" aria-hidden="true">
+                  <!-- Crown Tips -->
+                  <rect x="4" y="6" width="2" height="2" fill="#b844ff"/>
+                  <rect x="11" y="4" width="2" height="2" fill="#fff"/>
+                  <rect x="18" y="6" width="2" height="2" fill="#b844ff"/>
+                  <!-- Crown Body -->
+                  <rect x="4" y="8" width="3" height="7" fill="#b844ff"/>
+                  <rect x="10" y="6" width="4" height="9" fill="#d47aff"/>
+                  <rect x="17" y="8" width="3" height="7" fill="#b844ff"/>
+                  <rect x="7" y="11" width="3" height="4" fill="#9d22e8"/>
+                  <rect x="14" y="11" width="3" height="4" fill="#9d22e8"/>
+                  <!-- Jewels -->
+                  <rect x="5" y="13" width="1" height="1" fill="#00ffcc"/>
+                  <rect x="11" y="11" width="2" height="2" fill="#ffcc00"/>
+                  <rect x="18" y="13" width="1" height="1" fill="#00ffcc"/>
+                  <!-- Crown Rim -->
+                  <rect x="3" y="15" width="18" height="3" fill="#ffbe3b"/>
+                  <rect x="4" y="16" width="16" height="1" fill="#ffffff"/>
+                  <rect x="3" y="18" width="18" height="1" fill="#8c4400"/>
+                </svg>
+              </div>
+              <div class="setup-card__content">
+                <span class="setup-card__label">Accesorio Extra</span>
+                <strong class="setup-card__value" id="cardAccessoryVal">Sin accesorio</strong>
+                <span class="setup-card__hint">Clic para alternar</span>
+              </div>
+            </button>
+          </div>
+
+          <!-- Selects nativos ocultos para compatibilidad con logica de juego y accesibilidad -->
+          <div class="setup-fields sr-hidden" aria-hidden="true">
+            <select id="difficultySelect" class="difficulty-select">
+              <option value="suave">Suave</option><option value="picante" selected>Picante</option>
+              <option value="extra">Extra picante</option><option value="quemado">Modo quemado</option>
+            </select>
+            <select id="mapSelect"><option value="diner">01 / Local DOMI</option><option value="kitchen">02 / Cocina industrial</option><option value="parking">03 / Estacionamiento</option><option value="snow">04 / Nevado</option><option value="desert">05 / Desierto</option><option value="football">06 / Cancha de futbol</option></select>
+            <select id="modeSelect"><option value="survival">Supervivencia</option><option value="waves">8 oleadas</option><option value="rush">Duelo de 3 jefes</option></select>
+            <select id="companionSelect"><option value="none">Sin companero</option><option value="ketchup">Mini ketchup / Ataque</option><option value="drone">Dron delivery / Recoleccion</option></select>
+            <select id="accessorySelect"><option value="none">Sin accesorio</option><option value="headband">Vincha turbo</option><option value="shades">Anteojos</option><option value="crown">Corona</option></select>
+          </div>
+          <div>
+            <h3><span>01</span> El protagonista</h3>
+            <div id="skinOptions" class="option-grid"></div>
+          </div>
+          <div>
+            <h3><span>02</span> El ingrediente secreto</h3>
+            <div id="weaponOptions" class="option-grid"></div>
+          </div>
+          <details class="controls-guide" open>
+            <summary>Cómo jugar</summary>
+            <p>El ataque es automático. Movete para esquivar enemigos y recoger experiencia.</p>
+            <ul><li><kbd>WASD</kbd> o <kbd>↑ ↓ ← →</kbd> Moverte</li><li><kbd>Espacio</kbd> Esquivar / embestir</li><li><kbd>1</kbd> <kbd>2</kbd> <kbd>3</kbd> Elegir mejora</li><li><kbd>Esc</kbd> Pausar / seguir</li><li><kbd>Q</kbd> <kbd>E</kbd> <kbd>R</kbd> Poderes: niveles 10, 20 y 30</li></ul>
+            <p>Las mejoras aparecen durante la partida y tienen tiempo limitado. Elegilas con el teclado o haciendo clic. Para apuntar con el mouse, activá la mira en la barra superior.</p>
+          </details>
+          <div class="menu-actions">
+            <button id="startRunButton" class="pixel-button">SERVIR COMBO <span aria-hidden="true">&#8594;</span></button>
+            <button id="setupBackButton" class="pixel-button pixel-button--secondary">Volver</button>
+          </div>
+        </div>
+      </section>
+
+      <section id="rankingScreen" class="screen">
+        <div class="screen__panel">
+          <h2>Ranking</h2>
+          <ol id="rankingList" class="ranking-list"></ol>
+          <div class="menu-actions">
+            <button id="rankingBackButton" class="pixel-button">Volver</button>
+          </div>
+        </div>
+      </section>
+
+      <section id="achievementsScreen" class="screen"><div class="screen__panel"><h2>Logros</h2><div id="achievementsList" class="achievement-list"></div><div class="menu-actions"><button id="achievementsBackButton" class="pixel-button">Volver</button></div></div></section>
+      <section id="optionsScreen" class="screen"><div class="screen__panel options-panel"><h2>Opciones</h2><label class="toggle-field">Musica<input id="musicToggle" type="checkbox"></label><label class="toggle-field">Efectos de sonido<input id="sfxToggle" type="checkbox"></label><label class="volume-field">Volumen<input id="volumeSlider" type="range" min="0" max="1" step="0.05" value="0.35"></label><div class="menu-actions"><button id="clearRankingButton" class="pixel-button pixel-button--secondary">Borrar ranking</button><button id="clearAchievementsButton" class="pixel-button pixel-button--secondary">Borrar logros</button><button id="optionsBackButton" class="pixel-button">Volver</button></div></div></section>
+      <section id="skinsScreen" class="screen"><div class="screen__panel"><p class="eyebrow">EL EQUIPO DEL MOSTRADOR</p><h2>Fuera de carta.</h2><div id="skinsPreview" class="skins-preview"></div><div class="menu-actions"><button id="skinsBackButton" class="pixel-button">Volver</button></div></div></section>
+
+      <section id="pauseScreen" class="screen pause-screen"><div class="screen__panel pause-panel"><p class="eyebrow">PEDIDO EN ESPERA</p><h2>La cocina espera.</h2><p id="pauseGoal" class="pause-goal"></p><h3>Tu receta</h3><div id="buildList" class="build-list"></div><div class="menu-actions"><button id="resumeButton" class="pixel-button">Seguir cocinando</button><button id="abandonButton" class="pixel-button pixel-button--secondary">Terminar partida</button></div></div></section>
+
+      <section id="gameOverScreen" class="screen">
+        <div class="screen__panel gameOver-panel-enhanced">
+          <div id="gameOverPixelBanner" class="gameover-pixel-banner" aria-live="assertive">GAME OVER</div>
+          <p id="resultEyebrow" class="eyebrow">FIN DEL TURNO</p>
+          <h2 id="resultTitle">GAME OVER</h2>
+          <p id="gameOverPhrase" class="phrase"></p>
+          <div id="gameOverStats" class="stats"></div>
+          <div id="newAchievements" class="result-achievements"></div>
+          <div class="menu-actions">
+            <button id="retryButton" class="pixel-button pixel-button--green">OTRA PARTIDA <span aria-hidden="true">↺</span></button>
+            <button id="gameOverMenuButton" class="pixel-button pixel-button--secondary">VOLVER AL LOCAL</button>
+          </div>
+        </div>
+      </section>
+
+      <section id="abilityScreen" class="screen ability-screen" aria-labelledby="abilityTitle">
+        <div class="screen__panel ability-panel">
+          <p class="eyebrow">Nuevo nivel</p>
+          <h2 id="abilityTitle">Elegi una mejora</h2>
+          <p class="ability-help">Presioná la tecla o hacé clic. El turno sigue.</p>
+          <div class="ability-timer"><div id="abilityTimerFill"></div></div>
+          <div id="abilityOptions" class="ability-grid"></div>
+        </div>
+      </section>
+      <aside id="combatRail" class="combat-rail" hidden><div class="rail-brand">D<span>2</span><small>EL ULTIMO TURNO</small></div><div class="rail-section"><span class="rail-label">TU RECETA</span><div id="liveBuild" class="live-build"></div></div><div class="rail-next"><i data-lucide="sparkles"></i><span id="nextPrimeLabel">PRIME EN NIVEL 10</span></div></aside>
+
+      <div id="hud" class="hud" hidden>
+        <div class="hud-identity"><canvas id="hudPortrait" width="64" height="64" aria-hidden="true"></canvas><div><strong id="hudName">Pancho</strong><span id="hudWeapon">Tenedor</span><small id="weaponEvolutionStatus">EVOLUCION 1 / 15</small></div></div>
+        <div class="hud__bar hud__bar--hp">
+          <span>Vida <b id="hpValue">100 / 100</b></span>
+          <div class="meter"><div id="hpFill" class="meter__fill meter__fill--hp"></div></div>
+        </div>
+        <div class="hud__bar hud__bar--xp">
+          <span>XP <b id="levelValue">NV 1</b></span>
+          <div class="meter"><div id="xpFill" class="meter__fill meter__fill--xp"></div></div>
+        </div>
+        <div id="hudStats" class="hud__stats"></div>
+        <button id="aimButton" class="icon-button" title="Punteria automatica" aria-label="Alternar punteria manual" aria-pressed="false"><i data-lucide="crosshair"></i></button>
+        <button id="pauseButton" class="icon-button" title="Pausa (Esc)" aria-label="Pausar partida"><i data-lucide="pause"></i></button>
+        <div id="activeBuffs" class="active-buffs" aria-live="polite"></div>
+      </div>
+      <div id="runBar" class="run-bar" hidden><span id="runLocation">LOCAL DOMI</span><span id="comboCount" aria-live="polite">COMBO x1</span><span id="runDifficulty">PICANTE</span></div>
+      <div id="dashControl" class="dash-control" hidden><kbd class="pixel-key dash-key">ESPACIO</kbd><div class="dash-meter"><span id="dashLabel">LISTO / EMBESTI</span><div class="meter"><div id="dashFill" class="meter__fill"></div></div></div></div>
+      <aside id="comboMilestones" class="combo-milestones" hidden aria-label="Progresión del combo">
+        <div class="combo-current"><i data-lucide="biceps-flexed" aria-hidden="true"></i><strong id="comboMultiplier">x1.00</strong><span id="comboChain">0 KOs</span></div>
+        <div class="combo-steps"><span data-combo-step="10">x10</span><span data-combo-step="20">x20</span><span data-combo-step="30">x30</span></div>
+      </aside>
+      <div id="primeBar" class="prime-bar" hidden></div>
+      <div id="bossMeter" class="boss-meter" hidden><span id="bossName">EL REY DEL MOSTRADOR</span><div class="meter"><div id="bossFill" class="meter__fill"></div></div></div>
+      <div id="eventBanner" class="event-banner" hidden><span id="eventName"></span><b id="eventTime"></b></div>
+
+      <div id="toast" class="toast" role="status" hidden></div>
+      <div id="bossAlert" class="boss-alert" role="status" aria-live="assertive" hidden>ALERTA / JEFE EN COCINA</div>
+    </main>
+
+    <script src="./node_modules/lucide/dist/umd/lucide.min.js"></script>
+    <script type="module" src="./js/main.js"></script>
+  </body>
+</html>

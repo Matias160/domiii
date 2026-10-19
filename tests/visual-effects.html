@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="es"><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>DOMI / Revision visual</title>
+<style>body{margin:0;background:#101719;color:#e9f4ec;font:14px system-ui}main{max-width:960px;margin:auto}canvas{display:block;width:100%;height:auto;image-rendering:pixelated}h2{font-size:16px;margin:16px}button{padding:10px;margin:12px;background:#b0eed2;border:0;color:#10221c;cursor:pointer}</style>
+<main><button id="motion">Pausar</button><h2>Lobby</h2><canvas id="room" width="960" height="540"></canvas><h2>Combate / avisos y proyectiles</h2><canvas id="combat" width="960" height="540"></canvas></main>
+<script type="module">
+import {makeRoom,drawStation,drawRoomLight} from '../js/ui/lobbyArt.js';
+import {drawDiner,drawFood} from '../js/core/art.js';
+import {drawWorldProps} from '../js/core/worldProps.js';
+import {drawCombatFeedback} from '../js/ui/combatFeedback.js';
+import {Projectile} from '../js/entities/Projectile.js';
+const room=document.querySelector('#room').getContext('2d'),combat=document.querySelector('#combat').getContext('2d'),floor=makeRoom();
+const stations=[{id:'portal',x:480,y:205,label:'ENTRAR AL TURNO',color:'#ffe068'},{id:'wardrobe',x:185,y:210,label:'ARMARIO',color:'#f49b9b'},{id:'pets',x:775,y:210,label:'MASCOTAS',color:'#a2e9bf'},{id:'shop',x:780,y:425,label:'TIENDA',color:'#ffd078'},{id:'npc',x:180,y:425,label:'DON DOMI',color:'#acd5e9'},{id:'ranking',x:480,y:449,label:'HISTORIAL',color:'#efb1c5'}];
+let paused=false,t=0,last=0;
+document.querySelector('#motion').onclick=()=>{paused=!paused;document.querySelector('#motion').textContent=paused?'Reanudar':'Pausar';};
+const previewShots=Array.from({length:5},(_,i)=>new Projectile({x:510-i*34,y:405+i*13,vx:260+i*18,vy:0,size:4,color:i%2?'#f8d778':'#ff5d9e',kind:i%2?'fork':'sauce'}));
+function frame(now){const dt=paused?0:Math.min(.033,(now-last)/1000);t+=dt;last=now;
+room.drawImage(floor,0,0);drawRoomLight(room,t);for(const s of stations)drawStation(room,s,t,s.id==='portal');drawFood(room,'pancho',480,320,.9,t);
+drawDiner(combat,960,540,t,false,'football');drawWorldProps(combat,'football',t);
+const player={x:480,y:350,skin:{id:'pancho'},dashTime:.1,dashCooldown:2,dashDirection:{x:1,y:0},buffs:{speedTime:2},comboFeverTime:4,hp:100,maxHp:100};
+const bosses=[{x:310,y:200,radius:45,hp:100,isBoss:true,spawnTime:0,volleyTimer:2,bossPhase:'telegraph',chargeTarget:{x:550,y:340},speed:76,type:{}},{x:700,y:330,radius:42,hp:100,isBoss:true,spawnTime:0,volleyTimer:.85-t%.85,type:{bossStyle:'ranged'}}];
+const bossZones=[{kind:'shockwave',x:310,y:200,radius:110,delay:.8,life:1.1},{kind:'snipe',x:700,y:330,targetX:480,targetY:350,radius:40,delay:.8,life:1.2},{kind:'rain',x:0,y:0,targetX:590,targetY:430,radius:40,delay:.8,life:1.2}];
+drawCombatFeedback(combat,{player,enemies:bosses,bossZones,time:t,dashGhosts:[]});drawFood(combat,'pancho',480,350,.85,t);for(const b of bosses)drawFood(combat,'double',b.x,b.y,b.radius/23,t,true);
+for(const shot of previewShots){shot.update(dt);if(shot.x>875){shot.x=510;shot.trail=[];}shot.draw(combat);}
+requestAnimationFrame(frame);}requestAnimationFrame(frame);
+</script></html>
