@@ -13,26 +13,17 @@ const stations=[
   {id:'shop',     x:1520, y:760, label:'TIENDA ARCADE',   action:'TIENDA',    color:'#ffd000'},
 ];
 
-const advice=[
-  ['La receta del turno','No te quedes quieto, pibe. Rodea al grupo y deja una salida libre. La cocina se llena rapido.'],
-  ['Un paso adelante','El aceleron te da inmunidad y golpea una vez a cada enemigo que atravieses. Apunta bien la embestida.'],
-  ['La casa invita','Las mejoras de nivel duran nueve segundos en el mostrador. Una buena defensa tambien sostiene un combo.'],
-  ['Fuera de carta','Las prime se habilitan en los niveles 10, 20 y 30. El doble señuelo te compra unos segundos para escapar.'],
-];
-
 export class Lobby {
   constructor(game){
     this.game=game;this.canvas=document.querySelector('#lobbyCanvas');this.ctx=this.canvas.getContext('2d');
     this.room=makeRoom();
     this.x=960;this.y=520;
     this.camera={x:480,y:270};
-    this.near=null;this.hover=null;this.destination=null;this.adviceIndex=0;
-    this.dialog=document.querySelector('#lobbyDialogue');this.tip=document.querySelector('#lobbyTip');
+    this.near=null;this.hover=null;this.destination=null;
+    this.tip=document.querySelector('#lobbyTip');
     document.querySelectorAll('[data-station]').forEach(button=>button.addEventListener('click',()=>this.activate(button.dataset.station)));
-    document.querySelector('#dialogueNext').addEventListener('click',()=>{this.adviceIndex=(this.adviceIndex+1)%advice.length;this.showAdvice();});
-    document.querySelector('#dialogueClose').addEventListener('click',()=>this.closeAdvice());
-    document.querySelector('#lobbyOptions').addEventListener('click',()=>game.menu.showOptions());
-    document.querySelector('#lobbyAchievements').addEventListener('click',()=>game.menu.showAchievements());
+    document.querySelector('#lobbyOptions')?.addEventListener('click',()=>game.menu.showOptions());
+    document.querySelector('#lobbyAchievements')?.addEventListener('click',()=>game.menu.showAchievements());
     this.canvas.addEventListener('pointermove',event=>{
       const point=this.point(event);
       this.hover=point?stations.find(s=>Math.abs(s.x-point.x)<85&&point.y>s.y-90&&point.y<s.y+90):null;
@@ -40,7 +31,7 @@ export class Lobby {
     });
     this.canvas.addEventListener('pointerleave',()=>{this.hover=null;});
     this.canvas.addEventListener('click',event=>{
-      const point=this.point(event);if(!point||!this.dialog.hidden)return;
+      const point=this.point(event);if(!point)return;
       const station=stations.find(s=>Math.abs(s.x-point.x)<85&&point.y>s.y-90&&point.y<s.y+90);
       this.destination=station?{x:station.x,y:Math.min(990,station.y+80),station:station.id}:{x:Math.max(90,Math.min(1830,point.x)),y:Math.max(180,Math.min(1010,point.y))};
       this.game.audio.play('navigate');
@@ -54,8 +45,18 @@ export class Lobby {
   enter(){
     this.profile=currentAccount();
     this.destination=null;
-    this.dialog.hidden=true;
-    this.x=960;this.y=520;
+    // Recuperar la última posición guardada del jugador en el lobby
+    try {
+      const savedPos = JSON.parse(localStorage.getItem('domi2pancho.lobbyPos') || 'null');
+      if (savedPos && savedPos.x && savedPos.y) {
+        this.x = Math.max(90, Math.min(1830, savedPos.x));
+        this.y = Math.max(180, Math.min(1010, savedPos.y));
+      } else {
+        this.x = 960; this.y = 520;
+      }
+    } catch {
+      this.x = 960; this.y = 520;
+    }
     this.camera.x=this.x-480;this.camera.y=this.y-270;
     document.querySelector('#lobbyWelcome').textContent=this.profile.name.toUpperCase();
     document.querySelector('#lobbyBank').textContent=this.profile.bank.toLocaleString('es-AR');
@@ -63,7 +64,6 @@ export class Lobby {
     this.draw(0);
   }
   update(dt,input){
-    if(!this.dialog.hidden){if(input.consume('escape'))this.closeAdvice();this.draw(performance.now()/1000);return;}
     const axis=input.getAxis();this.moving=Boolean(axis.x||axis.y||this.destination);
     if(axis.x||axis.y){this.destination=null;this.x+=axis.x*260*dt;this.y+=axis.y*260*dt;}
     else if(this.destination){
@@ -72,6 +72,10 @@ export class Lobby {
     }
     this.x=Math.max(90,Math.min(1830,this.x));
     this.y=Math.max(180,Math.min(1010,this.y));
+    if(this.moving){
+      this._saveT=(this._saveT||0)+dt;
+      if(this._saveT>0.4){this._saveT=0;this.savePos();}
+    }
 
     // Smooth camera follow
     const targetCamX=this.x-480;
@@ -89,22 +93,20 @@ export class Lobby {
     if(input.consume('e')&&this.near){this.activate(this.near.id);return;}
     this.draw(performance.now()/1000);
   }
+  savePos(){
+    try{
+      localStorage.setItem('domi2pancho.lobbyPos', JSON.stringify({x:Math.round(this.x),y:Math.round(this.y)}));
+    }catch{}
+  }
   activate(id){
-    this.destination=null;this.game.audio.play('confirm');
+    this.destination=null;this.savePos();this.game.audio.play('confirm');
     if(id==='portal'){this.game.menu.prepareAccount();this.game.showScreen('setupScreen');}
     else if(id==='wardrobe')this.game.shop.show('skin',true);
     else if(id==='pets')this.game.shop.show('pet',true);
     else if(id==='shop')this.game.shop.show();
     else if(id==='ranking')this.game.showRanking();
-    else if(id==='npc')this.showAdvice();
+    else if(id==='npc')this.game.domi.show();
   }
-  showAdvice(){
-    this.dialog.hidden=false;this.game.input.clear();
-    document.querySelector('#dialogueTitle').textContent=advice[this.adviceIndex][0];
-    document.querySelector('#dialogueText').textContent=advice[this.adviceIndex][1];
-    document.querySelector('#dialogueNext').focus({preventScroll:true});
-  }
-  closeAdvice(){this.dialog.hidden=true;this.game.input.clear();document.activeElement?.blur();}
   draw(t){
     if(this.game.reducedMotion)t=0;
     const c=this.ctx;

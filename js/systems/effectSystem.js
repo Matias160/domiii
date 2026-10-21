@@ -59,9 +59,10 @@ export function damageEnemy(state, enemy, damage, type = 'normal') {
       x: enemy.x + (Math.random() - .5) * 18,
       y: enemy.y - 22,
       text: isCrit ? `✦${Math.ceil(finalDamage)}` : String(Math.ceil(finalDamage)),
-      life: isCrit ? .9 : .6,
+      life: isCrit ? .95 : .65,
       color,
-      scale: isCrit ? 1.6 : 1,
+      scale: isCrit ? 1.65 : 1,
+      kind: isCrit ? 'crit' : type,
     });
   }
 

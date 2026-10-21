@@ -15,7 +15,8 @@ export function updateProjectiles(state, delta, canvas) {
       if (state.player.takeDamage(shot.damage)) { state.shake = 0.18; state.audio?.play('damage'); }
     }
   }
-  state.enemyProjectiles = state.enemyProjectiles.filter(shot => shot.life > 0 && shot.x > -20 && shot.x < canvas.width + 20 && shot.y > -20 && shot.y < canvas.height + 20);
+  const bounds = state.world || canvas;
+  state.enemyProjectiles = state.enemyProjectiles.filter(shot => shot.life > 0 && shot.x > -60 && shot.x < bounds.width + 60 && shot.y > -60 && shot.y < bounds.height + 60);
 
   for (const projectile of state.projectiles) {
     if (projectile.boomerang && projectile.age > .48) {
@@ -73,7 +74,7 @@ export function updateProjectiles(state, delta, canvas) {
     }
   }
 
-  state.projectiles = state.projectiles.filter(p => !p.dead && p.x>=-40 && p.x<=canvas.width+40 && p.y>=-40 && p.y<=canvas.height+40);
+  state.projectiles = state.projectiles.filter(p => !p.dead && p.x >= -60 && p.x <= bounds.width + 60 && p.y >= -60 && p.y <= bounds.height + 60);
 }
 
 export function autoFire(state) {

@@ -10,6 +10,18 @@ export function drawAccessory(ctx, id, x, y, scale = 1) {
     ctx.fillStyle='#ffd960';ctx.beginPath();ctx.moveTo(-17,-26);ctx.lineTo(-18,-42);ctx.lineTo(-8,-33);ctx.lineTo(0,-46);ctx.lineTo(8,-33);ctx.lineTo(18,-42);ctx.lineTo(17,-26);ctx.fill();
     ctx.fillStyle='#ed6472';ctx.fillRect(-2,-32,4,4);
   }
+  if(id==='chef_hat'){
+    // Base y pliegues del gorro de chef en pixel art
+    ctx.fillStyle='#e2e8f0';ctx.fillRect(-16,-28,32,6); // Banda base
+    ctx.fillStyle='#ef4444';ctx.fillRect(-16,-24,32,2); // Ribete rojo
+    // Copa inflada blanca
+    ctx.fillStyle='#ffffff';ctx.fillRect(-20,-48,40,20);
+    // Pliegues y sombras pixel
+    ctx.fillStyle='#cbd5e1';
+    ctx.fillRect(-12,-46,3,16);ctx.fillRect(-2,-46,4,16);ctx.fillRect(9,-46,3,16);
+    ctx.fillStyle='#0f172a';ctx.fillRect(-20,-48,2,20);ctx.fillRect(18,-48,2,20); // Bordes laterales
+    ctx.fillRect(-18,-50,36,2); // Borde superior
+  }
   ctx.restore();
 }
 

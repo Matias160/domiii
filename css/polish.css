@@ -663,23 +663,309 @@ button:focus-visible, input:focus-visible, select:focus-visible {
 }
 
 .lobby-dialogue {
-  border: 4px solid var(--pixel-amber);
-  box-shadow: 6px 6px 0 #000;
-  background: #10181ce8;
-  border-radius: 0;
-  padding: 22px;
+  position: absolute !important;
+  top: 50% !important;
+  left: 50% !important;
+  transform: translate(-50%, -50%) !important;
+  z-index: 100 !important;
+  pointer-events: auto !important;
+  border: 4px solid #ffcc00 !important;
+  border-bottom: 6px solid #000 !important;
+  box-shadow: 8px 8px 0 #000, 0 0 25px rgba(255, 204, 0, 0.3) !important;
+  background: #0d161cfc !important;
+  border-radius: 0 !important;
+  padding: 20px 24px !important;
+  max-width: 580px !important;
+  width: 92% !important;
+}
+.dialogue-header {
+  display: flex !important;
+  align-items: center !important;
+  gap: 16px !important;
+  margin-bottom: 16px !important;
+  border-bottom: 3px solid #1e333c !important;
+  padding-bottom: 14px !important;
+}
+.dialogue-portrait-wrap {
+  width: 60px !important;
+  height: 60px !important;
+  border: 3px solid #ffcc00 !important;
+  border-bottom: 5px solid #997a00 !important;
+  box-shadow: 3px 3px 0 #000 !important;
+  background: #000 !important;
+  flex-shrink: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  overflow: hidden !important;
+}
+.domi-portrait-canvas {
+  width: 60px !important;
+  height: 60px !important;
+  image-rendering: pixelated !important;
+}
+.dialogue-header-text {
+  flex: 1 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 5px !important;
 }
 .dialogue-speaker {
-  font: 800 11px 'Press Start 2P', monospace;
-  color: var(--pixel-amber);
+  font: 900 13px 'Press Start 2P', monospace !important;
+  color: #ffcc00 !important;
+  text-shadow: 2px 2px 0 #000 !important;
+  letter-spacing: 1px !important;
 }
-.lobby-dialogue h3 {
-  font: 900 14px 'Press Start 2P', monospace;
-  color: #fff;
+.dialogue-subtitle {
+  font: 8px 'Press Start 2P', monospace !important;
+  color: #38bdf8 !important;
+  letter-spacing: 0.5px !important;
 }
-.lobby-dialogue p {
-  font: 11px/1.6 'Press Start 2P', monospace;
-  color: #c8d5bf;
+.dialogue-close-btn {
+  width: 34px !important;
+  height: 34px !important;
+  border: 2px solid #000 !important;
+  background: #ef4444 !important;
+  color: #fff !important;
+  box-shadow: 2px 2px 0 #000 !important;
+  border-radius: 0 !important;
+  cursor: pointer !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  transition: transform .1s, background .15s !important;
+}
+.dialogue-close-btn:hover {
+  background: #dc2626 !important;
+  transform: translateY(-2px) !important;
+}
+.dialogue-tabs {
+  display: flex !important;
+  gap: 8px !important;
+  margin-bottom: 14px !important;
+  border-bottom: 2px solid #1e333c !important;
+  padding-bottom: 8px !important;
+}
+.dialogue-tab {
+  background: #142228 !important;
+  border: 2px solid #283e47 !important;
+  border-bottom: 4px solid #0f181d !important;
+  color: #8da4a1 !important;
+  font: 800 8.5px 'Press Start 2P', monospace !important;
+  padding: 8px 12px !important;
+  cursor: pointer !important;
+  transition: all 0.15s ease !important;
+  border-radius: 0 !important;
+}
+.dialogue-tab:hover {
+  background: #20353d !important;
+  color: #fff !important;
+}
+.dialogue-tab.is-active {
+  background: #ffcc00 !important;
+  color: #000 !important;
+  border-color: #ffe066 !important;
+  border-bottom: 4px solid #b38f00 !important;
+  box-shadow: 2px 2px 0 #000 !important;
+}
+.dialogue-body {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 12px !important;
+}
+.dialogue-bubble {
+  background: #142127 !important;
+  border: 3px solid #293e47 !important;
+  border-bottom: 5px solid #000 !important;
+  box-shadow: 3px 3px 0 #000 !important;
+  padding: 16px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 10px !important;
+}
+.lobby-dialogue h3, #dialogueTitle {
+  font: 900 11px 'Press Start 2P', monospace !important;
+  color: #ffcc00 !important;
+  margin: 0 !important;
+  line-height: 1.4 !important;
+  text-shadow: 1px 1px 0 #000 !important;
+}
+.lobby-dialogue p, #dialogueText {
+  font: 9px/1.65 'Press Start 2P', monospace !important;
+  color: #e2e8f0 !important;
+  margin: 0 !important;
+}
+.dialogue-next-btn {
+  align-self: flex-start !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  font: 900 8.5px 'Press Start 2P', monospace !important;
+  padding: 9px 14px !important;
+  background: #0284c7 !important;
+  color: #fff !important;
+  border: 2px solid #38bdf8 !important;
+  border-bottom: 4px solid #0369a1 !important;
+  box-shadow: 3px 3px 0 #000 !important;
+  cursor: pointer !important;
+  border-radius: 0 !important;
+  transition: transform .12s, background .15s !important;
+}
+.dialogue-next-btn:hover {
+  background: #0369a1 !important;
+  transform: translateY(-2px) !important;
+}
+.domi-section-intro {
+  font: 8px 'Press Start 2P', monospace !important;
+  color: #94a3b8 !important;
+  line-height: 1.5 !important;
+  margin-bottom: 4px !important;
+}
+.domi-missions-list, .domi-collectibles-list {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 10px !important;
+  max-height: 270px !important;
+  overflow-y: auto !important;
+  padding-right: 4px !important;
+}
+.domi-missions-list::-webkit-scrollbar,
+.domi-collectibles-list::-webkit-scrollbar {
+  width: 6px !important;
+}
+.domi-missions-list::-webkit-scrollbar-thumb,
+.domi-collectibles-list::-webkit-scrollbar-thumb {
+  background: #2a3e47 !important;
+}
+.domi-mission-card {
+  background: #142127 !important;
+  border: 2px solid #283e47 !important;
+  border-bottom: 4px solid #000 !important;
+  padding: 12px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 8px !important;
+}
+.domi-mission-card.is-claimed {
+  border-color: #166534 !important;
+  background: #0c1f17 !important;
+}
+.domi-mission-header {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  flex-wrap: wrap !important;
+  gap: 6px !important;
+}
+.domi-mission-title {
+  font: 900 9.5px 'Press Start 2P', monospace !important;
+  color: #ffe066 !important;
+}
+.domi-mission-desc {
+  font: 8px/1.5 'Press Start 2P', monospace !important;
+  color: #94a3b8 !important;
+  margin: 0 !important;
+}
+.domi-mission-reward {
+  font: 8px 'Press Start 2P', monospace !important;
+  color: #38ef7d !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 4px !important;
+}
+.domi-progress-wrap {
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+  margin: 2px 0 !important;
+}
+.domi-progress-bar {
+  flex: 1 !important;
+  height: 9px !important;
+  background: #081014 !important;
+  border: 2px solid #20353c !important;
+  overflow: hidden !important;
+}
+.domi-progress-fill {
+  height: 100% !important;
+  background: linear-gradient(90deg, #00e5ff 0%, #00ff88 100%) !important;
+  box-shadow: 0 0 8px rgba(0, 255, 136, 0.6) !important;
+}
+.domi-progress-text {
+  font: 7.5px 'Press Start 2P', monospace !important;
+  color: #7dd3fc !important;
+  white-space: nowrap !important;
+}
+.domi-mission-btn {
+  align-self: flex-start !important;
+  font: 900 8px 'Press Start 2P', monospace !important;
+  padding: 8px 12px !important;
+  border: 2px solid #000 !important;
+  border-radius: 0 !important;
+  cursor: pointer !important;
+}
+.domi-mission-btn--claim {
+  background: #22c55e !important;
+  color: #000 !important;
+  box-shadow: 3px 3px 0 #000 !important;
+  animation: pulse 1.2s infinite !important;
+}
+.domi-mission-btn--done {
+  background: #1e293b !important;
+  color: #64748b !important;
+  border-color: #334155 !important;
+  cursor: default !important;
+}
+.domi-mission-btn--locked {
+  background: #141f26 !important;
+  color: #556873 !important;
+  border-color: #22323a !important;
+  cursor: default !important;
+}
+.domi-collec-row {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  gap: 14px !important;
+  background: #142127 !important;
+  border: 2px solid #283e47 !important;
+  border-bottom: 4px solid #000 !important;
+  padding: 10px 14px !important;
+}
+.domi-collec-info {
+  flex: 1 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 6px !important;
+}
+.domi-collec-head {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+}
+.domi-collec-title {
+  font: 900 8.5px 'Press Start 2P', monospace !important;
+  color: #f1f5f9 !important;
+}
+.domi-collec-val {
+  font: 900 8.5px 'Press Start 2P', monospace !important;
+  color: #ffcc00 !important;
+}
+.domi-collec-btn {
+  font: 900 8px 'Press Start 2P', monospace !important;
+  padding: 7px 11px !important;
+  background: #0284c7 !important;
+  color: #fff !important;
+  border: 2px solid #000 !important;
+  box-shadow: 2px 2px 0 #000 !important;
+  cursor: pointer !important;
+  border-radius: 0 !important;
+  white-space: nowrap !important;
+  transition: transform .1s, background .15s !important;
+}
+.domi-collec-btn:hover {
+  background: #0369a1 !important;
+  transform: translateY(-2px) !important;
 }
 
 /* Shop in Pixel Art */
@@ -722,10 +1008,12 @@ button:focus-visible, input:focus-visible, select:focus-visible {
   border-radius: 0;
 }
 .hud__bar .meter__fill--hp {
-  background: var(--pixel-red);
+  background: linear-gradient(90deg, #ff0844 0%, #ff4e50 55%, #f9d423 100%) !important;
+  box-shadow: 0 0 10px rgba(255, 30, 80, 0.75), inset 0 2px 0 rgba(255, 255, 255, 0.4) !important;
 }
 .hud__bar .meter__fill--xp {
-  background: var(--pixel-mint);
+  background: linear-gradient(90deg, #00c6ff 0%, #0072ff 45%, #00f2fe 100%) !important;
+  box-shadow: 0 0 10px rgba(0, 198, 255, 0.75), inset 0 2px 0 rgba(255, 255, 255, 0.45) !important;
 }
 .hud__stats b {
   font: 900 14px 'Press Start 2P', monospace;
@@ -925,162 +1213,475 @@ kbd { display: inline-block; border: 1px solid #556771; border-bottom-width: 3px
   display: none !important;
 }
 
-/* BOTÓN DE ACELERÓN RETRO Y VISUAL - PIXEL KEY */
+
+
+/* REGLAS GLOBALES PIXEL ART: FUENTES, BOTONES Y CARTELES */
+*, button, input, select, kbd, label, span, strong, h1, h2, h3, p, small, b {
+  font-family: 'Press Start 2P', monospace !important;
+  image-rendering: pixelated !important;
+}
+
+/* Evitar scroll vertical en GameOver y compactar pantalla */
+#gameOverScreen {
+  overflow: hidden !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 16px !important;
+}
+
+#gameOverScreen .screen__panel {
+  max-height: 94vh !important;
+  padding: 12px 24px !important;
+  margin: auto !important;
+  overflow: hidden !important;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: center !important;
+  align-items: center !important;
+  gap: 8px !important;
+}
+
+.gameover-pixel-banner {
+  margin: 0 0 8px 0 !important;
+  padding: 10px 24px !important;
+  font-size: clamp(24px, 4vw, 42px) !important;
+}
+
+#resultTitle {
+  display: none !important; /* Ocultar título redundante */
+}
+
+#resultEyebrow {
+  margin: 0 !important;
+  font-size: 9px !important;
+}
+
+#gameOverPhrase {
+  font-size: 11px !important;
+  margin: 4px 0 10px 0 !important;
+  max-width: 680px !important;
+}
+
+#gameOverStats {
+  display: grid !important;
+  grid-template-columns: repeat(3, 1fr) !important;
+  gap: 6px 16px !important;
+  width: 100% !important;
+  max-width: 760px !important;
+}
+
+#gameOverStats p {
+  padding: 8px 0 !important;
+  font-size: 11px !important;
+}
+
+#gameOverStats p:first-child {
+  font-size: 14px !important;
+}
+
+#gameOverStats strong {
+  font-size: 8px !important;
+  margin-bottom: 4px !important;
+}
+
+#gameOverScreen .menu-actions {
+  margin-top: 14px !important;
+  gap: 16px !important;
+}
+
+#gameOverScreen .pixel-button {
+  min-height: 40px !important;
+  padding: 10px 18px !important;
+  font-size: 11px !important;
+}
+
+/* OCULTAR TEXTO SUPERPUESTO DE MAPA Y DIFICULTAD QUE MOLESTABAN */
+#runBar, #runLocation, #runDifficulty {
+  display: none !important;
+}
+
+/* CENTRAR CARTELES Y NOTIFICACIONES */
+.toast {
+  position: absolute !important;
+  left: 50% !important;
+  top: 98px !important;
+  bottom: auto !important;
+  transform: translateX(-50%) !important;
+  border: 3px solid #000 !important;
+  box-shadow: 0 0 16px rgba(255, 204, 0, 0.4), 4px 4px 0 #000 !important;
+  font-size: 10px !important;
+  padding: 8px 18px !important;
+  text-align: center !important;
+  z-index: 100 !important;
+}
+
+/* REGLA MAESTRA DE VISIBILIDAD: Ocultar HUD, barra de jefes y acelerón en menús y pantallas fuera de juego */
+[hidden],
+.app:not([data-playing="true"]) #bossMeter,
+.app:not([data-playing="true"]) #dashControl,
+.app:not([data-playing="true"]) #combatRail,
+.app:not([data-playing="true"]) #comboMilestones,
+.app:not([data-playing="true"]) #primeBar,
+.app:not([data-playing="true"]) #hud,
+.app[data-playing="true"] .scene-caption,
+.app[data-playing="true"] .menu-panel,
+.boss-meter[hidden],
+.dash-control[hidden],
+.combat-rail[hidden],
+.combo-milestones[hidden],
+.prime-bar[hidden],
+.hud[hidden],
+.lobby-dialogue[hidden] {
+  display: none !important;
+}
+
+/* ESTILO RETRO PIXEL PARA BARRA DE VIDA DE JEFES */
+.boss-meter {
+  position: absolute !important;
+  top: 88px !important;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+  width: 360px !important;
+  max-width: 90vw !important;
+  background: #0d161ae6 !important;
+  border: 3px solid #ff3344 !important;
+  border-bottom: 5px solid #000 !important;
+  box-shadow: 0 0 18px rgba(255, 51, 68, 0.45), 4px 4px 0 #000 !important;
+  padding: 8px 14px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  gap: 6px !important;
+  z-index: 25 !important;
+}
+
+#bossName {
+  font-size: 10px !important;
+  color: #ffcc00 !important;
+  text-shadow: 1px 1px 0 #000 !important;
+  letter-spacing: 1px !important;
+}
+
+.boss-meter .meter {
+  width: 100% !important;
+  height: 12px !important;
+  background: #180508 !important;
+  border: 2px solid #000 !important;
+  border-radius: 0 !important;
+  overflow: hidden !important;
+}
+
+.boss-meter .meter__fill {
+  background: linear-gradient(90deg, #d00000 0%, #e85d04 50%, #ffba08 100%) !important;
+  box-shadow: 0 0 12px rgba(232, 93, 4, 0.85), inset 0 2px 0 rgba(255,255,255,0.4) !important;
+}
+
+/* BOTÓN DE ACELERÓN RETRO: POSICIONADO AL LADO DE LA BARRA DE HABILIDADES Q, E, R */
 .dash-control {
-  left: calc(50% + 175px) !important;
+  position: absolute !important;
+  left: calc(50% + 72px) !important;
+  right: auto !important;
   bottom: 9px !important;
-  width: auto !important;
-  min-width: 220px !important;
-  min-height: 58px !important;
+  width: 195px !important;
+  min-width: 195px !important;
+  height: 48px !important;
+  min-height: 48px !important;
   background: #0d161a !important;
   border: 3px solid #283b42 !important;
   border-bottom: 5px solid #000 !important;
   box-shadow: 4px 4px 0 #000 !important;
-  border-radius: 0 !important;
-  padding: 6px 12px !important;
+  padding: 5px 10px !important;
   display: flex !important;
   align-items: center !important;
-  gap: 12px !important;
+  gap: 10px !important;
   z-index: 10 !important;
+  transform: none !important;
+  transition: border-color .15s, box-shadow .15s !important;
 }
 
-.dash-control kbd,
-.dash-control .dash-key {
-  display: inline-flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  min-width: 84px !important;
-  width: 84px !important;
-  height: 32px !important;
-  padding: 0 6px !important;
-  font-family: 'Press Start 2P', monospace !important;
-  font-size: 8px !important;
-  font-weight: 900 !important;
-  letter-spacing: 0.5px !important;
-  background: #fff0b6 !important;
-  color: #18232b !important;
-  border: 2px solid #fff7da !important;
-  border-bottom: 5px solid #ad8141 !important;
-  box-shadow: 3px 3px 0 #060c13 !important;
-  text-align: center !important;
-  white-space: nowrap !important;
-  box-sizing: border-box !important;
+/* Iluminación fija al activarse (sin vibración ni traslación) */
+.dash-control[data-ready="true"] {
+  border-color: #00ff88 !important;
+  box-shadow: 0 0 14px rgba(0, 255, 136, 0.45), 4px 4px 0 #000 !important;
 }
 
-.dash-control .dash-meter {
-  display: flex !important;
-  flex-direction: column !important;
-  justify-content: center !important;
-  gap: 5px !important;
-  flex: 1 !important;
-  min-width: 105px !important;
+.dash-control.dash-active {
+  border-color: #00e5ff !important;
+  box-shadow: 0 0 20px rgba(0, 229, 255, 0.85), 4px 4px 0 #000 !important;
+  transform: none !important;
+  animation: none !important;
 }
 
-.dash-meter span,
-#dashLabel {
-  font-family: 'Press Start 2P', monospace !important;
-  font-size: 8px !important;
-  color: #9effea !important;
-  text-shadow: 1px 1px 0 #000 !important;
-  white-space: nowrap !important;
+/* Tecla oscurecida durante cooldown (SIN COLOR) */
+.dash-control:not([data-ready="true"]) kbd,
+.dash-control:not([data-ready="true"]) .dash-key,
+.dash-control.is-cooldown kbd,
+.dash-control.is-cooldown .dash-key {
+  background: #141f24 !important;
+  color: #556873 !important;
+  border: 2px solid #28373f !important;
+  border-bottom: 5px solid #0f161a !important;
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.8) !important;
+  filter: grayscale(1) brightness(0.6) !important;
+  text-shadow: none !important;
+  opacity: 0.65 !important;
 }
 
-.dash-meter .meter {
-  border: 2px solid #000 !important;
-  background: #081115 !important;
-  height: 10px !important;
-  width: 100% !important;
-  border-radius: 0 !important;
-  box-shadow: inset 0 1px 3px rgba(0,0,0,0.8) !important;
+/* Tecla ILUMINADA y con COLOR VIVO cuando está lista para usarse */
+.dash-control[data-ready="true"] kbd,
+.dash-control[data-ready="true"] .dash-key,
+.dash-control.is-ready kbd,
+.dash-control.is-ready .dash-key {
+  background: #00ff88 !important;
+  color: #012414 !important;
+  border: 2px solid #a8ffd7 !important;
+  border-bottom: 5px solid #00994d !important;
+  box-shadow: 0 0 16px rgba(0, 255, 136, 0.85), inset 0 2px 0 #ffffff !important;
+  text-shadow: 0 0 2px rgba(0, 255, 136, 0.5) !important;
+  filter: none !important;
+  opacity: 1 !important;
 }
 
 .dash-meter .meter__fill {
-  background: linear-gradient(90deg, #00d2ff, #00ff88) !important;
-  box-shadow: 0 0 6px rgba(0, 255, 136, 0.4) !important;
+  background: linear-gradient(90deg, #f72585 0%, #7209b7 50%, #4cc9f0 100%) !important;
+  box-shadow: 0 0 8px rgba(76, 201, 240, 0.65), inset 0 2px 0 rgba(255,255,255,0.4) !important;
 }
 
-.dash-control[data-ready="true"] kbd,
-.dash-control[data-ready="true"] .dash-key {
-  background: #00ff88 !important;
-  color: #042416 !important;
-  border-color: #a8ffd7 !important;
-  border-bottom: 5px solid #00994d !important;
-  box-shadow: 0 0 12px rgba(0, 255, 136, 0.6), 3px 3px 0 #060c13 !important;
+/* ANIMACIÓN DE SUBIDA DE NIVEL EN BARRA DE XP */
+@keyframes xpLevelFlash {
+  0% { filter: brightness(2.2); box-shadow: 0 0 16px #00ff88; }
+  50% { filter: brightness(1.6); box-shadow: 0 0 8px #00e5ff; }
+  100% { filter: brightness(1); box-shadow: none; }
 }
 
-.dash-control:not([data-ready="true"]) kbd {
-  background: #fff0b6 !important;
-  color: #18232b !important;
-  border-color: #fff7da !important;
-  border-bottom: 5px solid #ad8141 !important;
+.xp-level-up {
+  animation: xpLevelFlash .6s ease-out !important;
 }
 
-/* PANEL LATERAL DE HABILIDADES PASIVAS (ITEMS RETRO) */
+/* QUITAR INDICADOR DE HABILIDADES PASIVAS DE LA PARTIDA (SE CONSULTA EN PAUSA) */
+#combatRail,
 .combat-rail {
-  position: absolute !important;
-  z-index: 15 !important;
-  left: 12px !important;
-  top: 96px !important;
-  width: 76px !important;
-  max-height: calc(100% - 175px) !important;
-  padding: 8px 6px !important;
-  background: #0c181ff2 !important;
-  border: 3px solid #283b42 !important;
-  border-bottom: 5px solid #000 !important;
-  box-shadow: 4px 4px 0 #000 !important;
-  overflow-y: auto !important;
-  overflow-x: hidden !important;
-  display: flex !important;
-  flex-direction: column !important;
-  gap: 8px !important;
-}
-
-.app[data-playing="true"] .combat-rail {
-  display: flex !important;
-}
-
-.rail-brand, .rail-next {
   display: none !important;
 }
 
-.rail-section {
-  width: 100% !important;
+/* ESTILOS DE PAUSA: HABILIDADES PASIVAS Y ACTIVAS CON EXPLICACIÓN */
+.pause-panel-enhanced {
+  max-width: 760px !important;
+  width: 92% !important;
+  max-height: 88vh !important;
+  overflow-y: auto !important;
+  background: #0d161cfc !important;
+  border: 4px solid #ffcc00 !important;
+  border-bottom: 6px solid #000 !important;
+  box-shadow: 8px 8px 0 #000, 0 0 25px rgba(255, 204, 0, 0.25) !important;
+  padding: 24px 28px !important;
 }
 
-.rail-label {
-  display: block !important;
-  font-family: 'Press Start 2P', monospace !important;
-  font-size: 7px !important;
-  color: #9effea !important;
-  text-align: center !important;
-  margin-bottom: 8px !important;
-  letter-spacing: 0.5px !important;
-  text-shadow: 1px 1px 0 #000 !important;
+.pause-tabs {
+  display: flex !important;
+  gap: 10px !important;
+  margin: 14px 0 16px !important;
   border-bottom: 2px solid #20353c !important;
-  padding-bottom: 4px !important;
+  padding-bottom: 8px !important;
 }
 
-.live-build {
+.pause-tab {
+  font-family: 'Press Start 2P', monospace !important;
+  font-size: 8.5px !important;
+  padding: 8px 14px !important;
+  background: #142228 !important;
+  border: 2px solid #283e47 !important;
+  border-bottom: 4px solid #0f181d !important;
+  color: #8da4a1 !important;
+  cursor: pointer !important;
+  border-radius: 0 !important;
+  transition: all 0.15s ease !important;
+}
+
+.pause-tab:hover {
+  background: #20353d !important;
+  color: #fff !important;
+}
+
+.pause-tab.is-active {
+  background: #ffcc00 !important;
+  color: #000 !important;
+  border-color: #ffe066 !important;
+  border-bottom: 4px solid #b38f00 !important;
+  box-shadow: 2px 2px 0 #000 !important;
+  font-weight: 900 !important;
+}
+
+.pause-view {
   display: flex !important;
   flex-direction: column !important;
+  gap: 12px !important;
+  margin-bottom: 16px !important;
+}
+
+.pause-abilities-grid {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 10px !important;
+  max-height: 280px !important;
+  overflow-y: auto !important;
+  padding-right: 4px !important;
+}
+
+.pause-card {
+  background: #142127 !important;
+  border: 2px solid #283e47 !important;
+  border-bottom: 4px solid #000 !important;
+  padding: 12px 14px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 6px !important;
+}
+
+.pause-card--evo {
+  border-color: #a855f7 !important;
+  background: #1a1226 !important;
+}
+
+.pause-card-head {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
   gap: 8px !important;
+}
+
+.pause-card-title {
+  font-family: 'Press Start 2P', monospace !important;
+  font-size: 10px !important;
+  color: #ffe066 !important;
+}
+
+.pause-card-badge {
+  font-family: 'Press Start 2P', monospace !important;
+  font-size: 7.5px !important;
+  color: #7dd3fc !important;
+}
+
+.pause-badge--evo {
+  color: #c084fc !important;
+}
+
+.pause-level {
+  font-family: 'Press Start 2P', monospace !important;
+  font-size: 8px !important;
+  color: #38ef7d !important;
+}
+
+.pause-level.is-max {
+  color: #ff3b30 !important;
+  font-weight: 900 !important;
+}
+
+.pause-card-desc {
+  font-family: 'Press Start 2P', monospace !important;
+  font-size: 8px !important;
+  line-height: 1.6 !important;
+  color: #94a3b8 !important;
+  margin: 0 !important;
+}
+
+.pause-empty-msg {
+  grid-column: 1 / -1 !important;
+  font-family: 'Press Start 2P', monospace !important;
+  font-size: 9px !important;
+  line-height: 1.7 !important;
+  color: #8da4a1 !important;
+  padding: 24px !important;
+  text-align: center !important;
+  background: #142127 !important;
+  border: 2px dashed #283e47 !important;
+}
+
+.pause-actives-grid {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 10px !important;
+  max-height: 290px !important;
+  overflow-y: auto !important;
+  padding-right: 4px !important;
+}
+
+.pause-active-card {
+  background: #142127 !important;
+  border: 2px solid #283e47 !important;
+  border-bottom: 4px solid #000 !important;
+  padding: 12px 14px !important;
+  display: grid !important;
+  grid-template-columns: 52px 1fr !important;
+  gap: 12px !important;
   align-items: center !important;
 }
 
-.build-token {
-  position: relative !important;
-  width: 58px !important;
-  height: 54px !important;
-  background: #132229 !important;
-  border: 3px solid #364e57 !important;
-  border-bottom: 5px solid #101c22 !important;
-  box-shadow: 2px 2px 0 #000 !important;
-  cursor: pointer !important;
+.pause-active-card.is-unlocked {
+  border-left: 6px solid #00ff88 !important;
+}
+
+.pause-active-card.is-locked {
+  border-left: 6px solid #f59e0b !important;
+  opacity: 0.85 !important;
+}
+
+.pause-active-key kbd {
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
-  padding: 0 !important;
-  transition: transform .12s, border-color .15s !important;
+  min-width: 44px !important;
+  height: 34px !important;
+  font-family: 'Press Start 2P', monospace !important;
+  font-size: 10px !important;
+  font-weight: 900 !important;
+  background: #ffcc00 !important;
+  color: #000 !important;
+  border: 2px solid #000 !important;
+  border-bottom: 4px solid #996600 !important;
+  box-shadow: 2px 2px 0 #000 !important;
+  border-radius: 0 !important;
+  white-space: nowrap !important;
+}
+
+.pause-active-info {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 4px !important;
+}
+
+.pause-active-head {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  flex-wrap: wrap !important;
+  gap: 6px !important;
+}
+
+.pause-active-title {
+  font-family: 'Press Start 2P', monospace !important;
+  font-size: 10px !important;
+  color: #fff !important;
+}
+
+.pause-active-status.status--unlocked {
+  font-family: 'Press Start 2P', monospace !important;
+  font-size: 8px !important;
+  color: #00ff88 !important;
+}
+
+.pause-active-status.status--locked {
+  font-family: 'Press Start 2P', monospace !important;
+  font-size: 8px !important;
+  color: #f59e0b !important;
+}
+
+.pause-active-desc {
+  font-family: 'Press Start 2P', monospace !important;
+  font-size: 8px !important;
+  line-height: 1.55 !important;
+  color: #94a3b8 !important;
+  margin: 0 !important;
 }
 
 .build-token:hover, .build-token:focus {
@@ -1256,45 +1857,449 @@ kbd { display: inline-block; border: 1px solid #556771; border-bottom-width: 3px
   border-radius: 0 !important;
 }
 
-/* CARDS DE HABILIDAD MEJORADAS EN COLOR Y BORDES */
+/* ============================================================================
+   PANEL DE MEJORAS DE NIVEL: MÁS GRANDE, DESTACADO Y LEGIBLE (ARCADE CARD STYLE)
+   ============================================================================ */
+.ability-screen {
+  z-index: 45 !important;
+  justify-content: flex-end !important;
+  padding-right: 28px !important;
+}
+
+.ability-panel {
+  width: min(380px, 36vw) !important;
+  max-width: 400px !important;
+  padding: 20px 22px !important;
+  background: #0f1c21fa !important;
+  border: 4px solid #00e5ff !important;
+  border-bottom: 6px solid #000 !important;
+  box-shadow: 6px 6px 0 #000, 0 0 24px rgba(0, 229, 255, 0.25) !important;
+  border-radius: 0 !important;
+}
+
+.ability-panel .eyebrow {
+  font-family: 'Press Start 2P', monospace !important;
+  font-size: 9px !important;
+  color: #38ef7d !important;
+  margin: 0 0 8px 0 !important;
+  letter-spacing: 1px !important;
+}
+
+.ability-panel h2, #abilityTitle {
+  font-family: 'Press Start 2P', monospace !important;
+  font-size: 16px !important;
+  line-height: 1.35 !important;
+  color: #fff !important;
+  margin: 0 0 8px 0 !important;
+  text-shadow: 2px 2px 0 #000 !important;
+}
+
+.ability-help {
+  font-family: 'Press Start 2P', monospace !important;
+  font-size: 8.5px !important;
+  line-height: 1.6 !important;
+  color: #9cb3ad !important;
+  margin-bottom: 14px !important;
+}
+
+.ability-grid {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 12px !important;
+}
+
 .ability-card {
-  border: 3px solid #000 !important;
+  position: relative !important;
+  border: 3px solid #20353c !important;
+  border-bottom: 5px solid #000 !important;
   box-shadow: 4px 4px 0 #000 !important;
   border-radius: 0 !important;
-  background: #151e22 !important;
-  transition: transform .12s, border-color .12s, box-shadow .12s !important;
+  background: #142228 !important;
+  min-height: 95px !important;
+  padding: 14px 50px 14px 16px !important;
+  display: grid !important;
+  grid-template-columns: 36px 1fr !important;
+  gap: 4px 12px !important;
+  align-items: center !important;
+  transition: transform .12s, border-color .15s, box-shadow .15s, background .15s !important;
+  cursor: pointer !important;
 }
 
 .ability-card:hover {
-  transform: translateY(-4px) !important;
-  border-color: var(--pixel-amber) !important;
-  box-shadow: 6px 6px 0 #000, 0 0 14px rgba(255, 204, 0, 0.4) !important;
+  transform: translateY(-3px) scale(1.02) !important;
+  border-color: #ffe066 !important;
+  background: #1a2d36 !important;
+  box-shadow: 6px 6px 0 #000, 0 0 16px rgba(255, 224, 102, 0.45) !important;
 }
 
-.ability-card:nth-child(1) { border-top: 5px solid var(--pixel-cyan) !important; }
-.ability-card:nth-child(2) { border-top: 5px solid var(--pixel-amber) !important; }
-.ability-card:nth-child(3) { border-top: 5px solid var(--pixel-mint) !important; }
+.ability-card:nth-child(1) { border-left: 6px solid #00e5ff !important; }
+.ability-card:nth-child(2) { border-left: 6px solid #ffd700 !important; }
+.ability-card:nth-child(3) { border-left: 6px solid #00ff88 !important; }
+
+.ability-icon {
+  grid-row: span 3 !important;
+  align-self: center !important;
+  font-size: 30px !important;
+  color: #ffe066 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.ability-card__top {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  font-family: 'Press Start 2P', monospace !important;
+  font-size: 8px !important;
+  color: #7dd3fc !important;
+}
 
 .ability-card strong {
   font-family: 'Press Start 2P', monospace !important;
-  font-size: 11px !important;
+  font-size: 12px !important;
+  line-height: 1.3 !important;
   color: #fff !important;
+  margin: 3px 0 !important;
 }
 
 .ability-card__description {
   font-family: 'Press Start 2P', monospace !important;
-  font-size: 8px !important;
+  font-size: 9px !important;
   line-height: 1.6 !important;
-  color: #a8bec7 !important;
+  color: #a8c2b7 !important;
 }
 
 .choice-key {
+  position: absolute !important;
+  right: 14px !important;
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+  width: 32px !important;
+  height: 32px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
   font-family: 'Press Start 2P', monospace !important;
-  font-size: 11px !important;
+  font-size: 14px !important;
+  font-weight: 900 !important;
   border: 2px solid #000 !important;
+  border-bottom: 4px solid #996600 !important;
   background: #ffcc00 !important;
   color: #000 !important;
-  box-shadow: 2px 2px 0 #996600 !important;
+  box-shadow: 2px 2px 0 #000 !important;
   border-radius: 0 !important;
 }
+
+/* ============================================================================
+   DEGRADADOS CON COLORES INTENSOS EN INDICADORES DE DAÑO Y COMBOS
+   ============================================================================ */
+.combo-current strong, #comboMultiplier {
+  background: linear-gradient(180deg, #ffffff 0%, #ffe600 35%, #ff5500 70%, #d60036 100%) !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  filter: drop-shadow(0 0 8px rgba(255, 120, 0, 0.75)) drop-shadow(2px 2px 0 #050a0e) !important;
+}
+
+.combo-current span, #comboChain {
+  color: #00ffff !important;
+  text-shadow: 0 0 6px rgba(0, 255, 255, 0.65), 1px 1px 0 #000 !important;
+}
+
+#comboCount[data-active="true"] {
+  background: linear-gradient(180deg, #ffffff 0%, #00ffff 45%, #00e676 100%) !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  filter: drop-shadow(0 0 7px rgba(0, 255, 200, 0.75)) !important;
+}
+
+#comboCount[data-urgent="true"] {
+  background: linear-gradient(180deg, #ffffff 0%, #ffbb00 45%, #ff3b30 100%) !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  filter: drop-shadow(0 0 8px rgba(255, 60, 40, 0.85)) !important;
+}
+
+.combo-steps span[data-reached="true"] {
+  background: linear-gradient(180deg, #ffffff 0%, #38ffff 50%, #00e676 100%) !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  filter: drop-shadow(0 0 6px rgba(0, 230, 118, 0.85)) !important;
+}
+
+.combo-steps span[data-next="true"] {
+  background: linear-gradient(180deg, #ffffff 0%, #ffbe3b 40%, #ff5500 100%) !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  filter: drop-shadow(0 0 6px rgba(255, 110, 0, 0.75)) !important;
+}
+
+/* ============================================================================
+   PAUSA: LAYOUT CLÁSICO CON HUD LATERAL Y HABILIDADES
+   ============================================================================ */
+.pause-screen {
+  background: rgba(8, 14, 18, 0.92) !important;
+  backdrop-filter: blur(6px) !important;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 24px clamp(16px, 3vw, 40px) !important;
+  overflow-y: auto !important;
+  z-index: 99;
+}
+
+.pause-screen.screen--active {
+  display: flex !important;
+}
+
+.pause-layout {
+  display: flex !important;
+  flex-direction: row !important;
+  gap: 28px !important;
+  align-items: flex-start !important;
+  justify-content: center !important;
+  max-width: 1160px !important;
+  width: 100% !important;
+  margin: auto !important;
+}
+
+/* 1. Menú Central como antes */
+.pause-screen .pause-panel {
+  flex: 1 1 440px !important;
+  max-width: 480px !important;
+  background: #0d161cfc !important;
+  border: 4px solid #ffcc00 !important;
+  border-bottom: 6px solid #000 !important;
+  box-shadow: 8px 8px 0 #000, 0 0 25px rgba(255, 204, 0, 0.25) !important;
+  padding: 28px 32px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 16px !important;
+}
+
+.pause-screen .pause-panel .eyebrow {
+  color: #7dd3fc !important;
+  font-family: 'Press Start 2P', monospace !important;
+  font-size: 8px !important;
+  letter-spacing: 2px !important;
+  margin: 0 !important;
+}
+
+.pause-screen .pause-panel h2 {
+  font-family: 'Press Start 2P', monospace !important;
+  font-size: 20px !important;
+  line-height: 1.4 !important;
+  color: #fff !important;
+  text-shadow: 3px 3px 0 #000 !important;
+  margin: 0 !important;
+}
+
+.pause-screen .pause-panel .pause-goal {
+  color: #cbd5e1 !important;
+  font-family: 'Press Start 2P', monospace !important;
+  font-size: 8.5px !important;
+  line-height: 1.8 !important;
+  background: #142127 !important;
+  border: 2px solid #283e47 !important;
+  padding: 12px 14px !important;
+  margin: 0 !important;
+}
+
+.pause-screen .pause-panel .menu-actions {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 12px !important;
+  margin-top: 10px !important;
+  position: static !important;
+  background: transparent !important;
+  border: 0 !important;
+  padding: 0 !important;
+}
+
+.pause-screen .pause-panel .menu-actions button {
+  width: 100% !important;
+  min-height: 48px !important;
+  font-size: 10px !important;
+}
+
+/* 2. Barra lateral: HUD del juego y Habilidades */
+.pause-sidebar {
+  flex: 1 1 520px !important;
+  max-width: 580px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 16px !important;
+}
+
+/* Tarjeta con el MISMO diseño y colores del HUD del juego */
+.pause-hud-card {
+  background: #0f1619 !important;
+  border: 3px solid #000 !important;
+  border-left: 6px solid #38ef7d !important;
+  box-shadow: 6px 6px 0 #000, inset 0 0 15px rgba(0, 0, 0, 0.4) !important;
+  padding: 16px 18px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 12px !important;
+}
+
+.pause-hud-top {
+  display: flex !important;
+  align-items: center !important;
+  gap: 12px !important;
+  border-bottom: 2px solid #20353c !important;
+  padding-bottom: 10px !important;
+}
+
+#pauseHudPortrait {
+  width: 40px !important;
+  height: 40px !important;
+  background: #142127 !important;
+  border: 2px solid #283e47 !important;
+  border-radius: 0 !important;
+  box-shadow: 2px 2px 0 #000 !important;
+}
+
+.pause-hud-names {
+  flex: 1 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 3px !important;
+}
+
+#pauseHudSkinName {
+  font-family: 'Press Start 2P', monospace !important;
+  font-size: 11px !important;
+  color: #ffe066 !important;
+}
+
+#pauseHudWeaponName {
+  font-family: 'Press Start 2P', monospace !important;
+  font-size: 8px !important;
+  color: #7dd3fc !important;
+}
+
+.pause-hud-time {
+  font-family: 'Press Start 2P', monospace !important;
+  font-size: 11px !important;
+  color: #f8fafc !important;
+  background: #182830 !important;
+  border: 2px solid #334852 !important;
+  padding: 6px 10px !important;
+  box-shadow: 2px 2px 0 #000 !important;
+}
+
+.pause-hud-bars {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 6px !important;
+}
+
+.pause-bar-group {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 4px !important;
+}
+
+.pause-bar-label {
+  display: flex !important;
+  justify-content: space-between !important;
+  font-family: 'Press Start 2P', monospace !important;
+  font-size: 7.5px !important;
+  color: #94a3b8 !important;
+}
+
+.pause-bar-label b {
+  color: #38ef7d !important;
+}
+
+.pause-hud-bars .meter {
+  height: 10px !important;
+  background: #1a2529 !important;
+  border: 2px solid #000 !important;
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.6) !important;
+}
+
+.pause-hud-bars .meter__fill--hp {
+  background: linear-gradient(90deg, #ff3b30, #ff9500, #38ef7d) !important;
+  height: 100% !important;
+}
+
+.pause-buffs-block {
+  background: #142127 !important;
+  border: 2px solid #283e47 !important;
+  padding: 10px 12px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 6px !important;
+}
+
+.pause-buffs-label {
+  font-family: 'Press Start 2P', monospace !important;
+  font-size: 7.5px !important;
+  color: #ffe066 !important;
+  letter-spacing: 1px !important;
+}
+
+.pause-buffs-text {
+  font-family: 'Press Start 2P', monospace !important;
+  font-size: 8px !important;
+  line-height: 1.6 !important;
+  color: #38ef7d !important;
+  text-shadow: 0 0 6px rgba(56, 239, 125, 0.4) !important;
+}
+
+.pause-stats-row {
+  display: grid !important;
+  grid-template-columns: repeat(4, 1fr) !important;
+  gap: 8px !important;
+  background: #142127 !important;
+  border: 2px solid #283e47 !important;
+  padding: 8px !important;
+  text-align: center !important;
+}
+
+.pause-stats-row > div {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 3px !important;
+}
+
+.pause-stats-row span {
+  font-family: 'Press Start 2P', monospace !important;
+  font-size: 6.5px !important;
+  color: #94a3b8 !important;
+}
+
+.pause-stats-row b {
+  font-family: 'Press Start 2P', monospace !important;
+  font-size: 10px !important;
+  color: #ffe066 !important;
+}
+
+/* Tarjeta de Habilidades */
+.pause-abilities-card {
+  background: #0f1619 !important;
+  border: 3px solid #000 !important;
+  border-left: 6px solid #ffcc00 !important;
+  box-shadow: 6px 6px 0 #000 !important;
+  padding: 14px 16px !important;
+}
+
+.pause-abilities-card .pause-tabs {
+  margin-top: 0 !important;
+}
+
+@media (max-width: 900px) {
+  .pause-layout {
+    flex-direction: column !important;
+    align-items: stretch !important;
+  }
+  .pause-screen .pause-panel, .pause-sidebar {
+    max-width: 100% !important;
+    flex: 1 1 auto !important;
+  }
+}
+
+
 

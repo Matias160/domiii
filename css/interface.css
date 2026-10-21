@@ -1,0 +1,127 @@
+/* Shared arcade surfaces, scoped to avoid changing the account and shop views. */
+.pause-screen .pause-panel-enhanced, #lobbyDialogue {
+  background: #101718 !important;
+  border: 2px solid #80a99b !important;
+  border-top: 4px solid #ffe066 !important;
+  box-shadow: 6px 6px #030707, inset 0 1px #ffffff18 !important;
+  letter-spacing: 0 !important;
+}
+#lobbyDialogue { max-height: calc(100% - 24px); overflow-y: auto; padding: 20px !important; }
+#lobbyDialogue .dialogue-header-text { min-width: 0; }
+#lobbyDialogue .domi-portrait-canvas { position: static !important; transform: none !important; margin: 0 !important; }
+#lobbyDialogue .dialogue-speaker, #lobbyDialogue .dialogue-subtitle { letter-spacing: 0 !important; line-height: 1.7; overflow-wrap: anywhere; }
+#lobbyDialogue .dialogue-subtitle { color: #a6bbb0 !important; font: 11px monospace !important; }
+#lobbyDialogue .dialogue-tabs, .pause-screen .pause-tabs { display: grid !important; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 6px !important; }
+.pause-screen .pause-tabs { grid-template-columns: repeat(2,minmax(0,1fr)); }
+#lobbyDialogue .dialogue-tab, .pause-screen .pause-tab { padding: 12px 6px !important; font: bold 11px monospace !important; letter-spacing: 0 !important; }
+#lobbyDialogue .dialogue-tab.is-active, .pause-screen .pause-tab.is-active { background: #a4f3d1 !important; border-color: #c9ffe6 !important; border-bottom-color: #487e69 !important; }
+#lobbyDialogue .dialogue-bubble { background: transparent !important; border: 0 !important; border-left: 3px solid #ffe066 !important; box-shadow: none !important; padding: 14px !important; }
+#lobbyDialogue p { font: 16px/1.6 'VT323', monospace !important; color: #e0eee5 !important; }
+#lobbyDialogue .domi-section-intro { font: 13px/1.5 monospace; }
+#lobbyDialogue .domi-missions-list, #lobbyDialogue .domi-collectibles-list { max-height: none; }
+#lobbyDialogue .dialogue-body[hidden], .pause-screen .pause-view[hidden] { display: none !important; }
+#lobbyDialogue .dialogue-next-btn { width: 100%; font: bold 11px monospace !important; }
+.pause-screen .pause-panel-enhanced { max-width: 820px !important; padding: 22px !important; }
+.pause-screen h2 { font-size: 26px; margin: 8px 0 20px; line-height: 1.4; }
+.pause-summary { display: grid; grid-template-columns: repeat(5,minmax(0,1fr)); gap: 8px; }
+.pause-summary > div { background: #1c2825; border: 1px solid #496358; border-bottom: 3px solid #050a08; padding: 12px 10px; min-width: 0; }
+.pause-summary span { display: block; font: 10px monospace; color: #a8bcb2; margin-bottom: 8px; }
+.pause-summary strong { font: bold 18px monospace !important; color: #ffe066; overflow-wrap: anywhere; }
+.pause-summary > div:first-child strong { color: #8bf1bc; }
+.pause-screen .pause-goal { padding: 12px 0; border-bottom: 1px solid #3e554b; color: #b5c7be; font: 13px/1.5 monospace; }
+.pause-screen .pause-card-head, .pause-screen .pause-active-head { flex-wrap: wrap; }
+.pause-screen .pause-card-title { line-height: 1.6 !important; }
+.pause-screen .pause-card-desc, .pause-screen .pause-active-desc { font: 13px/1.5 monospace !important; color: #c1d0c7 !important; }
+.pause-screen .pause-abilities-grid, .pause-screen .pause-actives-grid { max-height: none !important; overflow: visible !important; }
+.pause-screen .menu-actions { position: sticky; bottom: -22px; padding: 14px 0; background: #101718; border-top: 1px solid #496358; display: grid; grid-template-columns: 1fr 1fr; }
+.pause-screen .menu-actions button { font-size: 10px; min-height: 48px; white-space: normal; }
+.pause-screen button:focus-visible, #lobbyDialogue button:focus-visible, #dashControl:focus-visible { outline: 3px solid #fff; outline-offset: 3px; }
+#dashControl { display: grid; grid-template-columns: 22px minmax(0,1fr); width: 190px; height: 72px; gap: 2px 8px; padding: 7px 10px; cursor: pointer; border: 2px solid #6b8b7d; border-bottom: 4px solid #284e40; border-radius: 2px; color: #a4f3d1; transition: background .15s, border-color .15s; }
+#dashControl[hidden] { display: none; }
+#dashControl > svg { width: 22px; height: 22px; grid-row: 1 / 3; }
+#dashControl .dash-meter { display: grid; gap: 3px; min-width: 0; grid-template-columns: 1fr; font: 9px monospace; text-align: left; }
+#dashControl .dash-meter strong { font: bold 11px monospace; }
+#dashControl .meter { display: block; width: 100%; height: 6px; }
+#dashControl .meter__fill { display: block; height: 100%; background: #9cf6ce; }
+#dashControl kbd { grid-column: 2; justify-self: start; min-width: 0; padding: 1px 5px; font: bold 8px monospace; border-width: 1px 1px 2px; }
+#dashControl[data-ready="true"] { border-color: #a4f3d1; background: #162e25; box-shadow: 3px 3px #020609, inset 0 0 12px #72ffc018; }
+#dashControl[data-ready="true"]:hover { background: #244b3c; }
+#dashControl[aria-disabled="true"] { color: #a9b6b1; border-color: #56645f; cursor: default; }
+#dashControl[data-active="true"] { background: #60471b; border-color: #ffe066; color: #fff2bd; }
+#dashControl.dash-refilled { animation: dash-refill .35s ease-out; }
+@keyframes dash-refill { from { box-shadow: 0 0 0 3px white, 0 0 18px #9cf6ce; } to { box-shadow: 3px 3px #020609; } }
+@media(max-width: 700px) {
+  #dashControl { width: 112px; height: 62px; grid-template-columns: 12px minmax(0,1fr); padding: 5px; gap: 2px 4px; }
+  #dashControl > svg { width: 12px; }
+  #dashControl .dash-meter { font-size: 7px; }
+  #dashControl .dash-meter strong { font-size: 9px; }
+  .pause-summary { grid-template-columns: repeat(3,minmax(0,1fr)); }
+  .pause-summary strong { font-size: 14px; }
+  .pause-screen .pause-abilities-grid { grid-template-columns: 1fr !important; }
+  .pause-screen .menu-actions { grid-template-columns: 1fr; }
+  #lobbyDialogue { padding: 12px !important; }
+  #lobbyDialogue .dialogue-speaker { font-size: 10px !important; }
+}
+@media(prefers-reduced-motion: reduce) { #dashControl { animation: none !important; transition: none; } }
+
+/* Explicitly retire legacy fixed-height/flex overrides on the dash control. */
+#dashControl {
+  display: grid !important; grid-template-columns: 20px minmax(0,1fr) 58px !important;
+  width: 212px !important; min-width: 0 !important; height: 56px !important; min-height: 0 !important;
+  padding: 7px 8px !important; gap: 8px !important; overflow: hidden;
+  background: #111b19 !important; border: 1px solid #658579 !important;
+  border-bottom: 3px solid #324c41 !important; box-shadow: 2px 3px #0008 !important;
+}
+#dashControl > svg { grid-row: auto; width: 20px; height: 20px; }
+#dashControl .dash-meter { gap: 3px !important; }
+#dashControl .dash-meter strong { font: bold 10px/1 monospace !important; letter-spacing: 0 !important; white-space: nowrap; }
+#dashControl #dashLabel { font: bold 10px/1 monospace !important; letter-spacing: 0 !important; white-space: nowrap; color: #a4f3d1; }
+#dashControl .meter { height: 3px !important; border: 0 !important; background: #35443d !important; }
+#dashControl .meter__fill { background: #a4f3d1 !important; box-shadow: none !important; }
+#dashControl kbd { grid-column: 3; width: 58px !important; height: 25px !important; min-width: 0 !important; display: grid; place-items: center; padding: 0 !important; font: bold 10px/1 monospace !important; letter-spacing: 0 !important; background: #273d33 !important; color: #e2f5e8 !important; border: 1px solid #6c8e7c !important; border-bottom: 3px solid #405c4e !important; box-shadow: none !important; text-shadow: none !important; filter: none !important; opacity: 1 !important; }
+#dashControl[data-ready="true"] { border-color: #9fe9c0 !important; }
+#dashControl[data-active="true"] { border-color: #ffe066 !important; background: #39331c !important; }
+#pauseScreen { padding: 16px !important; }
+#pauseScreen .pause-panel-enhanced {
+  width: min(720px,100%) !important; max-height: calc(100dvh - 32px) !important;
+  display: flex; flex-direction: column; padding: 20px !important; overflow: hidden !important;
+  border: 1px solid #587165 !important; border-top: 3px solid #ffe066 !important;
+}
+#pauseScreen .eyebrow { font: bold 10px monospace !important; margin: 0 0 8px !important; }
+#pauseScreen h2 { font: 18px/1.5 'Press Start 2P', monospace !important; margin: 0 0 16px !important; }
+#pauseScreen .pause-summary { gap: 0; background: #1a2520; border-block: 1px solid #384b40; }
+#pauseScreen .pause-summary > div { background: none; border: 0; border-right: 1px solid #384b40; padding: 10px; }
+#pauseScreen .pause-summary > div:last-child { border: 0; }
+#pauseScreen .pause-summary span { font: 9px monospace !important; margin-bottom: 6px; }
+#pauseScreen .pause-summary strong { font: bold 17px monospace !important; }
+#pauseScreen .pause-goal { margin: 8px 0 0; padding: 0; border: 0; font: 11px/1.4 monospace !important; }
+#pauseScreen .pause-tabs { display: flex !important; gap: 20px !important; margin: 12px 0 !important; padding: 0 !important; flex-shrink: 0; }
+#pauseScreen .pause-tab { display: flex; align-items: center; gap: 6px; background: transparent !important; border: 0 !important; border-bottom: 2px solid transparent !important; box-shadow: none !important; padding: 8px 0 !important; color: #9cae9f !important; }
+#pauseScreen .pause-tab.is-active { color: #ffe066 !important; border-bottom-color: #ffe066 !important; }
+#pauseScreen .pause-tab svg { width: 14px; height: 14px; }
+#pauseScreen .pause-view { min-height: 0; overflow-y: auto; margin: 0 !important; padding: 0 2px 2px; }
+#pauseScreen .pause-actives-grid { display: grid !important; grid-template-columns: repeat(2,minmax(0,1fr)) !important; gap: 8px !important; padding: 0 !important; }
+#pauseScreen .pause-active-card { grid-template-columns: 48px minmax(0,1fr) !important; gap: 10px !important; padding: 12px !important; border: 1px solid #405347 !important; border-left: 3px solid #9fe9c0 !important; background: #19241f !important; min-height: 100px; }
+#pauseScreen .pause-active-card.is-locked { border-left-color: #667469 !important; background: #151d19 !important; opacity: 1 !important; }
+#pauseScreen .pause-active-key kbd { width: 46px !important; min-width: 0 !important; height: 36px !important; font: bold 10px monospace !important; color: #b6c4b9 !important; background: #233027 !important; border: 1px solid #506052 !important; box-shadow: 0 3px #090d0a !important; }
+#pauseScreen .pause-active-card.is-unlocked kbd { color: #ffe066 !important; }
+#pauseScreen .pause-active-head { display: flex !important; flex-direction: column; align-items: flex-start !important; gap: 4px !important; }
+#pauseScreen .pause-active-title { font: bold 13px/1.2 monospace !important; color: #e0e9df !important; }
+#pauseScreen .pause-active-status { font: 9px/1.2 monospace !important; color: #9da99c !important; }
+#pauseScreen .pause-active-desc { margin: 6px 0 0 !important; font: 11px/1.4 monospace !important; color: #a9b7ac !important; }
+#pauseScreen .menu-actions { flex-shrink: 0; position: static; margin: 14px 0 0 !important; padding: 12px 0 0 !important; gap: 12px; }
+#pauseScreen .menu-actions button { display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 40px !important; padding: 10px !important; font: bold 12px monospace !important; border: 1px solid #516458 !important; box-shadow: none !important; }
+#pauseScreen #resumeButton { background: #a5e9bb !important; color: #112519 !important; }
+#pauseScreen #abandonButton { background: transparent !important; color: #b7c1b6 !important; }
+#pauseScreen .menu-actions svg { width: 16px; height: 16px; }
+@media(max-width:700px) {
+  #dashControl { left: calc(50% + 28px) !important; width: 166px !important; grid-template-columns: minmax(0,1fr) 54px !important; }
+  #dashControl > svg { display: none; }
+  #dashControl kbd { grid-column: 2; width: 54px !important; }
+  #pauseScreen .pause-panel-enhanced { padding: 14px !important; }
+  #pauseScreen .pause-summary { grid-template-columns: repeat(5,minmax(0,1fr)); }
+  #pauseScreen .pause-summary > div { padding: 8px 4px; }
+  #pauseScreen .pause-summary strong { font-size: 12px !important; }
+  #pauseScreen .menu-actions { grid-template-columns: 1fr 1fr; }
+}
+@media(max-width:460px) { #pauseScreen .pause-actives-grid { grid-template-columns: 1fr !important; } }

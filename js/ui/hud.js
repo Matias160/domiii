@@ -8,6 +8,7 @@ export class Hud {
     this.buffs = document.querySelector('#activeBuffs');
     this.runBar = document.querySelector('#runBar'); this.bossMeter = document.querySelector('#bossMeter');
     this.dashControl = document.querySelector('#dashControl');
+    this.dashControl.addEventListener('animationend', () => this.dashControl.classList.remove('dash-refilled'));
     this.comboMilestones = document.querySelector('#comboMilestones');
     this.eventBanner = document.querySelector('#eventBanner');
     const stats = document.querySelector('#hudStats');
@@ -30,6 +31,12 @@ export class Hud {
   set(id, text) { if (this.nodes[id].textContent !== text) this.nodes[id].textContent = text; }
   update(state) {
     const p = state.player;
+    if (this.previousLevel !== undefined && p.level > this.previousLevel) {
+      this.xpFill.classList.remove('xp-level-up');
+      requestAnimationFrame(() => this.xpFill.classList.add('xp-level-up'));
+    }
+    this.previousLevel = p.level;
+
     if(this.previousHp!==undefined&&p.hp<this.previousHp){
       this.root.classList.remove('hud--hit');
       requestAnimationFrame(() => this.root.classList.add('hud--hit'));
@@ -42,6 +49,10 @@ export class Hud {
     this.set('hudName',p.skin.name); this.set('hudWeapon',p.weaponEvolution?.name||p.weapon.name);
     this.set('weaponEvolutionStatus',p.weaponEvolution?'EVOLUCION ACTIVA':`EVOLUCION ${Math.min(p.level,15)} / 15`);
     this.nodes.weaponEvolutionStatus.dataset.ready=String(Boolean(p.weaponEvolution));
+    const nextAbilities = [5, 10, 15].filter(lvl => lvl > p.level);
+    const nextAbilityLvl = nextAbilities.length > 0 ? nextAbilities[0] : null;
+    const abilityProgress = nextAbilityLvl ? `ACTIVA EN NV ${nextAbilityLvl}` : 'ACTIVAS MAX';
+    this.nodes.weaponEvolutionStatus.textContent = p.weaponEvolution ? `${p.weaponEvolution.name.toUpperCase()} · ${abilityProgress}` : `${abilityProgress} (NV ${p.level})`;
     this.set('scoreValue',String(Math.floor(state.score)).padStart(6,'0'));
     this.set('timeValue',formatTime(state.time)); this.set('killsValue',String(state.kills));
     const combo = state.combo || 0;
@@ -62,9 +73,19 @@ export class Hud {
     this.nodes.comboCount.style.setProperty('--combo-left',`${Math.max(0,Math.min(1,state.comboTime/3.5))*100}%`);
     this.nodes.comboCount.dataset.active=String(combo>0);
     this.nodes.comboCount.dataset.urgent=String(combo>0&&state.comboTime<1);
-    this.set('dashLabel',p.dashTime>0?'ACELERON / IMPACTO':p.dashCooldown>0?`ACELERON / ${p.dashCooldown.toFixed(1)}s`:'LISTO / EMBESTI');
-    this.nodes.dashFill.parentElement.parentElement.dataset.ready=String(p.dashCooldown<=0);
-    this.nodes.dashFill.style.width = `${(1-p.dashCooldown/2.8)*100}%`;
+    const isDashReady = p.dashCooldown <= 0;
+    if (isDashReady && this.wasDashReady === false) this.dashControl.classList.add('dash-refilled');
+    this.wasDashReady = isDashReady;
+    this.dashControl.setAttribute('aria-disabled', String(!isDashReady));
+    this.dashControl.dataset.active = String(p.dashTime > 0);
+    this.set('dashLabel',p.dashTime>0?'IMPACTO':p.dashCooldown>0?`${p.dashCooldown.toFixed(1)} s`:'LISTO');
+    if (this.dashControl) {
+      this.dashControl.dataset.ready = String(isDashReady);
+      this.dashControl.classList.toggle('is-ready', isDashReady);
+      this.dashControl.classList.toggle('is-cooldown', !isDashReady);
+    }
+    this.nodes.dashFill.parentElement.parentElement.dataset.ready=String(isDashReady);
+    this.nodes.dashFill.style.width = `${Math.max(0, Math.min(1, 1-p.dashCooldown/2.8))*100}%`;
     this.set('runLocation',maps[state.mapId]); this.set('runDifficulty',state.difficulty.name.toUpperCase());
     const progress=state.modeId==='waves'?'OLEADA '+state.wave+'/8':state.modeId==='rush'?'JEFES '+state.bossesKilled+'/3':modes[state.modeId].name.toUpperCase();
     this.nodes.runLocation.title = progress;

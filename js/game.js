@@ -24,11 +24,12 @@ import {bindAuth} from './ui/authScreen.js';
 import {isOwned} from './data/shop.js';
 import {Lobby} from './ui/lobby.js';
 import {Shop} from './ui/shop.js';
+import {DomiScreen} from './ui/domi.js';
 import {updateMap,drawMapObstacles} from './systems/mapSystem.js';
 import {primes,updatePrimes,activatePrime,drawPrimeEffects} from './systems/primeSystem.js';
 import {icon,refreshIcons,abilityIcons} from './ui/icons.js';
 import {canvasPoint} from './core/presentation.js';
-import {drawCombatFeedback} from './ui/combatFeedback.js';
+import {drawCombatFeedback, drawScreenCombatOverlays} from './ui/combatFeedback.js';
 import {drawFloatingText} from './ui/floatingText.js';
 import {evolveWeapon} from './data/weaponEvolutions.js';
 import {burst} from './systems/effectSystem.js';
@@ -42,7 +43,7 @@ export class Game {
     this.audio = new AudioSystem();
     this.menu = new MenuScreen(this);
     this.gameOver = new GameOverScreen(this);
-    this.lobby=new Lobby(this);this.shop=new Shop(this);this.choice=null;
+    this.lobby=new Lobby(this);this.shop=new Shop(this);this.domi=new DomiScreen(this);this.choice=null;
     bindAuth(this);
     document.querySelector('#logoutButton').addEventListener('click',()=>{logout();this.showScreen('authScreen');});
     this.lastSetup = null;
@@ -50,7 +51,6 @@ export class Game {
     this.lastTime = 0;
     this.running = false;
     this.toast = document.querySelector("#toast");
-    this.bossAlert = document.querySelector('#bossAlert');
     this.reducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
     refreshIcons();
     document.querySelector('#aimButton').addEventListener('click',()=>{
@@ -60,11 +60,37 @@ export class Game {
       this.updateAimButton();this.audio.play('navigate');
     });
     canvas.addEventListener('pointermove',event=>{
-      if(this.running){const point=canvasPoint(canvas.getBoundingClientRect(),960,540,event.clientX,event.clientY);if(point)this.state.aimPoint=point;}
+      if(this.running){
+        const point=canvasPoint(canvas.getBoundingClientRect(),960,540,event.clientX,event.clientY);
+        if(point){
+          const cam = this.state?.camera || { x: 0, y: 0 };
+          this.state.aimPoint = { x: point.x + cam.x, y: point.y + cam.y };
+        }
+      }
     });
     document.querySelector('#pauseButton').addEventListener('click', () => this.pause());
+    document.querySelector('#dashControl').addEventListener('click', () => {
+      if (this.running && this.state.player.dashCooldown <= 0) this.input.pressed.add(' ');
+      document.querySelector('#dashControl').blur();
+    });
     document.querySelector('#resumeButton').addEventListener('click', () => this.resume());
     document.querySelector('#abandonButton').addEventListener('click', () => this.endRun('abandoned'));
+    document.querySelector('#pauseTabActives')?.addEventListener('click', () => {
+      document.querySelector('#pauseTabActives').classList.add('is-active');
+      document.querySelector('#pauseTabPassives')?.classList.remove('is-active');
+      const av = document.querySelector('#pauseActivesView');
+      const pv = document.querySelector('#pausePassivesView');
+      if (av) av.hidden = false;
+      if (pv) pv.hidden = true;
+    });
+    document.querySelector('#pauseTabPassives')?.addEventListener('click', () => {
+      document.querySelector('#pauseTabPassives').classList.add('is-active');
+      document.querySelector('#pauseTabActives')?.classList.remove('is-active');
+      const av = document.querySelector('#pauseActivesView');
+      const pv = document.querySelector('#pausePassivesView');
+      if (av) av.hidden = true;
+      if (pv) pv.hidden = false;
+    });
     window.addEventListener('keydown', event => {
       if (event.target.closest?.('input, select, textarea')) return;
       if (event.key === 'Escape' && !event.repeat) { if (this.running) this.pause(); else if (this.screenId === 'pauseScreen') this.resume(); }
@@ -107,29 +133,164 @@ export class Game {
     this.input.clear();
     this.audio.setScene(id === 'gameScreen' && this.state?.enemies.some(enemy=>enemy.isBoss) ? 'boss' : id);
     if (id === 'menuScreen') document.querySelector('#menuBest').textContent = String(getBestScore()).padStart(6,'0');
-    if (id !== 'gameScreen') this.bossAlert.hidden = true;
     if (id !== 'gameScreen') { clearTimeout(this.toastTimer); this.toast.hidden = true; }
     if (!inRun || isPaused) this.hud.eventBanner.hidden = true;
     document.querySelector('#primeBar').hidden=!inRun || isPaused;
     if(id==='lobbyScreen')this.lobby.enter();
     if (id === 'pauseScreen') this.renderBuild();
+    if(id==='domiScreen')this.domi.render();
     if (id !== 'gameScreen' && id !== 'abilityScreen') {
       document.querySelector('#'+id)?.querySelector('button:not(:disabled),input')?.focus({preventScroll:true});
     } else if (id === 'gameScreen') document.activeElement?.blur();
   }
 
-  pause() { if (this.running) this.showScreen('pauseScreen'); }
+  pause() { if (this.running) { this.showScreen('pauseScreen'); document.querySelector('#resumeButton').focus(); } }
   resume() { if (this.screenId === 'pauseScreen') this.showScreen('gameScreen'); }
 
   renderBuild() {
-    const root = document.querySelector('#buildList'); root.replaceChildren();
-    for (const [id,count] of Object.entries(this.state.player.abilities)) {
-      const item = document.createElement('span');
-      item.textContent = (abilityCatalog.find(ability=>ability.id===id)?.name || id) + ' / ' + count;
-      root.append(item);
+    const p = this.state?.player;
+    if (!p) return;
+    // Portrait del personaje
+    const portraitCanvas = document.querySelector('#pauseHudPortrait');
+    if (portraitCanvas) {
+      const c = portraitCanvas.getContext('2d');
+      c.clearRect(0, 0, 40, 40);
+      drawFood(c, p.skin.id, 20, 18, 0.55);
     }
-    if (!root.children.length) root.textContent = 'Combo original';
-    document.querySelector('#pauseGoal').textContent = modes[this.state.modeId].goal;
+
+    // Datos del HUD en la pausa (idéntico al HUD del juego)
+    const nameEl = document.querySelector('#pauseHudSkinName');
+    if (nameEl) nameEl.textContent = p.skin.name;
+    const wepEl = document.querySelector('#pauseHudWeaponName');
+    if (wepEl) wepEl.textContent = p.weaponEvolution ? p.weaponEvolution.name : p.weapon.name;
+    const timeEl = document.querySelector('#pauseHudTime');
+    if (timeEl) timeEl.textContent = formatTime(this.state.time);
+
+    const hpVal = document.querySelector('#pauseHpValue');
+    if (hpVal) hpVal.textContent = `${Math.ceil(p.hp)} / ${p.maxHp}`;
+    const hpFill = document.querySelector('#pauseHpFill');
+    if (hpFill) hpFill.style.width = `${Math.max(0, p.hp / p.maxHp * 100)}%`;
+
+    // Efectos activos con el MISMO formato del HUD del juego
+    const buffsEl = document.querySelector('#pauseActiveBuffs');
+    if (buffsEl) {
+      const labels = [['damageTime', 'DANO'], ['speedTime', 'VELOCIDAD'], ['fireTime', 'CADENCIA']];
+      const activeLabels = labels.filter(([key]) => p.buffs[key] > 0).map(([key, label]) => `${label} ${Math.ceil(p.buffs[key])}s`);
+      if (p.comboFeverTime > 0) activeLabels.push(`FIEBRE ${Math.ceil(p.comboFeverTime)}s`);
+      buffsEl.textContent = activeLabels.length ? activeLabels.join(' / ') : 'NINGUNO (SIN BUFFS)';
+    }
+
+    const lvlEl = document.querySelector('#pauseLevelValue');
+    if (lvlEl) lvlEl.textContent = p.level;
+    const killsEl = document.querySelector('#pauseKillsValue');
+    if (killsEl) killsEl.textContent = this.state.kills;
+    const scoreEl = document.querySelector('#pauseScoreValue');
+    if (scoreEl) scoreEl.textContent = Math.floor(this.state.score).toLocaleString('es-AR');
+    const combo = this.state.combo || 0;
+    const comboMult = Math.min(3, 1 + Math.floor(combo / 5) * 0.25);
+    const comboEl = document.querySelector('#pauseComboValue');
+    if (comboEl) comboEl.textContent = combo > 0 ? `x${comboMult.toFixed(2)} (${combo})` : 'x1.00';
+    const passivesRoot = document.querySelector('#buildList');
+    const activesRoot = document.querySelector('#pauseActivesList');
+    const goalEl = document.querySelector('#pauseGoal');
+    if (goalEl && modes[this.state.modeId]) goalEl.textContent = modes[this.state.modeId].goal;
+
+    // 1. Habilidades Pasivas Adquiridas
+    if (passivesRoot) {
+      passivesRoot.replaceChildren();
+      const entries = Object.entries(p.abilities || {});
+      const evo = p.weaponEvolution;
+
+      if (evo) {
+        const card = document.createElement('div');
+        card.className = 'pause-card pause-card--evo';
+        card.innerHTML = `
+          <div class="pause-card-head">
+            <span class="pause-badge pause-badge--evo">EVOLUCIÓN</span>
+            <strong class="pause-card-title">${evo.name}</strong>
+          </div>
+          <p class="pause-card-desc">${evo.description}</p>
+        `;
+        passivesRoot.append(card);
+      }
+
+      for (const [id, count] of entries) {
+        const ab = abilityCatalog.find(x => x.id === id);
+        const card = document.createElement('div');
+        card.className = 'pause-card';
+        const isMax = count >= (ab?.maxStacks || count);
+        card.innerHTML = `
+          <div class="pause-card-head">
+            <span class="pause-badge">${ab?.category || 'PASIVA'}</span>
+            <strong class="pause-card-title">${ab?.name || id}</strong>
+            <span class="pause-level ${isMax ? 'is-max' : ''}">${isMax ? '¡MAX!' : `Nivel ${count}/${ab?.maxStacks || count}`}</span>
+          </div>
+          <p class="pause-card-desc">${ab?.description || 'Mejora pasiva activa en el turno.'}</p>
+        `;
+        passivesRoot.append(card);
+      }
+
+      if (!entries.length && !evo) {
+        const empty = document.createElement('div');
+        empty.className = 'pause-empty-msg';
+        empty.textContent = 'Aún no elegiste mejoras pasivas. ¡Subí de nivel durante la partida para desbloquear recetas!';
+        passivesRoot.append(empty);
+      }
+    }
+
+    // 2. Habilidades Activas Desbloqueables
+    if (activesRoot) {
+      activesRoot.replaceChildren();
+      const currentLevel = p.level || 1;
+      const actives = [
+        {
+          key: 'Q',
+          name: primes[0].name,
+          levelReq: 5,
+          desc: '20 disparos en todas direcciones. Recarga: 18 s.',
+          isUnlocked: currentLevel >= 5
+        },
+        {
+          key: 'E',
+          name: primes[1].name,
+          levelReq: 10,
+          desc: 'Un clon distrae enemigos hasta 5 s. Recarga: 28 s.',
+          isUnlocked: currentLevel >= 10
+        },
+        {
+          key: 'R',
+          name: primes[2].name,
+          levelReq: 15,
+          desc: 'Inmunidad por 3,5 s y empuje cercano. Recarga: 40 s.',
+          isUnlocked: currentLevel >= 15
+        },
+        {
+          key: 'ESPACIO',
+          name: 'ACELERÓN / EMBESTIDA',
+          levelReq: 1,
+          desc: 'Esquiva y golpea al atravesar enemigos. Recarga: 2,8 s.',
+          isUnlocked: true
+        }
+      ];
+
+      for (const act of actives) {
+        const card = document.createElement('div');
+        card.className = `pause-active-card ${act.isUnlocked ? 'is-unlocked' : 'is-locked'}`;
+        card.innerHTML = `
+          <div class="pause-active-key"><kbd>${act.key}</kbd></div>
+          <div class="pause-active-info">
+            <div class="pause-active-head">
+              <strong class="pause-active-title">${act.name}</strong>
+              <span class="pause-active-status ${act.isUnlocked ? 'status--unlocked' : 'status--locked'}">
+                ${act.isUnlocked ? 'DESBLOQUEADA' : `NIVEL ${act.levelReq}`}
+              </span>
+            </div>
+            <p class="pause-active-desc">${act.desc}</p>
+          </div>
+        `;
+        activesRoot.append(card);
+      }
+    }
   }
 
   showRanking() {
@@ -168,6 +329,7 @@ export class Game {
     this.drawBackground();
     if(this.screenId==='lobbyScreen')this.lobby.update(delta,this.input);
     if(this.screenId==='shopScreen')this.shop.update(time/1000);
+    if(this.screenId==='domiScreen')this.domi.update(time/1000);
     if (this.state && ['gameScreen','abilityScreen','pauseScreen'].includes(this.screenId)) {
       if (this.running) this.update(delta);
       this.draw();
@@ -181,12 +343,34 @@ export class Game {
     state.shake = Math.max(0, state.shake - delta);
     updateDirector(state, delta, this.canvas);
     updatePrimes(state,delta);updateMap(state,delta);
+    if (state.bossIntro) {
+      state.bossIntro.timer -= delta;
+      if (state.bossIntro.timer <= 0) state.bossIntro = null;
+    }
     if (state.directorNotice) { this.showToast(state.directorNotice); state.directorNotice = ''; }
     const before = { x:state.player.x, y:state.player.y };
     const dashBefore=state.player.dashTime;
-    updatePlayer(state, delta, this.input, this.canvas);
-    if(dashBefore<=0&&state.player.dashTime>0)this.audio.play('dash');
+    const bounds = state.world || this.canvas;
+    updatePlayer(state, delta, this.input, bounds);
+    if(dashBefore<=0&&state.player.dashTime>0){
+      this.audio.play('dash');
+      const dashEl = document.querySelector('#dashControl');
+      if (dashEl) {
+        dashEl.classList.remove('dash-active');
+        requestAnimationFrame(() => dashEl.classList.add('dash-active'));
+        setTimeout(() => dashEl.classList.remove('dash-active'), 220);
+      }
+    }
     state.distance += Math.hypot(state.player.x - before.x, state.player.y - before.y);
+
+    // Suave seguimiento de cámara al jugador
+    if (state.camera && state.world) {
+      const targetCamX = Math.max(0, Math.min(state.world.width - 960, state.player.x - 480));
+      const targetCamY = Math.max(0, Math.min(state.world.height - 540, state.player.y - 270));
+      state.camera.x += (targetCamX - state.camera.x) * Math.min(1, delta * 8.5);
+      state.camera.y += (targetCamY - state.camera.y) * Math.min(1, delta * 8.5);
+    }
+
     updateEffects(state, delta);
     for (const hazard of state.hazards) hazard.life -= delta;
     state.hazards = state.hazards.filter(hazard => hazard.life > 0);
@@ -194,13 +378,23 @@ export class Game {
       if (Math.hypot(hazard.x - state.player.x, hazard.y - state.player.y) < hazard.radius + state.player.radius) {
         state.player.buffs.slowTime = Math.max(state.player.buffs.slowTime, 0.35);
       }
+      if (hazard.isKetchupPuddle) {
+        for (const enemy of state.enemies) {
+          if (enemy.hp > 0 && Math.hypot(hazard.x - enemy.x, hazard.y - enemy.y) < hazard.radius + enemy.radius) {
+            enemy.speedMultiplier = Math.min(enemy.speedMultiplier || 1, 0.55);
+            if (Math.random() < 0.15) {
+              enemy.hp -= 2.5 * delta * (state.player.buffs.damageMultiplier || 1);
+            }
+          }
+        }
+      }
     }
-    if (updateEnemies(state, delta, this.canvas)) this.announceBoss();
+    if (updateEnemies(state, delta, bounds)) this.announceBoss();
     state.companion.update(state, delta);
-    updateProjectiles(state, delta, this.canvas);
-    updateItems(state, delta, this.canvas);
+    updateProjectiles(state, delta, bounds);
+    updateItems(state, delta, bounds);
     if (state.itemNotice) { this.showToast(state.itemNotice); this.audio.play('pickup'); state.itemNotice = ''; }
-    resolveDeaths(state, () => this.onLevelUp());
+    resolveDeaths(state, (isAbilityLevel) => this.onLevelUp(isAbilityLevel));
     if (state.bossDefeated) {
       state.bossDefeated = false;
       this.showToast(phrases.bossDefeated[Math.floor(Math.random() * phrases.bossDefeated.length)]);
@@ -221,9 +415,35 @@ export class Game {
     this.renderLiveBuild();
   }
 
-  onLevelUp() {
-    this.state.pendingLevels += 1;
+  onLevelUp(isAbilityLevel = true) {
+    if (isAbilityLevel) {
+      this.state.pendingLevels += 1;
+    }
     this.state.score = (this.state.score || 0) + 50;
+    // Pequeño buff pasivo por nivel regular para recompensar el progreso
+    this.state.player.hp = Math.min(this.state.player.maxHp, this.state.player.hp + 12);
+    if (!isAbilityLevel) {
+      this.state.floaters?.push({
+        x: this.state.player.x,
+        y: this.state.player.y - 36,
+        text: `NV ${this.state.player.level} (+12 HP)`,
+        life: 0.9,
+        color: '#86e3bf',
+        scale: 1.1
+      });
+    }
+    // Modo Dios al Nivel 3: Aura dorada omnipotente
+    if (this.state.player.level === 3) {
+      this.state.player.godMode = true;
+      this.state.player.invulnerable = Math.max(this.state.player.invulnerable, 999);
+      this.state.player.buffs.damageMultiplier = Math.max(this.state.player.buffs.damageMultiplier, 10);
+      this.state.directorNotice = '¡MODO DIOS ACTIVADO! / ANIQUILACIÓN TOTAL';
+      this.state.shake = Math.max(this.state.shake || 0, 0.45);
+      this.state.rings.push({ x: this.state.player.x, y: this.state.player.y, radius: 180, life: 1.5, maxLife: 1.5, color: '#ffd700' });
+      burst(this.state, this.state.player.x, this.state.player.y, '#ffd700', 50, 300);
+      this.audio?.play('level');
+    }
+
     const evolution=evolveWeapon(this.state.player);
     if(evolution){
       const player=this.state.player;
@@ -284,7 +504,9 @@ export class Game {
   }
 
   renderLiveBuild(){
-    const entries=Object.entries(this.state.player.abilities),evolution=this.state.player.weaponEvolution,signature=JSON.stringify(entries)+'/'+(evolution?.id||'base');
+    const entries=Object.entries(this.state.player.abilities),evolution=this.state.player.weaponEvolution;
+    const pickups=Object.entries(this.state.pickups||{});
+    const signature=JSON.stringify(entries)+'/'+(evolution?.id||'base')+'/'+JSON.stringify(pickups);
     if(signature!==this.buildSignature){
       this.buildSignature=signature;const root=document.querySelector('#liveBuild');root.replaceChildren();
       const rarityWeights = { legendary: 4, epic: 3, rare: 2, common: 1 };
@@ -344,10 +566,34 @@ export class Game {
         `;
         root.prepend(token);
       }
-      if(!entries.length&&!evolution)root.textContent='Receta original';
+      // Fichas de consumibles recolectados
+      const itemIcons = { ketchup: 'Flame', mayo: 'Heart', mustard: 'Zap', hotSauce: 'Sparkles', barbecue: 'Bomb' };
+      for (const [pId, pCount] of pickups) {
+        if (!pCount) continue;
+        const token = document.createElement('div');
+        token.className = 'build-token build-token--consumable';
+        token.tabIndex = 0;
+        token.innerHTML = `
+          <div class="token-frame">
+            <span class="token-rarity-gem" style="background:#00e5ff;color:#00e5ff;"></span>
+            ${icon(itemIcons[pId] || 'Package', 'token-icon')}
+            <b class="token-stack">x${pCount}</b>
+          </div>
+          <div class="build-tooltip">
+            <div class="tooltip-header">
+              <span class="tooltip-rarity" style="color:#00e5ff;">CONSUMIBLE</span>
+              <strong>${pId.toUpperCase()}</strong>
+            </div>
+            <p class="tooltip-desc">Recolectado en el turno.</p>
+            <div class="tooltip-meta">${pCount} veces obtenido</div>
+          </div>
+        `;
+        root.append(token);
+      }
+      if(!entries.length&&!evolution&&!pickups.length)root.textContent='Receta original';
     }
     const next=primes.find(prime=>prime.level>this.state.player.level);
-    document.querySelector('#nextPrimeLabel').textContent=next?'PRIME EN NIVEL '+next.level:'RECETA PRIME COMPLETA';
+    document.querySelector('#nextPrimeLabel').textContent=next?'ACTIVA EN NIVEL '+next.level:'ACTIVAS COMPLETAS';
   }
 
   renderPrimeBar(){
@@ -430,13 +676,44 @@ export class Game {
 
   draw() {
     const state = this.state;
+    const cam = state.camera || { x: 0, y: 0 };
+    const time = matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : this.lastTime / 1000;
+
     this.ctx.save();
     if (state.shake > 0 && !this.reducedMotion) {
       this.ctx.translate((Math.random() - 0.5) * 8, (Math.random() - 0.5) * 8);
     }
+
+    // Cámara en espacio de mundo
+    this.ctx.save();
+    this.ctx.translate(-Math.round(cam.x), -Math.round(cam.y));
+
+    // Dibujamos el suelo y props del mundo en coordenadas mundiales
+    const worldW = state.world?.width || 1920;
+    const worldH = state.world?.height || 1080;
+    drawDiner(this.ctx, worldW, worldH, time, false, state.mapId);
+    drawWorldProps(this.ctx, state.mapId || 'diner', time);
+
     for (const hazard of state.hazards) {
-      this.ctx.save();this.ctx.globalAlpha=Math.min(.25,hazard.life*.05);this.ctx.fillStyle='#c898ee';
-      this.ctx.beginPath();this.ctx.arc(hazard.x,hazard.y,hazard.radius,0,Math.PI*2);this.ctx.fill();this.ctx.restore();
+      this.ctx.save();
+      if (hazard.isKetchupPuddle) {
+        this.ctx.globalAlpha = Math.min(0.7, hazard.life * 0.18);
+        this.ctx.fillStyle = '#b31818';
+        this.ctx.beginPath();
+        this.ctx.arc(hazard.x, hazard.y, hazard.radius, 0, Math.PI * 2);
+        this.ctx.fill();
+        this.ctx.fillStyle = '#e52c2c';
+        this.ctx.beginPath();
+        this.ctx.arc(hazard.x - 3, hazard.y - 3, hazard.radius * 0.55, 0, Math.PI * 2);
+        this.ctx.fill();
+      } else {
+        this.ctx.globalAlpha = Math.min(.25, hazard.life * .05);
+        this.ctx.fillStyle = '#c898ee';
+        this.ctx.beginPath();
+        this.ctx.arc(hazard.x, hazard.y, hazard.radius, 0, Math.PI * 2);
+        this.ctx.fill();
+      }
+      this.ctx.restore();
     }
     drawMapObstacles(this.ctx,state);
     drawCombatFeedback(this.ctx,state,this.reducedMotion);
@@ -478,12 +755,206 @@ export class Game {
     for (const text of state.floaters) {
       drawFloatingText(this.ctx,text,this.reducedMotion);
     }
+    this.ctx.restore(); // Salimos del espacio de mundo (cámara)
+
+    // Overlays en coordenadas de pantalla (960x540)
     this.ctx.globalAlpha=1;
+    drawScreenCombatOverlays(this.ctx, state, this.reducedMotion);
     if(state.player.hitFlash>0&&!this.reducedMotion){this.ctx.strokeStyle=`rgba(255,80,75,${state.player.hitFlash*3})`;this.ctx.lineWidth=12;this.ctx.strokeRect(6,6,948,528);}
+
+    // Animación de aparición cinemática del Jefe (Pixel Art Boss Intro)
+    if (state.bossIntro) {
+      this.drawBossIntro(state.bossIntro);
+    }
+
+    // Miniradar táctico Pixel Art en esquina superior derecha
+    this.drawMinimap(state);
+
     this.ctx.restore();
   }
 
+  drawMinimap(state) {
+    const ctx = this.ctx;
+    const worldW = state.world?.width || 1920;
+    const worldH = state.world?.height || 1080;
+    const cam = state.camera || { x: 0, y: 0 };
+    const p = state.player;
+
+    // Dimensiones y posición del minimapa (ubicado a la izquierda, debajo del contador de combo)
+    const mapW = 124;
+    const mapH = 68;
+    const mapX = 26;
+    const mapY = 82;
+
+    ctx.save();
+    // 1. Marco exterior con estética arcade/pixel
+    ctx.fillStyle = '#0a1014cc';
+    ctx.fillRect(mapX - 4, mapY - 4, mapW + 8, mapH + 8);
+    ctx.strokeStyle = '#2d424b';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(mapX - 4, mapY - 4, mapW + 8, mapH + 8);
+
+    // Borde interno de radar
+    ctx.strokeStyle = '#39535f';
+    ctx.lineWidth = 1;
+    ctx.strokeRect(mapX - 1, mapY - 1, mapW + 2, mapH + 2);
+
+    // Fondo del minimapa (cuadrícula radar tenue)
+    ctx.fillStyle = '#121c22ee';
+    ctx.fillRect(mapX, mapY, mapW, mapH);
+
+    // Cuadrícula sutil
+    ctx.strokeStyle = '#1d2f38';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(mapX + mapW / 2, mapY); ctx.lineTo(mapX + mapW / 2, mapY + mapH);
+    ctx.moveTo(mapX, mapY + mapH / 2); ctx.lineTo(mapX + mapW, mapY + mapH / 2);
+    ctx.stroke();
+
+    // 2. Rectángulo de la cámara actual (Viewport activo)
+    const camXRatio = cam.x / worldW;
+    const camYRatio = cam.y / worldH;
+    const camWRatio = 960 / worldW;
+    const camHRatio = 540 / worldH;
+    ctx.strokeStyle = '#486574';
+    ctx.fillStyle = '#22384433';
+    ctx.fillRect(mapX + camXRatio * mapW, mapY + camYRatio * mapH, camWRatio * mapW, camHRatio * mapH);
+    ctx.strokeRect(mapX + camXRatio * mapW, mapY + camYRatio * mapH, camWRatio * mapW, camHRatio * mapH);
+
+    // 3. Items coleccionables / botines (puntos celestes / dorados)
+    for (let i = 0; i < state.items.length; i++) {
+      const it = state.items[i];
+      const ix = mapX + (it.x / worldW) * mapW;
+      const iy = mapY + (it.y / worldH) * mapH;
+      ctx.fillStyle = '#38bdf8';
+      ctx.fillRect(Math.round(ix) - 1, Math.round(iy) - 1, 3, 3);
+    }
+
+    // 4. Enemigos comunes (puntos rojos)
+    ctx.fillStyle = '#ff4d4d';
+    for (let i = 0; i < state.enemies.length; i++) {
+      const enemy = state.enemies[i];
+      if (enemy.hp <= 0 || enemy.isBoss) continue;
+      const ex = mapX + (enemy.x / worldW) * mapW;
+      const ey = mapY + (enemy.y / worldH) * mapH;
+      ctx.fillRect(Math.round(ex) - 1, Math.round(ey) - 1, 2, 2);
+    }
+
+    // 5. Jefes (calaveras/iconos dorados grandes y pulsantes)
+    for (let i = 0; i < state.enemies.length; i++) {
+      const boss = state.enemies[i];
+      if (boss.hp <= 0 || !boss.isBoss) continue;
+      const bx = mapX + (boss.x / worldW) * mapW;
+      const by = mapY + (boss.y / worldH) * mapH;
+      const pulse = Math.sin(performance.now() / 120) * 1.5;
+      // Anillo de alerta jefe
+      ctx.strokeStyle = '#ffcc00';
+      ctx.lineWidth = 1;
+      ctx.strokeRect(Math.round(bx) - 3 - pulse / 2, Math.round(by) - 3 - pulse / 2, 6 + pulse, 6 + pulse);
+      // Punto central del jefe
+      ctx.fillStyle = '#ff2a44';
+      ctx.fillRect(Math.round(bx) - 2, Math.round(by) - 2, 4, 4);
+      ctx.fillStyle = '#ffd700';
+      ctx.fillRect(Math.round(bx) - 1, Math.round(by) - 1, 2, 2);
+    }
+
+    // 6. Jugador (punto verde lima brillante con flecha/indicador)
+    const px = mapX + (p.x / worldW) * mapW;
+    const py = mapY + (p.y / worldH) * mapH;
+    ctx.fillStyle = '#00ff88';
+    ctx.fillRect(Math.round(px) - 2, Math.round(py) - 2, 4, 4);
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(Math.round(px) - 1, Math.round(py) - 1, 2, 2);
+
+    // Decoración: Etiqueta "RADAR"
+    ctx.font = 'bold 8px monospace';
+    ctx.fillStyle = '#839da9';
+    ctx.textAlign = 'left';
+    ctx.fillText('MAPA', mapX, mapY - 6);
+
+    ctx.restore();
+  }
+
+  drawBossIntro(intro) {
+    const elapsed = intro.duration - intro.timer;
+    const progress = Math.min(1, elapsed / intro.duration);
+    const ctx = this.ctx;
+
+    // 1. Barras de cine negras pixeladas superior e inferior
+    const barHeight = 64;
+    ctx.fillStyle = '#080c10';
+    ctx.fillRect(0, 0, 960, barHeight);
+    ctx.fillRect(0, 540 - barHeight, 960, barHeight);
+
+    // Borde neón peligro
+    ctx.fillStyle = '#ff2a44';
+    ctx.fillRect(0, barHeight, 960, 4);
+    ctx.fillRect(0, 540 - barHeight - 4, 960, 4);
+
+    // Hazard stripes en las barras
+    ctx.fillStyle = '#ffcc0033';
+    for (let x = -60 + (elapsed * 80) % 60; x < 960; x += 36) {
+      ctx.beginPath();
+      ctx.moveTo(x, 0); ctx.lineTo(x + 18, 0); ctx.lineTo(x, barHeight); ctx.lineTo(x - 18, barHeight); ctx.fill();
+      ctx.beginPath();
+      ctx.moveTo(x, 540 - barHeight); ctx.lineTo(x + 18, 540 - barHeight); ctx.lineTo(x, 540); ctx.lineTo(x - 18, 540); ctx.fill();
+    }
+
+    // 2. Flash estroboscópico de alerta roja al inicio
+    if (elapsed < 0.35) {
+      const flash = (1 - elapsed / 0.35) * 0.38;
+      ctx.fillStyle = `rgba(255, 30, 60, ${flash})`;
+      ctx.fillRect(0, 0, 960, 540);
+    }
+
+    // 3. Cartel central tipo banner arcade de advertencia
+    const bannerY = 240;
+    const slideIn = Math.min(1, elapsed / 0.3);
+    const scale = 0.8 + 0.2 * Math.sin(slideIn * Math.PI / 2);
+
+    ctx.save();
+    ctx.translate(480, bannerY);
+    ctx.scale(scale, scale);
+
+    // Fondo del banner con borde pixel-art
+    ctx.fillStyle = '#0f171cee';
+    ctx.fillRect(-380, -48, 760, 96);
+    ctx.lineWidth = 4;
+    ctx.strokeStyle = '#ff3344';
+    ctx.strokeRect(-380, -48, 760, 96);
+
+    // Decoración de esquinas pixel
+    ctx.fillStyle = '#ffcc00';
+    ctx.fillRect(-380, -48, 12, 12);
+    ctx.fillRect(368, -48, 12, 12);
+    ctx.fillRect(-380, 36, 12, 12);
+    ctx.fillRect(368, 36, 12, 12);
+
+    // Texto: WARNING / ALERTA DE JEFE
+    ctx.textAlign = 'center';
+    ctx.font = '900 13px "Press Start 2P", monospace';
+    ctx.fillStyle = '#ffcc00';
+    ctx.fillText('⚠ ¡ALERTA DE PEDIDO ESPECIAL! ⚠', 0, -22);
+
+    // Nombre gigante del Boss
+    ctx.font = '900 24px "Press Start 2P", monospace';
+    // Sombra pixel
+    ctx.fillStyle = '#660011';
+    ctx.fillText(intro.bossName, 3, 17);
+    ctx.fillStyle = '#ffffff';
+    ctx.fillText(intro.bossName, 0, 14);
+
+    // Subtítulo temático
+    ctx.font = 'bold 11px monospace';
+    ctx.fillStyle = '#86e3bf';
+    ctx.fillText('NIVEL DE AMENAZA: EXTREMO · ¡PREPARATE!', 0, 36);
+
+    ctx.restore();
+  }
+
   drawBackground() {
+    const inGame = ['gameScreen','abilityScreen','pauseScreen'].includes(this.screenId);
+    if (inGame) return; // Se dibuja dentro de draw() bajo la cámara
     const menu = ['menuScreen','authScreen','lobbyScreen','shopScreen'].includes(this.screenId);
     const width = menu ? this.canvas.clientWidth : 960;
     const height = menu ? this.canvas.clientHeight : 540;
@@ -507,11 +978,24 @@ export class Game {
   announceBoss() {
     this.audio.setScene('boss'); this.audio.play('boss');
     const boss = this.state.enemies.find(enemy=>enemy.isBoss);
-    this.bossAlert.textContent = 'PEDIDO ESPECIAL / ' + boss.type.name.toUpperCase();
-    this.bossAlert.hidden = false;
-    clearTimeout(this.bossAlertTimer);
-    this.bossAlertTimer = setTimeout(() => { this.bossAlert.hidden = true; }, 4000);
-    this.showToast('JEFE: ' + boss.type.name.toUpperCase());
+    if (!boss) return;
+    const bossName = boss.type.name.toUpperCase();
+    this.showToast('JEFE: ' + bossName);
+
+    // Activamos la animación de aparición cinemática
+    this.state.bossIntro = {
+      bossName,
+      bossType: boss.type.id,
+      timer: 3.2,
+      duration: 3.2
+    };
+
+    // Temblor de pantalla y ondas de impacto al aparecer el jefe
+    this.state.shake = 0.55;
+    this.state.rings.push({ x: boss.x, y: boss.y, radius: 240, life: 1.2, maxLife: 1.2, color: '#ff3344' });
+    this.state.rings.push({ x: boss.x, y: boss.y, radius: 150, life: 0.9, maxLife: 0.9, color: '#ffcc00' });
+    burst(this.state, boss.x, boss.y, '#ff3344', 40, 260);
+    burst(this.state, boss.x, boss.y, '#ffcc00', 35, 200);
   }
 
   formatTime(seconds) {

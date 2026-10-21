@@ -51,6 +51,14 @@ export function updateEnemies(state, delta, canvas) {
       }
       enemy.hp = 0;
     }
+    // Modo Dios: Aniquilación automática al contacto
+    if (state.player.godMode && Math.hypot(enemy.x - state.player.x, enemy.y - state.player.y) < 130) {
+      damageEnemy(state, enemy, 9999, 'god');
+      burst(state, enemy.x, enemy.y, '#ffd700', 16, 180);
+      impactRing(state, enemy.x, enemy.y, '#ffd700');
+      state.floaters?.push({ x: enemy.x, y: enemy.y - 30, text: '¡EXTERMINIO!', life: 0.85, color: '#ffd700', scale: 1.35, kind: 'crit' });
+    }
+
     if (enemy.hp > 0 && circlesOverlap(enemy, state.player)) {
       const player=state.player;
       if(player.dashTime>0&&enemy.lastDashSequence!==player.dashSequence){
@@ -59,7 +67,7 @@ export function updateEnemies(state, delta, canvas) {
         enemy.x+=dx/length*42;enemy.y+=dy/length*42;
         damageEnemy(state,enemy,(18+player.level*1.35)*player.damageMultiplier,'dash');
         state.score+=15;state.shake=Math.max(state.shake,.12);
-        state.floaters?.push({x:enemy.x,y:enemy.y-34,text:'CHOQUE +15',life:.75,color:'#9fffe0',scale:1.05});
+        state.floaters?.push({x:enemy.x,y:enemy.y-34,text:'CHOQUE +15',life:.8,color:'#9fffe0',scale:1.1,kind:'dash'});
         impactRing(state,enemy.x,enemy.y,'#9fffe0');burst(state,enemy.x,enemy.y,'#9fffe0',14,145);state.audio?.play('kill');
       }else if(player.takeDamage(enemy.damage)){
         state.shake = 0.18;state.audio?.play('damage');
@@ -90,25 +98,56 @@ function updateBossZones(state,delta){
 }
 
 function spawnEnemy(state, canvas, boss = false) {
-  const side = Math.floor(Math.random() * 4);
-  const margin = 36;
-  const position = [
-    { x: Math.random() * canvas.width, y: -margin },
-    { x: canvas.width + margin, y: Math.random() * canvas.height },
-    { x: Math.random() * canvas.width, y: canvas.height + margin },
-    { x: -margin, y: Math.random() * canvas.height },
-  ][side];
+  const worldW = state.world?.width || 1920;
+  const worldH = state.world?.height || 1080;
+  const cam = state.camera || { x: (worldW - 960) / 2, y: (worldH - 540) / 2 };
+  const p = state.player;
+
+  let px, py;
+  if (boss) {
+    // Los jefes aparecen a una distancia épica frente a la cámara
+    px = Math.max(80, Math.min(worldW - 80, cam.x + 480 + (Math.random() - 0.5) * 160));
+    py = Math.max(160, Math.min(worldH - 120, cam.y + 110));
+  } else {
+    // 70% de spawn alrededor de la pantalla actual (desfasado del jugador) y 30% en sectores dispersos del mapa 1920x1080
+    if (Math.random() < 0.7) {
+      const side = Math.floor(Math.random() * 4);
+      const margin = 40 + Math.random() * 60;
+      if (side === 0) { // Arriba de la cámara
+        px = cam.x + Math.random() * 960;
+        py = cam.y - margin;
+      } else if (side === 1) { // Derecha de la cámara
+        px = cam.x + 960 + margin;
+        py = cam.y + Math.random() * 540;
+      } else if (side === 2) { // Abajo de la cámara
+        px = cam.x + Math.random() * 960;
+        py = cam.y + 540 + margin;
+      } else { // Izquierda de la cámara
+        px = cam.x - margin;
+        py = cam.y + Math.random() * 540;
+      }
+    } else {
+      // Spawn en abanico circular amplio alrededor del jugador (radio 500-750px) para rodearlo orgánicamente
+      const angle = Math.random() * Math.PI * 2;
+      const dist = 520 + Math.random() * 240;
+      px = p.x + Math.cos(angle) * dist;
+      py = p.y + Math.sin(angle) * dist;
+    }
+  }
+
+  px = Math.max(40, Math.min(worldW - 40, px));
+  py = Math.max(130, Math.min(worldH - 40, py));
+  const position = { x: px, y: py };
   const normalTypes = enemyTypes.filter(type => !type.boss);
   const maxType = state.time > 65 ? normalTypes.length : state.time > 35 ? 5 : state.time > 15 ? 4 : 2;
-  const bosses = enemyTypes.filter(record=>record.boss);
+  const bosses = enemyTypes.filter(record => record.boss);
   const type = boss ? bosses[(state.bossesKilled || 0) % bosses.length] : normalTypes[Math.floor(Math.random() * maxType)];
-  if (boss) { position.x = canvas.width / 2; position.y = 146; }
   if (type.id === 'onion') {
     const angle = Math.random() * Math.PI * 2;
-    position.x = Math.max(62, Math.min(canvas.width - 62, state.player.x + Math.cos(angle) * 145));
-    position.y = Math.max(120, Math.min(canvas.height - 40, state.player.y + Math.sin(angle) * 145));
+    position.x = Math.max(62, Math.min(worldW - 62, state.player.x + Math.cos(angle) * 165));
+    position.y = Math.max(130, Math.min(worldH - 40, state.player.y + Math.sin(angle) * 165));
   }
   const growth = 1 + Math.max(0, state.time - 60) / 300;
-  const difficulty = {...state.difficulty,hp:state.difficulty.hp*growth,speed:state.difficulty.speed*(state.mapId==='kitchen'?1.08:1)};
+  const difficulty = { ...state.difficulty, hp: state.difficulty.hp * growth, speed: state.difficulty.speed * (state.mapId === 'kitchen' ? 1.08 : 1) };
   state.enemies.push(new Enemy({ ...position, type, difficulty }));
 }

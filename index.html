@@ -12,6 +12,7 @@
     <link rel="stylesheet" href="./css/polish.css" />
     <link rel="stylesheet" href="./css/shop.css" />
     <link rel="stylesheet" href="./css/gameplay.css" />
+    <link rel="stylesheet" href="./css/interface.css" />
   </head>
   <body>
     <main id="app" class="app">
@@ -20,24 +21,31 @@
       <section id="authScreen" class="screen screen--active auth-screen">
         <div class="auth-brand"><span>DOMI <b>2</b></span><strong>PANCHO</strong><small>ARCADE CLUB / TU TURNO EMPIEZA ACÁ</small><p class="auth-intro">Sobreviví al turno. Armá tu combo.<br />Volvé por más.</p><span class="keyboard-note">Juego para teclado y mouse</span></div>
         <form id="authForm" class="auth-panel screen__panel">
-          <p class="eyebrow">TARJETA DE SOCIO</p><h2 id="authTitle">Entrar al local.</h2>
+          <p class="eyebrow">TARJETA DE SOCIO</p>
+          <div class="auth-tabs" style="display:flex;gap:8px;margin-bottom:14px;">
+            <button type="button" class="dialogue-tab is-active" id="tabAuthLogin" style="flex:1;">INICIAR SESIÓN</button>
+            <button type="button" class="dialogue-tab" id="tabAuthRegister" style="flex:1;">CREAR CUENTA</button>
+          </div>
+          <h2 id="authTitle" style="font-size:13px;margin-bottom:12px;">Entrar al local.</h2>
           <label class="field" for="authName">Usuario<input id="authName" name="username" autocomplete="username" autocapitalize="none" spellcheck="false" minlength="3" maxlength="16" aria-describedby="authNameHint" required /></label>
           <p id="authNameHint" class="field-hint" hidden>De 3 a 16 caracteres: letras, números, espacios, guion o guion bajo.</p>
           <div class="field"><label for="authPassword">Contraseña</label><div class="password-field"><input id="authPassword" name="password" type="password" autocomplete="current-password" minlength="6" aria-describedby="authPasswordHint authCapsLock" required /><button id="authPasswordToggle" class="password-toggle" type="button" aria-controls="authPassword" aria-label="Mostrar contraseña" aria-pressed="false">Mostrar</button></div></div>
-          <p id="authPasswordHint" class="field-hint" hidden>Usá al menos 6 caracteres. Elegí una contraseña exclusiva para este juego.</p>
+          <p id="authPasswordHint" class="field-hint" hidden>Usá al menos 6 caracteres. Elegí una contraseña para este juego.</p>
           <p id="authCapsLock" class="field-hint caps-lock" role="status" hidden>Bloq Mayús está activado.</p>
           <p id="authError" class="form-error" role="alert" tabindex="-1" hidden></p>
           <button class="pixel-button" type="submit" id="authSubmit">INICIAR SESIÓN</button>
-          <button class="text-button" type="button" id="authSwitch">Crear una cuenta nueva</button>
-          <small class="save-note">Tu cuenta y progreso se guardan solo en este navegador. Si borrás sus datos o cambiás de dispositivo, no se trasladan. No hay recuperación de contraseña.</small>
+          <button class="pixel-button pixel-button--guest" type="button" id="authGuest" style="background:#2563eb;border-color:#60a5fa;color:#fff;margin-top:8px;">🎮 ENTRAR COMO INVITADO (JUGAR YA)</button>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-top:10px;">
+            <button class="text-button" type="button" id="authSwitch">Crear una cuenta nueva</button>
+            <button class="text-button" type="button" id="authReset" style="color:#f59e0b;font-size:9px;">Restablecer clave</button>
+          </div>
+          <small class="save-note">Tu cuenta y progreso se guardan solo en este navegador. Si borrás sus datos o cambiás de dispositivo, no se trasladan.</small>
         </form>
       </section>
 
       <section id="lobbyScreen" class="screen lobby-screen">
         <header class="lobby-header"><span class="brand-mark">D<span>2</span></span><div><strong id="lobbyWelcome">PANCHO</strong><small>SOCIO DEL CLUB / EN EL LOCAL</small></div><span class="wallet"><i data-lucide="coins"></i><b id="lobbyBank">0</b><small>PT</small></span><button id="lobbyAchievements" class="lobby-achievements" title="Ver logros" aria-label="Ver logros y progreso"><i data-lucide="trophy"></i><span>LOGROS <b id="lobbyAchievementCount">0 / 6</b></span></button><button id="lobbyOptions" class="icon-button" title="Opciones" aria-label="Opciones"><i data-lucide="settings-2"></i></button><button id="logoutButton" class="icon-button" title="Cerrar sesion" aria-label="Cerrar sesion"><i data-lucide="log-out"></i></button></header>
-        <div class="lobby-stage"><canvas id="lobbyCanvas" width="960" height="540" aria-label="Lobby interactivo"></canvas><p class="lobby-controls"><kbd>WASD</kbd> / flechas: moverte <span>·</span> <kbd>E</kbd>: interactuar <span>·</span> También podés hacer clic en los lugares.</p><div class="lobby-tip" id="lobbyTip" hidden></div>
-          <aside id="lobbyDialogue" class="lobby-dialogue" role="dialog" aria-labelledby="dialogueTitle" hidden><div class="dialogue-speaker">DON DOMI <span>EL DUEÑO DE LA CASA</span></div><button id="dialogueClose" class="icon-button" title="Cerrar" aria-label="Cerrar consejo"><i data-lucide="x"></i></button><h3 id="dialogueTitle"></h3><p id="dialogueText"></p><button id="dialogueNext" class="text-button">Otra receta <i data-lucide="arrow-right"></i></button></aside>
-        </div>
+        <div class="lobby-stage"><canvas id="lobbyCanvas" width="960" height="540" aria-label="Lobby interactivo"></canvas><p class="lobby-controls"><kbd>WASD</kbd> / flechas: moverte <span>·</span> <kbd>E</kbd>: interactuar <span>·</span> También podés hacer clic en los lugares.</p><div class="lobby-tip" id="lobbyTip" hidden></div></div>
         <nav class="lobby-nav" aria-label="Lugares del local"><button data-station="portal" title="Preparar partida"><i data-lucide="door-open"></i><span>PARTIDA</span></button><button data-station="wardrobe" title="Tu coleccion"><i data-lucide="shirt"></i><span>ARMARIO</span></button><button data-station="pets" title="Mascotas"><i data-lucide="paw-print"></i><span>MASCOTAS</span></button><button data-station="shop" title="Tienda"><i data-lucide="store"></i><span>TIENDA</span></button><button data-station="npc" title="Hablar con Don Domi"><i data-lucide="message-circle"></i><span>DON DOMI</span></button><button data-station="ranking" title="Tus partidas"><i data-lucide="chart-no-axes-column"></i><span>HISTORIAL</span></button></nav>
       </section>
 
@@ -51,6 +59,35 @@
           <div id="shopTabs" class="shop-tabs" role="group" aria-label="Categorías de artículos"></div>
           <div class="shop-layout"><div class="shop-catalog"><div class="shop-catalog-heading"><h3 id="shopCategory">Personajes</h3><span id="shopCount" role="status"></span></div><div id="shopGrid" class="shop-grid"></div></div><aside id="shopDetail" class="shop-detail" aria-label="Probador del artículo"></aside></div>
           <p id="shopFeedback" class="shop-feedback" role="status" aria-live="polite"></p>
+        </div>
+      </section>
+
+      <section id="domiScreen" class="screen shop-screen domi-screen" aria-labelledby="domiTitle">
+        <div class="screen__panel shop-panel">
+          <header class="shop-heading">
+            <button id="domiBackButton" class="icon-button" title="Volver al local" aria-label="Volver al local"><i data-lucide="arrow-left"></i></button>
+            <div class="shop-heading-copy">
+              <p class="eyebrow">DOMI / EL DUEÑO DE LA CASA</p>
+              <h2 id="domiTitle">Don Domi</h2>
+              <p id="domiSubtitle">Consejos de combate, misiones exclusivas y estado de tu colección.</p>
+            </div>
+            <div class="shop-balance">
+              <small>TUS PUNTOS</small>
+              <span class="wallet"><i data-lucide="coins"></i><b id="domiBank">0</b><small>PT</small></span>
+            </div>
+          </header>
+          <div id="domiTabs" class="shop-tabs" role="group" aria-label="Categorías de Don Domi"></div>
+          <div class="shop-layout">
+            <div class="shop-catalog">
+              <div class="shop-catalog-heading">
+                <h3 id="domiCategory">Misiones</h3>
+                <span id="domiCount" role="status"></span>
+              </div>
+              <div id="domiGrid" class="shop-grid"></div>
+            </div>
+            <aside id="domiDetail" class="shop-detail" aria-label="Detalle de Don Domi"></aside>
+          </div>
+          <p id="domiFeedback" class="shop-feedback" role="status" aria-live="polite"></p>
         </div>
       </section>
 
@@ -259,8 +296,21 @@
             </select>
             <select id="mapSelect"><option value="diner">01 / Local DOMI</option><option value="kitchen">02 / Cocina industrial</option><option value="parking">03 / Estacionamiento</option><option value="snow">04 / Nevado</option><option value="desert">05 / Desierto</option><option value="football">06 / Cancha de futbol</option></select>
             <select id="modeSelect"><option value="survival">Supervivencia</option><option value="waves">8 oleadas</option><option value="rush">Duelo de 3 jefes</option></select>
-            <select id="companionSelect"><option value="none">Sin companero</option><option value="ketchup">Mini ketchup / Ataque</option><option value="drone">Dron delivery / Recoleccion</option></select>
-            <select id="accessorySelect"><option value="none">Sin accesorio</option><option value="headband">Vincha turbo</option><option value="shades">Anteojos</option><option value="crown">Corona</option></select>
+            <select id="companionSelect">
+              <option value="none">Sin compañero</option>
+              <option value="ketchup">Mini Ketchup / Ataque y Charcos</option>
+              <option value="drone">Dron Delivery / Imán y Rayos</option>
+              <option value="taco">Taco Guardián / Escudo y Embestida</option>
+              <option value="soda">Botellita Soda / Curación y Furia</option>
+              <option value="parrilla">Mini Parrilla / Fuego de Don Domi</option>
+            </select>
+            <select id="accessorySelect">
+              <option value="none">Sin accesorio</option>
+              <option value="headband">Vincha turbo</option>
+              <option value="shades">Anteojos</option>
+              <option value="crown">Corona</option>
+              <option value="chef_hat">Gorro de Chef</option>
+            </select>
           </div>
           <div>
             <h3><span>01</span> El protagonista</h3>
@@ -297,7 +347,65 @@
       <section id="optionsScreen" class="screen"><div class="screen__panel options-panel"><h2>Opciones</h2><label class="toggle-field">Musica<input id="musicToggle" type="checkbox"></label><label class="toggle-field">Efectos de sonido<input id="sfxToggle" type="checkbox"></label><label class="volume-field">Volumen<input id="volumeSlider" type="range" min="0" max="1" step="0.05" value="0.35"></label><div class="menu-actions"><button id="clearRankingButton" class="pixel-button pixel-button--secondary">Borrar ranking</button><button id="clearAchievementsButton" class="pixel-button pixel-button--secondary">Borrar logros</button><button id="optionsBackButton" class="pixel-button">Volver</button></div></div></section>
       <section id="skinsScreen" class="screen"><div class="screen__panel"><p class="eyebrow">EL EQUIPO DEL MOSTRADOR</p><h2>Fuera de carta.</h2><div id="skinsPreview" class="skins-preview"></div><div class="menu-actions"><button id="skinsBackButton" class="pixel-button">Volver</button></div></div></section>
 
-      <section id="pauseScreen" class="screen pause-screen"><div class="screen__panel pause-panel"><p class="eyebrow">PEDIDO EN ESPERA</p><h2>La cocina espera.</h2><p id="pauseGoal" class="pause-goal"></p><h3>Tu receta</h3><div id="buildList" class="build-list"></div><div class="menu-actions"><button id="resumeButton" class="pixel-button">Seguir cocinando</button><button id="abandonButton" class="pixel-button pixel-button--secondary">Terminar partida</button></div></div></section>
+      <section id="pauseScreen" class="screen pause-screen">
+        <div class="pause-layout">
+          <!-- Menú central como antes -->
+          <div class="screen__panel pause-panel">
+            <p class="eyebrow">PEDIDO EN ESPERA</p>
+            <h2>La cocina espera.</h2>
+            <p id="pauseGoal" class="pause-goal"></p>
+            <div class="menu-actions">
+              <button id="resumeButton" class="pixel-button pixel-button--green">SEGUIR COCINANDO <span aria-hidden="true">&#9654;</span></button>
+              <button id="abandonButton" class="pixel-button pixel-button--secondary">TERMINAR PARTIDA</button>
+            </div>
+          </div>
+
+          <!-- Al costado: Efectos con el mismo HUD del juego y Habilidades -->
+          <aside class="pause-sidebar">
+            <!-- Efectos con el mismo HUD del juego -->
+            <div class="pause-hud-card">
+              <div class="pause-hud-top">
+                <canvas id="pauseHudPortrait" width="40" height="40"></canvas>
+                <div class="pause-hud-names">
+                  <strong id="pauseHudSkinName">Pancho</strong>
+                  <span id="pauseHudWeaponName">Tenedor</span>
+                </div>
+                <span id="pauseHudTime" class="pause-hud-time">00:00</span>
+              </div>
+              <div class="pause-hud-bars">
+                <div class="pause-bar-group">
+                  <div class="pause-bar-label"><span>Vida</span><b id="pauseHpValue">100 / 100</b></div>
+                  <div class="meter"><div id="pauseHpFill" class="meter__fill meter__fill--hp"></div></div>
+                </div>
+              </div>
+              <div class="pause-buffs-block">
+                <span class="pause-buffs-label">EFECTOS ACTIVOS:</span>
+                <div id="pauseActiveBuffs" class="active-buffs pause-buffs-text"></div>
+              </div>
+              <div class="pause-stats-row">
+                <div><span>NV</span><b id="pauseLevelValue">1</b></div>
+                <div><span>KOs</span><b id="pauseKillsValue">0</b></div>
+                <div><span>PTS</span><b id="pauseScoreValue">0</b></div>
+                <div><span>COMBO</span><b id="pauseComboValue">x1</b></div>
+              </div>
+            </div>
+
+            <!-- Habilidades al costado -->
+            <div class="pause-abilities-card">
+              <div class="pause-tabs" role="tablist">
+                <button type="button" class="pause-tab is-active" id="pauseTabActives">ACTIVAS</button>
+                <button type="button" class="pause-tab" id="pauseTabPassives">PASIVAS</button>
+              </div>
+              <div id="pauseActivesView" class="pause-view">
+                <div id="pauseActivesList" class="pause-actives-list"></div>
+              </div>
+              <div id="pausePassivesView" class="pause-view" hidden>
+                <div id="buildList" class="pause-passives-list"></div>
+              </div>
+            </div>
+          </aside>
+        </div>
+      </section>
 
       <section id="gameOverScreen" class="screen">
         <div class="screen__panel gameOver-panel-enhanced">
@@ -341,7 +449,7 @@
         <div id="activeBuffs" class="active-buffs" aria-live="polite"></div>
       </div>
       <div id="runBar" class="run-bar" hidden><span id="runLocation">LOCAL DOMI</span><span id="comboCount" aria-live="polite">COMBO x1</span><span id="runDifficulty">PICANTE</span></div>
-      <div id="dashControl" class="dash-control" hidden><kbd class="pixel-key dash-key">ESPACIO</kbd><div class="dash-meter"><span id="dashLabel">LISTO / EMBESTI</span><div class="meter"><div id="dashFill" class="meter__fill"></div></div></div></div>
+      <button type="button" id="dashControl" class="dash-control" hidden title="Aceleron (Espacio)" aria-label="Usar aceleron"><i data-lucide="zap" aria-hidden="true"></i><span class="dash-meter"><strong>ACELERON</strong><span id="dashLabel">LISTO / EMBESTI</span><span class="meter"><span id="dashFill" class="meter__fill"></span></span></span><kbd class="pixel-key dash-key">ESPACIO</kbd></button>
       <aside id="comboMilestones" class="combo-milestones" hidden aria-label="Progresión del combo">
         <div class="combo-current"><i data-lucide="biceps-flexed" aria-hidden="true"></i><strong id="comboMultiplier">x1.00</strong><span id="comboChain">0 KOs</span></div>
         <div class="combo-steps"><span data-combo-step="10">x10</span><span data-combo-step="20">x20</span><span data-combo-step="30">x30</span></div>
@@ -351,7 +459,6 @@
       <div id="eventBanner" class="event-banner" hidden><span id="eventName"></span><b id="eventTime"></b></div>
 
       <div id="toast" class="toast" role="status" hidden></div>
-      <div id="bossAlert" class="boss-alert" role="status" aria-live="assertive" hidden>ALERTA / JEFE EN COCINA</div>
     </main>
 
     <script src="./node_modules/lucide/dist/umd/lucide.min.js"></script>

@@ -1,4 +1,4 @@
-import { login, register } from '../systems/accountSystem.js';
+import { login, register, guestLogin, resetPassword } from '../systems/accountSystem.js';
 
 export function bindAuth(game) {
   const form = document.querySelector('#authForm');
@@ -6,9 +6,13 @@ export function bindAuth(game) {
   const password = document.querySelector('#authPassword');
   const submit = document.querySelector('#authSubmit');
   const switchMode = document.querySelector('#authSwitch');
+  const guestBtn = document.querySelector('#authGuest');
+  const resetBtn = document.querySelector('#authReset');
   const toggle = document.querySelector('#authPasswordToggle');
   const error = document.querySelector('#authError');
   const capsLock = document.querySelector('#authCapsLock');
+  const tabLogin = document.querySelector('#tabAuthLogin');
+  const tabRegister = document.querySelector('#tabAuthRegister');
   let mode = 'login';
   let busy = false;
 
@@ -20,24 +24,66 @@ export function bindAuth(game) {
     capsLock.hidden = true;
   }
 
-  function renderMode() {
+  function setMode(newMode) {
+    mode = newMode;
     const signingUp = mode === 'register';
+    tabLogin?.classList.toggle('is-active', !signingUp);
+    tabRegister?.classList.toggle('is-active', signingUp);
     document.querySelector('#authTitle').textContent = signingUp ? 'Sumate al club.' : 'Entrar al local.';
     submit.textContent = signingUp ? 'CREAR CUENTA' : 'INICIAR SESIÓN';
-    switchMode.textContent = signingUp ? 'Ya tengo cuenta' : 'Crear una cuenta nueva';
+    switchMode.textContent = signingUp ? 'Ya tengo cuenta (Iniciar sesión)' : 'Crear una cuenta nueva';
     password.autocomplete = signingUp ? 'new-password' : 'current-password';
     document.querySelector('#authNameHint').hidden = !signingUp;
     document.querySelector('#authPasswordHint').hidden = !signingUp;
+    error.hidden = true;
   }
+
+  tabLogin?.addEventListener('click', () => { if (!busy) { setMode('login'); name.focus(); } });
+  tabRegister?.addEventListener('click', () => { if (!busy) { setMode('register'); name.focus(); } });
 
   switchMode.addEventListener('click', () => {
     if (busy) return;
-    mode = mode === 'login' ? 'register' : 'login';
-    error.hidden = true;
+    setMode(mode === 'login' ? 'register' : 'login');
     password.value = '';
     concealPassword();
-    renderMode();
     name.focus();
+  });
+
+  guestBtn?.addEventListener('click', (e) => {
+    e.preventDefault();
+    try {
+      guestLogin();
+      game.menu?.prepareAccount?.();
+      game.showScreen('lobbyScreen');
+      game.showToast?.('¡Bienvenido al local! Entraste como Invitado.');
+    } catch (err) {
+      console.error('Error entering guest mode:', err);
+      game.showScreen('lobbyScreen');
+    }
+  });
+
+  resetBtn?.addEventListener('click', async () => {
+    const username = name.value.trim();
+    if (!username) {
+      error.textContent = 'Escribí tu nombre de usuario arriba antes de restablecer clave.';
+      error.hidden = false;
+      name.focus();
+      return;
+    }
+    const newPass = prompt(`Ingresá una nueva contraseña para "${username}" (mínimo 6 caracteres):`);
+    if (!newPass) return;
+    if (newPass.length < 6) {
+      alert('La contraseña debe tener al menos 6 caracteres.');
+      return;
+    }
+    try {
+      await resetPassword(username, newPass);
+      alert(`¡Contraseña restablecida con éxito para "${username}"! Ingresando al juego...`);
+      game.menu.prepareAccount();
+      game.showScreen('lobbyScreen');
+    } catch (err) {
+      alert(err.message || 'No se pudo restablecer la contraseña.');
+    }
   });
 
   toggle.addEventListener('click', () => {
@@ -62,6 +108,7 @@ export function bindAuth(game) {
     error.hidden = true;
     form.setAttribute('aria-busy', 'true');
     submit.disabled = switchMode.disabled = toggle.disabled = true;
+    if (guestBtn) guestBtn.disabled = true;
     name.readOnly = password.readOnly = true;
     submit.textContent = mode === 'login' ? 'ENTRANDO…' : 'CREANDO CUENTA…';
     try {
@@ -78,8 +125,9 @@ export function bindAuth(game) {
       busy = false;
       form.setAttribute('aria-busy', 'false');
       submit.disabled = switchMode.disabled = toggle.disabled = false;
+      if (guestBtn) guestBtn.disabled = false;
       name.readOnly = password.readOnly = false;
-      renderMode();
+      setMode(mode);
     }
   });
 }

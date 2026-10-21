@@ -1,9 +1,9 @@
 import {Projectile} from '../entities/Projectile.js';
 import {drawFood} from '../core/art.js';
 export const primes=[
-  {key:'q',level:10,name:'Rafaga 360',cooldown:22,symbol:'✳'},
-  {key:'e',level:20,name:'Doble señuelo',cooldown:38,symbol:'◈'},
-  {key:'r',level:30,name:'Campana blindada',cooldown:52,symbol:'⬡'},
+  {key:'q',level:5,name:'Rafaga 360',cooldown:18,symbol:'✳'},
+  {key:'e',level:10,name:'Doble señuelo',cooldown:28,symbol:'◈'},
+  {key:'r',level:15,name:'Campana blindada',cooldown:40,symbol:'⬡'},
 ];
 export function updatePrimes(state,dt){
   for(const prime of primes)state.primeCooldowns[prime.key]=Math.max(0,(state.primeCooldowns[prime.key]||0)-dt);
