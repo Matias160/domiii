@@ -2,6 +2,8 @@ import { drawFood } from '../core/art.js';
 import { Projectile } from './Projectile.js';
 import { damageEnemy, burst, impactRing } from '../systems/effectSystem.js';
 
+const companionBuffer = [];
+
 export const companions = {
   none: { name: 'Sin companero', detail: 'Solo contra el menu.' },
   ketchup: { name: 'Mini ketchup', detail: 'Dispara salsa y deja charcos pegajosos que frenan enemigos.' },
@@ -43,7 +45,12 @@ export class Companion {
       this.zapCooldown -= delta;
       if (this.zapCooldown <= 0) {
         let nearest = null, minDist = 220;
-        for (const enemy of state.enemies) {
+        const candidates = (state.spatialGrid && state.spatialGrid.totalEntities > 0)
+          ? state.spatialGrid.queryRadius(this.x, this.y, 220, companionBuffer)
+          : state.enemies;
+        const cLen = candidates.length;
+        for (let i = 0; i < cLen; i++) {
+          const enemy = candidates[i];
           if (enemy.hp > 0 && enemy.spawnTime <= 0) {
             const d = Math.hypot(enemy.x - this.x, enemy.y - this.y);
             if (d < minDist) { minDist = d; nearest = enemy; }
@@ -71,7 +78,12 @@ export class Companion {
       this.cooldown -= delta;
       if (this.cooldown <= 0) {
         let target = null, nearest = 380;
-        for (const enemy of state.enemies) {
+        const candidates = (state.spatialGrid && state.spatialGrid.totalEntities > 0)
+          ? state.spatialGrid.queryRadius(this.x, this.y, 380, companionBuffer)
+          : state.enemies;
+        const cLen = candidates.length;
+        for (let i = 0; i < cLen; i++) {
+          const enemy = candidates[i];
           const distance = Math.hypot(enemy.x - this.x, enemy.y - this.y);
           if (enemy.hp > 0 && enemy.spawnTime <= 0 && distance < nearest) { target = enemy; nearest = distance; }
         }
@@ -114,7 +126,12 @@ export class Companion {
       this.tacoDashTimer -= delta;
       if (this.tacoDashTimer <= 0) {
         let target = null, minDist = 210;
-        for (const enemy of state.enemies) {
+        const candidates = (state.spatialGrid && state.spatialGrid.totalEntities > 0)
+          ? state.spatialGrid.queryRadius(this.x, this.y, 210, companionBuffer)
+          : state.enemies;
+        const cLen = candidates.length;
+        for (let i = 0; i < cLen; i++) {
+          const enemy = candidates[i];
           if (enemy.hp > 0 && enemy.spawnTime <= 0) {
             const d = Math.hypot(enemy.x - this.x, enemy.y - this.y);
             if (d < minDist) { minDist = d; target = enemy; }
@@ -150,7 +167,12 @@ export class Companion {
       this.cooldown -= delta;
       if (this.cooldown <= 0) {
         let target = null, nearest = 340;
-        for (const enemy of state.enemies) {
+        const candidates = (state.spatialGrid && state.spatialGrid.totalEntities > 0)
+          ? state.spatialGrid.queryRadius(this.x, this.y, 340, companionBuffer)
+          : state.enemies;
+        const cLen = candidates.length;
+        for (let i = 0; i < cLen; i++) {
+          const enemy = candidates[i];
           const d = Math.hypot(enemy.x - this.x, enemy.y - this.y);
           if (enemy.hp > 0 && enemy.spawnTime <= 0 && d < nearest) { target = enemy; nearest = d; }
         }
@@ -173,7 +195,12 @@ export class Companion {
       this.cooldown -= delta;
       if (this.cooldown <= 0) {
         let target = null, nearest = 340;
-        for (const enemy of state.enemies) {
+        const candidates = (state.spatialGrid && state.spatialGrid.totalEntities > 0)
+          ? state.spatialGrid.queryRadius(this.x, this.y, 340, companionBuffer)
+          : state.enemies;
+        const cLen = candidates.length;
+        for (let i = 0; i < cLen; i++) {
+          const enemy = candidates[i];
           const d = Math.hypot(enemy.x - this.x, enemy.y - this.y);
           if (enemy.hp > 0 && enemy.spawnTime <= 0 && d < nearest) { target = enemy; nearest = d; }
         }
@@ -196,7 +223,12 @@ export class Companion {
         this.puddleTimer = 4.5;
         impactRing(state, this.x, this.y, '#ff4500');
         burst(state, this.x, this.y, '#ffaa00', 16, 120);
-        for (const enemy of state.enemies) {
+        const nearTargets = (state.spatialGrid && state.spatialGrid.totalEntities > 0)
+          ? state.spatialGrid.queryRadius(this.x, this.y, 140, companionBuffer)
+          : state.enemies;
+        const nLen = nearTargets.length;
+        for (let i = 0; i < nLen; i++) {
+          const enemy = nearTargets[i];
           if (enemy.hp > 0 && enemy.spawnTime <= 0 && Math.hypot(enemy.x - this.x, enemy.y - this.y) < 140) {
             damageEnemy(state, enemy, 35 + p.level * 3, 'dash');
           }

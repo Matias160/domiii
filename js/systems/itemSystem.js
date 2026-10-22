@@ -50,8 +50,16 @@ function applyItem(state,item){
     player.buffs.fireRateMultiplier=Math.min(player.buffs.fireRateMultiplier,1/(1+type.value*power));
     player.buffs.fireTime=Math.max(player.buffs.fireTime,duration);
   } else if(type.kind==='blast'){
-    for(const enemy of state.enemies)if(distance(item,enemy)<155*power)damageEnemy(state,enemy,type.value*power);
-    state.rings?.push({x:item.x,y:item.y,radius:155*power,life:.6,color:'#ff8860'});
+    const blastRadius = 155 * power;
+    const candidates = (state.spatialGrid && state.spatialGrid.totalEntities > 0)
+      ? state.spatialGrid.queryRadius(item.x, item.y, blastRadius)
+      : state.enemies;
+    const cLen = candidates.length;
+    for (let i = 0; i < cLen; i++) {
+      const enemy = candidates[i];
+      if (distance(item, enemy) < blastRadius) damageEnemy(state, enemy, type.value * power);
+    }
+    state.rings?.push({x:item.x,y:item.y,radius:blastRadius,life:.6,color:'#ff8860'});
   }
   state.score+=Math.round(15*power);
   state.pickups[type.id]=(state.pickups[type.id]||0)+1;
