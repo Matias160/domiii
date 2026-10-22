@@ -4,6 +4,8 @@ import { skins } from '../data/skins.js';
 import { weapons } from '../data/weapons.js';
 import { difficulties } from '../systems/enemySystem.js';
 import { initializeDirector } from '../systems/directorSystem.js';
+import { SpatialHashGrid } from './SpatialHashGrid.js';
+import { SkillController } from '../skills/SkillSystem.js';
 
 export function createRunState(setup = {}, audio = null) {
   const world = { width: 1920, height: 1080 };
@@ -14,6 +16,8 @@ export function createRunState(setup = {}, audio = null) {
     x: 960,
     y: 540
   });
+  player.skills = new SkillController(player);
+
   const state = {
     player, audio,
     world,
@@ -26,6 +30,7 @@ export function createRunState(setup = {}, audio = null) {
     enemies: [], projectiles: [], enemyProjectiles: [], items: [], hazards: [], bossZones: [],
     particles: [], floaters: [], rings: [], dashGhosts: [], manualAim: false, aimPoint: null, target: null,
     bossIntro: null,
+    spatialGrid: new SpatialHashGrid(120, 120, world.width, world.height),
     itemTimer: 4, pickups: {}, score: 0, time: 0, kills: 0, spawnTimer: .3,
     shake: 0, combo: 0, comboTime: 0, pendingLevels: 0, bossesKilled: 0, distance: 0,
   };

@@ -1,4 +1,10 @@
 import { drawFood } from "../core/art.js";
+import { createBossBehaviorTree } from "../ai/trees/enemyBehavior.js";
+import { SkillController } from "../skills/SkillSystem.js";
+
+// Reusable static buffer for boid separation queries
+const boidBuffer = [];
+
 export class Enemy {
   constructor({ x, y, type, difficulty }) {
     this.x = x;
@@ -33,6 +39,13 @@ export class Enemy {
     this.roleTimer = type.role === 'healer' ? 2.2 : type.role === 'summoner' ? 4 : 0;
     this.flockAngle = Math.random() * Math.PI * 2;
     this.flockTimer = Math.random() * 2;
+
+    // AI & Skills architecture
+    this.skills = new SkillController(this);
+    this.blackboard = {};
+    if (this.isBoss) {
+      this.behaviorTree = createBossBehaviorTree();
+    }
   }
 
   update(delta, player, state) {
@@ -113,12 +126,17 @@ export class Enemy {
       moveY += tangentY * Math.sin(this.flockAngle) * 0.42;
     }
 
-    // Separación entre enemigos cercanos (Anti-clumping / Boids separation)
-    if (state && state.enemies) {
+    // Separación entre enemigos cercanos (Anti-clumping / Boids separation O(1) con SpatialGrid)
+    if (state) {
       let sepX = 0, sepY = 0, neighbors = 0;
       const minDistance = this.radius * 2.2;
-      for (let i = 0; i < state.enemies.length; i++) {
-        const other = state.enemies[i];
+      const candidates = state.spatialGrid
+        ? state.spatialGrid.queryRadius(this.x, this.y, minDistance, boidBuffer)
+        : (state.enemies || []);
+      const candLen = candidates.length;
+
+      for (let i = 0; i < candLen; i++) {
+        const other = candidates[i];
         if (other === this || other.hp <= 0) continue;
         const distSq = (this.x - other.x) * (this.x - other.x) + (this.y - other.y) * (this.y - other.y);
         if (distSq < minDistance * minDistance && distSq > 0.01) {

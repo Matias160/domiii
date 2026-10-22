@@ -14,7 +14,7 @@ test('lobby pointer mapping ignores letterbox space and preserves world position
 });
 
 test('manual aim fires toward the cursor without requiring an enemy',()=>{
-  const state=createRunState();state.manualAim=true;state.aimPoint={x:480,y:130};
+  const state=createRunState();state.manualAim=true;state.aimPoint={x:state.player.x,y:state.player.y-140};
   updateProjectiles(state,0,{width:960,height:540});
   assert.equal(state.projectiles.length,1);
   assert.ok(state.projectiles[0].vy<0);

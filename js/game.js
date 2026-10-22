@@ -31,8 +31,10 @@ import {icon,refreshIcons,abilityIcons} from './ui/icons.js';
 import {canvasPoint} from './core/presentation.js';
 import {drawCombatFeedback, drawScreenCombatOverlays} from './ui/combatFeedback.js';
 import {drawFloatingText} from './ui/floatingText.js';
-import {evolveWeapon} from './data/weaponEvolutions.js';
-import {burst} from './systems/effectSystem.js';
+import { evolveWeapon } from './data/weaponEvolutions.js';
+import { burst } from './systems/effectSystem.js';
+import { modLoader } from './mods/ModLoader.js';
+import { FrostbiteMod } from './mods/sampleFrostMod.js';
 
 export class Game {
   constructor(canvas) {
@@ -44,7 +46,9 @@ export class Game {
     this.menu = new MenuScreen(this);
     this.gameOver = new GameOverScreen(this);
     this.lobby=new Lobby(this);this.shop=new Shop(this);this.domi=new DomiScreen(this);this.choice=null;
+    this.renderSortBuffer = [];
     bindAuth(this);
+    modLoader.loadMod(FrostbiteMod);
     document.querySelector('#logoutButton').addEventListener('click',()=>{logout();this.showScreen('authScreen');});
     this.lastSetup = null;
     this.state = null;
@@ -340,7 +344,22 @@ export class Game {
   update(delta) {
     const state = this.state;
     state.time += delta;
+    state.delta = delta;
     state.shake = Math.max(0, state.shake - delta);
+
+    // Rebuild Spatial Hash Grid for O(1) broadphase queries
+    if (state.spatialGrid) {
+      state.spatialGrid.clear();
+      const enemyLen = state.enemies.length;
+      for (let i = 0; i < enemyLen; i++) {
+        const e = state.enemies[i];
+        if (e.hp > 0) state.spatialGrid.insert(e);
+      }
+    }
+
+    // Update Player modular skills
+    state.player.skills?.update(delta, state);
+
     updateDirector(state, delta, this.canvas);
     updatePrimes(state,delta);updateMap(state,delta);
     if (state.bossIntro) {
@@ -734,12 +753,23 @@ export class Game {
       this.ctx.globalAlpha=1;
       this.ctx.strokeStyle=(shot.color||'#ff6573')+'99';this.ctx.lineWidth=shot.radius;
       this.ctx.beginPath();this.ctx.moveTo(shot.x-shot.vx/speed*18,shot.y-shot.vy/speed*18);this.ctx.lineTo(shot.x,shot.y);this.ctx.stroke();
-      this.ctx.fillStyle=shot.color||'#ff6874';this.ctx.shadowColor=shot.color||'#ff6874';this.ctx.shadowBlur=10;
-      this.ctx.beginPath();this.ctx.arc(shot.x,shot.y,shot.radius,0,Math.PI*2);this.ctx.fill();this.ctx.shadowBlur=0;
+      this.ctx.fillStyle=shot.color||'#ff6874';
+      this.ctx.beginPath();this.ctx.arc(shot.x,shot.y,shot.radius,0,Math.PI*2);this.ctx.fill();
       this.ctx.fillStyle='#fff0d8';this.ctx.beginPath();this.ctx.arc(shot.x,shot.y,shot.radius*.4,0,Math.PI*2);this.ctx.fill();
     }
     this.ctx.restore();
-    [...state.enemies,state.player,state.companion].sort((a,b)=>a.y-b.y).forEach(actor=>actor.draw(this.ctx,state.time));
+
+    // Reusable sort buffer without allocation
+    this.renderSortBuffer.length = 0;
+    const enemyLen = state.enemies.length;
+    for (let i = 0; i < enemyLen; i++) this.renderSortBuffer.push(state.enemies[i]);
+    this.renderSortBuffer.push(state.player);
+    if (state.companion) this.renderSortBuffer.push(state.companion);
+    this.renderSortBuffer.sort((a,b)=>a.y-b.y);
+    const actorLen = this.renderSortBuffer.length;
+    for (let i = 0; i < actorLen; i++) {
+      this.renderSortBuffer[i].draw(this.ctx, state.time);
+    }
     drawPrimeEffects(this.ctx,state);
     this.ctx.save();this.ctx.globalCompositeOperation='lighter';
     for (const p of state.particles) {

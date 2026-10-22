@@ -1,5 +1,8 @@
 import { damageEnemy, burst, impactRing } from './effectSystem.js';
 import { scoreMultiplier } from './directorSystem.js';
+import { gameEvents } from '../core/EventBus.js';
+
+const explosionCandidates = [];
 
 export function spawnThematicEnemyDeath(state, enemy) {
   if (!state.particles) return;
@@ -124,9 +127,17 @@ export function resolveDeaths(state, onLevelUp) {
     }
     state.audio?.play(enemy.isBoss ? 'boss' : 'kill');
 
+    // EventBus hook: onEnemyKilled for mods and achievements
+    gameEvents.emit('onEnemyKilled', { enemy, state, scoreGained: gained });
+
     if (state.player.explosionDamage > 0) {
       state.rings?.push({ x: enemy.x, y: enemy.y, radius: 72, life: .5, color: '#ff9965' });
-      for (const other of state.enemies) {
+      const nearbyEnemies = (state.spatialGrid && state.spatialGrid.totalEntities > 0)
+        ? state.spatialGrid.queryRadius(enemy.x, enemy.y, 72, explosionCandidates)
+        : state.enemies;
+      const nearLen = nearbyEnemies.length;
+      for (let n = 0; n < nearLen; n++) {
+        const other = nearbyEnemies[n];
         if (other !== enemy && other.hp > 0 && Math.hypot(other.x - enemy.x, other.y - enemy.y) < 72) {
           damageEnemy(state, other, state.player.explosionDamage);
           if (other.hp <= 0) queue.push(other);
@@ -146,7 +157,16 @@ export function resolveDeaths(state, onLevelUp) {
       onLevelUp(true);
     }
   }
-  state.enemies = state.enemies.filter(enemy => !resolved.has(enemy));
+
+  // In-place enemy array compaction (zero GC)
+  let aliveEnemies = 0;
+  for (let i = 0; i < state.enemies.length; i++) {
+    const e = state.enemies[i];
+    if (!resolved.has(e) && e.hp > 0) {
+      state.enemies[aliveEnemies++] = e;
+    }
+  }
+  state.enemies.length = aliveEnemies;
 }
 
 export function applyComboReward(state) {

@@ -1,19 +1,77 @@
-// Spawn partículas con velocidad y tamaño variables
+import { ObjectPool } from '../core/ObjectPool.js';
+import { gameEvents } from '../core/EventBus.js';
+
+// Pre-allocated object pools for high-frequency effects
+export const particlePool = new ObjectPool(
+  () => ({ x: 0, y: 0, vx: 0, vy: 0, life: 0, maxLife: 0, size: 3, color: '#fff', palette: null, drag: 0.92, gravity: 45 }),
+  (p) => { p.life = 0; p.palette = null; },
+  512,
+  2048
+);
+
+export const floaterPool = new ObjectPool(
+  () => ({ x: 0, y: 0, text: '', life: 0, maxLife: 0, color: '#fff', scale: 1, kind: 'normal' }),
+  (f) => { f.life = 0; },
+  128,
+  512
+);
+
+export const ringPool = new ObjectPool(
+  () => ({ x: 0, y: 0, radius: 20, life: 0.5, maxLife: 0.5, color: '#fff' }),
+  (r) => { r.life = 0; },
+  64,
+  256
+);
+
+// Spawn partículas con velocidad y tamaño variables utilizando el ObjectPool
 export function burst(state, x, y, color, count = 8, power = 100) {
   if (!state.particles) return;
-  for (let i = 0; i < count && state.particles.length < 800; i++) {
-    const angle = Math.random() * Math.PI * 2, speed = power * (.3 + Math.random() * .7);
-    const size = 2 + Math.random() * 4;
-    const life=.25+Math.random()*.4;
-    state.particles.push({x,y,vx:Math.cos(angle)*speed,vy:Math.sin(angle)*speed,life,maxLife:life,color,size,palette:['#fffbe8',color,'#ff8a3d','#ff3535'],drag:.92,gravity:45});
+  const currentCount = state.particles.length;
+  const maxAllowed = 800;
+  const toSpawn = Math.min(count, maxAllowed - currentCount);
+  if (toSpawn <= 0) return;
+
+  const defaultPalette = ['#fffbe8', color, '#ff8a3d', '#ff3535'];
+  for (let i = 0; i < toSpawn; i++) {
+    const angle = Math.random() * Math.PI * 2;
+    const speed = power * (0.3 + Math.random() * 0.7);
+    const life = 0.25 + Math.random() * 0.4;
+    const p = particlePool.acquire();
+    p.x = x;
+    p.y = y;
+    p.vx = Math.cos(angle) * speed;
+    p.vy = Math.sin(angle) * speed;
+    p.life = life;
+    p.maxLife = life;
+    p.size = 2 + Math.random() * 4;
+    p.color = color;
+    p.palette = defaultPalette;
+    p.drag = 0.92;
+    p.gravity = 45;
+    state.particles.push(p);
   }
 }
 
-export function explosionBurst(state,x,y,color='#ff7048',count=26,power=180){
-  burst(state,x,y,color,count,power);
-  for(let i=0;i<9;i++){
-    const angle=Math.random()*Math.PI*2,speed=20+Math.random()*45,life=.65+Math.random()*.55;
-    state.particles.push({x:x+(Math.random()-.5)*18,y:y+(Math.random()-.5)*12,vx:Math.cos(angle)*speed,vy:-25+Math.sin(angle)*speed*.35,life,maxLife:life,color:'#697078',size:5+Math.random()*7,palette:['#ffd487','#8b6d63','#596169','#29333c'],drag:.965,gravity:-10});
+export function explosionBurst(state, x, y, color = '#ff7048', count = 26, power = 180) {
+  burst(state, x, y, color, count, power);
+  const smokePalette = ['#ffd487', '#8b6d63', '#596169', '#29333c'];
+  for (let i = 0; i < 9 && state.particles.length < 800; i++) {
+    const angle = Math.random() * Math.PI * 2;
+    const speed = 20 + Math.random() * 45;
+    const life = 0.65 + Math.random() * 0.55;
+    const p = particlePool.acquire();
+    p.x = x + (Math.random() - 0.5) * 18;
+    p.y = y + (Math.random() - 0.5) * 12;
+    p.vx = Math.cos(angle) * speed;
+    p.vy = -25 + Math.sin(angle) * speed * 0.35;
+    p.life = life;
+    p.maxLife = life;
+    p.color = '#697078';
+    p.size = 5 + Math.random() * 7;
+    p.palette = smokePalette;
+    p.drag = 0.965;
+    p.gravity = -10;
+    state.particles.push(p);
   }
 }
 
@@ -21,15 +79,38 @@ export function explosionBurst(state,x,y,color='#ff7048',count=26,power=180){
 export function critBurst(state, x, y) {
   if (!state.particles) return;
   const colors = ['#fff7a0', '#ffe54d', '#ffffff', '#ffd700'];
-  for (let i = 0; i < 16; i++) {
-    const angle = (i / 16) * Math.PI * 2, speed = 90 + Math.random() * 160;
-    const life=.4+Math.random()*.3,color=colors[i%colors.length];state.particles.push({x,y,vx:Math.cos(angle)*speed,vy:Math.sin(angle)*speed,life,maxLife:life,color,size:3+Math.random()*4,palette:['#ffffff',color,'#ff9c33','#4b525b'],drag:.98,gravity:38});
+  for (let i = 0; i < 16 && state.particles.length < 800; i++) {
+    const angle = (i / 16) * Math.PI * 2;
+    const speed = 90 + Math.random() * 160;
+    const life = 0.4 + Math.random() * 0.3;
+    const color = colors[i % colors.length];
+    const p = particlePool.acquire();
+    p.x = x;
+    p.y = y;
+    p.vx = Math.cos(angle) * speed;
+    p.vy = Math.sin(angle) * speed;
+    p.life = life;
+    p.maxLife = life;
+    p.color = color;
+    p.size = 3 + Math.random() * 4;
+    p.palette = ['#ffffff', color, '#ff9c33', '#4b525b'];
+    p.drag = 0.98;
+    p.gravity = 38;
+    state.particles.push(p);
   }
 }
 
 // Onda de impacto visual al golpear
 export function impactRing(state, x, y, color = '#ffffff88') {
-  state.rings?.push({ x, y, radius: 32, life: .38, maxLife:.38, color });
+  if (!state.rings || state.rings.length >= 100) return;
+  const r = ringPool.acquire();
+  r.x = x;
+  r.y = y;
+  r.radius = 32;
+  r.life = 0.38;
+  r.maxLife = 0.38;
+  r.color = color;
+  state.rings.push(r);
 }
 
 // Colores de floaters según tipo de daño
@@ -45,48 +126,70 @@ const DAMAGE_COLORS = {
 
 export function damageEnemy(state, enemy, damage, type = 'normal') {
   if (enemy.hp <= 0 || enemy.spawnTime > 0) return;
-  damage /= enemy.armor || 1;
-  // Crítico: daño alto o aleatorio 10%
-  const isCrit = damage > 60 || Math.random() < 0.10;
+
+  // EventBus hook: beforeEnemyDamage allows mods or skills to modify incoming damage
+  const beforeEvent = gameEvents.emit('beforeEnemyDamage', { state, enemy, damage, type });
+  if (beforeEvent.cancelled) return;
+  damage = beforeEvent.damage;
+
+  damage /= (enemy.armor || 1);
+  const isCrit = type === 'crit' || damage > 60 || (state.running && Math.random() < 0.10);
   const finalDamage = isCrit ? damage * 1.4 : damage;
   enemy.hp -= finalDamage;
-  enemy.hitFlash = isCrit ? .22 : .12;
-  if(isCrit)state.shake=Math.max(state.shake||0,.12);
+  enemy.hitFlash = isCrit ? 0.22 : 0.12;
+  if (isCrit) state.shake = Math.max(state.shake || 0, 0.12);
 
   if (state.floaters && state.floaters.length < 90) {
     const color = isCrit ? DAMAGE_COLORS.crit : (DAMAGE_COLORS[type] || DAMAGE_COLORS.normal);
-    state.floaters.push({
-      x: enemy.x + (Math.random() - .5) * 18,
-      y: enemy.y - 22,
-      text: isCrit ? `✦${Math.ceil(finalDamage)}` : String(Math.ceil(finalDamage)),
-      life: isCrit ? .95 : .65,
-      color,
-      scale: isCrit ? 1.65 : 1,
-      kind: isCrit ? 'crit' : type,
-    });
+    const floater = floaterPool.acquire();
+    floater.x = enemy.x + (Math.random() - 0.5) * 18;
+    floater.y = enemy.y - 22;
+    floater.text = isCrit ? `✦${Math.ceil(finalDamage)}` : String(Math.ceil(finalDamage));
+    floater.life = isCrit ? 0.95 : 0.65;
+    floater.maxLife = floater.life;
+    floater.color = color;
+    floater.scale = isCrit ? 1.65 : 1;
+    floater.kind = isCrit ? 'crit' : type;
+    state.floaters.push(floater);
   }
 
   const particleColor = isCrit ? '#fff700' : (DAMAGE_COLORS[type] || '#ffd468');
   burst(state, enemy.x, enemy.y, particleColor, isCrit ? 30 : 20, isCrit ? 170 : 115);
-  if (isCrit) { critBurst(state, enemy.x, enemy.y); impactRing(state, enemy.x, enemy.y, '#ffe500aa'); }
-  else impactRing(state, enemy.x, enemy.y, particleColor + '88');
+  if (isCrit) {
+    critBurst(state, enemy.x, enemy.y);
+    impactRing(state, enemy.x, enemy.y, '#ffe500aa');
+  } else {
+    impactRing(state, enemy.x, enemy.y, particleColor + '88');
+  }
+
+  // EventBus hook: onEnemyDamage
+  gameEvents.emit('onEnemyDamage', { state, enemy, damage: finalDamage, isCrit, type });
 }
 
 export function updateEffects(state, delta) {
   const player = state.player;
   state.dashGhosts ||= [];
-  state.dashGhosts = state.dashGhosts.filter(ghost => ghost.life > delta);
-  for (const ghost of state.dashGhosts) ghost.life -= delta;
-  if (player.dashTime > 0) state.dashGhosts.push({ x: player.x, y: player.y, life: .18 });
+
+  // 1. Dash ghosts update with in-place compaction
+  let ghostAlive = 0;
+  for (let i = 0; i < state.dashGhosts.length; i++) {
+    const ghost = state.dashGhosts[i];
+    ghost.life -= delta;
+    if (ghost.life > 0) {
+      state.dashGhosts[ghostAlive++] = ghost;
+    }
+  }
+  state.dashGhosts.length = ghostAlive;
+  if (player.dashTime > 0) state.dashGhosts.push({ x: player.x, y: player.y, life: 0.18 });
+
   state.comboTime = Math.max(0, state.comboTime - delta);
   if (state.comboTime <= 0) state.combo = 0;
-  
-  if (state.particles.length > 450) {
-    state.particles = state.particles.slice(state.particles.length - 450);
-  }
+
+  // 2. High-performance Particles Update with ObjectPool and in-place compaction (Zero GC)
   const dragFactor = Math.pow(0.92, delta * 60);
-  const activeParticles = [];
-  for (let i = 0; i < state.particles.length; i++) {
+  let pAlive = 0;
+  const pLen = state.particles.length;
+  for (let i = 0; i < pLen; i++) {
     const p = state.particles[i];
     p.life -= delta;
     if (p.life > 0) {
@@ -96,26 +199,92 @@ export function updateEffects(state, delta) {
       p.vx *= drag;
       p.vy *= drag;
       p.vy += (p.gravity ?? 45) * delta;
-      activeParticles.push(p);
+      state.particles[pAlive++] = p;
+    } else {
+      particlePool.release(p);
     }
   }
-  state.particles = activeParticles;
-  state.floaters = state.floaters.filter(p => p.life > 0);
-  for (const p of state.floaters) { p.maxLife ??= p.life;p.life -= delta; p.y -= delta * (p.scale > 1 ? 55 : 38); }
-  state.rings = state.rings.filter(r => r.life > 0);
-  for (const ring of state.rings) { ring.maxLife ??= ring.life; ring.life -= delta; }
+  state.particles.length = pAlive;
+
+  // 3. Floaters Update with in-place compaction
+  let fAlive = 0;
+  const fLen = state.floaters.length;
+  for (let i = 0; i < fLen; i++) {
+    const p = state.floaters[i];
+    p.maxLife ??= p.life;
+    p.life -= delta;
+    if (p.life > 0) {
+      p.y -= delta * (p.scale > 1 ? 55 : 38);
+      state.floaters[fAlive++] = p;
+    } else {
+      floaterPool.release(p);
+    }
+  }
+  state.floaters.length = fAlive;
+
+  // 4. Rings Update with in-place compaction
+  let rAlive = 0;
+  const rLen = state.rings.length;
+  for (let i = 0; i < rLen; i++) {
+    const ring = state.rings[i];
+    ring.maxLife ??= ring.life;
+    ring.life -= delta;
+    if (ring.life > 0) {
+      state.rings[rAlive++] = ring;
+    } else {
+      ringPool.release(ring);
+    }
+  }
+  state.rings.length = rAlive;
+
   if (player.dashTime > 0) burst(state, player.x - player.facing.x * 15, player.y, '#86e3bf', 2, 30);
 
-  // Rising energy pixels make temporary states readable around the character.
-  const auraColor=player.comboFeverTime>0?'#ff5d9e':player.buffs.fireTime>0?'#ffd75f':player.buffs.speedTime>0?'#72f5e1':player.buffs.damageTime>0?'#ff936e':null;
-  if(auraColor){state.auraParticleClock=(state.auraParticleClock||0)-delta;if(state.auraParticleClock<=0){state.auraParticleClock=.075;for(let i=0;i<2;i++){const life=.55+Math.random()*.35;state.particles.push({x:player.x+(Math.random()-.5)*38,y:player.y+22,vx:(Math.random()-.5)*18,vy:-45-Math.random()*35,life,maxLife:life,color:auraColor,size:2+Math.random()*3,palette:['#ffffff',auraColor,auraColor,'#23343b'],drag:.99,gravity:-8});}}}
+  // Rising energy pixels around character
+  const auraColor = player.comboFeverTime > 0 ? '#ff5d9e' :
+                    player.buffs.fireTime > 0 ? '#ffd75f' :
+                    player.buffs.speedTime > 0 ? '#72f5e1' :
+                    player.buffs.damageTime > 0 ? '#ff936e' : null;
+  if (auraColor) {
+    state.auraParticleClock = (state.auraParticleClock || 0) - delta;
+    if (state.auraParticleClock <= 0) {
+      state.auraParticleClock = 0.075;
+      for (let i = 0; i < 2; i++) {
+        const life = 0.55 + Math.random() * 0.35;
+        const p = particlePool.acquire();
+        p.x = player.x + (Math.random() - 0.5) * 38;
+        p.y = player.y + 22;
+        p.vx = (Math.random() - 0.5) * 18;
+        p.vy = -45 - Math.random() * 35;
+        p.life = life;
+        p.maxLife = life;
+        p.color = auraColor;
+        p.size = 2 + Math.random() * 3;
+        p.palette = ['#ffffff', auraColor, auraColor, '#23343b'];
+        p.drag = 0.99;
+        p.gravity = -8;
+        state.particles.push(p);
+      }
+    }
+  }
 
   // Partículas orbitales de aura
   if (player.auraLevel > 0) {
-    const t = state.time * 2.5;
+    const t = (state.time || 0) * 2.5;
     for (let i = 0; i < player.auraLevel; i++) {
       const a = t + (i / player.auraLevel) * Math.PI * 2;
-      state.particles.push({ x: player.x + Math.cos(a) * 108, y: player.y + Math.sin(a) * 108, vx: -Math.sin(a) * 22, vy: Math.cos(a) * 22, life: .22,maxLife:.22, color: '#86e3bf', size: 3,palette:['#eafff6','#86e3bf','#2b6d61'] });
+      const p = particlePool.acquire();
+      p.x = player.x + Math.cos(a) * 108;
+      p.y = player.y + Math.sin(a) * 108;
+      p.vx = -Math.sin(a) * 22;
+      p.vy = Math.cos(a) * 22;
+      p.life = 0.22;
+      p.maxLife = 0.22;
+      p.color = '#86e3bf';
+      p.size = 3;
+      p.palette = ['#eafff6', '#86e3bf', '#2b6d61'];
+      p.drag = 0.92;
+      p.gravity = 0;
+      state.particles.push(p);
     }
   }
 
@@ -123,12 +292,13 @@ export function updateEffects(state, delta) {
     player.rainTimer -= delta;
     if (player.rainTimer <= 0 && state.enemies.some(e => e.hp > 0 && e.spawnTime <= 0)) {
       player.rainTimer = 5;
-      const targets = state.enemies.filter(e => e.hp > 0 && e.spawnTime <= 0)
+      const targets = state.enemies
+        .filter(e => e.hp > 0 && e.spawnTime <= 0)
         .sort((a, b) => Math.hypot(a.x - player.x, a.y - player.y) - Math.hypot(b.x - player.x, b.y - player.y))
         .slice(0, 2 + player.mustardLevel);
       for (const enemy of targets) {
         damageEnemy(state, enemy, 28 * player.mustardLevel, 'fire');
-        state.rings.push({ x: enemy.x, y: enemy.y, radius: 48, life: .6, color: '#ffcf4a' });
+        impactRing(state, enemy.x, enemy.y, '#ffcf4a');
         burst(state, enemy.x, enemy.y, '#ffcf4a', 18, 140);
       }
       state.audio?.play('pickup');

@@ -109,7 +109,7 @@ test('each boss enters a distinct telegraphed second phase',()=>{
     const state=createRunState(),boss=new Enemy({x:480,y:250,type,difficulty:state.difficulty});boss.spawnTime=0;boss.hp=boss.maxHp*.49;boss.specialTimer=0;state.enemies=[boss];
     updateEnemies(state,.016,bounds);assert.equal(boss.phaseTwo,true);assert.match(state.directorNotice,/FASE 2/);assert.equal(state.bossZones.length,1);kinds.push(state.bossZones[0].kind);
   }
-  assert.deepEqual(new Set(kinds),new Set(['shockwave','snipe','rain']));
+  assert.deepEqual(new Set(kinds), new Set(['shockwave', 'snipe', 'rain', 'meteor', 'freeze']));
 });
 
 test('boss reward does not revive a defeated player',()=>{

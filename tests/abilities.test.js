@@ -28,7 +28,7 @@ test('ability choices are distinct and capped abilities disappear', () => {
   for (let index = 0; index < extraShot.maxStacks; index += 1) {
     assert.equal(applyAbility(pancho, extraShot), true);
   }
-  assert.equal(pancho.extraProjectiles, 3);
+  assert.equal(pancho.extraProjectiles, 6);
   assert.equal(applyAbility(pancho, extraShot), false);
   assert.ok(!getAbilityChoices(pancho, () => 0.5).includes(extraShot));
 });
@@ -39,12 +39,12 @@ test('attack and defense upgrades change actual player stats', () => {
   for (const id of ['rapidFire', 'hotSauce', 'piercing', 'sneakers', 'extraPortion']) {
     applyAbility(pancho, abilities.find(ability => ability.id === id));
   }
-  assert.equal(pancho.fireRateMultiplier, 0.82);
-  assert.equal(pancho.damageMultiplier, 1.25);
-  assert.equal(pancho.pierceBonus, 1);
-  assert.equal(pancho.speed, skins.pancho.speed * 1.15);
-  assert.equal(pancho.maxHp, 125);
-  assert.equal(pancho.hp, 65);
+  assert.equal(pancho.fireRateMultiplier, 0.65);
+  assert.equal(pancho.damageMultiplier, 1.5);
+  assert.equal(pancho.pierceBonus, 2);
+  assert.equal(pancho.speed, skins.pancho.speed * 1.30);
+  assert.equal(pancho.maxHp, 150);
+  assert.equal(pancho.hp, 90);
 });
 
 test('piercing projectile hits each enemy only once', () => {
