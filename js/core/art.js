@@ -80,13 +80,39 @@ function foodSprite(kind, enemy, flash = false) {
   rect(c, INK, 27, 33, 4, 6); rect(c, INK, 42, 33, 4, 6);
   if (enemy) { rect(c, INK, 21, 28, 7, 3); rect(c, INK, 26, 30, 6, 3); rect(c, INK, 38, 30, 6, 3); rect(c, INK, 43, 28, 7, 3); }
   rect(c, INK, 31, 46, 10, 3); rect(c, enemy ? '#f9867e' : '#fff2d5', 34, 49, 5, 2);
+
+  // Sombreado y degradado de color vibrante (iluminación cenital cálida y sombra rica)
+  c.save();
+  c.globalCompositeOperation = 'source-atop';
+  const shadeGrad = c.createLinearGradient(0, 4, 0, 68);
+  shadeGrad.addColorStop(0, enemy ? 'rgba(255, 120, 100, 0.28)' : 'rgba(255, 245, 180, 0.28)');
+  shadeGrad.addColorStop(0.35, 'rgba(255, 255, 255, 0.06)');
+  shadeGrad.addColorStop(0.7, 'rgba(0, 0, 0, 0.0)');
+  shadeGrad.addColorStop(1, enemy ? 'rgba(50, 10, 25, 0.42)' : 'rgba(15, 25, 45, 0.38)');
+  c.fillStyle = shadeGrad;
+  c.fillRect(0, 0, 64, 72);
+
+  // Luz de borde / rim light lateral coloreada
+  const rimGrad = c.createLinearGradient(0, 0, 64, 0);
+  rimGrad.addColorStop(0, enemy ? 'rgba(255, 80, 80, 0.24)' : 'rgba(125, 211, 252, 0.24)');
+  rimGrad.addColorStop(0.2, 'transparent');
+  rimGrad.addColorStop(0.8, 'transparent');
+  rimGrad.addColorStop(1, 'rgba(0, 0, 0, 0.28)');
+  c.fillStyle = rimGrad;
+  c.fillRect(0, 0, 64, 72);
+  c.restore();
+
   sprites.set(key, sprite); return sprite;
 }
 
 export function drawFood(c, kind, x, y, scale = 1, time = 0, enemy = false, flash = false) {
   const bob = Math.round(Math.sin(time * 7 + x * .05) * 1.5);
   c.save(); c.imageSmoothingEnabled = false;
-  c.fillStyle = '#080d1360'; c.beginPath(); c.ellipse(x, y + 23 * scale, 25 * scale, 7 * scale, 0, 0, Math.PI * 2); c.fill();
+  const groundGlow = c.createRadialGradient(x, y + 23 * scale, 3 * scale, x, y + 23 * scale, 28 * scale);
+  groundGlow.addColorStop(0, enemy ? 'rgba(239, 68, 68, 0.25)' : 'rgba(34, 211, 238, 0.2)');
+  groundGlow.addColorStop(0.45, '#080d1360');
+  groundGlow.addColorStop(1, 'transparent');
+  c.fillStyle = groundGlow; c.beginPath(); c.ellipse(x, y + 23 * scale, 28 * scale, 8 * scale, 0, 0, Math.PI * 2); c.fill();
   c.drawImage(foodSprite(kind, enemy, flash), Math.round(x - 32 * scale), Math.round(y - 36 * scale + bob), 64 * scale, 72 * scale);
   c.restore();
 }
@@ -156,14 +182,14 @@ function dinerFloor(map = 'diner') {
   const c = canvas.getContext('2d'); const parking = map === 'parking', kitchen = map === 'kitchen';
   if(map==='football'){footballFloor(c);floors.set(map,canvas);return canvas;}
   if(['snow','desert'].includes(map)){
-    const colors=map==='snow'?['#b8d6d9','#c9e5e7']:map==='desert'?['#bb8149','#c99355']:['#3c965b','#48a867'];
-    for(let y=0;y<1080;y+=32)for(let x=0;x<1920;x+=32){rect(c,colors[(x/32+y/32)%2],x,y,32,32);rect(c,'#ffffff0b',x+2,y+2,28,2);}
+    const colors=map==='snow'?['#275574','#35688a']:map==='desert'?['#bb8149','#c99355']:['#3c965b','#48a867'];
+    for(let y=0;y<1080;y+=32)for(let x=0;x<1920;x+=32){rect(c,colors[(x/32+y/32)%2],x,y,32,32);rect(c,map==='snow'?'#7dd3fc1c':'#ffffff0b',x+2,y+2,28,2);}
     if(map==='snow'){
-      for(let i=0;i<140;i++){const x=(i*179)%1920,y=108+(i*91)%920;rect(c,'#f1fcf8',x,y,5,3);}
-      rect(c,'#e7f6ee',0,80,1920,12);
-      rect(c,'#52777f',0,0,1920,84);rect(c,'#83b5b9',0,76,1920,8);
-      for(let x=0;x<1920;x+=64){block(c,x%128?'#789fa3':'#6e959a',x+2,5,60,31,2);block(c,'#63898f',x+18,40,60,31,2);rect(c,'#dfffff99',x+8,9,38,3);}
-      for(const x of [160,540,960,1380,1760]){rect(c,'#efffff',x,72,80,5);rect(c,'#8cf5ef',x+8,77,64,3);}
+      for(let i=0;i<160;i++){const x=(i*179)%1920,y=108+(i*91)%920;rect(c,i%2?'#bae6fd':'#e0f2fe',x,y,5,3);rect(c,'#38bdf8',x+1,y+1,2,1);}
+      rect(c,'#38bdf8',0,80,1920,3);
+      rect(c,'#0d1e2b',0,0,1920,84);rect(c,'#173850',0,76,1920,8);
+      for(let x=0;x<1920;x+=64){block(c,x%128?'#1c3d55':'#163246',x+2,5,60,31,2);block(c,'#122839',x+18,40,60,31,2);rect(c,'#38bdf866',x+8,9,38,3);}
+      for(const x of [160,540,960,1380,1760]){rect(c,'#e0f2fe',x,72,80,5);rect(c,'#38bdf8',x+8,77,64,3);}
     }else{
       for(let i=0;i<100;i++){const x=(i*191)%1920,y=110+(i*73)%920;rect(c,'#e8b975',x,y,10,2);}
       rect(c,'#75462f',0,0,1920,84);rect(c,'#bf7b47',0,76,1920,8);
@@ -206,6 +232,38 @@ export function drawDiner(c, width, height, time, menu, map = 'diner') {
     // Efectos ambientales animados según el mapa con iluminación y partículas ricas
     if (map === 'snow') {
       c.save();
+      // Aurora Boreal dinámica ondulante en el cielo/muro
+      for (let a = 0; a < 3; a++) {
+        const aGrad = c.createLinearGradient(0, 0, width, 0);
+        const shift = time * 0.3 + a * 0.5;
+        const alpha = 0.12 + Math.sin(time * 1.5 + a) * 0.05;
+        aGrad.addColorStop(0, 'transparent');
+        aGrad.addColorStop(Math.max(0.1, Math.min(0.9, 0.35 + Math.sin(shift) * 0.2)), `rgba(56, 189, 248, ${alpha})`);
+        aGrad.addColorStop(Math.max(0.1, Math.min(0.9, 0.65 + Math.cos(shift * 1.2) * 0.2)), `rgba(14, 165, 233, ${alpha * 1.2})`);
+        aGrad.addColorStop(1, 'transparent');
+        c.fillStyle = aGrad;
+        c.fillRect(0, 5 + a * 26, width, 85);
+      }
+
+      // Conos de luz dinámica azulada desde los faroles del muro
+      for (const lx of [160, 540, 960, 1380, 1760]) {
+        if (lx < width + 100) {
+          const lGrad = c.createRadialGradient(lx + 40, 78, 5, lx + 40, 150, 120);
+          const flicker = 0.16 + Math.sin(time * 3 + lx) * 0.04;
+          lGrad.addColorStop(0, `rgba(224, 242, 254, ${flicker})`);
+          lGrad.addColorStop(0.5, `rgba(56, 189, 248, ${flicker * 0.5})`);
+          lGrad.addColorStop(1, 'transparent');
+          c.fillStyle = lGrad;
+          c.beginPath();
+          c.moveTo(lx + 20, 78);
+          c.lineTo(lx + 60, 78);
+          c.lineTo(lx + 105, 230);
+          c.lineTo(lx - 25, 230);
+          c.closePath();
+          c.fill();
+        }
+      }
+
       // Ventisca de nieve en capas: partículas lentas pequeñas y copos rápidos grandes
       for (let i = 0; i < 90; i++) {
         const speedX = 45 + (i % 5) * 18;
@@ -213,25 +271,31 @@ export function drawDiner(c, width, height, time, menu, map = 'diner') {
         const x = ((i * 137 + time * speedX) % width);
         const y = ((i * 89 + time * speedY) % (height - 90)) + 90;
         const size = (i % 4 === 0) ? 3 : (i % 2 === 0) ? 2 : 1.5;
-        c.fillStyle = (i % 3 === 0) ? '#ffffff' : '#d8f4ff';
-        c.globalAlpha = 0.45 + Math.sin(time * 2.5 + i) * 0.35;
+        c.fillStyle = (i % 3 === 0) ? '#ffffff' : '#bae6fd';
+        c.globalAlpha = 0.5 + Math.sin(time * 2.5 + i) * 0.35;
         c.fillRect(Math.round(x), Math.round(y), size, size);
       }
       // Ráfagas de viento helado
-      c.strokeStyle = '#c5efffaa'; c.lineWidth = 1.5;
+      c.strokeStyle = '#bae6fdcc'; c.lineWidth = 1.5;
       for (let i = 0; i < 14; i++) {
         const y = 130 + (i * 73 + time * 30) % (height - 200);
         const x = ((i * 181 + time * 95) % width);
-        c.globalAlpha = 0.22 + Math.sin(time * 1.8 + i) * 0.12;
+        c.globalAlpha = 0.25 + Math.sin(time * 1.8 + i) * 0.12;
         c.beginPath(); c.moveTo(x, y); c.lineTo(x + 75 + (i % 3) * 35, y); c.stroke();
       }
-      // Brillos de escarcha azulada en el suelo
-      for (let i = 0; i < 12; i++) {
-        const gx = (i * 165 + 80) % width, gy = 180 + (i * 85) % (height - 260);
-        const glow = c.createRadialGradient(gx, gy, 0, gx, gy, 120);
-        glow.addColorStop(0, 'rgba(160, 235, 255, 0.08)');
+      // Brillos y destellos de escarcha azulada en el suelo
+      for (let i = 0; i < 16; i++) {
+        const gx = (i * 155 + 70) % width, gy = 150 + (i * 83) % (height - 220);
+        const twinkle = Math.max(0, Math.sin(time * 4 + i * 1.7));
+        if (twinkle > 0.4) {
+          c.fillStyle = '#f0f9ff';
+          c.globalAlpha = twinkle * 0.7;
+          c.fillRect(Math.round(gx), Math.round(gy), 2, 2);
+        }
+        const glow = c.createRadialGradient(gx, gy, 0, gx, gy, 110);
+        glow.addColorStop(0, 'rgba(56, 189, 248, 0.09)');
         glow.addColorStop(1, 'transparent');
-        c.fillStyle = glow; c.fillRect(gx - 120, gy - 120, 240, 240);
+        c.fillStyle = glow; c.fillRect(gx - 110, gy - 110, 220, 220);
       }
       c.restore();
     } else if (map === 'desert') {

@@ -243,26 +243,39 @@ export class Companion {
     if (this.id === 'parrilla') {
       const bob = Math.sin(time * 8) * 2;
       ctx.save(); ctx.translate(Math.round(this.x), Math.round(this.y + bob));
-      // Sombra
-      ctx.fillStyle = '#111c2266'; ctx.fillRect(-12, 14, 24, 4);
-      // Patas de metal
-      ctx.fillStyle = '#334155'; ctx.fillRect(-10, 8, 3, 7); ctx.fillRect(7, 8, 3, 7);
-      // Tambor / cuerpo de parrilla
-      ctx.fillStyle = '#1e293b'; ctx.fillRect(-14, -4, 28, 14);
-      ctx.fillStyle = '#0f172a'; ctx.fillRect(-12, 4, 24, 5);
-      // Rejilla y brasas al rojo vivo
-      ctx.fillStyle = '#ef4444'; ctx.fillRect(-12, -6, 24, 4);
-      ctx.fillStyle = '#ffaa00'; ctx.fillRect(-9, -5, 5, 2); ctx.fillRect(2, -5, 6, 2);
+      // Sombra con resplandor cálido de brasas
+      const shadowGrad = ctx.createRadialGradient(0, 15, 2, 0, 15, 16);
+      shadowGrad.addColorStop(0, 'rgba(239, 68, 68, 0.35)');
+      shadowGrad.addColorStop(0.5, '#111c2266');
+      shadowGrad.addColorStop(1, 'transparent');
+      ctx.fillStyle = shadowGrad; ctx.fillRect(-14, 12, 28, 6);
+      // Patas de metal con bisel
+      ctx.fillStyle = '#1e293b'; ctx.fillRect(-10, 8, 3, 7); ctx.fillRect(7, 8, 3, 7);
+      ctx.fillStyle = '#475569'; ctx.fillRect(-9, 8, 1, 7); ctx.fillRect(8, 8, 1, 7);
+      // Tambor / cuerpo de parrilla con degradado metálico oscuro
+      ctx.fillStyle = '#0f172a'; ctx.fillRect(-14, -4, 28, 14);
+      ctx.fillStyle = '#1e293b'; ctx.fillRect(-13, -3, 26, 7);
+      ctx.fillStyle = '#334155'; ctx.fillRect(-12, -2, 24, 2);
+      ctx.fillStyle = '#090d16'; ctx.fillRect(-12, 4, 24, 5);
+      // Rejilla y brasas ardientes con resplandor
+      const emberGlow = ctx.createRadialGradient(0, -5, 1, 0, -5, 14);
+      emberGlow.addColorStop(0, '#fef08a');
+      emberGlow.addColorStop(0.3, '#f97316');
+      emberGlow.addColorStop(0.8, '#dc2626');
+      emberGlow.addColorStop(1, '#7f1d1d');
+      ctx.fillStyle = emberGlow; ctx.fillRect(-12, -6, 24, 4);
+      ctx.fillStyle = '#ffedd5'; ctx.fillRect(-8, -5, 4, 2); ctx.fillRect(3, -5, 5, 2);
       // Rejilla de hierro
-      ctx.fillStyle = '#64748b'; ctx.fillRect(-13, -7, 26, 2);
+      ctx.fillStyle = '#94a3b8'; ctx.fillRect(-13, -7, 26, 2);
+      ctx.fillStyle = '#475569';
       for (let gx = -11; gx <= 11; gx += 4) { ctx.fillRect(gx, -7, 2, 4); }
       // Ojitos pixel
       ctx.fillStyle = '#ffffff'; ctx.fillRect(-6, 0, 3, 3); ctx.fillRect(3, 0, 3, 3);
       ctx.fillStyle = '#0f172a'; ctx.fillRect(-5, 1, 2, 2); ctx.fillRect(4, 1, 2, 2);
-      // Humito / brasa animada subiendo
+      // Humito y chispas animadas
       const emberY = -10 - (Math.round(time * 30) % 12);
       ctx.fillStyle = '#ff8800'; ctx.fillRect(-4 + Math.sin(time * 10) * 3, emberY, 2, 2);
-      ctx.fillStyle = '#ffcc00'; ctx.fillRect(3 - Math.sin(time * 8) * 3, emberY - 4, 2, 2);
+      ctx.fillStyle = '#fde047'; ctx.fillRect(3 - Math.sin(time * 8) * 3, emberY - 4, 2, 2);
       ctx.restore();
       return;
     }
@@ -277,17 +290,26 @@ export class Companion {
     if (this.id === 'taco') {
       const bob = Math.sin(time * 7) * 2;
       ctx.save(); ctx.translate(Math.round(this.x), Math.round(this.y + bob));
-      // Sombra pixel
-      ctx.fillStyle = '#111c2266'; ctx.fillRect(-12, 12, 24, 4);
-      // Tortilla doblada
-      ctx.fillStyle = '#d97706'; ctx.fillRect(-14, -6, 28, 16);
-      ctx.fillStyle = '#f59e0b'; ctx.fillRect(-12, -8, 24, 16);
-      ctx.fillStyle = '#fbbf24'; ctx.fillRect(-10, -10, 20, 14);
-      // Relleno: carne, lechuga, tomate, queso
-      ctx.fillStyle = '#78350f'; ctx.fillRect(-8, -12, 16, 5); // carne picada
-      ctx.fillStyle = '#22c55e'; ctx.fillRect(-6, -14, 6, 4);  // lechuga
-      ctx.fillStyle = '#ef4444'; ctx.fillRect(1, -14, 5, 4);   // tomate
-      ctx.fillStyle = '#facc15'; ctx.fillRect(-2, -11, 4, 3);  // queso
+      // Sombra pixel con halo dorado
+      const tacoShadow = ctx.createRadialGradient(0, 13, 2, 0, 13, 14);
+      tacoShadow.addColorStop(0, 'rgba(245, 158, 11, 0.25)');
+      tacoShadow.addColorStop(0.5, '#111c2266');
+      tacoShadow.addColorStop(1, 'transparent');
+      ctx.fillStyle = tacoShadow; ctx.fillRect(-14, 11, 28, 5);
+      // Tortilla doblada con degradado dorado
+      ctx.fillStyle = '#b45309'; ctx.fillRect(-14, -6, 28, 16);
+      ctx.fillStyle = '#d97706'; ctx.fillRect(-13, -7, 26, 16);
+      ctx.fillStyle = '#f59e0b'; ctx.fillRect(-12, -8, 24, 15);
+      ctx.fillStyle = '#fbbf24'; ctx.fillRect(-10, -9, 20, 12);
+      ctx.fillStyle = '#fef08a'; ctx.fillRect(-8, -8, 16, 2); // Brillo crujiente
+      // Relleno: carne especiada, lechuga fresca, tomate y queso fundido
+      ctx.fillStyle = '#5c2406'; ctx.fillRect(-8, -12, 16, 5);
+      ctx.fillStyle = '#854d0e'; ctx.fillRect(-7, -11, 14, 2);
+      ctx.fillStyle = '#16a34a'; ctx.fillRect(-6, -14, 6, 4);
+      ctx.fillStyle = '#4ade80'; ctx.fillRect(-5, -14, 4, 2);
+      ctx.fillStyle = '#dc2626'; ctx.fillRect(1, -14, 5, 4);
+      ctx.fillStyle = '#f87171'; ctx.fillRect(2, -14, 3, 2);
+      ctx.fillStyle = '#facc15'; ctx.fillRect(-2, -11, 4, 3);
       // Ojitos tiernos pixel
       ctx.fillStyle = '#111827'; ctx.fillRect(-5, -3, 3, 3); ctx.fillRect(2, -3, 3, 3);
       ctx.fillStyle = '#ffffff'; ctx.fillRect(-4, -3, 1, 1); ctx.fillRect(3, -3, 1, 1);
@@ -298,13 +320,29 @@ export class Companion {
     }
     const bob = Math.sin(time * 8) * 2;
     ctx.save(); ctx.translate(Math.round(this.x), Math.round(this.y + bob));
-    ctx.fillStyle = '#111c2266'; ctx.fillRect(-13, 16, 26, 4);
-    ctx.fillStyle = '#182528'; ctx.fillRect(-14, -8, 28, 20);
-    ctx.fillStyle = '#f5ca62'; ctx.fillRect(-10, -5, 20, 14); ctx.fillStyle = '#f2f1d2'; ctx.fillRect(-3, -4, 6, 12);
-    // Antenas y hélices
-    ctx.fillStyle = '#93b4a8'; ctx.fillRect(-23, -12, 18, 3); ctx.fillRect(5, -12, 18, 3);
-    ctx.fillStyle = '#00ffff'; ctx.fillRect(-2, -10, 4, 3); // Lente neon
-    ctx.fillStyle = '#dce2c9'; ctx.fillRect(-23 + Math.round(Math.sin(time * 50) * 4), -15, 18, 2);
+    // Sombra pixel con aura cyan cibernética
+    const droneHalo = ctx.createRadialGradient(0, 4, 2, 0, 4, 22);
+    droneHalo.addColorStop(0, 'rgba(34, 211, 238, 0.3)');
+    droneHalo.addColorStop(0.7, '#111c2266');
+    droneHalo.addColorStop(1, 'transparent');
+    ctx.fillStyle = droneHalo; ctx.fillRect(-16, 12, 32, 7);
+    // Chasis metálico con degradado
+    ctx.fillStyle = '#0f172a'; ctx.fillRect(-14, -8, 28, 20);
+    ctx.fillStyle = '#1e293b'; ctx.fillRect(-13, -7, 26, 18);
+    ctx.fillStyle = '#334155'; ctx.fillRect(-12, -6, 24, 3); // Reflejo cenital
+    ctx.fillStyle = '#d97706'; ctx.fillRect(-10, -5, 20, 14);
+    ctx.fillStyle = '#fbbf24'; ctx.fillRect(-9, -4, 18, 12);
+    ctx.fillStyle = '#fef08a'; ctx.fillRect(-3, -4, 6, 12);
+    // Antenas y hélices con destello
+    ctx.fillStyle = '#64748b'; ctx.fillRect(-23, -12, 18, 3); ctx.fillRect(5, -12, 18, 3);
+    // Lente neon cyan pulsante
+    const lensGlow = 0.5 + Math.sin(time * 8) * 0.4;
+    ctx.fillStyle = `rgba(34, 211, 238, ${lensGlow})`;
+    ctx.fillRect(-4, -11, 8, 5);
+    ctx.fillStyle = '#67e8f9'; ctx.fillRect(-2, -10, 4, 3);
+    ctx.fillStyle = '#ffffff'; ctx.fillRect(-1, -10, 2, 1);
+    // Aspas giratorias
+    ctx.fillStyle = '#e2e8f0'; ctx.fillRect(-23 + Math.round(Math.sin(time * 50) * 4), -15, 18, 2);
     ctx.fillRect(5 + Math.round(Math.cos(time * 50) * 4), -15, 18, 2);
     ctx.restore();
   }

@@ -36,6 +36,15 @@ import { burst } from './systems/effectSystem.js';
 import { modLoader } from './mods/ModLoader.js';
 import { FrostbiteMod } from './mods/sampleFrostMod.js';
 
+const PAUSE_THEMES = [
+  { border: '#00f0ff', glow: 'rgba(0, 240, 255, 0.65)' },
+  { border: '#ff007f', glow: 'rgba(255, 0, 127, 0.65)' },
+  { border: '#ffe066', glow: 'rgba(255, 224, 102, 0.7)' },
+  { border: '#39ff14', glow: 'rgba(57, 255, 20, 0.65)' },
+  { border: '#ff5500', glow: 'rgba(255, 85, 0, 0.7)' },
+  { border: '#a855f7', glow: 'rgba(168, 85, 247, 0.65)' },
+];
+
 export class Game {
   constructor(canvas) {
     this.canvas = canvas;
@@ -148,7 +157,19 @@ export class Game {
     } else if (id === 'gameScreen') document.activeElement?.blur();
   }
 
-  pause() { if (this.running) { this.showScreen('pauseScreen'); document.querySelector('#resumeButton').focus(); } }
+  pause() {
+    if (this.running) {
+      this.pauseThemeIndex = ((this.pauseThemeIndex ?? -1) + 1) % PAUSE_THEMES.length;
+      const theme = PAUSE_THEMES[this.pauseThemeIndex];
+      const panel = document.querySelector('#pauseScreen .pause-panel');
+      if (panel) {
+        panel.style.setProperty('--pause-border', theme.border);
+        panel.style.setProperty('--pause-glow', theme.glow);
+      }
+      this.showScreen('pauseScreen');
+      document.querySelector('#resumeButton')?.focus();
+    }
+  }
   resume() { if (this.screenId === 'pauseScreen') this.showScreen('gameScreen'); }
 
   renderBuild() {

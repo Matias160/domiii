@@ -71,7 +71,8 @@ export class Shop{
       const button=node('button','catalog-item');button.type='button';button.dataset.item=item.id;button.dataset.type=item.type;button.dataset.owned=String(Boolean(owned));
       button.setAttribute('aria-label',`${item.name}, ${equipped?'equipado':owned?'en tu colección':item.cost+' puntos'}. Ver detalle`);button.setAttribute('aria-pressed',String(this.selected?.id===item.id));button.setAttribute('aria-controls','shopDetail');
       const art=node('div','catalog-art');const canvas=document.createElement('canvas');canvas.width=280;canvas.height=180;canvas.setAttribute('aria-hidden','true');drawItemPreview(canvas,item,profile);
-      art.append(canvas,node('span','catalog-badge',equipped?'✓ EN USO':owned?'✓ LO TENÉS':'🔒 NO LO TENÉS'));
+      art.append(canvas);
+      if(equipped) art.append(node('span','catalog-badge','✓ EN USO'));
       if(!owned){const lock=node('span','catalog-lock');lock.innerHTML=icon('LockKeyhole');lock.setAttribute('aria-hidden','true');art.append(lock);}
       const copy=node('div','catalog-copy');copy.append(node('strong','catalog-name',item.name),node('span','catalog-description',item.description));
       const footer=node('span','catalog-status');footer.innerHTML=icon(equipped?'CircleCheck':owned?'Check':'Coins');footer.append(node('span','',equipped?'Equipado':owned?'Listo para equipar':`${item.cost.toLocaleString('es-AR')} PT`),node('span','catalog-arrow','↗'));
