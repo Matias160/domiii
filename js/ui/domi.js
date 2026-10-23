@@ -120,6 +120,7 @@ export class DomiScreen {
         rewardType: 'accessory',
         rewardId: 'chef_hat',
         rewardName: 'Gorro Chef',
+        rewardTooltip: 'GORRO CHEF: +10% de daño permanente en combate (Accesorio)',
         name: 'Prueba de Fuego',
         iconType: 'star',
         description: 'Sobrevive y alcanza el Nivel 5 en combate.',
@@ -136,6 +137,7 @@ export class DomiScreen {
         rewardType: 'pet',
         rewardId: 'parrilla',
         rewardName: 'Mini Parrilla',
+        rewardTooltip: 'MINI PARRILLA: Mascota ígnea que escupe ascuas a enemigos (Compañero)',
         name: 'Maestro Asador',
         iconType: 'skull',
         description: 'Elimina 50 clientes molestos en una sola partida.',
@@ -152,6 +154,7 @@ export class DomiScreen {
         rewardType: 'points',
         rewardId: 'godmode',
         rewardName: '+400 PT',
+        rewardTooltip: '+400 PT: 400 Puntos arcade para gastar en la tienda',
         name: 'Receta Celestial',
         iconType: 'god',
         description: 'Desbloquea el Modo Dios alcanzando el Nivel 3.',
@@ -172,6 +175,7 @@ export class DomiScreen {
         rewardType: 'points',
         rewardId: 'combo15',
         rewardName: '+250 PT',
+        rewardTooltip: '+250 PT: 250 Puntos arcade para gastar en la tienda',
         name: 'Combo Imparable',
         iconType: 'combo',
         description: 'Encadena al menos 15 bajas consecutivas en turno.',
@@ -192,6 +196,7 @@ export class DomiScreen {
         rewardType: 'accessory',
         rewardId: 'headband',
         rewardName: 'Vincha Turbo',
+        rewardTooltip: 'VINCHA TURBO: +5% velocidad y menor recarga (Accesorio)',
         name: 'Resistencia Nocturna',
         iconType: 'time',
         description: 'Sobrevive más de 3 minutos (180 s) bajo asedio.',
@@ -312,13 +317,22 @@ export class DomiScreen {
         </div>
       `;
 
-      // Derecha: Badge dorado de recompensa + Botón Reclamar
+      // Derecha: Badge dorado de recompensa con tooltip pixel art + Botón Reclamar
       const right = document.createElement('div');
       right.className = 'domi-mission-right';
+
+      const rewardWrap = document.createElement('div');
+      rewardWrap.className = 'domi-reward-wrap';
 
       const badge = document.createElement('span');
       badge.className = 'domi-reward-badge';
       badge.textContent = m.rewardName;
+
+      const tooltip = document.createElement('div');
+      tooltip.className = 'domi-pixel-tooltip';
+      tooltip.textContent = m.rewardTooltip || m.rewardName;
+
+      rewardWrap.append(badge, tooltip);
 
       const btn = document.createElement('button');
       btn.type = 'button';
@@ -346,7 +360,7 @@ export class DomiScreen {
         btn.textContent = 'EN CURSO';
       }
 
-      right.append(badge, btn);
+      right.append(rewardWrap, btn);
       card.append(iconBox, center, right);
       list.append(card);
     }

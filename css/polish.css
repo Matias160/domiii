@@ -821,151 +821,63 @@ button:focus-visible, input:focus-visible, select:focus-visible {
   line-height: 1.5 !important;
   margin-bottom: 4px !important;
 }
-.domi-missions-list, .domi-collectibles-list {
-  display: flex !important;
-  flex-direction: column !important;
-  gap: 10px !important;
-  max-height: 270px !important;
-  overflow-y: auto !important;
-  padding-right: 4px !important;
+/* ========================================================
+   GLOBAL PIXEL KEYCAPS (ESTILO IMAGEN 1: 3D ARCADE RETRO)
+   ======================================================== */
+kbd,
+.pixel-key,
+.prime-key,
+.dash-key {
+  display: inline-grid !important;
+  place-items: center !important;
+  background: #fff0b6 !important;
+  color: #18232b !important;
+  border: 2px solid #fff7da !important;
+  border-bottom: 5px solid #ad8141 !important;
+  box-shadow: 3px 3px 0 #060c13 !important;
+  font-family: 'Press Start 2P', monospace !important;
+  font-weight: 900 !important;
+  border-radius: 0 !important;
+  text-align: center !important;
+  line-height: 1 !important;
 }
-.domi-missions-list::-webkit-scrollbar,
-.domi-collectibles-list::-webkit-scrollbar {
-  width: 6px !important;
+
+.prime-slot .prime-key.pixel-key {
+  position: absolute !important;
+  top: 5px !important;
+  left: 5px !important;
+  width: 25px !important;
+  height: 27px !important;
+  font-size: 11px !important;
+  padding: 0 !important;
 }
-.domi-missions-list::-webkit-scrollbar-thumb,
-.domi-collectibles-list::-webkit-scrollbar-thumb {
-  background: #2a3e47 !important;
+
+#dashControl .pixel-key.dash-key {
+  width: 38px !important;
+  height: 33px !important;
+  font-size: 8px !important;
+  padding: 0 !important;
+  flex: none !important;
 }
-.domi-mission-card {
-  background: #142127 !important;
-  border: 2px solid #283e47 !important;
-  border-bottom: 4px solid #000 !important;
-  padding: 12px !important;
-  display: flex !important;
-  flex-direction: column !important;
-  gap: 8px !important;
-}
-.domi-mission-card.is-claimed {
-  border-color: #166534 !important;
-  background: #0c1f17 !important;
-}
-.domi-mission-header {
-  display: flex !important;
-  justify-content: space-between !important;
-  align-items: center !important;
-  flex-wrap: wrap !important;
-  gap: 6px !important;
-}
-.domi-mission-title {
-  font: 900 9.5px 'Press Start 2P', monospace !important;
-  color: #ffe066 !important;
-}
-.domi-mission-desc {
-  font: 8px/1.5 'Press Start 2P', monospace !important;
+
+.prime-slot[data-status="locked"] .pixel-key,
+.prime-slot[data-status="cooldown"] .pixel-key,
+#dashControl[data-status="cooldown"] .pixel-key,
+#dashControl:not([data-ready="true"]) .pixel-key {
+  background: #646c70 !important;
+  border-color: #899195 !important;
+  border-bottom-color: #343a3d !important;
   color: #94a3b8 !important;
-  margin: 0 !important;
-}
-.domi-mission-reward {
-  font: 8px 'Press Start 2P', monospace !important;
-  color: #38ef7d !important;
-  display: flex !important;
-  align-items: center !important;
-  gap: 4px !important;
-}
-.domi-progress-wrap {
-  display: flex !important;
-  align-items: center !important;
-  gap: 10px !important;
-  margin: 2px 0 !important;
-}
-.domi-progress-bar {
-  flex: 1 !important;
-  height: 9px !important;
-  background: #081014 !important;
-  border: 2px solid #20353c !important;
-  overflow: hidden !important;
-}
-.domi-progress-fill {
-  height: 100% !important;
-  background: linear-gradient(90deg, #00e5ff 0%, #00ff88 100%) !important;
-  box-shadow: 0 0 8px rgba(0, 255, 136, 0.6) !important;
-}
-.domi-progress-text {
-  font: 7.5px 'Press Start 2P', monospace !important;
-  color: #7dd3fc !important;
-  white-space: nowrap !important;
-}
-.domi-mission-btn {
-  align-self: flex-start !important;
-  font: 900 8px 'Press Start 2P', monospace !important;
-  padding: 8px 12px !important;
-  border: 2px solid #000 !important;
-  border-radius: 0 !important;
-  cursor: pointer !important;
-}
-.domi-mission-btn--claim {
-  background: #22c55e !important;
-  color: #000 !important;
-  box-shadow: 3px 3px 0 #000 !important;
-  animation: pulse 1.2s infinite !important;
-}
-.domi-mission-btn--done {
-  background: #1e293b !important;
-  color: #64748b !important;
-  border-color: #334155 !important;
-  cursor: default !important;
-}
-.domi-mission-btn--locked {
-  background: #141f26 !important;
-  color: #556873 !important;
-  border-color: #22323a !important;
-  cursor: default !important;
-}
-.domi-collec-row {
-  display: flex !important;
-  justify-content: space-between !important;
-  align-items: center !important;
-  gap: 14px !important;
-  background: #142127 !important;
-  border: 2px solid #283e47 !important;
-  border-bottom: 4px solid #000 !important;
-  padding: 10px 14px !important;
-}
-.domi-collec-info {
-  flex: 1 !important;
-  display: flex !important;
-  flex-direction: column !important;
-  gap: 6px !important;
-}
-.domi-collec-head {
-  display: flex !important;
-  justify-content: space-between !important;
-  align-items: center !important;
-}
-.domi-collec-title {
-  font: 900 8.5px 'Press Start 2P', monospace !important;
-  color: #f1f5f9 !important;
-}
-.domi-collec-val {
-  font: 900 8.5px 'Press Start 2P', monospace !important;
-  color: #ffcc00 !important;
-}
-.domi-collec-btn {
-  font: 900 8px 'Press Start 2P', monospace !important;
-  padding: 7px 11px !important;
-  background: #0284c7 !important;
-  color: #fff !important;
-  border: 2px solid #000 !important;
   box-shadow: 2px 2px 0 #000 !important;
-  cursor: pointer !important;
-  border-radius: 0 !important;
-  white-space: nowrap !important;
-  transition: transform .1s, background .15s !important;
 }
-.domi-collec-btn:hover {
-  background: #0369a1 !important;
-  transform: translateY(-2px) !important;
+
+.prime-slot[data-status="ready"] .pixel-key,
+#dashControl[data-status="ready"] .pixel-key {
+  background: #fff0b6 !important;
+  border-color: #fff7da !important;
+  border-bottom-color: #ad8141 !important;
+  color: #18232b !important;
+  box-shadow: 3px 3px 0 #060c13 !important;
 }
 
 /* Shop in Pixel Art */
@@ -2139,7 +2051,7 @@ kbd { display: inline-block; border: 1px solid #556771; border-bottom-width: 3px
 .pause-screen .pause-panel .menu-actions button {
   flex: 1 !important;
   min-height: 48px !important;
-  font-size: 10px !important;
+  font-size: 9.5px !important;
 }
 
 /* ============================================================================
@@ -2154,17 +2066,66 @@ kbd { display: inline-block; border: 1px solid #556771; border-bottom-width: 3px
 }
 
 /* ============================================================================
-   MENÚ PRINCIPAL: BOTONES COHERENTES Y TEXTOS PIXEL ART
+   BOTONES PIXEL ART RETRO (ESTILO IMAGEN 2: VOLVER / ARCADE SLATE 3D SHADOW)
    ============================================================================ */
+.pixel-button,
+.btn-arcade,
+.pause-screen .menu-actions button,
+.gameOver-panel-enhanced .menu-actions button,
 .menu-actions .pixel-button,
 .menu-links .pixel-button {
+  border-radius: 0 !important;
+  background: #172328 !important;
+  border: 2px solid #283e47 !important;
+  color: #ffffff !important;
   font-family: 'Press Start 2P', monospace !important;
-  font-size: 8.5px !important;
+  font-size: 9.5px !important;
+  font-weight: 900 !important;
   letter-spacing: 0.5px !important;
-  padding: 12px 16px !important;
-  border: 3px solid #000 !important;
-  border-bottom: 5px solid #000 !important;
-  box-shadow: 3px 3px 0 #000 !important;
+  padding: 13px 18px !important;
+  min-height: 46px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 10px !important;
+  box-shadow: 4px 4px 0 #000000 !important;
+  cursor: pointer !important;
+  text-transform: uppercase !important;
+  transition: transform 0.1s ease, background 0.15s ease, box-shadow 0.1s ease, border-color 0.15s ease !important;
+}
+
+.pixel-button:hover,
+.btn-arcade:hover,
+.pause-screen .menu-actions button:hover,
+.gameOver-panel-enhanced .menu-actions button:hover,
+.menu-actions .pixel-button:hover,
+.menu-links .pixel-button:hover {
+  background: #20353d !important;
+  color: #ffe066 !important;
+  border-color: #3f606e !important;
+  transform: translate(-1px, -1px) !important;
+  box-shadow: 5px 5px 0 #000000 !important;
+}
+
+.pixel-button:active,
+.btn-arcade:active,
+.pause-screen .menu-actions button:active,
+.gameOver-panel-enhanced .menu-actions button:active,
+.menu-actions .pixel-button:active,
+.menu-links .pixel-button:active {
+  transform: translate(2px, 2px) !important;
+  box-shadow: 2px 2px 0 #000000 !important;
+}
+
+.pause-screen #resumeButton {
+  border-color: #22d3ee !important;
+  color: #67e8f9 !important;
+}
+
+.pause-screen #resumeButton:hover {
+  background: #0e333e !important;
+  color: #fff !important;
+  border-color: #38bdf8 !important;
 }
 
 .menu-links {
@@ -2174,22 +2135,8 @@ kbd { display: inline-block; border: 1px solid #556771; border-bottom-width: 3px
   margin-top: 14px !important;
 }
 
-.menu-links .pixel-button--secondary {
-  background: #192b2e !important;
-  color: #79ddbd !important;
-  border-color: #0b1517 !important;
-  border-bottom-color: #04090a !important;
-}
-
-.menu-links .pixel-button--secondary:hover {
-  background: #233e42 !important;
-  color: #ffe066 !important;
-  transform: translate(-1px, -1px) !important;
-  box-shadow: 4px 4px 0 #000 !important;
-}
-
 /* ============================================================================
-   ACELERÓN (ESPACIO): CASILLA METÁLICA OSCURA 16-BITS CON TECLA 3D Y RAYO CIAN/ORO
+   ACELERÓN (ESPACIO): CASILLA METÁLICA OSCURA CON TECLA 3D (IMAGEN 1) Y RAYO CIAN/ORO
    ============================================================================ */
 #dashControl.dash-control.prime-slot.dash-box-pixel {
   position: absolute !important;
@@ -2222,33 +2169,13 @@ kbd { display: inline-block; border: 1px solid #556771; border-bottom-width: 3px
   height: 42px !important;
 }
 
-/* Lado izquierdo: tecla gris de teclado en 3D con texto "ESP" */
-.dash-key-3d {
-  flex: none !important;
+/* Tecla estilo Imagen 1 dentro del acelerón */
+#dashControl .pixel-key.dash-key {
   width: 38px !important;
-  height: 38px !important;
-  background: #475569 !important;
-  border: 2px solid #0f172a !important;
-  border-bottom: 4px solid #1e293b !important;
-  box-shadow: inset 1px 1px 0 #94a3b8, 1px 2px 0 #000 !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  transition: all 0.1s ease !important;
-}
-
-.dash-key-3d kbd {
-  font-family: 'Press Start 2P', monospace !important;
+  height: 34px !important;
   font-size: 8px !important;
-  font-weight: 900 !important;
-  color: #f8fafc !important;
-  text-shadow: 1px 1px 0 #000 !important;
-  background: transparent !important;
-  border: 0 !important;
-  padding: 0 !important;
-  margin: 0 !important;
   line-height: 1 !important;
-  box-shadow: none !important;
+  flex: none !important;
 }
 
 /* Lado derecho: icono de habilidad con rayo cian/amarillo en recuadro oscuro */
@@ -2318,11 +2245,6 @@ kbd { display: inline-block; border: 1px solid #556771; border-bottom-width: 3px
   box-shadow: 4px 4px 0 #000, 0 0 14px rgba(56, 189, 248, 0.5), inset 0 0 0 1px #67e8f9 !important;
 }
 
-#dashControl[data-status="ready"] .dash-key-3d {
-  background: #64748b !important;
-  box-shadow: inset 1px 1px 0 #cbd5e1, 1px 2px 0 #000, 0 0 6px rgba(255, 255, 255, 0.3) !important;
-}
-
 #dashControl[data-status="ready"] .dash-bolt-svg {
   transform: scale(1.08) !important;
 }
@@ -2334,29 +2256,19 @@ kbd { display: inline-block; border: 1px solid #556771; border-bottom-width: 3px
   opacity: 0.88 !important;
 }
 
-#dashControl[data-status="cooldown"] .dash-key-3d,
-#dashControl:not([data-ready="true"]) .dash-key-3d {
-  background: #334155 !important;
-  box-shadow: inset 1px 1px 0 #475569, 1px 1px 0 #000 !important;
-}
-
-#dashControl[data-status="cooldown"] .dash-key-3d kbd,
-#dashControl:not([data-ready="true"]) .dash-key-3d kbd {
-  color: #94a3b8 !important;
-}
-
 #dashControl[data-status="cooldown"] .dash-cd-timer,
 #dashControl:not([data-ready="true"]) .dash-cd-timer {
   display: flex !important;
 }
 
 /* ============================================================================
-   SEÑOR DOMI: INTERFAZ PIXEL ART 2D RETRO (MISIONES, CONSEJOS, COLECCIÓN)
+   SEÑOR DOMI: INTERFAZ PIXEL ART 2D RETRO (ESPACIOSA, IMAGEN 3 Y TOOLTIPS)
    ============================================================================ */
 #domiScreen .shop-panel {
-  max-width: 1240px !important;
+  max-width: 1260px !important;
   width: 95% !important;
   margin: 0 auto !important;
+  padding: 10px 0 40px !important;
 }
 
 #domiScreen .shop-tabs {
@@ -2402,18 +2314,19 @@ kbd { display: inline-block; border: 1px solid #556771; border-bottom-width: 3px
   display: flex !important;
   flex-direction: column !important;
   gap: 20px !important;
-  min-height: 440px !important;
+  min-height: 560px !important;
+  width: 100% !important;
 }
 
 /* --------------------------------------------------------------------------
-   1. MISIONES
+   1. MISIONES (ESPACIOSAS EN HORIZONTAL, CON RECOMPENSA TOOLTIP PIXEL ART)
    -------------------------------------------------------------------------- */
 .domi-missions-header {
   background: #0f181d !important;
   border: 2px solid #22424b !important;
   border-bottom: 4px solid #0b1317 !important;
   box-shadow: 4px 4px 0 #000 !important;
-  padding: 16px 20px !important;
+  padding: 16px 22px !important;
   display: flex !important;
   flex-direction: column !important;
   gap: 10px !important;
@@ -2458,19 +2371,25 @@ kbd { display: inline-block; border: 1px solid #556771; border-bottom-width: 3px
 .domi-missions-list {
   display: flex !important;
   flex-direction: column !important;
-  gap: 12px !important;
+  gap: 14px !important;
+  max-height: none !important;
+  overflow: visible !important;
 }
 
 .domi-mission-card {
   display: flex !important;
+  flex-direction: row !important;
   align-items: center !important;
-  gap: 16px !important;
+  justify-content: space-between !important;
+  gap: 20px !important;
+  min-height: 78px !important;
   background: #111a1f !important;
   border: 2px solid #1e3840 !important;
-  border-left: 5px solid #22d3ee !important;
+  border-left: 6px solid #22d3ee !important;
   border-bottom: 4px solid #080e12 !important;
   box-shadow: 4px 4px 0 #000 !important;
-  padding: 14px 18px !important;
+  padding: 14px 22px !important;
+  box-sizing: border-box !important;
   transition: transform 0.15s ease, border-color 0.15s ease !important;
 }
 
@@ -2481,14 +2400,14 @@ kbd { display: inline-block; border: 1px solid #556771; border-bottom-width: 3px
 }
 
 .domi-mission-card.is-claimed {
-  opacity: 0.72 !important;
+  opacity: 0.78 !important;
   border-left-color: #4ade80 !important;
 }
 
 .domi-mission-icon-box {
   flex: none !important;
-  width: 44px !important;
-  height: 44px !important;
+  width: 46px !important;
+  height: 46px !important;
   background: #080f13 !important;
   border: 2px solid #1c333a !important;
   box-shadow: inset 2px 2px 0 #000 !important;
@@ -2514,14 +2433,14 @@ kbd { display: inline-block; border: 1px solid #556771; border-bottom-width: 3px
 
 .domi-mission-title {
   font-family: 'Press Start 2P', monospace !important;
-  font-size: 9.5px !important;
+  font-size: 10px !important;
   color: #ffe066 !important;
   letter-spacing: 0.5px !important;
 }
 
 .domi-mission-ratio {
   font-family: 'Press Start 2P', monospace !important;
-  font-size: 7.5px !important;
+  font-size: 8px !important;
   color: #67e8f9 !important;
 }
 
@@ -2533,7 +2452,7 @@ kbd { display: inline-block; border: 1px solid #556771; border-bottom-width: 3px
 }
 
 .domi-mission-mini-bar {
-  height: 7px !important;
+  height: 8px !important;
   background: #091216 !important;
   border: 1px solid #193036 !important;
   position: relative !important;
@@ -2553,27 +2472,69 @@ kbd { display: inline-block; border: 1px solid #556771; border-bottom-width: 3px
 .domi-mission-right {
   flex: none !important;
   display: flex !important;
-  flex-direction: column !important;
-  align-items: flex-end !important;
-  gap: 8px !important;
-  min-width: 130px !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  gap: 14px !important;
+  min-width: 260px !important;
+  justify-content: flex-end !important;
+}
+
+/* Tooltip pixel art sobre la recompensa */
+.domi-reward-wrap {
+  position: relative !important;
+  display: inline-flex !important;
+  align-items: center !important;
 }
 
 .domi-reward-badge {
   font-family: 'Press Start 2P', monospace !important;
-  font-size: 7.5px !important;
-  padding: 6px 10px !important;
+  font-size: 8px !important;
+  padding: 8px 12px !important;
   background: #2a2010 !important;
   color: #facc15 !important;
   border: 2px solid #b48528 !important;
-  box-shadow: 2px 2px 0 #000 !important;
+  box-shadow: 3px 3px 0 #000 !important;
   white-space: nowrap !important;
+  cursor: help !important;
+  transition: background 0.15s ease, border-color 0.15s ease !important;
+}
+
+.domi-reward-wrap:hover .domi-reward-badge {
+  background: #3b2e15 !important;
+  border-color: #ffd000 !important;
+}
+
+.domi-pixel-tooltip {
+  position: absolute !important;
+  bottom: calc(100% + 8px) !important;
+  right: 0 !important;
+  background: #080f13 !important;
+  border: 2px solid #ffe066 !important;
+  box-shadow: 4px 4px 0 #000 !important;
+  color: #ffe066 !important;
+  font-family: 'Press Start 2P', monospace !important;
+  font-size: 7.5px !important;
+  line-height: 1.6 !important;
+  padding: 8px 12px !important;
+  white-space: nowrap !important;
+  pointer-events: none !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+  transform: translateY(4px) !important;
+  transition: opacity 0.15s ease, transform 0.15s ease !important;
+  z-index: 30 !important;
+}
+
+.domi-reward-wrap:hover .domi-pixel-tooltip {
+  opacity: 1 !important;
+  visibility: visible !important;
+  transform: translateY(0) !important;
 }
 
 .domi-claim-btn {
-  font-size: 8px !important;
+  font-size: 8.5px !important;
   padding: 10px 14px !important;
-  width: 100% !important;
+  min-width: 130px !important;
 }
 
 .pixel-button--claim {
@@ -2581,7 +2542,7 @@ kbd { display: inline-block; border: 1px solid #556771; border-bottom-width: 3px
   color: #171003 !important;
   border-color: #fde047 !important;
   border-bottom-color: #b45309 !important;
-  box-shadow: 3px 3px 0 #000, 0 0 10px rgba(245, 158, 11, 0.4) !important;
+  box-shadow: 4px 4px 0 #000, 0 0 12px rgba(245, 158, 11, 0.45) !important;
   animation: pulse-claim 1.2s infinite ease-in-out !important;
 }
 

@@ -159,11 +159,20 @@ export class Enemy {
     this.x += (moveX / moveMag) * finalSpeed * delta;
     this.y += (moveY / moveMag) * finalSpeed * delta;
 
-    // Mantener a los enemigos dentro de los límites del mapa 1920x1080
+    // Mantener a los enemigos dentro de los límites del mapa 1920x1080 (salvo al perseguir al clon señuelo)
     const worldW = state?.world?.width || 1920;
     const worldH = state?.world?.height || 1080;
-    this.x = Math.max(this.radius + 6, Math.min(worldW - this.radius - 6, this.x));
-    this.y = Math.max(120 + this.radius, Math.min(worldH - this.radius - 20, this.y));
+    if (state?.decoy) {
+      // Si el señuelo está activo, los enemigos lo persiguen hacia afuera del mapa
+      if (this.x < -80 || this.x > worldW + 80 || this.y < -80 || this.y > worldH + 80) {
+        this.hp = 0;
+        if (state.player) state.player.kills = (state.player.kills || 0) + 1;
+        state.floaters?.push({ x: this.x, y: this.y, text: '¡BURLADO!', life: 0.8, color: '#38bdf8', scale: 1 });
+      }
+    } else {
+      this.x = Math.max(this.radius + 6, Math.min(worldW - this.radius - 6, this.x));
+      this.y = Math.max(120 + this.radius, Math.min(worldH - this.radius - 20, this.y));
+    }
     if (this.type.id === 'ketchup') {
       this.shotTimer -= delta;
       if (this.shotTimer <= 0) { this.shotTimer = 2.1; this.shotReady = true; }
