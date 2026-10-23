@@ -152,148 +152,30 @@ export class Game {
   resume() { if (this.screenId === 'pauseScreen') this.showScreen('gameScreen'); }
 
   renderBuild() {
-    const p = this.state?.player;
-    if (!p) return;
-    // Portrait del personaje
-    const portraitCanvas = document.querySelector('#pauseHudPortrait');
-    if (portraitCanvas) {
-      const c = portraitCanvas.getContext('2d');
-      c.clearRect(0, 0, 40, 40);
-      drawFood(c, p.skin.id, 20, 18, 0.55);
+    const root = document.querySelector('#buildList');
+    if (!root || !this.state) return;
+    root.replaceChildren();
+    const p = this.state.player;
+    if (p.weaponEvolution) {
+      const evo = document.createElement('span');
+      evo.className = 'build-evo';
+      evo.textContent = '? ' + p.weaponEvolution.name;
+      root.append(evo);
     }
-
-    // Datos del HUD en la pausa (idéntico al HUD del juego)
-    const nameEl = document.querySelector('#pauseHudSkinName');
-    if (nameEl) nameEl.textContent = p.skin.name;
-    const wepEl = document.querySelector('#pauseHudWeaponName');
-    if (wepEl) wepEl.textContent = p.weaponEvolution ? p.weaponEvolution.name : p.weapon.name;
-    const timeEl = document.querySelector('#pauseHudTime');
-    if (timeEl) timeEl.textContent = formatTime(this.state.time);
-
-    const hpVal = document.querySelector('#pauseHpValue');
-    if (hpVal) hpVal.textContent = `${Math.ceil(p.hp)} / ${p.maxHp}`;
-    const hpFill = document.querySelector('#pauseHpFill');
-    if (hpFill) hpFill.style.width = `${Math.max(0, p.hp / p.maxHp * 100)}%`;
-
-    // Efectos activos con el MISMO formato del HUD del juego
-    const buffsEl = document.querySelector('#pauseActiveBuffs');
-    if (buffsEl) {
-      const labels = [['damageTime', 'DANO'], ['speedTime', 'VELOCIDAD'], ['fireTime', 'CADENCIA']];
-      const activeLabels = labels.filter(([key]) => p.buffs[key] > 0).map(([key, label]) => `${label} ${Math.ceil(p.buffs[key])}s`);
-      if (p.comboFeverTime > 0) activeLabels.push(`FIEBRE ${Math.ceil(p.comboFeverTime)}s`);
-      buffsEl.textContent = activeLabels.length ? activeLabels.join(' / ') : 'NINGUNO (SIN BUFFS)';
+    for (const [id, count] of Object.entries(p.abilities || {})) {
+      const item = document.createElement('span');
+      const ab = abilityCatalog.find(ability => ability.id === id);
+      item.textContent = (ab?.name || id) + ' / ' + count;
+      root.append(item);
     }
-
-    const lvlEl = document.querySelector('#pauseLevelValue');
-    if (lvlEl) lvlEl.textContent = p.level;
-    const killsEl = document.querySelector('#pauseKillsValue');
-    if (killsEl) killsEl.textContent = this.state.kills;
-    const scoreEl = document.querySelector('#pauseScoreValue');
-    if (scoreEl) scoreEl.textContent = Math.floor(this.state.score).toLocaleString('es-AR');
-    const combo = this.state.combo || 0;
-    const comboMult = Math.min(3, 1 + Math.floor(combo / 5) * 0.25);
-    const comboEl = document.querySelector('#pauseComboValue');
-    if (comboEl) comboEl.textContent = combo > 0 ? `x${comboMult.toFixed(2)} (${combo})` : 'x1.00';
-    const passivesRoot = document.querySelector('#buildList');
-    const activesRoot = document.querySelector('#pauseActivesList');
-    const goalEl = document.querySelector('#pauseGoal');
-    if (goalEl && modes[this.state.modeId]) goalEl.textContent = modes[this.state.modeId].goal;
-
-    // 1. Habilidades Pasivas Adquiridas
-    if (passivesRoot) {
-      passivesRoot.replaceChildren();
-      const entries = Object.entries(p.abilities || {});
-      const evo = p.weaponEvolution;
-
-      if (evo) {
-        const card = document.createElement('div');
-        card.className = 'pause-card pause-card--evo';
-        card.innerHTML = `
-          <div class="pause-card-head">
-            <span class="pause-badge pause-badge--evo">EVOLUCIÓN</span>
-            <strong class="pause-card-title">${evo.name}</strong>
-          </div>
-          <p class="pause-card-desc">${evo.description}</p>
-        `;
-        passivesRoot.append(card);
-      }
-
-      for (const [id, count] of entries) {
-        const ab = abilityCatalog.find(x => x.id === id);
-        const card = document.createElement('div');
-        card.className = 'pause-card';
-        const isMax = count >= (ab?.maxStacks || count);
-        card.innerHTML = `
-          <div class="pause-card-head">
-            <span class="pause-badge">${ab?.category || 'PASIVA'}</span>
-            <strong class="pause-card-title">${ab?.name || id}</strong>
-            <span class="pause-level ${isMax ? 'is-max' : ''}">${isMax ? '¡MAX!' : `Nivel ${count}/${ab?.maxStacks || count}`}</span>
-          </div>
-          <p class="pause-card-desc">${ab?.description || 'Mejora pasiva activa en el turno.'}</p>
-        `;
-        passivesRoot.append(card);
-      }
-
-      if (!entries.length && !evo) {
-        const empty = document.createElement('div');
-        empty.className = 'pause-empty-msg';
-        empty.textContent = 'Aún no elegiste mejoras pasivas. ¡Subí de nivel durante la partida para desbloquear recetas!';
-        passivesRoot.append(empty);
-      }
+    if (!root.children.length) {
+      const empty = document.createElement('span');
+      empty.textContent = 'Combo original (sin mejoras)';
+      root.append(empty);
     }
-
-    // 2. Habilidades Activas Desbloqueables
-    if (activesRoot) {
-      activesRoot.replaceChildren();
-      const currentLevel = p.level || 1;
-      const actives = [
-        {
-          key: 'Q',
-          name: primes[0].name,
-          levelReq: 5,
-          desc: '20 disparos en todas direcciones. Recarga: 18 s.',
-          isUnlocked: currentLevel >= 5
-        },
-        {
-          key: 'E',
-          name: primes[1].name,
-          levelReq: 10,
-          desc: 'Un clon distrae enemigos hasta 5 s. Recarga: 28 s.',
-          isUnlocked: currentLevel >= 10
-        },
-        {
-          key: 'R',
-          name: primes[2].name,
-          levelReq: 15,
-          desc: 'Inmunidad por 3,5 s y empuje cercano. Recarga: 40 s.',
-          isUnlocked: currentLevel >= 15
-        },
-        {
-          key: 'ESPACIO',
-          name: 'ACELERÓN / EMBESTIDA',
-          levelReq: 1,
-          desc: 'Esquiva y golpea al atravesar enemigos. Recarga: 2,8 s.',
-          isUnlocked: true
-        }
-      ];
-
-      for (const act of actives) {
-        const card = document.createElement('div');
-        card.className = `pause-active-card ${act.isUnlocked ? 'is-unlocked' : 'is-locked'}`;
-        card.innerHTML = `
-          <div class="pause-active-key"><kbd>${act.key}</kbd></div>
-          <div class="pause-active-info">
-            <div class="pause-active-head">
-              <strong class="pause-active-title">${act.name}</strong>
-              <span class="pause-active-status ${act.isUnlocked ? 'status--unlocked' : 'status--locked'}">
-                ${act.isUnlocked ? 'DESBLOQUEADA' : `NIVEL ${act.levelReq}`}
-              </span>
-            </div>
-            <p class="pause-active-desc">${act.desc}</p>
-          </div>
-        `;
-        activesRoot.append(card);
-      }
+    const goal = document.querySelector('#pauseGoal');
+    if (goal && modes[this.state.modeId]) {
+      goal.textContent = modes[this.state.modeId].goal;
     }
   }
 

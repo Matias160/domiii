@@ -2035,16 +2035,15 @@ kbd { display: inline-block; border: 1px solid #556771; border-bottom-width: 3px
 }
 
 /* ============================================================================
-   PAUSA: LAYOUT CLÃSICO CON HUD LATERAL Y HABILIDADES
+   PAUSA: MENÚ CLÁSICO RETRO CENTRADO (ORIGINAL)
    ============================================================================ */
 .pause-screen {
-  background: rgba(8, 14, 18, 0.92) !important;
+  background: rgba(10, 16, 20, 0.92) !important;
   backdrop-filter: blur(6px) !important;
   display: none;
   align-items: center;
   justify-content: center;
-  padding: 24px clamp(16px, 3vw, 40px) !important;
-  overflow-y: auto !important;
+  padding: 24px !important;
   z-index: 99;
 }
 
@@ -2052,64 +2051,85 @@ kbd { display: inline-block; border: 1px solid #556771; border-bottom-width: 3px
   display: flex !important;
 }
 
-.pause-layout {
-  display: flex !important;
-  flex-direction: row !important;
-  gap: 28px !important;
-  align-items: flex-start !important;
-  justify-content: center !important;
-  max-width: 1160px !important;
-  width: 100% !important;
-  margin: auto !important;
-}
-
-/* 1. MenÃº Central como antes */
 .pause-screen .pause-panel {
-  flex: 1 1 440px !important;
-  max-width: 480px !important;
+  max-width: 580px !important;
+  width: 90% !important;
+  margin: auto !important;
   background: #0d161cfc !important;
   border: 4px solid #ffcc00 !important;
   border-bottom: 6px solid #000 !important;
-  box-shadow: 8px 8px 0 #000, 0 0 25px rgba(255, 204, 0, 0.25) !important;
-  padding: 28px 32px !important;
+  box-shadow: 8px 8px 0 #000, 0 0 30px rgba(255, 204, 0, 0.25) !important;
+  padding: 32px 36px !important;
   display: flex !important;
   flex-direction: column !important;
   gap: 16px !important;
+  text-align: left !important;
 }
 
 .pause-screen .pause-panel .eyebrow {
   color: #7dd3fc !important;
   font-family: 'Press Start 2P', monospace !important;
-  font-size: 8px !important;
+  font-size: 8.5px !important;
   letter-spacing: 2px !important;
   margin: 0 !important;
 }
 
 .pause-screen .pause-panel h2 {
   font-family: 'Press Start 2P', monospace !important;
-  font-size: 20px !important;
-  line-height: 1.4 !important;
+  font-size: 26px !important;
+  line-height: 1.3 !important;
   color: #fff !important;
   text-shadow: 3px 3px 0 #000 !important;
   margin: 0 !important;
 }
 
 .pause-screen .pause-panel .pause-goal {
-  color: #cbd5e1 !important;
+  color: #38ef7d !important;
   font-family: 'Press Start 2P', monospace !important;
-  font-size: 8.5px !important;
-  line-height: 1.8 !important;
+  font-size: 9px !important;
+  line-height: 1.7 !important;
   background: #142127 !important;
   border: 2px solid #283e47 !important;
   padding: 12px 14px !important;
   margin: 0 !important;
 }
 
+.pause-screen .pause-panel h3 {
+  font-family: 'Press Start 2P', monospace !important;
+  font-size: 11px !important;
+  color: #ffe066 !important;
+  margin: 8px 0 0 !important;
+}
+
+.pause-screen .build-list {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 8px !important;
+  max-height: 160px !important;
+  overflow-y: auto !important;
+  padding: 6px 2px !important;
+}
+
+.pause-screen .build-list span {
+  font-family: 'Press Start 2P', monospace !important;
+  font-size: 8px !important;
+  padding: 8px 12px !important;
+  background: #142127 !important;
+  border: 2px solid #283e47 !important;
+  border-bottom: 3px solid #000 !important;
+  color: #cbd5e1 !important;
+}
+
+.pause-screen .build-list .build-evo {
+  color: #ffe066 !important;
+  border-color: #f59e0b !important;
+  background: #231b12 !important;
+}
+
 .pause-screen .pause-panel .menu-actions {
   display: flex !important;
-  flex-direction: column !important;
-  gap: 12px !important;
-  margin-top: 10px !important;
+  gap: 16px !important;
+  margin-top: 14px !important;
   position: static !important;
   background: transparent !important;
   border: 0 !important;
@@ -2117,189 +2137,329 @@ kbd { display: inline-block; border: 1px solid #556771; border-bottom-width: 3px
 }
 
 .pause-screen .pause-panel .menu-actions button {
-  width: 100% !important;
+  flex: 1 !important;
   min-height: 48px !important;
   font-size: 10px !important;
 }
 
-/* 2. Barra lateral: HUD del juego y Habilidades */
-.pause-sidebar {
-  flex: 1 1 520px !important;
-  max-width: 580px !important;
-  display: flex !important;
-  flex-direction: column !important;
-  gap: 16px !important;
+/* ============================================================================
+   ACELERÓN (ESPACIO): ESTILO VISUAL IDÉNTICO A LAS HABILIDADES PRIME
+   ============================================================================ */
+#dashControl.dash-control.prime-slot {
+  position: absolute !important;
+  left: calc(50% + 105px) !important;
+  right: auto !important;
+  bottom: 9px !important;
+  transform: translateX(-50%) !important;
+  width: 96px !important;
+  height: 58px !important;
+  min-height: 58px !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  border: 3px solid #65717a !important;
+  background: #121c22 !important;
+  box-shadow: 5px 5px #020609, inset 0 0 0 2px #05090c !important;
+  cursor: pointer !important;
+  z-index: 3 !important;
+  display: block !important;
+  color: #edf8ef !important;
+  text-align: left !important;
 }
 
-/* Tarjeta con el MISMO diseÃ±o y colores del HUD del juego */
-.pause-hud-card {
-  background: #0f1619 !important;
-  border: 3px solid #000 !important;
-  border-left: 6px solid #38ef7d !important;
-  box-shadow: 6px 6px 0 #000, inset 0 0 15px rgba(0, 0, 0, 0.4) !important;
-  padding: 16px 18px !important;
+#dashControl.dash-control.prime-slot::after {
+  content: '' !important;
+  position: absolute !important;
+  z-index: 1 !important;
+  inset: 0 !important;
+  pointer-events: none !important;
+  background: linear-gradient(to top, transparent 0 var(--charge, 0%), rgba(1, 5, 8, 0.78) var(--charge, 0%) 100%) !important;
+}
+
+#dashControl .prime-key.dash-key {
+  position: absolute !important;
+  top: 5px !important;
+  left: 5px !important;
+  width: auto !important;
+  min-width: 48px !important;
+  height: 24px !important;
+  padding: 2px 4px !important;
+  font-family: 'Press Start 2P', monospace !important;
+  font-size: 7.5px !important;
+  font-weight: 900 !important;
+  line-height: 20px !important;
+  text-align: center !important;
+  background: #f8d76c !important;
+  color: #182329 !important;
+  border: 2px solid #000 !important;
+  border-bottom: 3px solid #b38f00 !important;
+  box-shadow: 1px 1px 0 #000 !important;
+  z-index: 2 !important;
+  border-radius: 0 !important;
+}
+
+#dashControl .prime-symbol {
+  position: absolute !important;
+  top: 4px !important;
+  right: 6px !important;
+  left: auto !important;
+  width: 32px !important;
+  height: 28px !important;
+  display: grid !important;
+  place-items: center !important;
+  background: #1a2a30 !important;
+  border: 1px solid #283e47 !important;
+  z-index: 2 !important;
+}
+
+#dashControl .prime-symbol svg {
+  width: 18px !important;
+  height: 18px !important;
+  color: #a9ffe1 !important;
+}
+
+#dashControl .prime-label {
+  position: absolute !important;
+  left: 4px !important;
+  right: 4px !important;
+  bottom: 4px !important;
+  color: #edf8ef !important;
+  font: 700 8px/1.2 monospace !important;
+  white-space: nowrap !important;
+  text-align: center !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  z-index: 2 !important;
+}
+
+#dashControl .prime-cool {
+  position: absolute !important;
+  z-index: 3 !important;
+  top: 6px !important;
+  right: 6px !important;
+  padding: 3px 5px !important;
+  background: #050b10e8 !important;
+  color: #ffe078 !important;
+  font: bold 10px monospace !important;
+  border: 1px solid #ffcc0066 !important;
+}
+
+#dashControl .dash-meter {
+  display: none !important;
+}
+
+#dashControl i#dashFill {
+  position: absolute !important;
+  bottom: 0 !important;
+  left: 0 !important;
+  height: 3px !important;
+  background: #73f0c1 !important;
+  transition: width 0.05s linear !important;
+  z-index: 4 !important;
+}
+
+#dashControl[data-status="ready"], #dashControl[data-ready="true"] {
+  border-color: #73f0c1 !important;
+  box-shadow: 5px 5px #020609, inset 0 0 0 2px #07100c, 0 0 10px rgba(115, 240, 193, 0.45) !important;
+}
+
+#dashControl[data-status="ready"] .dash-key {
+  background: #f8d76c !important;
+  color: #182329 !important;
+  border-color: #000 !important;
+}
+
+#dashControl[data-status="cooldown"], #dashControl[data-ready="false"] {
+  border-color: #d49b4e !important;
+}
+
+#dashControl[data-status="cooldown"] .dash-key {
+  background: #3c444a !important;
+  color: #94a3b8 !important;
+  border-color: #283036 !important;
+  border-bottom-color: #141a1e !important;
+}
+
+/* ============================================================================
+   DON DOMI: DISTRIBUCIÓN MEJORADA Y ESPACIOSA MANTENIENDO EL ESTILO VISUAL
+   ============================================================================ */
+#domiScreen .shop-panel {
+  max-width: 1260px !important;
+  width: 94% !important;
+  margin: 0 auto !important;
+}
+
+#domiScreen .shop-layout {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1.45fr) minmax(360px, 420px) !important;
+  gap: 32px !important;
+  align-items: start !important;
+}
+
+#domiScreen .shop-tabs {
   display: flex !important;
-  flex-direction: column !important;
   gap: 12px !important;
+  margin: 0 0 24px !important;
+  border-bottom: 2px solid #28444a !important;
+  padding-bottom: 12px !important;
 }
 
-.pause-hud-top {
+#domiScreen .shop-tabs button {
+  padding: 12px 24px !important;
+  font-family: 'Press Start 2P', monospace !important;
+  font-size: 9px !important;
+  border: 2px solid #334d54 !important;
+  border-bottom: 4px solid #142226 !important;
+  background: #111e24 !important;
+  color: #8da4a1 !important;
   display: flex !important;
   align-items: center !important;
-  gap: 12px !important;
-  border-bottom: 2px solid #20353c !important;
-  padding-bottom: 10px !important;
+  gap: 10px !important;
+  cursor: pointer !important;
+  transition: all 0.15s ease !important;
 }
 
-#pauseHudPortrait {
-  width: 40px !important;
-  height: 40px !important;
-  background: #142127 !important;
-  border: 2px solid #283e47 !important;
-  border-radius: 0 !important;
-  box-shadow: 2px 2px 0 #000 !important;
+#domiScreen .shop-tabs button:hover {
+  background: #1c323a !important;
+  color: #fff !important;
+  border-color: #4d707a !important;
 }
 
-.pause-hud-names {
-  flex: 1 !important;
+#domiScreen .shop-tabs button.active {
+  background: #5ce1e6 !important;
+  color: #0b1518 !important;
+  border-color: #7ef5fa !important;
+  border-bottom: 4px solid #32969b !important;
+  box-shadow: 0 4px 0 #000, 0 0 16px rgba(92, 225, 230, 0.35) !important;
+  font-weight: 900 !important;
+}
+
+#domiScreen .shop-grid {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 18px !important;
+}
+
+#domiScreen .catalog-item {
+  min-height: 240px !important;
+  border: 2px solid #2d454d !important;
+  border-bottom: 4px solid #000 !important;
+  background: #132026 !important;
+  box-shadow: 4px 4px 0 #000 !important;
+  padding: 0 !important;
   display: flex !important;
   flex-direction: column !important;
-  gap: 3px !important;
 }
 
-#pauseHudSkinName {
-  font-family: 'Press Start 2P', monospace !important;
+#domiScreen .catalog-art {
+  height: 125px !important;
+  background: #1b2e35 !important;
+  border-bottom: 2px solid #263e46 !important;
+}
+
+#domiScreen .catalog-copy {
+  padding: 16px !important;
+  gap: 10px !important;
+}
+
+#domiScreen .catalog-name {
   font-size: 11px !important;
-  color: #ffe066 !important;
+  line-height: 1.6 !important;
+  color: #fff4cc !important;
 }
 
-#pauseHudWeaponName {
+#domiScreen .catalog-description {
+  font-size: 13px !important;
+  line-height: 1.55 !important;
+  color: #a6bcc5 !important;
+}
+
+#domiScreen .shop-detail {
+  position: sticky !important;
+  top: 16px !important;
+  border: 2px solid #3f636b !important;
+  border-top: 4px solid #5ce1e6 !important;
+  background: #121e24 !important;
+  box-shadow: 8px 8px 0 #000, 0 0 25px rgba(0, 0, 0, 0.5) !important;
+}
+
+#domiScreen .detail-top {
+  padding: 16px 20px !important;
+  border-bottom: 2px solid #243a40 !important;
+  color: #5ce1e6 !important;
   font-family: 'Press Start 2P', monospace !important;
   font-size: 8px !important;
-  color: #7dd3fc !important;
-}
-
-.pause-hud-time {
-  font-family: 'Press Start 2P', monospace !important;
-  font-size: 11px !important;
-  color: #f8fafc !important;
-  background: #182830 !important;
-  border: 2px solid #334852 !important;
-  padding: 6px 10px !important;
-  box-shadow: 2px 2px 0 #000 !important;
-}
-
-.pause-hud-bars {
-  display: flex !important;
-  flex-direction: column !important;
-  gap: 6px !important;
-}
-
-.pause-bar-group {
-  display: flex !important;
-  flex-direction: column !important;
-  gap: 4px !important;
-}
-
-.pause-bar-label {
-  display: flex !important;
-  justify-content: space-between !important;
-  font-family: 'Press Start 2P', monospace !important;
-  font-size: 7.5px !important;
-  color: #94a3b8 !important;
-}
-
-.pause-bar-label b {
-  color: #38ef7d !important;
-}
-
-.pause-hud-bars .meter {
-  height: 10px !important;
-  background: #1a2529 !important;
-  border: 2px solid #000 !important;
-  box-shadow: inset 0 2px 4px rgba(0,0,0,0.6) !important;
-}
-
-.pause-hud-bars .meter__fill--hp {
-  background: linear-gradient(90deg, #ff3b30, #ff9500, #38ef7d) !important;
-  height: 100% !important;
-}
-
-.pause-buffs-block {
-  background: #142127 !important;
-  border: 2px solid #283e47 !important;
-  padding: 10px 12px !important;
-  display: flex !important;
-  flex-direction: column !important;
-  gap: 6px !important;
-}
-
-.pause-buffs-label {
-  font-family: 'Press Start 2P', monospace !important;
-  font-size: 7.5px !important;
-  color: #ffe066 !important;
   letter-spacing: 1px !important;
 }
 
-.pause-buffs-text {
-  font-family: 'Press Start 2P', monospace !important;
-  font-size: 8px !important;
-  line-height: 1.6 !important;
-  color: #38ef7d !important;
-  text-shadow: 0 0 6px rgba(56, 239, 125, 0.4) !important;
+#domiScreen .detail-stage {
+  background: #192c32 !important;
+  border-bottom: 2px solid #243a40 !important;
 }
 
-.pause-stats-row {
+#domiScreen .detail-stage canvas {
+  width: 100% !important;
+  max-height: 240px !important;
+  object-fit: contain !important;
+}
+
+#domiScreen .detail-body {
+  padding: 22px 24px 0 !important;
+}
+
+#domiScreen .detail-body h3 {
+  font-family: 'Press Start 2P', monospace !important;
+  font-size: 14px !important;
+  line-height: 1.6 !important;
+  color: #fff4cc !important;
+  margin-bottom: 12px !important;
+}
+
+#domiScreen .shop-description {
+  font-size: 14px !important;
+  line-height: 1.65 !important;
+  color: #b0c6cf !important;
+  margin-bottom: 18px !important;
+}
+
+#domiScreen .preview-stats {
   display: grid !important;
-  grid-template-columns: repeat(4, 1fr) !important;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
   gap: 8px !important;
-  background: #142127 !important;
-  border: 2px solid #283e47 !important;
-  padding: 8px !important;
+  margin: 0 0 18px !important;
+}
+
+#domiScreen .preview-stats span {
+  background: #0d161a !important;
+  border: 2px solid #263c42 !important;
+  padding: 12px 6px !important;
   text-align: center !important;
 }
 
-.pause-stats-row > div {
-  display: flex !important;
-  flex-direction: column !important;
-  gap: 3px !important;
-}
-
-.pause-stats-row span {
+#domiScreen .preview-stats small {
   font-family: 'Press Start 2P', monospace !important;
   font-size: 6.5px !important;
-  color: #94a3b8 !important;
+  color: #8da4a1 !important;
+  display: block !important;
+  margin-bottom: 6px !important;
 }
 
-.pause-stats-row b {
+#domiScreen .preview-stats b {
   font-family: 'Press Start 2P', monospace !important;
-  font-size: 10px !important;
-  color: #ffe066 !important;
+  font-size: 12px !important;
+  color: #5ce1e6 !important;
 }
 
-/* Tarjeta de Habilidades */
-.pause-abilities-card {
-  background: #0f1619 !important;
-  border: 3px solid #000 !important;
-  border-left: 6px solid #ffcc00 !important;
-  box-shadow: 6px 6px 0 #000 !important;
-  padding: 14px 16px !important;
+#domiScreen .detail-action {
+  padding: 0 24px 24px !important;
 }
 
-.pause-abilities-card .pause-tabs {
-  margin-top: 0 !important;
+#domiScreen .purchase-button {
+  min-height: 52px !important;
+  font-size: 11px !important;
 }
 
-@media (max-width: 900px) {
-  .pause-layout {
-    flex-direction: column !important;
-    align-items: stretch !important;
-  }
-  .pause-screen .pause-panel, .pause-sidebar {
-    max-width: 100% !important;
-    flex: 1 1 auto !important;
+@media (max-width: 1024px) {
+  #domiScreen .shop-layout {
+    grid-template-columns: minmax(0, 1fr) !important;
   }
 }
-
-
-

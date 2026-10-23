@@ -80,12 +80,15 @@ export class Hud {
     this.dashControl.dataset.active = String(p.dashTime > 0);
     this.set('dashLabel',p.dashTime>0?'IMPACTO':p.dashCooldown>0?`${p.dashCooldown.toFixed(1)} s`:'LISTO');
     if (this.dashControl) {
+      this.dashControl.dataset.status = isDashReady ? 'ready' : 'cooldown';
       this.dashControl.dataset.ready = String(isDashReady);
       this.dashControl.classList.toggle('is-ready', isDashReady);
       this.dashControl.classList.toggle('is-cooldown', !isDashReady);
+      this.dashControl.style.setProperty('--charge', `${Math.max(0, Math.min(1, 1-p.dashCooldown/2.8))*100}%`);
     }
-    this.nodes.dashFill.parentElement.parentElement.dataset.ready=String(isDashReady);
-    this.nodes.dashFill.style.width = `${Math.max(0, Math.min(1, 1-p.dashCooldown/2.8))*100}%`;
+    if (this.nodes.dashFill) {
+      this.nodes.dashFill.style.width = `${Math.max(0, Math.min(1, 1-p.dashCooldown/2.8))*100}%`;
+    }
     this.set('runLocation',maps[state.mapId]); this.set('runDifficulty',state.difficulty.name.toUpperCase());
     const progress=state.modeId==='waves'?'OLEADA '+state.wave+'/8':state.modeId==='rush'?'JEFES '+state.bossesKilled+'/3':modes[state.modeId].name.toUpperCase();
     this.nodes.runLocation.title = progress;

@@ -331,25 +331,78 @@ export function drawDiner(c, width, height, time, menu, map = 'diner') {
       }
       c.restore();
     } else {
-      // Diner clásico: Iluminación de lámparas colgantes retro sobre las mesas
+      // Diner clásico (Local DOMI): Iluminación retro inmersiva con luces volumétricas, viñeta y sombras
       c.save();
-      for (let i = 0; i < 6; i++) {
-        const tx = [220, 700, 1220, 1700, 480, 1440][i];
-        const ty = [170, 170, 170, 170, height - 180, height - 180][i];
-        const lamp = c.createRadialGradient(tx, ty - 10, 0, tx, ty + 40, 180);
-        lamp.addColorStop(0, 'rgba(255, 235, 175, 0.14)');
-        lamp.addColorStop(0.5, 'rgba(255, 210, 130, 0.05)');
-        lamp.addColorStop(1, 'transparent');
-        c.fillStyle = lamp;
-        c.fillRect(tx - 180, ty - 180, 360, 360);
+
+      // 1. Oclusión ambiental perimetral / Viñeta en los bordes de la sala
+      const vignette = c.createRadialGradient(width / 2, height / 2, height * 0.35, width / 2, height / 2, Math.max(width, height) * 0.72);
+      vignette.addColorStop(0, 'rgba(0, 0, 0, 0)');
+      vignette.addColorStop(0.65, 'rgba(10, 16, 20, 0.28)');
+      vignette.addColorStop(1, 'rgba(4, 8, 12, 0.65)');
+      c.fillStyle = vignette;
+      c.fillRect(0, 0, width, height);
+
+      // 2. Resplandor del letrero de neón DOMI en la pared superior
+      const neonGlow = c.createRadialGradient(width / 2, 70, 10, width / 2, 70, 320);
+      const neonPulse = 0.18 + Math.sin(time * 3.5) * 0.04 + (Math.random() < 0.02 ? -0.06 : 0);
+      neonGlow.addColorStop(0, `rgba(255, 90, 80, ${neonPulse * 1.4})`);
+      neonGlow.addColorStop(0.4, `rgba(255, 170, 80, ${neonPulse * 0.6})`);
+      neonGlow.addColorStop(1, 'transparent');
+      c.fillStyle = neonGlow;
+      c.fillRect(width / 2 - 320, 0, 640, 220);
+
+      // 3. Luces colgantes retro (conos volumétricos y pisadas de luz cálida sobre el suelo)
+      const lampPositions = [
+        { x: 220, y: 78, floorY: 190, r: 190 },
+        { x: 500, y: 78, floorY: 180, r: 170 },
+        { x: 820, y: 78, floorY: 200, r: 210 },
+        { x: 1100, y: 78, floorY: 200, r: 210 },
+        { x: 1420, y: 78, floorY: 180, r: 170 },
+        { x: width - 220, y: 78, floorY: 190, r: 190 },
+        { x: 300, y: 78, floorY: height - 170, r: 220 },
+        { x: width - 300, y: 78, floorY: height - 170, r: 220 }
+      ];
+
+      for (let i = 0; i < lampPositions.length; i++) {
+        const { x: lx, y: ly, floorY, r } = lampPositions[i];
+        const lampFlicker = 0.12 + Math.sin(time * 2.2 + i * 1.7) * 0.025;
+
+        // Cono volumétrico de luz que desciende
+        c.save();
+        const coneGrad = c.createLinearGradient(lx, ly, lx, floorY + 40);
+        coneGrad.addColorStop(0, `rgba(255, 238, 180, ${lampFlicker * 1.5})`);
+        coneGrad.addColorStop(0.4, `rgba(255, 215, 130, ${lampFlicker * 0.7})`);
+        coneGrad.addColorStop(1, 'rgba(255, 190, 90, 0)');
+        c.fillStyle = coneGrad;
+        c.beginPath();
+        c.moveTo(lx - 18, ly);
+        c.lineTo(lx + 18, ly);
+        c.lineTo(lx + r * 0.75, floorY + 30);
+        c.lineTo(lx - r * 0.75, floorY + 30);
+        c.closePath();
+        c.fill();
+        c.restore();
+
+        // Piscina de luz cálida en el suelo (reflejo especular en las baldosas)
+        const poolGrad = c.createRadialGradient(lx, floorY, 10, lx, floorY, r);
+        poolGrad.addColorStop(0, `rgba(255, 230, 160, ${lampFlicker * 1.6})`);
+        poolGrad.addColorStop(0.4, `rgba(255, 195, 110, ${lampFlicker * 0.8})`);
+        poolGrad.addColorStop(0.8, `rgba(220, 150, 70, ${lampFlicker * 0.2})`);
+        poolGrad.addColorStop(1, 'transparent');
+        c.fillStyle = poolGrad;
+        c.beginPath();
+        c.ellipse(lx, floorY, r, r * 0.52, 0, 0, Math.PI * 2);
+        c.fill();
       }
-      // Motas de polvo dorado flotando en los rayos de luz
-      for (let i = 0; i < 35; i++) {
-        const dx = ((i * 157 + time * 14) % width);
-        const dy = 110 + ((i * 97 + Math.sin(time + i) * 18) % (height - 180));
-        c.fillStyle = '#ffeaa7';
-        c.globalAlpha = 0.35 + Math.sin(time * 2 + i) * 0.25;
-        c.fillRect(Math.round(dx), Math.round(dy), 2, 2);
+
+      // 4. Rayos tenues y motas de polvo dorado en suspensión
+      for (let i = 0; i < 42; i++) {
+        const dx = ((i * 139 + time * 12) % width);
+        const dy = 90 + ((i * 83 + Math.sin(time * 1.4 + i) * 16) % (height - 160));
+        const alpha = 0.35 + Math.sin(time * 2.5 + i) * 0.25;
+        c.fillStyle = (i % 3 === 0) ? '#fff2b2' : '#ffd580';
+        c.globalAlpha = Math.max(0.1, alpha);
+        c.fillRect(Math.round(dx), Math.round(dy), (i % 5 === 0) ? 3 : 2, (i % 5 === 0) ? 3 : 2);
       }
       c.restore();
     }

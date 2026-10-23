@@ -89,11 +89,40 @@ export function drawWorldProps(ctx, map = 'diner', time = 0, world = { width: 19
     machine(ctx, 200, 170, '#697c7c'); machine(ctx, w - 200, 170, '#697c7c');
     machine(ctx, 200, h - 200, '#697c7c'); machine(ctx, w - 200, h - 200, '#697c7c');
   } else {
-    // Diner
+    // Diner clásico: mobiliario con sombras de contacto profundas y reflejos cálidos
+    // Sombras oclusivas de base en el piso antes de dibujar los muebles
+    ctx.save();
+    ctx.fillStyle = 'rgba(5, 10, 14, 0.42)';
+    for (const [tx, ty] of [[220, 170], [w - 220, 170], [220, h - 180], [w - 220, h - 180]]) {
+      ctx.beginPath();
+      ctx.ellipse(tx, ty + 26, 62, 14, 0, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    for (const [sx, sy] of [[450, 150], [w - 450, 150]]) {
+      ctx.beginPath();
+      ctx.ellipse(sx, sy + 38, 72, 16, 0, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    ctx.restore();
+
     table(ctx, 220, 170); table(ctx, w - 220, 170);
     table(ctx, 220, h - 180); table(ctx, w - 220, h - 180);
     showcase(ctx, 450, 150); showcase(ctx, w - 450, 150);
     steam(ctx, 240, 150, time); steam(ctx, w - 240, 150, time + .8);
+
+    // Resplandor cálido de neón/vidrio de las vitrinas
+    ctx.save();
+    for (const sx of [450, w - 450]) {
+      const showGlow = ctx.createRadialGradient(sx, 160, 10, sx, 165, 85);
+      showGlow.addColorStop(0, 'rgba(126, 209, 186, 0.12)');
+      showGlow.addColorStop(0.6, 'rgba(248, 231, 172, 0.06)');
+      showGlow.addColorStop(1, 'transparent');
+      ctx.fillStyle = showGlow;
+      ctx.beginPath();
+      ctx.ellipse(sx, 165, 85, 35, 0, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    ctx.restore();
   }
   ctx.restore();
 }

@@ -348,62 +348,16 @@
       <section id="skinsScreen" class="screen"><div class="screen__panel"><p class="eyebrow">EL EQUIPO DEL MOSTRADOR</p><h2>Fuera de carta.</h2><div id="skinsPreview" class="skins-preview"></div><div class="menu-actions"><button id="skinsBackButton" class="pixel-button">Volver</button></div></div></section>
 
       <section id="pauseScreen" class="screen pause-screen">
-        <div class="pause-layout">
-          <!-- Menú central como antes -->
-          <div class="screen__panel pause-panel">
-            <p class="eyebrow">PEDIDO EN ESPERA</p>
-            <h2>La cocina espera.</h2>
-            <p id="pauseGoal" class="pause-goal"></p>
-            <div class="menu-actions">
-              <button id="resumeButton" class="pixel-button pixel-button--green">SEGUIR COCINANDO <span aria-hidden="true">&#9654;</span></button>
-              <button id="abandonButton" class="pixel-button pixel-button--secondary">TERMINAR PARTIDA</button>
-            </div>
+        <div class="screen__panel pause-panel">
+          <p class="eyebrow">PEDIDO EN ESPERA</p>
+          <h2>La cocina espera.</h2>
+          <p id="pauseGoal" class="pause-goal"></p>
+          <h3>Tu receta</h3>
+          <div id="buildList" class="build-list"></div>
+          <div class="menu-actions">
+            <button id="resumeButton" class="pixel-button pixel-button--green">SEGUIR COCINANDO <span aria-hidden="true">&#9654;</span></button>
+            <button id="abandonButton" class="pixel-button pixel-button--secondary">TERMINAR PARTIDA</button>
           </div>
-
-          <!-- Al costado: Efectos con el mismo HUD del juego y Habilidades -->
-          <aside class="pause-sidebar">
-            <!-- Efectos con el mismo HUD del juego -->
-            <div class="pause-hud-card">
-              <div class="pause-hud-top">
-                <canvas id="pauseHudPortrait" width="40" height="40"></canvas>
-                <div class="pause-hud-names">
-                  <strong id="pauseHudSkinName">Pancho</strong>
-                  <span id="pauseHudWeaponName">Tenedor</span>
-                </div>
-                <span id="pauseHudTime" class="pause-hud-time">00:00</span>
-              </div>
-              <div class="pause-hud-bars">
-                <div class="pause-bar-group">
-                  <div class="pause-bar-label"><span>Vida</span><b id="pauseHpValue">100 / 100</b></div>
-                  <div class="meter"><div id="pauseHpFill" class="meter__fill meter__fill--hp"></div></div>
-                </div>
-              </div>
-              <div class="pause-buffs-block">
-                <span class="pause-buffs-label">EFECTOS ACTIVOS:</span>
-                <div id="pauseActiveBuffs" class="active-buffs pause-buffs-text"></div>
-              </div>
-              <div class="pause-stats-row">
-                <div><span>NV</span><b id="pauseLevelValue">1</b></div>
-                <div><span>KOs</span><b id="pauseKillsValue">0</b></div>
-                <div><span>PTS</span><b id="pauseScoreValue">0</b></div>
-                <div><span>COMBO</span><b id="pauseComboValue">x1</b></div>
-              </div>
-            </div>
-
-            <!-- Habilidades al costado -->
-            <div class="pause-abilities-card">
-              <div class="pause-tabs" role="tablist">
-                <button type="button" class="pause-tab is-active" id="pauseTabActives">ACTIVAS</button>
-                <button type="button" class="pause-tab" id="pauseTabPassives">PASIVAS</button>
-              </div>
-              <div id="pauseActivesView" class="pause-view">
-                <div id="pauseActivesList" class="pause-actives-list"></div>
-              </div>
-              <div id="pausePassivesView" class="pause-view" hidden>
-                <div id="buildList" class="pause-passives-list"></div>
-              </div>
-            </div>
-          </aside>
         </div>
       </section>
 
@@ -449,7 +403,13 @@
         <div id="activeBuffs" class="active-buffs" aria-live="polite"></div>
       </div>
       <div id="runBar" class="run-bar" hidden><span id="runLocation">LOCAL DOMI</span><span id="comboCount" aria-live="polite">COMBO x1</span><span id="runDifficulty">PICANTE</span></div>
-      <button type="button" id="dashControl" class="dash-control" hidden title="Aceleron (Espacio)" aria-label="Usar aceleron"><i data-lucide="zap" aria-hidden="true"></i><span class="dash-meter"><strong>ACELERON</strong><span id="dashLabel">LISTO / EMBESTI</span><span class="meter"><span id="dashFill" class="meter__fill"></span></span></span><kbd class="pixel-key dash-key">ESPACIO</kbd></button>
+      <button type="button" id="dashControl" class="dash-control prime-slot" hidden title="Aceleron (Espacio)" aria-label="Usar aceleron">
+        <kbd class="prime-key pixel-key dash-key">ESPACIO</kbd>
+        <span class="prime-symbol"><i data-lucide="zap" aria-hidden="true"></i></span>
+        <span class="prime-label">ACELERÓN</span>
+        <span id="dashLabel" class="prime-cool"></span>
+        <span class="dash-meter"><span class="meter"><i id="dashFill"></i></span></span>
+      </button>
       <aside id="comboMilestones" class="combo-milestones" hidden aria-label="Progresión del combo">
         <div class="combo-current"><i data-lucide="biceps-flexed" aria-hidden="true"></i><strong id="comboMultiplier">x1.00</strong><span id="comboChain">0 KOs</span></div>
         <div class="combo-steps"><span data-combo-step="10">x10</span><span data-combo-step="20">x20</span><span data-combo-step="30">x30</span></div>
