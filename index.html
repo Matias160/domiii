@@ -46,7 +46,6 @@
       <section id="lobbyScreen" class="screen lobby-screen">
         <header class="lobby-header"><span class="brand-mark">D<span>2</span></span><div><strong id="lobbyWelcome">PANCHO</strong><small>SOCIO DEL CLUB / EN EL LOCAL</small></div><span class="wallet"><i data-lucide="coins"></i><b id="lobbyBank">0</b><small>PT</small></span><button id="lobbyAchievements" class="lobby-achievements" title="Ver logros" aria-label="Ver logros y progreso"><i data-lucide="trophy"></i><span>LOGROS <b id="lobbyAchievementCount">0 / 6</b></span></button><button id="lobbyOptions" class="icon-button" title="Opciones" aria-label="Opciones"><i data-lucide="settings-2"></i></button><button id="logoutButton" class="icon-button" title="Cerrar sesion" aria-label="Cerrar sesion"><i data-lucide="log-out"></i></button></header>
         <div class="lobby-stage"><canvas id="lobbyCanvas" width="960" height="540" aria-label="Lobby interactivo"></canvas><p class="lobby-controls"><kbd>WASD</kbd> / flechas: moverte <span>·</span> <kbd>E</kbd>: interactuar <span>·</span> También podés hacer clic en los lugares.</p><div class="lobby-tip" id="lobbyTip" hidden></div></div>
-        <nav class="lobby-nav" aria-label="Lugares del local"><button data-station="portal" title="Preparar partida"><i data-lucide="door-open"></i><span>PARTIDA</span></button><button data-station="wardrobe" title="Tu coleccion"><i data-lucide="shirt"></i><span>ARMARIO</span></button><button data-station="pets" title="Mascotas"><i data-lucide="paw-print"></i><span>MASCOTAS</span></button><button data-station="shop" title="Tienda"><i data-lucide="store"></i><span>TIENDA</span></button><button data-station="npc" title="Hablar con Don Domi"><i data-lucide="message-circle"></i><span>DON DOMI</span></button><button data-station="ranking" title="Tus partidas"><i data-lucide="chart-no-axes-column"></i><span>HISTORIAL</span></button></nav>
       </section>
 
       <section id="shopScreen" class="screen shop-screen" aria-labelledby="shopTitle">
@@ -77,16 +76,7 @@
             </div>
           </header>
           <div id="domiTabs" class="shop-tabs" role="group" aria-label="Categorías de Don Domi"></div>
-          <div class="shop-layout">
-            <div class="shop-catalog">
-              <div class="shop-catalog-heading">
-                <h3 id="domiCategory">Misiones</h3>
-                <span id="domiCount" role="status"></span>
-              </div>
-              <div id="domiGrid" class="shop-grid"></div>
-            </div>
-            <aside id="domiDetail" class="shop-detail" aria-label="Detalle de Don Domi"></aside>
-          </div>
+          <div id="domiContent" class="domi-content-area"></div>
           <p id="domiFeedback" class="shop-feedback" role="status" aria-live="polite"></p>
         </div>
       </section>
@@ -99,12 +89,12 @@
           <p class="menu-copy">La cocina cerro.<br />El menu se levanto.</p>
           <div class="menu-actions">
             <button id="playButton" class="pixel-button play-button">A LA COCINA <span aria-hidden="true">&#8599;</span></button>
-            <button id="rankingButton" class="text-button">Ver ranking <span aria-hidden="true">&#8594;</span></button>
+            <button id="rankingButton" class="pixel-button pixel-button--secondary">HISTORIAL <span aria-hidden="true">&#8594;</span></button>
           </div>
-          <nav class="menu-links" aria-label="Extras">
-            <button id="skinsButton" class="text-button">Personajes</button>
-            <button id="achievementsButton" class="text-button">Logros</button>
-            <button id="optionsButton" class="text-button">Opciones</button>
+          <nav class="menu-links" aria-label="Accesos directos">
+            <button id="skinsButton" class="pixel-button pixel-button--secondary">PERSONAJES</button>
+            <button id="achievementsButton" class="pixel-button pixel-button--secondary">LOGROS</button>
+            <button id="optionsButton" class="pixel-button pixel-button--secondary">OPCIONES</button>
           </nav>
         </div>
         <aside class="scene-caption"><span>01 / LOCAL DOMI</span><strong>COMBO DEL DIA:<br />SOBREVIVIR.</strong><span class="scene-status">PEDIDOS PENDIENTES <b>99+</b></span></aside>
@@ -403,11 +393,25 @@
         <div id="activeBuffs" class="active-buffs" aria-live="polite"></div>
       </div>
       <div id="runBar" class="run-bar" hidden><span id="runLocation">LOCAL DOMI</span><span id="comboCount" aria-live="polite">COMBO x1</span><span id="runDifficulty">PICANTE</span></div>
-      <button type="button" id="dashControl" class="dash-control prime-slot" hidden title="Aceleron (Espacio)" aria-label="Usar aceleron">
-        <kbd class="prime-key pixel-key dash-key">ESPACIO</kbd>
-        <span class="prime-symbol"><i data-lucide="zap" aria-hidden="true"></i></span>
-        <span class="prime-label">ACELERÓN</span>
-        <span id="dashLabel" class="prime-cool"></span>
+      <button type="button" id="dashControl" class="dash-control prime-slot dash-box-pixel" hidden title="Acelerón (Espacio)" aria-label="Usar acelerón">
+        <div class="dash-inner-frame">
+          <div class="dash-key-3d"><kbd>ESP</kbd></div>
+          <div class="dash-icon-well">
+            <svg class="dash-bolt-svg" viewBox="0 0 24 24" width="22" height="22" shape-rendering="crispEdges" aria-hidden="true">
+              <!-- Estelas de velocidad sci-fi cian -->
+              <rect x="1" y="6" width="4" height="2" fill="#38bdf8" opacity="0.65"/>
+              <rect x="0" y="11" width="5" height="2" fill="#38bdf8" opacity="0.85"/>
+              <rect x="2" y="16" width="3" height="2" fill="#38bdf8" opacity="0.55"/>
+              <!-- Rayo exterior cian neón -->
+              <polygon points="13,2 6,13 12,13 9,22 19,10 13,10" fill="#22d3ee"/>
+              <!-- Rayo interior amarillo eléctrico -->
+              <polygon points="13,4 8,12 12,12 10,19 17,11 13,11" fill="#ffe066"/>
+              <!-- Núcleo brillante blanco -->
+              <polygon points="13,6 10,12 12,12 11,16 15,12 13,12" fill="#ffffff"/>
+            </svg>
+            <span id="dashLabel" class="dash-cd-timer"></span>
+          </div>
+        </div>
         <span class="dash-meter"><span class="meter"><i id="dashFill"></i></span></span>
       </button>
       <aside id="comboMilestones" class="combo-milestones" hidden aria-label="Progresión del combo">

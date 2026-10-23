@@ -1248,7 +1248,7 @@ kbd { display: inline-block; border: 1px solid #556771; border-bottom-width: 3px
 }
 
 #resultTitle {
-  display: none !important; /* Ocultar título redundante */
+  display: none !important; /* Ocultar tÃ­tulo redundante */
 }
 
 #resultEyebrow {
@@ -1315,7 +1315,7 @@ kbd { display: inline-block; border: 1px solid #556771; border-bottom-width: 3px
   z-index: 100 !important;
 }
 
-/* REGLA MAESTRA DE VISIBILIDAD: Ocultar HUD, barra de jefes y acelerón en menús y pantallas fuera de juego */
+/* REGLA MAESTRA DE VISIBILIDAD: Ocultar HUD, barra de jefes y acelerÃ³n en menÃºs y pantallas fuera de juego */
 [hidden],
 .app:not([data-playing="true"]) #bossMeter,
 .app:not([data-playing="true"]) #dashControl,
@@ -1376,7 +1376,7 @@ kbd { display: inline-block; border: 1px solid #556771; border-bottom-width: 3px
   box-shadow: 0 0 12px rgba(232, 93, 4, 0.85), inset 0 2px 0 rgba(255,255,255,0.4) !important;
 }
 
-/* BOTÓN DE ACELERÓN RETRO: POSICIONADO AL LADO DE LA BARRA DE HABILIDADES Q, E, R */
+/* BOTÃ“N DE ACELERÃ“N RETRO: POSICIONADO AL LADO DE LA BARRA DE HABILIDADES Q, E, R */
 .dash-control {
   position: absolute !important;
   left: calc(50% + 72px) !important;
@@ -1399,7 +1399,7 @@ kbd { display: inline-block; border: 1px solid #556771; border-bottom-width: 3px
   transition: border-color .15s, box-shadow .15s !important;
 }
 
-/* Iluminación fija al activarse (sin vibración ni traslación) */
+/* IluminaciÃ³n fija al activarse (sin vibraciÃ³n ni traslaciÃ³n) */
 .dash-control[data-ready="true"] {
   border-color: #00ff88 !important;
   box-shadow: 0 0 14px rgba(0, 255, 136, 0.45), 4px 4px 0 #000 !important;
@@ -1427,7 +1427,7 @@ kbd { display: inline-block; border: 1px solid #556771; border-bottom-width: 3px
   opacity: 0.65 !important;
 }
 
-/* Tecla ILUMINADA y con COLOR VIVO cuando está lista para usarse */
+/* Tecla ILUMINADA y con COLOR VIVO cuando estÃ¡ lista para usarse */
 .dash-control[data-ready="true"] kbd,
 .dash-control[data-ready="true"] .dash-key,
 .dash-control.is-ready kbd,
@@ -1447,7 +1447,7 @@ kbd { display: inline-block; border: 1px solid #556771; border-bottom-width: 3px
   box-shadow: 0 0 8px rgba(76, 201, 240, 0.65), inset 0 2px 0 rgba(255,255,255,0.4) !important;
 }
 
-/* ANIMACIÓN DE SUBIDA DE NIVEL EN BARRA DE XP */
+/* ANIMACIÃ“N DE SUBIDA DE NIVEL EN BARRA DE XP */
 @keyframes xpLevelFlash {
   0% { filter: brightness(2.2); box-shadow: 0 0 16px #00ff88; }
   50% { filter: brightness(1.6); box-shadow: 0 0 8px #00e5ff; }
@@ -1464,7 +1464,7 @@ kbd { display: inline-block; border: 1px solid #556771; border-bottom-width: 3px
   display: none !important;
 }
 
-/* ESTILOS DE PAUSA: HABILIDADES PASIVAS Y ACTIVAS CON EXPLICACIÓN */
+/* ESTILOS DE PAUSA: HABILIDADES PASIVAS Y ACTIVAS CON EXPLICACIÃ“N */
 .pause-panel-enhanced {
   max-width: 760px !important;
   width: 92% !important;
@@ -1858,7 +1858,7 @@ kbd { display: inline-block; border: 1px solid #556771; border-bottom-width: 3px
 }
 
 /* ============================================================================
-   PANEL DE MEJORAS DE NIVEL: MÁS GRANDE, DESTACADO Y LEGIBLE (ARCADE CARD STYLE)
+   PANEL DE MEJORAS DE NIVEL: MÃS GRANDE, DESTACADO Y LEGIBLE (ARCADE CARD STYLE)
    ============================================================================ */
 .ability-screen {
   z-index: 45 !important;
@@ -1992,7 +1992,7 @@ kbd { display: inline-block; border: 1px solid #556771; border-bottom-width: 3px
 }
 
 /* ============================================================================
-   DEGRADADOS CON COLORES INTENSOS EN INDICADORES DE DAÑO Y COMBOS
+   DEGRADADOS CON COLORES INTENSOS EN INDICADORES DE DAÃ‘O Y COMBOS
    ============================================================================ */
 .combo-current strong, #comboMultiplier {
   background: linear-gradient(180deg, #ffffff 0%, #ffe600 35%, #ff5500 70%, #d60036 100%) !important;
@@ -2035,7 +2035,7 @@ kbd { display: inline-block; border: 1px solid #556771; border-bottom-width: 3px
 }
 
 /* ============================================================================
-   PAUSA: MEN� CL�SICO RETRO CENTRADO (ORIGINAL)
+   PAUSA: MENÚ CLÁSICO RETRO CENTRADO (ORIGINAL)
    ============================================================================ */
 .pause-screen {
   background: rgba(10, 16, 20, 0.92) !important;
@@ -2143,323 +2143,770 @@ kbd { display: inline-block; border: 1px solid #556771; border-bottom-width: 3px
 }
 
 /* ============================================================================
-   ACELER�N (ESPACIO): ESTILO VISUAL ID�NTICO A LAS HABILIDADES PRIME
+   LOBBY: ELIMINACIÓN DE BARRA DE OPCIONES INFERIOR (OBLIGAR MOVIMIENTO)
    ============================================================================ */
-#dashControl.dash-control.prime-slot {
+.lobby-screen {
+  grid-template-rows: 64px minmax(0, 1fr) !important;
+}
+
+.lobby-nav {
+  display: none !important;
+}
+
+/* ============================================================================
+   MENÚ PRINCIPAL: BOTONES COHERENTES Y TEXTOS PIXEL ART
+   ============================================================================ */
+.menu-actions .pixel-button,
+.menu-links .pixel-button {
+  font-family: 'Press Start 2P', monospace !important;
+  font-size: 8.5px !important;
+  letter-spacing: 0.5px !important;
+  padding: 12px 16px !important;
+  border: 3px solid #000 !important;
+  border-bottom: 5px solid #000 !important;
+  box-shadow: 3px 3px 0 #000 !important;
+}
+
+.menu-links {
+  display: flex !important;
+  gap: 12px !important;
+  flex-wrap: wrap !important;
+  margin-top: 14px !important;
+}
+
+.menu-links .pixel-button--secondary {
+  background: #192b2e !important;
+  color: #79ddbd !important;
+  border-color: #0b1517 !important;
+  border-bottom-color: #04090a !important;
+}
+
+.menu-links .pixel-button--secondary:hover {
+  background: #233e42 !important;
+  color: #ffe066 !important;
+  transform: translate(-1px, -1px) !important;
+  box-shadow: 4px 4px 0 #000 !important;
+}
+
+/* ============================================================================
+   ACELERÓN (ESPACIO): CASILLA METÁLICA OSCURA 16-BITS CON TECLA 3D Y RAYO CIAN/ORO
+   ============================================================================ */
+#dashControl.dash-control.prime-slot.dash-box-pixel {
   position: absolute !important;
-  left: calc(50% + 105px) !important;
+  left: calc(50% + 115px) !important;
   right: auto !important;
-  bottom: 9px !important;
+  bottom: 8px !important;
   transform: translateX(-50%) !important;
   width: 96px !important;
   height: 58px !important;
   min-height: 58px !important;
-  padding: 0 !important;
-  overflow: hidden !important;
-  border: 3px solid #65717a !important;
-  background: #121c22 !important;
-  box-shadow: 5px 5px #020609, inset 0 0 0 2px #05090c !important;
+  padding: 4px !important;
+  box-sizing: border-box !important;
+  background: #0d1519 !important;
+  border: 3px solid #233c42 !important;
+  border-bottom: 4px solid #0d171a !important;
+  box-shadow: 4px 4px 0 #000, inset 0 0 0 1px #33565e !important;
   cursor: pointer !important;
   z-index: 3 !important;
-  display: block !important;
-  color: #edf8ef !important;
-  text-align: left !important;
-}
-
-#dashControl.dash-control.prime-slot::after {
-  content: '' !important;
-  position: absolute !important;
-  z-index: 1 !important;
-  inset: 0 !important;
-  pointer-events: none !important;
-  background: linear-gradient(to top, transparent 0 var(--charge, 0%), rgba(1, 5, 8, 0.78) var(--charge, 0%) 100%) !important;
-}
-
-#dashControl .prime-key.dash-key {
-  position: absolute !important;
-  top: 5px !important;
-  left: 5px !important;
-  width: auto !important;
-  min-width: 48px !important;
-  height: 24px !important;
-  padding: 2px 4px !important;
-  font-family: 'Press Start 2P', monospace !important;
-  font-size: 7.5px !important;
-  font-weight: 900 !important;
-  line-height: 20px !important;
-  text-align: center !important;
-  background: #f8d76c !important;
-  color: #182329 !important;
-  border: 2px solid #000 !important;
-  border-bottom: 3px solid #b38f00 !important;
-  box-shadow: 1px 1px 0 #000 !important;
-  z-index: 2 !important;
-  border-radius: 0 !important;
-}
-
-#dashControl .prime-symbol {
-  position: absolute !important;
-  top: 4px !important;
-  right: 6px !important;
-  left: auto !important;
-  width: 32px !important;
-  height: 28px !important;
-  display: grid !important;
-  place-items: center !important;
-  background: #1a2a30 !important;
-  border: 1px solid #283e47 !important;
-  z-index: 2 !important;
-}
-
-#dashControl .prime-symbol svg {
-  width: 18px !important;
-  height: 18px !important;
-  color: #a9ffe1 !important;
-}
-
-#dashControl .prime-label {
-  position: absolute !important;
-  left: 4px !important;
-  right: 4px !important;
-  bottom: 4px !important;
-  color: #edf8ef !important;
-  font: 700 8px/1.2 monospace !important;
-  white-space: nowrap !important;
-  text-align: center !important;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: space-between !important;
   overflow: hidden !important;
-  text-overflow: ellipsis !important;
-  z-index: 2 !important;
 }
 
-#dashControl .prime-cool {
+.dash-inner-frame {
+  display: flex !important;
+  align-items: center !important;
+  gap: 5px !important;
+  width: 100% !important;
+  height: 42px !important;
+}
+
+/* Lado izquierdo: tecla gris de teclado en 3D con texto "ESP" */
+.dash-key-3d {
+  flex: none !important;
+  width: 38px !important;
+  height: 38px !important;
+  background: #475569 !important;
+  border: 2px solid #0f172a !important;
+  border-bottom: 4px solid #1e293b !important;
+  box-shadow: inset 1px 1px 0 #94a3b8, 1px 2px 0 #000 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  transition: all 0.1s ease !important;
+}
+
+.dash-key-3d kbd {
+  font-family: 'Press Start 2P', monospace !important;
+  font-size: 8px !important;
+  font-weight: 900 !important;
+  color: #f8fafc !important;
+  text-shadow: 1px 1px 0 #000 !important;
+  background: transparent !important;
+  border: 0 !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  line-height: 1 !important;
+  box-shadow: none !important;
+}
+
+/* Lado derecho: icono de habilidad con rayo cian/amarillo en recuadro oscuro */
+.dash-icon-well {
+  flex: 1 !important;
+  height: 38px !important;
+  background: #080f13 !important;
+  border: 2px solid #163038 !important;
+  box-shadow: inset 2px 2px 0 #020507 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  position: relative !important;
+  overflow: hidden !important;
+}
+
+.dash-bolt-svg {
+  filter: drop-shadow(0 0 4px rgba(34, 211, 238, 0.75));
+  transition: transform 0.15s ease !important;
+}
+
+.dash-cd-timer {
   position: absolute !important;
-  z-index: 3 !important;
-  top: 6px !important;
-  right: 6px !important;
-  padding: 3px 5px !important;
-  background: #050b10e8 !important;
-  color: #ffe078 !important;
-  font: bold 10px monospace !important;
-  border: 1px solid #ffcc0066 !important;
-}
-
-#dashControl .dash-meter {
+  inset: 0 !important;
   display: none !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-family: 'Press Start 2P', monospace !important;
+  font-size: 7px !important;
+  color: #ffe066 !important;
+  text-shadow: 1px 1px 0 #000, 0 0 3px #000 !important;
+  background: rgba(8, 15, 19, 0.82) !important;
 }
 
-#dashControl i#dashFill {
+/* Barra de carga en fondo inferior */
+#dashControl .dash-meter {
+  display: block !important;
+  height: 4px !important;
+  width: 100% !important;
+  background: #111d22 !important;
+  border-top: 1px solid #1c3238 !important;
+  position: relative !important;
+}
+
+#dashControl .dash-meter .meter {
+  display: block !important;
+  height: 100% !important;
+  width: 100% !important;
+  background: transparent !important;
+  position: relative !important;
+}
+
+#dashControl .dash-meter #dashFill {
   position: absolute !important;
-  bottom: 0 !important;
   left: 0 !important;
-  height: 3px !important;
-  background: #73f0c1 !important;
+  top: 0 !important;
+  bottom: 0 !important;
+  background: linear-gradient(90deg, #38bdf8, #ffe066) !important;
+  box-shadow: 0 0 6px #38bdf8 !important;
   transition: width 0.05s linear !important;
-  z-index: 4 !important;
 }
 
-#dashControl[data-status="ready"], #dashControl[data-ready="true"] {
-  border-color: #73f0c1 !important;
-  box-shadow: 5px 5px #020609, inset 0 0 0 2px #07100c, 0 0 10px rgba(115, 240, 193, 0.45) !important;
+/* Estado Disponible (Ready) */
+#dashControl[data-status="ready"],
+#dashControl[data-ready="true"] {
+  border-color: #38bdf8 !important;
+  box-shadow: 4px 4px 0 #000, 0 0 14px rgba(56, 189, 248, 0.5), inset 0 0 0 1px #67e8f9 !important;
 }
 
-#dashControl[data-status="ready"] .dash-key {
-  background: #f8d76c !important;
-  color: #182329 !important;
-  border-color: #000 !important;
+#dashControl[data-status="ready"] .dash-key-3d {
+  background: #64748b !important;
+  box-shadow: inset 1px 1px 0 #cbd5e1, 1px 2px 0 #000, 0 0 6px rgba(255, 255, 255, 0.3) !important;
 }
 
-#dashControl[data-status="cooldown"], #dashControl[data-ready="false"] {
-  border-color: #d49b4e !important;
+#dashControl[data-status="ready"] .dash-bolt-svg {
+  transform: scale(1.08) !important;
 }
 
-#dashControl[data-status="cooldown"] .dash-key {
-  background: #3c444a !important;
+/* Estado Recarga (Cooldown) */
+#dashControl[data-status="cooldown"],
+#dashControl:not([data-ready="true"]) {
+  border-color: #233c42 !important;
+  opacity: 0.88 !important;
+}
+
+#dashControl[data-status="cooldown"] .dash-key-3d,
+#dashControl:not([data-ready="true"]) .dash-key-3d {
+  background: #334155 !important;
+  box-shadow: inset 1px 1px 0 #475569, 1px 1px 0 #000 !important;
+}
+
+#dashControl[data-status="cooldown"] .dash-key-3d kbd,
+#dashControl:not([data-ready="true"]) .dash-key-3d kbd {
   color: #94a3b8 !important;
-  border-color: #283036 !important;
-  border-bottom-color: #141a1e !important;
+}
+
+#dashControl[data-status="cooldown"] .dash-cd-timer,
+#dashControl:not([data-ready="true"]) .dash-cd-timer {
+  display: flex !important;
 }
 
 /* ============================================================================
-   DON DOMI: DISTRIBUCI�N MEJORADA Y ESPACIOSA MANTENIENDO EL ESTILO VISUAL
+   SEÑOR DOMI: INTERFAZ PIXEL ART 2D RETRO (MISIONES, CONSEJOS, COLECCIÓN)
    ============================================================================ */
 #domiScreen .shop-panel {
-  max-width: 1260px !important;
-  width: 94% !important;
+  max-width: 1240px !important;
+  width: 95% !important;
   margin: 0 auto !important;
-}
-
-#domiScreen .shop-layout {
-  display: grid !important;
-  grid-template-columns: minmax(0, 1.45fr) minmax(360px, 420px) !important;
-  gap: 32px !important;
-  align-items: start !important;
 }
 
 #domiScreen .shop-tabs {
   display: flex !important;
   gap: 12px !important;
-  margin: 0 0 24px !important;
-  border-bottom: 2px solid #28444a !important;
+  margin: 0 0 20px !important;
+  border-bottom: 2px solid #233d45 !important;
   padding-bottom: 12px !important;
 }
 
 #domiScreen .shop-tabs button {
-  padding: 12px 24px !important;
+  padding: 10px 20px !important;
   font-family: 'Press Start 2P', monospace !important;
-  font-size: 9px !important;
-  border: 2px solid #334d54 !important;
-  border-bottom: 4px solid #142226 !important;
+  font-size: 8.5px !important;
+  border: 2px solid #2d474e !important;
+  border-bottom: 4px solid #101c20 !important;
   background: #111e24 !important;
   color: #8da4a1 !important;
   display: flex !important;
   align-items: center !important;
   gap: 10px !important;
   cursor: pointer !important;
+  box-shadow: 3px 3px 0 #000 !important;
   transition: all 0.15s ease !important;
 }
 
 #domiScreen .shop-tabs button:hover {
-  background: #1c323a !important;
+  background: #19313a !important;
   color: #fff !important;
-  border-color: #4d707a !important;
+  border-color: #486f7a !important;
 }
 
 #domiScreen .shop-tabs button.active {
-  background: #5ce1e6 !important;
-  color: #0b1518 !important;
-  border-color: #7ef5fa !important;
-  border-bottom: 4px solid #32969b !important;
-  box-shadow: 0 4px 0 #000, 0 0 16px rgba(92, 225, 230, 0.35) !important;
+  background: #06b6d4 !important;
+  color: #06151a !important;
+  border-color: #67e8f9 !important;
+  border-bottom: 4px solid #0e7490 !important;
+  box-shadow: 3px 3px 0 #000, 0 0 14px rgba(6, 182, 212, 0.4) !important;
   font-weight: 900 !important;
 }
 
-#domiScreen .shop-grid {
-  display: grid !important;
-  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-  gap: 18px !important;
+.domi-content-area {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 20px !important;
+  min-height: 440px !important;
 }
 
-#domiScreen .catalog-item {
-  min-height: 240px !important;
-  border: 2px solid #2d454d !important;
-  border-bottom: 4px solid #000 !important;
-  background: #132026 !important;
+/* --------------------------------------------------------------------------
+   1. MISIONES
+   -------------------------------------------------------------------------- */
+.domi-missions-header {
+  background: #0f181d !important;
+  border: 2px solid #22424b !important;
+  border-bottom: 4px solid #0b1317 !important;
   box-shadow: 4px 4px 0 #000 !important;
-  padding: 0 !important;
+  padding: 16px 20px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 10px !important;
+}
+
+.domi-progress-title-row {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+}
+
+.domi-progress-label {
+  font-family: 'Press Start 2P', monospace !important;
+  font-size: 10px !important;
+  color: #67e8f9 !important;
+  letter-spacing: 1px !important;
+}
+
+.domi-progress-count {
+  font-family: 'Press Start 2P', monospace !important;
+  font-size: 11px !important;
+  color: #ffe066 !important;
+}
+
+/* Barra de progreso gruesa en cian y dorado */
+.domi-progress-bar-thick {
+  height: 20px !important;
+  background: #070d10 !important;
+  border: 2px solid #1a343b !important;
+  box-shadow: inset 2px 2px 0 #000 !important;
+  position: relative !important;
+  overflow: hidden !important;
+}
+
+.domi-progress-fill-thick {
+  height: 100% !important;
+  background: linear-gradient(90deg, #06b6d4 0%, #22d3ee 60%, #fbbf24 100%) !important;
+  box-shadow: 0 0 10px rgba(34, 211, 238, 0.6) !important;
+  transition: width 0.3s ease !important;
+}
+
+.domi-missions-list {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 12px !important;
+}
+
+.domi-mission-card {
+  display: flex !important;
+  align-items: center !important;
+  gap: 16px !important;
+  background: #111a1f !important;
+  border: 2px solid #1e3840 !important;
+  border-left: 5px solid #22d3ee !important;
+  border-bottom: 4px solid #080e12 !important;
+  box-shadow: 4px 4px 0 #000 !important;
+  padding: 14px 18px !important;
+  transition: transform 0.15s ease, border-color 0.15s ease !important;
+}
+
+.domi-mission-card.is-done {
+  border-color: #fbbf24 !important;
+  border-left-color: #facc15 !important;
+  box-shadow: 4px 4px 0 #000, 0 0 12px rgba(251, 191, 36, 0.25) !important;
+}
+
+.domi-mission-card.is-claimed {
+  opacity: 0.72 !important;
+  border-left-color: #4ade80 !important;
+}
+
+.domi-mission-icon-box {
+  flex: none !important;
+  width: 44px !important;
+  height: 44px !important;
+  background: #080f13 !important;
+  border: 2px solid #1c333a !important;
+  box-shadow: inset 2px 2px 0 #000 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.domi-mission-center {
+  flex: 1 !important;
+  min-width: 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 6px !important;
+}
+
+.domi-mission-head {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 12px !important;
+}
+
+.domi-mission-title {
+  font-family: 'Press Start 2P', monospace !important;
+  font-size: 9.5px !important;
+  color: #ffe066 !important;
+  letter-spacing: 0.5px !important;
+}
+
+.domi-mission-ratio {
+  font-family: 'Press Start 2P', monospace !important;
+  font-size: 7.5px !important;
+  color: #67e8f9 !important;
+}
+
+.domi-mission-desc {
+  font-size: 12.5px !important;
+  line-height: 1.4 !important;
+  color: #9cb5be !important;
+  margin: 0 !important;
+}
+
+.domi-mission-mini-bar {
+  height: 7px !important;
+  background: #091216 !important;
+  border: 1px solid #193036 !important;
+  position: relative !important;
+  overflow: hidden !important;
+}
+
+.domi-mini-fill {
+  height: 100% !important;
+  background: linear-gradient(90deg, #06b6d4, #38bdf8) !important;
+  transition: width 0.25s ease !important;
+}
+
+.domi-mission-card.is-done .domi-mini-fill {
+  background: linear-gradient(90deg, #38bdf8, #fbbf24) !important;
+}
+
+.domi-mission-right {
+  flex: none !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: flex-end !important;
+  gap: 8px !important;
+  min-width: 130px !important;
+}
+
+.domi-reward-badge {
+  font-family: 'Press Start 2P', monospace !important;
+  font-size: 7.5px !important;
+  padding: 6px 10px !important;
+  background: #2a2010 !important;
+  color: #facc15 !important;
+  border: 2px solid #b48528 !important;
+  box-shadow: 2px 2px 0 #000 !important;
+  white-space: nowrap !important;
+}
+
+.domi-claim-btn {
+  font-size: 8px !important;
+  padding: 10px 14px !important;
+  width: 100% !important;
+}
+
+.pixel-button--claim {
+  background: #f59e0b !important;
+  color: #171003 !important;
+  border-color: #fde047 !important;
+  border-bottom-color: #b45309 !important;
+  box-shadow: 3px 3px 0 #000, 0 0 10px rgba(245, 158, 11, 0.4) !important;
+  animation: pulse-claim 1.2s infinite ease-in-out !important;
+}
+
+@keyframes pulse-claim {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.03); }
+}
+
+.btn-claimed {
+  background: #14241d !important;
+  color: #86efac !important;
+  border-color: #22543d !important;
+}
+
+.btn-locked {
+  background: #192329 !important;
+  color: #64748b !important;
+  border-color: #334155 !important;
+}
+
+/* --------------------------------------------------------------------------
+   2. CONSEJOS (TICKETS DE RECETA)
+   -------------------------------------------------------------------------- */
+.domi-advice-filters {
+  display: flex !important;
+  gap: 10px !important;
+  margin-bottom: 8px !important;
+}
+
+.domi-advice-filters .btn-filter {
+  font-size: 8px !important;
+  padding: 8px 16px !important;
+  background: #132026 !important;
+  color: #9cb3be !important;
+  border-color: #2b454e !important;
+}
+
+.domi-advice-filters .btn-filter.active {
+  background: #0284c7 !important;
+  color: #fff !important;
+  border-color: #38bdf8 !important;
+  border-bottom-color: #0369a1 !important;
+  box-shadow: 3px 3px 0 #000, 0 0 10px rgba(56, 189, 248, 0.4) !important;
+}
+
+.domi-tickets-list {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 14px !important;
+}
+
+.domi-recipe-ticket {
+  display: flex !important;
+  gap: 16px !important;
+  align-items: center !important;
+  background: #0e171b !important;
+  border: 2px solid #1c353c !important;
+  border-left: 6px solid #22d3ee !important;
+  border-bottom: 4px solid #060b0e !important;
+  box-shadow: 4px 4px 0 #000 !important;
+  padding: 16px 20px !important;
+  position: relative !important;
+}
+
+.domi-ticket-art {
+  flex: none !important;
+  width: 52px !important;
+  height: 52px !important;
+  background: #080e12 !important;
+  border: 2px solid #183036 !important;
+  box-shadow: inset 2px 2px 0 #000 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.domi-ticket-body {
+  flex: 1 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 6px !important;
+}
+
+.domi-ticket-badge-row {
+  display: flex !important;
+  gap: 8px !important;
+  align-items: center !important;
+}
+
+.ticket-tag {
+  font-family: 'Press Start 2P', monospace !important;
+  font-size: 7.5px !important;
+  color: #22d3ee !important;
+}
+
+.ticket-cat {
+  font-family: 'Press Start 2P', monospace !important;
+  font-size: 6.5px !important;
+  padding: 3px 6px !important;
+  background: #1b2f36 !important;
+  color: #ffe066 !important;
+  border: 1px solid #375963 !important;
+}
+
+.domi-ticket-title {
+  font-family: 'Press Start 2P', monospace !important;
+  font-size: 10px !important;
+  color: #f8fafc !important;
+  margin: 0 !important;
+}
+
+.domi-ticket-desc {
+  font-size: 13px !important;
+  line-height: 1.5 !important;
+  color: #94abb5 !important;
+  margin: 0 !important;
+}
+
+/* --------------------------------------------------------------------------
+   3. COLECCIÓN (GRILLA 4x3 + PEDESTAL DERECHO)
+   -------------------------------------------------------------------------- */
+.domi-collection-layout {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1.4fr) minmax(320px, 380px) !important;
+  gap: 28px !important;
+  align-items: start !important;
+}
+
+.domi-grid-4x3 {
+  display: grid !important;
+  grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+  gap: 12px !important;
+}
+
+.domi-slot {
+  aspect-ratio: 1 / 1 !important;
+  background: #0c1519 !important;
+  border: 3px solid #1c3238 !important;
+  border-bottom: 4px solid #060b0e !important;
+  box-shadow: 3px 3px 0 #000, inset 0 0 0 1px #050a0d !important;
+  cursor: pointer !important;
+  position: relative !important;
+  padding: 6px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  transition: all 0.15s ease !important;
+}
+
+.domi-slot-canvas {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: contain !important;
+}
+
+.domi-slot.is-unlocked {
+  border-color: #2b5159 !important;
+}
+
+.domi-slot.is-unlocked:hover {
+  border-color: #38bdf8 !important;
+  box-shadow: 3px 3px 0 #000, 0 0 10px rgba(56, 189, 248, 0.4) !important;
+  transform: translateY(-2px) !important;
+}
+
+.domi-slot.is-selected {
+  border-color: #facc15 !important;
+  border-bottom-color: #ca8a04 !important;
+  box-shadow: 3px 3px 0 #000, 0 0 14px rgba(250, 204, 21, 0.45) !important;
+  background: #14232a !important;
+}
+
+.domi-slot.is-locked {
+  opacity: 0.65 !important;
+  border-color: #162428 !important;
+}
+
+.domi-slot.is-locked:hover {
+  opacity: 0.85 !important;
+  border-color: #2a4148 !important;
+}
+
+.domi-slot-lock {
+  position: absolute !important;
+  inset: 0 !important;
+  background: rgba(6, 11, 14, 0.72) !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 4px !important;
+}
+
+.domi-lock-label {
+  font-family: 'Press Start 2P', monospace !important;
+  font-size: 6px !important;
+  color: #ffe066 !important;
+  background: #111e24 !important;
+  padding: 2px 4px !important;
+  border: 1px solid #334d56 !important;
+}
+
+/* Panel de pedestal derecho */
+.domi-pedestal-panel {
+  background: #0e171b !important;
+  border: 2px solid #24414a !important;
+  border-top: 4px solid #06b6d4 !important;
+  border-bottom: 5px solid #060b0e !important;
+  box-shadow: 6px 6px 0 #000 !important;
+  position: sticky !important;
+  top: 16px !important;
   display: flex !important;
   flex-direction: column !important;
 }
 
-#domiScreen .catalog-art {
-  height: 125px !important;
-  background: #1b2e35 !important;
-  border-bottom: 2px solid #263e46 !important;
+.domi-pedestal-stage {
+  position: relative !important;
+  background: #080f13 !important;
+  border-bottom: 2px solid #1c3238 !important;
 }
 
-#domiScreen .catalog-copy {
-  padding: 16px !important;
+.domi-pedestal-stage canvas {
+  width: 100% !important;
+  max-height: 200px !important;
+  display: block !important;
+}
+
+.domi-pedestal-cat-badge {
+  position: absolute !important;
+  top: 8px !important;
+  right: 8px !important;
+  font-family: 'Press Start 2P', monospace !important;
+  font-size: 6.5px !important;
+  padding: 4px 8px !important;
+  background: #0e1e24 !important;
+  color: #67e8f9 !important;
+  border: 1px solid #234c56 !important;
+  box-shadow: 2px 2px 0 #000 !important;
+}
+
+.domi-pedestal-body {
+  padding: 18px 20px 10px !important;
+  display: flex !important;
+  flex-direction: column !important;
   gap: 10px !important;
 }
 
-#domiScreen .catalog-name {
-  font-size: 11px !important;
-  line-height: 1.6 !important;
-  color: #fff4cc !important;
+.domi-pedestal-title {
+  font-family: 'Press Start 2P', monospace !important;
+  font-size: 12px !important;
+  color: #ffe066 !important;
+  letter-spacing: 0.5px !important;
 }
 
-#domiScreen .catalog-description {
+.domi-pedestal-desc {
   font-size: 13px !important;
-  line-height: 1.55 !important;
-  color: #a6bcc5 !important;
+  line-height: 1.5 !important;
+  color: #9cb5be !important;
+  margin: 0 !important;
 }
 
-#domiScreen .shop-detail {
-  position: sticky !important;
-  top: 16px !important;
-  border: 2px solid #3f636b !important;
-  border-top: 4px solid #5ce1e6 !important;
-  background: #121e24 !important;
-  box-shadow: 8px 8px 0 #000, 0 0 25px rgba(0, 0, 0, 0.5) !important;
-}
-
-#domiScreen .detail-top {
-  padding: 16px 20px !important;
-  border-bottom: 2px solid #243a40 !important;
-  color: #5ce1e6 !important;
-  font-family: 'Press Start 2P', monospace !important;
-  font-size: 8px !important;
-  letter-spacing: 1px !important;
-}
-
-#domiScreen .detail-stage {
-  background: #192c32 !important;
-  border-bottom: 2px solid #243a40 !important;
-}
-
-#domiScreen .detail-stage canvas {
-  width: 100% !important;
-  max-height: 240px !important;
-  object-fit: contain !important;
-}
-
-#domiScreen .detail-body {
-  padding: 22px 24px 0 !important;
-}
-
-#domiScreen .detail-body h3 {
-  font-family: 'Press Start 2P', monospace !important;
-  font-size: 14px !important;
-  line-height: 1.6 !important;
-  color: #fff4cc !important;
-  margin-bottom: 12px !important;
-}
-
-#domiScreen .shop-description {
-  font-size: 14px !important;
-  line-height: 1.65 !important;
-  color: #b0c6cf !important;
-  margin-bottom: 18px !important;
-}
-
-#domiScreen .preview-stats {
+.domi-pedestal-stats {
   display: grid !important;
-  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
-  gap: 8px !important;
-  margin: 0 0 18px !important;
+  grid-template-columns: repeat(3, 1fr) !important;
+  gap: 6px !important;
+  margin-top: 4px !important;
 }
 
-#domiScreen .preview-stats span {
-  background: #0d161a !important;
-  border: 2px solid #263c42 !important;
-  padding: 12px 6px !important;
+.stat-box {
+  background: #070e11 !important;
+  border: 1px solid #1c333a !important;
+  padding: 8px 4px !important;
   text-align: center !important;
 }
 
-#domiScreen .preview-stats small {
+.stat-box small {
   font-family: 'Press Start 2P', monospace !important;
-  font-size: 6.5px !important;
-  color: #8da4a1 !important;
+  font-size: 6px !important;
+  color: #64748b !important;
   display: block !important;
-  margin-bottom: 6px !important;
+  margin-bottom: 4px !important;
 }
 
-#domiScreen .preview-stats b {
+.stat-box b {
   font-family: 'Press Start 2P', monospace !important;
-  font-size: 12px !important;
-  color: #5ce1e6 !important;
+  font-size: 9px !important;
+  color: #22d3ee !important;
 }
 
-#domiScreen .detail-action {
-  padding: 0 24px 24px !important;
+.stat-perk {
+  background: #0a1317 !important;
+  border-left: 3px solid #fbbf24 !important;
+  padding: 8px 10px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 3px !important;
 }
 
-#domiScreen .purchase-button {
-  min-height: 52px !important;
-  font-size: 11px !important;
+.stat-perk small {
+  font-family: 'Press Start 2P', monospace !important;
+  font-size: 6px !important;
+  color: #94a3b8 !important;
 }
 
-@media (max-width: 1024px) {
-  #domiScreen .shop-layout {
-    grid-template-columns: minmax(0, 1fr) !important;
+.stat-perk b {
+  font-family: 'Press Start 2P', monospace !important;
+  font-size: 8px !important;
+  color: #facc15 !important;
+}
+
+.domi-pedestal-action {
+  padding: 10px 20px 20px !important;
+}
+
+.domi-action-btn {
+  width: 100% !important;
+  font-size: 9px !important;
+  padding: 12px !important;
+}
+
+@media (max-width: 900px) {
+  .domi-collection-layout {
+    grid-template-columns: 1fr !important;
+  }
+  .domi-grid-4x3 {
+    grid-template-columns: repeat(3, 1fr) !important;
   }
 }

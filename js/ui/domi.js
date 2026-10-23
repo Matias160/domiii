@@ -11,75 +11,69 @@ const tabs = [
 
 export const adviceList = [
   {
-    id: 'adv_movement',
-    title: 'La receta del turno',
-    badge: 'CONSEJO #1',
-    description: 'No te quedes quieto, pibe. Rodea al grupo y deja una salida libre. La cocina se llena rápido.',
-    detail: 'El secreto del mostrador es el juego de pies. Mantenete en círculos amplios para juntar a los clientes en racimos. Si te encerrás contra un mostrador o pared, vas a recibir daño innecesario. ¡Buscá siempre el espacio abierto!'
-  },
-  {
     id: 'adv_dash',
-    title: 'El acelerón gourmet',
-    badge: 'CONSEJO #2',
-    description: 'El acelerón (Espacio) te otorga inmunidad completa durante la embestida y daña a todos los enemigos que atravieses.',
-    detail: 'La tecla Espacio no es solo para correr: te vuelve invulnerable por una fracción de segundo y atraviesa cualquier masa de clientes pesados haciéndoles daño. Fijate en el indicador en pantalla para saber cuándo vuelve a estar cargado.'
+    category: 'movement',
+    title: 'Acelerón Gourmet',
+    badge: 'MOVIMIENTO',
+    description: 'Espacio activa la embestida invulnerable: atraviesa masas de clientes sin recibir daño y daña a todos los enemigos que cruce. Recarga en 2.8 s.'
   },
   {
-    id: 'adv_skills',
-    title: 'Poderes de la casa',
-    badge: 'CONSEJO #3',
-    description: 'Las habilidades activas se desbloquean por nivel: Q al Nivel 5, E al Nivel 10 y R al Nivel 15.',
-    detail: 'Al subir de nivel durante la partida desbloqueás tus poderes: con la Q lanzás una ráfaga radial de 20 disparos, con la E desplegás un clon señuelo que distrae a la clientela, y con la R generás una burbuja de inmunidad que repele todo.'
-  },
-  {
-    id: 'adv_godmode',
-    title: 'Aura Modo Dios',
-    badge: 'CONSEJO #4',
-    description: 'Al alcanzar el Nivel 3, entrás en Modo Dios con un aura dorada resplandeciente que fulmina a todo lo que toque.',
-    detail: 'Cuando subas a Nivel 3, el fuego de la cocina te bendice: tu personaje desata un aura radiante invencible. Aprovechá ese momento para arrollar directamente a las hordas más difíciles sin miedo.'
-  },
-  {
-    id: 'adv_evo',
-    title: 'Evolución de armas',
-    badge: 'CONSEJO #5',
-    description: 'Maximizá tu ingrediente principal para forjar su evolución definitiva dorada.',
-    detail: 'Cada arma (tenedor, cuchillo, rodillo, espátula) tiene una forma evolucionada que dispara proyectiles dorados gigantes y activa efectos secundarios como charcos de salsa y ondas de choque.'
-  },
-  {
-    id: 'adv_pets',
-    title: 'Mascotas al rescate',
-    badge: 'CONSEJO #6',
-    description: 'Equipá un compañero en el mostrador para sumar fuego de cobertura y curación.',
-    detail: 'Compañeros como la Mini Parrilla, el Ketchup o el Taco Guardián atacan automáticamente a los enemigos cercanos, crean zonas seguras o aumentan tu probabilidad de supervivencia.'
+    id: 'adv_movement',
+    category: 'movement',
+    title: 'El Juego de Pies',
+    badge: 'MOVIMIENTO',
+    description: 'Mantenete siempre en círculos amplios. Nunca te arrincones contra mostradores ni paredes; juntá a los clientes en racimos.'
   },
   {
     id: 'adv_lighting',
-    title: 'Luces y derrapes',
-    badge: 'CONSEJO #7',
-    description: 'En el estacionamiento se cortó la luz: tu linterna te guía y el piso aceitoso modifica la tracción.',
-    detail: 'En el turno de noche del estacionamiento la visibilidad es reducida. Mantené la calma, usá el haz de tu linterna y cuidá tus giros en las manchas de aceite para no derrapar hacia los grupos enemigos.'
+    category: 'movement',
+    title: 'Visión y Derrapes',
+    badge: 'MOVIMIENTO',
+    description: 'En el estacionamiento la luz es escasa. Tu linterna frontal ilumina el camino y las manchas de aceite alteran la tracción.'
+  },
+  {
+    id: 'adv_skills',
+    category: 'combat',
+    title: 'Poderes Activos',
+    badge: 'COMBATE',
+    description: 'Se desbloquean por nivel de partida: Q al Nivel 5 (ráfaga radial), E al Nivel 10 (clon señuelo) y R al Nivel 15 (escudo de inmunidad).'
+  },
+  {
+    id: 'adv_godmode',
+    category: 'combat',
+    title: 'Aura Modo Dios',
+    badge: 'COMBATE',
+    description: 'Al alcanzar el Nivel 3, tu personaje desata el aura dorada celestial: fulmina instantáneamente a cualquier cliente que intente tocarte.'
+  },
+  {
+    id: 'adv_evo',
+    category: 'combat',
+    title: 'Evolución de Armas',
+    badge: 'COMBATE',
+    description: 'Maximizá tu receta base para forjar su evolución definitiva dorada con disparos gigantes, charcos de salsa y ondas de choque.'
   },
   {
     id: 'adv_combos',
-    title: 'Racha de combos',
-    badge: 'CONSEJO #8',
-    description: 'Encadená bajas sin interrupción para multiplicar tus puntos de cocina hasta x3.00.',
-    detail: 'Cada cliente eliminado alimenta tu medidor de combo. A las 10, 20 y 30 bajas seguidas alcanzás hitos que otorgan multiplicadores masivos y activan el modo Fiebre con velocidad extra.'
+    category: 'combat',
+    title: 'Racha de Combos',
+    badge: 'COMBATE',
+    description: 'Bajas consecutivas elevan el multiplicador a x1.5, x2.0 y x3.0. A las 30 bajas seguidas se activa Fiebre Arcade con velocidad extrema.'
+  },
+  {
+    id: 'adv_pets',
+    category: 'combat',
+    title: 'Mascotas de Apoyo',
+    badge: 'COMBATE',
+    description: 'Equipá un compañero desde el lobby: atacan automáticamente, aplican salsa ralentizadora o generan zonas seguras para curarte.'
   }
 ];
-
-function node(tag, className, text) {
-  const el = document.createElement(tag);
-  el.className = className;
-  if (text !== undefined) el.textContent = text;
-  return el;
-}
 
 export class DomiScreen {
   constructor(game) {
     this.game = game;
     this.type = 'missions';
-    this.selected = null;
+    this.adviceFilter = 'all';
+    this.selectedSlot = null;
     this.previewCanvas = null;
 
     document.querySelector('#domiBackButton')?.addEventListener('click', () => {
@@ -89,7 +83,7 @@ export class DomiScreen {
 
   show(tab = 'missions') {
     this.type = tab;
-    this.selected = null;
+    this.selectedSlot = null;
     const profile = currentAccount();
     if (!profile) {
       this.game.showScreen('authScreen');
@@ -105,7 +99,7 @@ export class DomiScreen {
 
   selectCategory(type) {
     this.type = type;
-    this.selected = null;
+    this.selectedSlot = null;
     this.render();
     this.game.audio.play('navigate');
     document.querySelector(`#domiTabs [data-type="${type}"]`)?.focus({preventScroll: true});
@@ -125,19 +119,16 @@ export class DomiScreen {
         type: 'mission',
         rewardType: 'accessory',
         rewardId: 'chef_hat',
-        rewardName: 'Gorro de Chef',
+        rewardName: 'Gorro Chef',
         name: 'Prueba de Fuego',
-        badge: 'RECOMPENSA EXCLUSIVA',
-        description: 'Sobrevive y alcanza el Nivel 5 en cualquier turno.',
-        detail: 'Demostrá que aguantás la presión en los fuegos de la cocina. Si sobrevivís hasta el Nivel 5, Don Domi te concede su Gorro de Chef artesanal para tu personaje.',
+        iconType: 'star',
+        description: 'Sobrevive y alcanza el Nivel 5 en combate.',
         current: Math.min(5, maxLevel),
         target: 5,
         unit: 'Nivel',
         isDone: maxLevel >= 5,
         isClaimed: isOwned(profile, 'accessory', 'chef_hat'),
-        claim: () => {
-          grantItem('accessory', 'chef_hat');
-        }
+        claim: () => { grantItem('accessory', 'chef_hat'); }
       },
       {
         id: 'm_kills50',
@@ -146,28 +137,24 @@ export class DomiScreen {
         rewardId: 'parrilla',
         rewardName: 'Mini Parrilla',
         name: 'Maestro Asador',
-        badge: 'MASCOTA EXCLUSIVA',
-        description: 'Elimina al menos 50 clientes en una sola partida.',
-        detail: 'Despachá a medio centenar de clientes molestos en un único turno. Don Domi te entregará a la Mini Parrilla, un compañero leal que escupe brasas ardientes.',
+        iconType: 'skull',
+        description: 'Elimina 50 clientes molestos en una sola partida.',
         current: Math.min(50, maxKills),
         target: 50,
         unit: 'KOs',
         isDone: maxKills >= 50,
         isClaimed: isOwned(profile, 'pet', 'parrilla'),
-        claim: () => {
-          grantItem('pet', 'parrilla');
-        }
+        claim: () => { grantItem('pet', 'parrilla'); }
       },
       {
         id: 'm_godmode',
         type: 'mission',
         rewardType: 'points',
         rewardId: 'godmode',
-        rewardName: '+400 PT Arcade',
+        rewardName: '+400 PT',
         name: 'Receta Celestial',
-        badge: '+400 PUNTOS',
+        iconType: 'god',
         description: 'Desbloquea el Modo Dios alcanzando el Nivel 3.',
-        detail: 'Alcanzá el Nivel 3 para encender el aura divina de Don Domi. ¡Te recompensa con una bolsa de 400 puntos arcade para gastar en la tienda!',
         current: maxLevel >= 3 ? 3 : Math.min(3, maxLevel),
         target: 3,
         unit: 'Nivel',
@@ -184,11 +171,10 @@ export class DomiScreen {
         type: 'mission',
         rewardType: 'points',
         rewardId: 'combo15',
-        rewardName: '+250 PT Arcade',
+        rewardName: '+250 PT',
         name: 'Combo Imparable',
-        badge: '+250 PUNTOS',
-        description: 'Encadena al menos 15 bajas consecutivas en un turno.',
-        detail: 'Mantené el ritmo sin que el combo se enfríe. Superá las 15 bajas seguidas y Don Domi te sumará 250 puntos arcade a tu saldo.',
+        iconType: 'combo',
+        description: 'Encadena al menos 15 bajas consecutivas en turno.',
         current: Math.min(15, maxCombo),
         target: 15,
         unit: 'Combo',
@@ -207,76 +193,32 @@ export class DomiScreen {
         rewardId: 'headband',
         rewardName: 'Vincha Turbo',
         name: 'Resistencia Nocturna',
-        badge: 'ACCESORIO',
-        description: 'Sobrevive más de 3 minutos (180 s) en combate.',
-        detail: 'Aguantá más de 3 minutos completos bajo el asedio continuo del turno. Recibirás la Vincha Turbo para correr con estilo en la cocina.',
+        iconType: 'time',
+        description: 'Sobrevive más de 3 minutos (180 s) bajo asedio.',
         current: Math.min(180, Math.floor(maxTime)),
         target: 180,
         unit: 'segundos',
         isDone: maxTime >= 180,
         isClaimed: isOwned(profile, 'accessory', 'headband'),
-        claim: () => {
-          grantItem('accessory', 'headband');
-        }
+        claim: () => { grantItem('accessory', 'headband'); }
       }
     ];
   }
 
-  getCollectibles(profile) {
-    const skinsOwned = shopItems.filter(i => i.type === 'skin' && isOwned(profile, 'skin', i.id)).length + 1;
-    const petsOwned = shopItems.filter(i => i.type === 'pet' && isOwned(profile, 'pet', i.id)).length;
-    const accessoriesOwned = shopItems.filter(i => i.type === 'accessory' && isOwned(profile, 'accessory', i.id)).length;
-    const mapsOwned = shopItems.filter(i => i.type === 'map' && isOwned(profile, 'map', i.id)).length + 3;
-
+  getCollectionSlots(profile) {
     return [
-      {
-        id: 'collec_skins',
-        type: 'collectible',
-        name: 'Personajes y Skins',
-        badge: `${skinsOwned} / 6 DESBLOQUEADOS`,
-        description: 'Colección de chefs del mostrador: Pancho, Lomito, Empanada, Hamburguesa y Don Domi.',
-        detail: 'Cada personaje cuenta con estadísticas únicas de vida máxima, velocidad de desplazamiento, defensa y multiplicador de daño.',
-        owned: skinsOwned,
-        total: 6,
-        targetScreen: 'wardrobe',
-        btnText: 'ABRIR ARMARIO'
-      },
-      {
-        id: 'collec_pets',
-        type: 'collectible',
-        name: 'Mascotas del Local',
-        badge: `${petsOwned} / 5 DESBLOQUEADAS`,
-        description: 'Compañeros leales: Mini Ketchup, Dron Delivery, Taco Guardián, Botella Soda y Mini Parrilla.',
-        detail: 'Las mascotas atacan, patrullan, crean zonas seguras o curan a tu personaje automáticamente mientras cocinás.',
-        owned: petsOwned,
-        total: 5,
-        targetScreen: 'pets',
-        btnText: 'VER MASCOTAS'
-      },
-      {
-        id: 'collec_accessories',
-        type: 'collectible',
-        name: 'Accesorios Cosméticos',
-        badge: `${accessoriesOwned} / 4 DESBLOQUEADOS`,
-        description: 'Gorros de chef, vinchas turbo, anteojos oscuros y coronas doradas.',
-        detail: 'Personalizá a tu chef con accesorios exclusivos que podés desbloquear completando las misiones de Don Domi o en la Tienda Arcade.',
-        owned: accessoriesOwned,
-        total: 4,
-        targetScreen: 'shop_accessory',
-        btnText: 'VER EN TIENDA'
-      },
-      {
-        id: 'collec_maps',
-        type: 'collectible',
-        name: 'Mapas y Escenarios',
-        badge: `${mapsOwned} / 6 DESBLOQUEADOS`,
-        description: 'Local DOMI, Cocina Industrial, Estacionamiento Nocturno y más turnos por descubrir.',
-        detail: 'Cada escenario tiene desafíos de iluminación, trampas de aceite o trampas eléctricas, obstáculos y jefes finales exclusivos.',
-        owned: mapsOwned,
-        total: 6,
-        targetScreen: 'portal',
-        btnText: 'JUGAR MAPAS'
-      }
+      { id: 'pancho', type: 'skin', name: 'Pancho Clásico', category: 'CHEF', stats: { hp: '100', spd: '100', dmg: '100', perk: 'Disparo Balanceado' }, desc: 'El héroe del mostrador. Preciso y confiable.', lockText: 'INICIAL', isUnlocked: true },
+      { id: 'nugget', type: 'skin', name: 'Nugget Veloz', category: 'CHEF', stats: { hp: '80', spd: '130', dmg: '90', perk: '+30% Velocidad' }, desc: 'Escurridizo entre las comandas rápidas.', lockText: '450 PT', isUnlocked: isOwned(profile, 'skin', 'nugget') },
+      { id: 'papas', type: 'skin', name: 'Papas Fritas', category: 'CHEF', stats: { hp: '90', spd: '105', dmg: '110', perk: '+1 Proyectil' }, desc: 'Lluvia constante de bastones dorados.', lockText: '650 PT', isUnlocked: isOwned(profile, 'skin', 'papas') },
+      { id: 'pizza', type: 'skin', name: 'Pizza Suprema', category: 'CHEF', stats: { hp: '130', spd: '90', dmg: '120', perk: 'Resistencia Máx' }, desc: 'Masa gruesa que absorbe castigo pesado.', lockText: '850 PT', isUnlocked: isOwned(profile, 'skin', 'pizza') },
+      { id: 'empanada', type: 'skin', name: 'Empanada Criolla', category: 'CHEF', stats: { hp: '110', spd: '115', dmg: '105', perk: 'Defensa Blindada' }, desc: 'Repulgue de acero y esquiva rápida.', lockText: '950 PT', isUnlocked: isOwned(profile, 'skin', 'empanada') },
+      { id: 'choripan', type: 'skin', name: 'Choripán Bravo', category: 'CHEF', stats: { hp: '120', spd: '95', dmg: '140', perk: 'Cazajefes' }, desc: 'Impacto brutal con chimichurri picante.', lockText: '1600 PT', isUnlocked: isOwned(profile, 'skin', 'choripan') },
+      { id: 'parrilla', type: 'pet', name: 'Mini Parrilla', category: 'MASCOTA', stats: { hp: 'AUTO', spd: 'ALTO', dmg: '85', perk: 'Lanza Brasas' }, desc: 'Compañero ígneo exclusivo de Don Domi.', lockText: 'Misión #2', isUnlocked: isOwned(profile, 'pet', 'parrilla') },
+      { id: 'ketchup', type: 'pet', name: 'Mini Ketchup', category: 'MASCOTA', stats: { hp: 'AUTO', spd: 'MED', dmg: '45', perk: 'Charcos Lentos' }, desc: 'Frena el avance de masas de clientes.', lockText: '700 PT', isUnlocked: isOwned(profile, 'pet', 'ketchup') },
+      { id: 'drone', type: 'pet', name: 'Dron Delivery', category: 'MASCOTA', stats: { hp: 'AUTO', spd: 'MAX', dmg: '65', perk: 'Imán + Rayos' }, desc: 'Atrae ingredientes y descarga voltios.', lockText: '850 PT', isUnlocked: isOwned(profile, 'pet', 'drone') },
+      { id: 'taco', type: 'pet', name: 'Taco Guardián', category: 'MASCOTA', stats: { hp: 'AUTO', spd: 'MED', dmg: '75', perk: 'Escudo Frontal' }, desc: 'Bloquea proyectiles e impactos directos.', lockText: '950 PT', isUnlocked: isOwned(profile, 'pet', 'taco') },
+      { id: 'chef_hat', type: 'accessory', name: 'Gorro de Chef', category: 'ACCESORIO', stats: { hp: '-', spd: '-', dmg: '+10%', perk: '+10% Daño Total' }, desc: 'Gorro artesanal concedido por Don Domi.', lockText: 'Misión #1', isUnlocked: isOwned(profile, 'accessory', 'chef_hat') },
+      { id: 'crown', type: 'accessory', name: 'Corona Real', category: 'ACCESORIO', stats: { hp: '+10', spd: '-', dmg: '-', perk: '+10 Vida Máx' }, desc: 'Corona dorada para el monarca del local.', lockText: '650 PT', isUnlocked: isOwned(profile, 'accessory', 'crown') }
     ];
   }
 
@@ -285,267 +227,396 @@ export class DomiScreen {
     if (!this.profile) return;
     const profile = this.profile;
 
-    document.querySelector('#domiBank').textContent = profile.bank.toLocaleString('es-AR');
+    const bankEl = document.querySelector('#domiBank');
+    if (bankEl) bankEl.textContent = profile.bank.toLocaleString('es-AR');
 
-    // Render Tabs
+    // Tabs
     const tabsRoot = document.querySelector('#domiTabs');
-    tabsRoot.replaceChildren();
-
-    for (const [id, label, symbol] of tabs) {
-      const button = node('button', id === this.type ? 'active' : '');
-      button.type = 'button';
-      button.dataset.type = id;
-      button.innerHTML = icon(symbol);
-      button.append(node('span', '', label));
-      button.setAttribute('aria-pressed', String(id === this.type));
-      button.onclick = () => this.selectCategory(id);
-      tabsRoot.append(button);
+    if (tabsRoot) {
+      tabsRoot.replaceChildren();
+      for (const [id, label, symbol] of tabs) {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = id === this.type ? 'active' : '';
+        btn.dataset.type = id;
+        btn.innerHTML = `${icon(symbol)} <span>${label}</span>`;
+        btn.setAttribute('aria-pressed', String(id === this.type));
+        btn.onclick = () => this.selectCategory(id);
+        tabsRoot.append(btn);
+      }
     }
 
-    this.renderCatalog();
+    const container = document.querySelector('#domiContent');
+    if (!container) return;
+    container.replaceChildren();
+
+    if (this.type === 'missions') {
+      this.renderMissions(container, profile);
+    } else if (this.type === 'advice') {
+      this.renderAdvice(container);
+    } else if (this.type === 'collectibles') {
+      this.renderCollectibles(container, profile);
+    }
+
     refreshIcons();
   }
 
-  renderCatalog() {
-    this.profile = currentAccount();
-    if (!this.profile) return;
-    const profile = this.profile;
-
-    let items = [];
-    let categoryTitle = 'Misiones';
-
-    if (this.type === 'missions') {
-      items = this.getMissions(profile);
-      categoryTitle = 'Misiones y Desafíos';
-      const doneCount = items.filter(m => m.isClaimed).length;
-      document.querySelector('#domiCount').textContent = `${doneCount} de ${items.length} completadas`;
-    } else if (this.type === 'advice') {
-      items = adviceList;
-      categoryTitle = 'Consejos de Don Domi';
-      document.querySelector('#domiCount').textContent = `${items.length} recetas secretas`;
-    } else if (this.type === 'collectibles') {
-      items = this.getCollectibles(profile);
-      categoryTitle = 'Tu Colección';
-      document.querySelector('#domiCount').textContent = 'Progreso global del club';
-    }
-
-    document.querySelector('#domiCategory').textContent = categoryTitle;
-
-    if (!this.selected || !items.some(i => i.id === this.selected.id)) {
-      this.selected = items[0] || null;
-    }
-
-    const grid = document.querySelector('#domiGrid');
-    grid.replaceChildren();
-
-    for (const item of items) {
-      const card = node('button', 'catalog-item');
-      card.type = 'button';
-      card.dataset.item = item.id;
-      card.setAttribute('aria-pressed', String(this.selected?.id === item.id));
-
-      const art = node('div', 'catalog-art');
-      const canvas = document.createElement('canvas');
-      canvas.width = 280;
-      canvas.height = 180;
-      canvas.setAttribute('aria-hidden', 'true');
-      this.drawCardPreview(canvas, item, profile);
-
-      const badgeText = item.badge || (item.isClaimed ? '✓ COMPLETADA' : item.isDone ? '★ RECLAMAR' : 'EN PROGRESO');
-      art.append(canvas, node('span', 'catalog-badge', badgeText));
-
-      const copy = node('div', 'catalog-copy');
-      copy.append(node('strong', 'catalog-name', item.name || item.title), node('span', 'catalog-description', item.description));
-
-      const footer = node('span', 'catalog-status');
-      if (this.type === 'missions') {
-        footer.innerHTML = icon(item.isClaimed ? 'CircleCheck' : item.isDone ? 'Sparkles' : 'Clock');
-        footer.append(node('span', '', item.isClaimed ? 'Reclamada' : item.isDone ? '¡Lista para reclamar!' : `${item.current}/${item.target} ${item.unit}`));
-      } else if (this.type === 'advice') {
-        footer.innerHTML = icon('ChefHat');
-        footer.append(node('span', '', 'Consejo del chef'));
-      } else if (this.type === 'collectibles') {
-        footer.innerHTML = icon('Trophy');
-        footer.append(node('span', '', `${item.owned} / ${item.total} Desbloqueados`));
-      }
-      footer.append(node('span', 'catalog-arrow', '↗'));
-      copy.append(footer);
-      card.append(art, copy);
-
-      card.onclick = () => {
-        this.selected = item;
-        grid.querySelectorAll('.catalog-item').forEach(c => c.setAttribute('aria-pressed', String(c === card)));
-        this.renderDetail();
-        this.game.audio.play('navigate');
-      };
-
-      grid.append(card);
-    }
-
-    this.renderDetail();
-  }
-
-  renderDetail() {
-    const root = document.querySelector('#domiDetail');
-    root.replaceChildren();
+  /* =========================================================================
+     1. MISIONES: Barra gruesa cian/oro (3/5) y lista vertical ordenada
+     ========================================================================= */
+  renderMissions(container, profile) {
     this.previewCanvas = null;
+    const missions = this.getMissions(profile);
+    const claimedCount = missions.filter(m => m.isClaimed).length;
+    const pct = Math.round((claimedCount / missions.length) * 100);
 
-    const item = this.selected;
-    if (!item) {
-      root.append(node('p', 'detail-placeholder', 'Elegí un elemento para ver el detalle.'));
-      return;
-    }
+    // Barra de progreso gruesa superior (3/5)
+    const header = document.createElement('div');
+    header.className = 'domi-missions-header';
+    header.innerHTML = `
+      <div class="domi-progress-title-row">
+        <span class="domi-progress-label">REGISTRO DE MISIONES</span>
+        <b class="domi-progress-count">(${claimedCount} / ${missions.length})</b>
+      </div>
+      <div class="domi-progress-bar-thick" role="progressbar" aria-valuenow="${claimedCount}" aria-valuemin="0" aria-valuemax="${missions.length}">
+        <div class="domi-progress-fill-thick" style="width: ${pct}%;"></div>
+      </div>
+    `;
+    container.append(header);
 
-    const profile = currentAccount();
-    if (!profile) return;
+    // Lista vertical ordenada de tarjetas rectangulares
+    const list = document.createElement('div');
+    list.className = 'domi-missions-list';
 
-    const top = node('div', 'detail-top');
-    top.append(
-      node('span', '', this.type === 'missions' ? 'DESAFÍO EXCLUSIVO' : this.type === 'advice' ? 'SECRETOS DEL MOSTRADOR' : 'PROGRESO DE COLECCIÓN'),
-      node('span', 'detail-state', item.badge || (item.isClaimed ? 'COMPLETADO' : 'DISPONIBLE'))
-    );
+    for (const m of missions) {
+      const card = document.createElement('div');
+      card.className = `domi-mission-card ${m.isClaimed ? 'is-claimed' : m.isDone ? 'is-done' : 'is-progress'}`;
 
-    const stage = node('div', 'detail-stage');
-    const canvas = document.createElement('canvas');
-    canvas.width = 480;
-    canvas.height = 300;
-    canvas.id = 'domiPreview';
-    canvas.setAttribute('aria-label', `Vista previa de ${item.name || item.title}`);
-    this.previewCanvas = canvas;
+      // Ícono/casilla en pixel art a la izquierda
+      const iconBox = document.createElement('div');
+      iconBox.className = 'domi-mission-icon-box';
+      iconBox.innerHTML = this.getMissionIcon(m.iconType);
 
-    const captionText = this.type === 'missions' ? `Recompensa: ${item.rewardName}` : this.type === 'advice' ? 'Don Domi · Maestro de la Cocina' : 'Desbloquea contenido jugando partidas';
-    stage.append(canvas, node('span', 'preview-caption', captionText));
+      // Centro: Título y mini barra de progreso
+      const center = document.createElement('div');
+      center.className = 'domi-mission-center';
+      const mPct = Math.min(100, Math.round((m.current / m.target) * 100));
+      center.innerHTML = `
+        <div class="domi-mission-head">
+          <strong class="domi-mission-title">${m.name}</strong>
+          <span class="domi-mission-ratio">${m.current}/${m.target} ${m.unit}</span>
+        </div>
+        <p class="domi-mission-desc">${m.description}</p>
+        <div class="domi-mission-mini-bar">
+          <div class="domi-mini-fill" style="width: ${mPct}%;"></div>
+        </div>
+      `;
 
-    const body = node('div', 'detail-body');
-    const heading = node('h3', '', item.name || item.title);
-    body.append(heading, node('p', 'shop-description', item.detail || item.description));
+      // Derecha: Badge dorado de recompensa + Botón Reclamar
+      const right = document.createElement('div');
+      right.className = 'domi-mission-right';
 
-    // Stats o Progreso
-    if (this.type === 'missions') {
-      const stats = node('div', 'preview-stats');
-      const s1 = node('span', '');
-      s1.append(node('small', '', 'ACTUAL'), node('b', '', String(item.current)));
-      const s2 = node('span', '');
-      s2.append(node('small', '', 'META'), node('b', '', String(item.target)));
-      const pct = Math.min(100, Math.round((item.current / item.target) * 100));
-      const s3 = node('span', '');
-      s3.append(node('small', '', 'PROGRESO'), node('b', '', `${pct}%`));
-      stats.append(s1, s2, s3);
-      body.append(stats);
-    } else if (this.type === 'collectibles') {
-      const stats = node('div', 'preview-stats');
-      const s1 = node('span', '');
-      s1.append(node('small', '', 'OBTENIDOS'), node('b', '', String(item.owned)));
-      const s2 = node('span', '');
-      s2.append(node('small', '', 'TOTAL'), node('b', '', String(item.total)));
-      const pct = Math.min(100, Math.round((item.owned / item.total) * 100));
-      const s3 = node('span', '');
-      s3.append(node('small', '', 'COLECCIÓN'), node('b', '', `${pct}%`));
-      stats.append(s1, s2, s3);
-      body.append(stats);
-    }
+      const badge = document.createElement('span');
+      badge.className = 'domi-reward-badge';
+      badge.textContent = m.rewardName;
 
-    // Action button
-    const action = node('div', 'detail-action');
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'pixel-button domi-claim-btn';
 
-    if (this.type === 'missions') {
-      if (item.isClaimed) {
-        action.append(node('p', 'purchase-explainer', '¡Ya reclamaste esta recompensa! Se encuentra en tu colección.'));
-        const btn = node('button', 'pixel-button purchase-button');
+      if (m.isClaimed) {
         btn.disabled = true;
-        btn.innerHTML = `${icon('Check')} <span>RECOMPENSA RECLAMADA</span>`;
-        action.append(btn);
-      } else if (item.isDone) {
-        action.append(node('p', 'purchase-explainer', '¡Misión cumplida! Hacé clic abajo para reclamar tu recompensa.'));
-        const btn = node('button', 'pixel-button purchase-button');
-        btn.innerHTML = `${icon('Sparkles')} <span>¡RECLAMAR ${item.rewardName.toUpperCase()}!</span>`;
+        btn.classList.add('btn-claimed');
+        btn.textContent = '✓ RECLAMADA';
+      } else if (m.isDone) {
+        btn.classList.add('pixel-button--claim');
+        btn.textContent = '¡RECLAMAR!';
         btn.onclick = () => {
           btn.disabled = true;
-          item.claim();
+          m.claim();
           this.game.audio.play('levelUp');
-          this.game.showToast?.(`¡DESBLOQUEADO: ${item.rewardName}!`);
+          this.game.showToast?.(`¡RECOMPENSA OBTENIDA: ${m.rewardName}!`);
           const fb = document.querySelector('#domiFeedback');
-          if (fb) fb.textContent = `¡Felicitaciones! Desbloqueaste: ${item.rewardName}.`;
+          if (fb) fb.textContent = `¡Excelente trabajo! Desbloqueaste: ${m.rewardName}.`;
           this.render();
         };
-        action.append(btn);
       } else {
-        const missing = item.target - item.current;
-        action.append(node('p', 'purchase-explainer', `Te falta ${missing} ${item.unit} para completar este objetivo durante una partida.`));
-        const btn = node('button', 'pixel-button purchase-button');
         btn.disabled = true;
-        btn.innerHTML = `${icon('Lock')} <span>EN PROGRESO · ${item.current} / ${item.target}</span>`;
-        action.append(btn);
+        btn.classList.add('btn-locked');
+        btn.textContent = 'EN CURSO';
       }
-    } else if (this.type === 'advice') {
-      action.append(node('p', 'purchase-explainer', 'Don Domi siempre tiene un consejo para cada situación en el local.'));
-      const btn = node('button', 'pixel-button purchase-button');
-      btn.innerHTML = `${icon('MessageCircle')} <span>SIGUIENTE CONSEJO</span>`;
-      btn.onclick = () => {
-        const idx = adviceList.findIndex(a => a.id === item.id);
-        const next = adviceList[(idx + 1) % adviceList.length];
-        this.selected = next;
-        this.renderCatalog();
-        this.game.audio.play('navigate');
-      };
-      action.append(btn);
-    } else if (this.type === 'collectibles') {
-      action.append(node('p', 'purchase-explainer', 'Acceso directo para equipar o adquirir artículos de esta categoría.'));
-      const btn = node('button', 'pixel-button purchase-button');
-      btn.innerHTML = `${icon('ArrowRight')} <span>${item.btnText}</span>`;
-      btn.onclick = () => {
-        if (item.targetScreen === 'wardrobe') {
-          this.game.shop.show('skin', true);
-        } else if (item.targetScreen === 'pets') {
-          this.game.shop.show('pet', true);
-        } else if (item.targetScreen === 'shop_accessory') {
-          this.game.shop.show('accessory', false);
-        } else if (item.targetScreen === 'portal') {
-          this.game.menu.prepareAccount();
-          this.game.showScreen('setupScreen');
-        }
-      };
-      action.append(btn);
+
+      right.append(badge, btn);
+      card.append(iconBox, center, right);
+      list.append(card);
     }
 
-    root.append(top, stage, body, action);
-    this.drawCardPreview(canvas, item, profile);
+    container.append(list);
   }
 
-  drawCardPreview(canvas, item, profile, time = 0) {
+  getMissionIcon(type) {
+    if (type === 'star') {
+      return `<svg viewBox="0 0 16 16" width="24" height="24" shape-rendering="crispEdges"><rect x="7" y="1" width="2" height="3" fill="#ffe066"/><rect x="5" y="4" width="6" height="3" fill="#ffe066"/><rect x="1" y="6" width="14" height="3" fill="#ffd000"/><rect x="3" y="9" width="10" height="3" fill="#ffd000"/><rect x="2" y="12" width="4" height="3" fill="#e69900"/><rect x="10" y="12" width="4" height="3" fill="#e69900"/></svg>`;
+    }
+    if (type === 'skull') {
+      return `<svg viewBox="0 0 16 16" width="24" height="24" shape-rendering="crispEdges"><rect x="4" y="2" width="8" height="8" fill="#e2e8f0"/><rect x="2" y="4" width="12" height="5" fill="#e2e8f0"/><rect x="4" y="5" width="2" height="3" fill="#0f172a"/><rect x="10" y="5" width="2" height="3" fill="#0f172a"/><rect x="5" y="11" width="6" height="3" fill="#cbd5e1"/><rect x="6" y="12" width="1" height="2" fill="#0f172a"/><rect x="8" y="12" width="1" height="2" fill="#0f172a"/></svg>`;
+    }
+    if (type === 'god') {
+      return `<svg viewBox="0 0 16 16" width="24" height="24" shape-rendering="crispEdges"><circle cx="8" cy="8" r="6" fill="#38bdf8" opacity="0.3"/><rect x="7" y="2" width="2" height="12" fill="#ffe066"/><rect x="2" y="7" width="12" height="2" fill="#ffe066"/><rect x="4" y="4" width="8" height="8" fill="#fff" opacity="0.8"/></svg>`;
+    }
+    if (type === 'combo') {
+      return `<svg viewBox="0 0 16 16" width="24" height="24" shape-rendering="crispEdges"><rect x="6" y="1" width="4" height="3" fill="#f97316"/><rect x="4" y="4" width="8" height="4" fill="#fbbf24"/><rect x="3" y="7" width="10" height="6" fill="#ef4444"/><rect x="6" y="9" width="4" height="4" fill="#fef08a"/></svg>`;
+    }
+    return `<svg viewBox="0 0 16 16" width="24" height="24" shape-rendering="crispEdges"><rect x="3" y="2" width="10" height="2" fill="#94a3b8"/><rect x="5" y="4" width="6" height="3" fill="#38bdf8"/><rect x="7" y="7" width="2" height="2" fill="#22d3ee"/><rect x="5" y="9" width="6" height="3" fill="#38bdf8"/><rect x="3" y="12" width="10" height="2" fill="#94a3b8"/></svg>`;
+  }
+
+  /* =========================================================================
+     2. CONSEJOS: Filtros superiores ("Todos", "Combate", "Movimientos") y tickets
+     ========================================================================= */
+  renderAdvice(container) {
+    this.previewCanvas = null;
+
+    // Barra de filtros arcade
+    const filtersBar = document.createElement('div');
+    filtersBar.className = 'domi-advice-filters';
+    filtersBar.innerHTML = `
+      <button type="button" class="pixel-button btn-filter ${this.adviceFilter === 'all' ? 'active' : ''}" data-filter="all">TODOS</button>
+      <button type="button" class="pixel-button btn-filter ${this.adviceFilter === 'combat' ? 'active' : ''}" data-filter="combat">COMBATE</button>
+      <button type="button" class="pixel-button btn-filter ${this.adviceFilter === 'movement' ? 'active' : ''}" data-filter="movement">MOVIMIENTOS</button>
+    `;
+
+    filtersBar.querySelectorAll('button').forEach(b => {
+      b.onclick = () => {
+        this.adviceFilter = b.dataset.filter;
+        this.game.audio.play('navigate');
+        this.render();
+      };
+    });
+    container.append(filtersBar);
+
+    // Contenido: Tarjetas estilo "ticket de receta" con acento cian
+    const list = document.createElement('div');
+    list.className = 'domi-tickets-list';
+
+    const filtered = adviceList.filter(a => this.adviceFilter === 'all' || a.category === this.adviceFilter);
+
+    filtered.forEach((adv, idx) => {
+      const ticket = document.createElement('div');
+      ticket.className = 'domi-recipe-ticket';
+
+      // Ilustración pixel art
+      const artBox = document.createElement('div');
+      artBox.className = 'domi-ticket-art';
+      artBox.innerHTML = adv.category === 'movement'
+        ? `<svg viewBox="0 0 24 24" width="32" height="32" shape-rendering="crispEdges"><rect x="3" y="11" width="5" height="2" fill="#38bdf8"/><polygon points="14,2 7,13 13,13 10,22 20,10 14,10" fill="#22d3ee"/><polygon points="14,4 9,12 13,12 11,19 18,11 14,11" fill="#ffe066"/></svg>`
+        : `<svg viewBox="0 0 24 24" width="32" height="32" shape-rendering="crispEdges"><rect x="10" y="2" width="4" height="2" fill="#fbbf24"/><rect x="8" y="4" width="8" height="4" fill="#f59e0b"/><rect x="4" y="8" width="16" height="5" fill="#ef4444"/><rect x="7" y="13" width="10" height="4" fill="#fbbf24"/><rect x="10" y="17" width="4" height="5" fill="#e2e8f0"/></svg>`;
+
+      // Cuerpo del ticket con texto instructivo claro sin redundancias
+      const body = document.createElement('div');
+      body.className = 'domi-ticket-body';
+      body.innerHTML = `
+        <div class="domi-ticket-badge-row">
+          <span class="ticket-tag">RECETA #${idx + 1}</span>
+          <span class="ticket-cat">${adv.badge}</span>
+        </div>
+        <strong class="domi-ticket-title">${adv.title}</strong>
+        <p class="domi-ticket-desc">${adv.description}</p>
+      `;
+
+      ticket.append(artBox, body);
+      list.append(ticket);
+    });
+
+    container.append(list);
+  }
+
+  /* =========================================================================
+     3. COLECCIÓN: Grilla 4x3 de 12 ranuras oscuras + Pedestal de exhibición
+     ========================================================================= */
+  renderCollectibles(container, profile) {
+    const slots = this.getCollectionSlots(profile);
+    if (!this.selectedSlot || !slots.some(s => s.id === this.selectedSlot.id)) {
+      this.selectedSlot = slots[0];
+    }
+    const current = this.selectedSlot;
+
+    const layout = document.createElement('div');
+    layout.className = 'domi-collection-layout';
+
+    // Grilla 4x3
+    const grid = document.createElement('div');
+    grid.className = 'domi-grid-4x3';
+
+    for (const slot of slots) {
+      const slotBtn = document.createElement('button');
+      slotBtn.type = 'button';
+      slotBtn.className = `domi-slot ${slot.isUnlocked ? 'is-unlocked' : 'is-locked'} ${current.id === slot.id ? 'is-selected' : ''}`;
+      slotBtn.setAttribute('aria-pressed', String(current.id === slot.id));
+      slotBtn.title = slot.name;
+
+      const canvas = document.createElement('canvas');
+      canvas.width = 64;
+      canvas.height = 64;
+      canvas.className = 'domi-slot-canvas';
+      this.drawSlotIcon(canvas, slot, profile);
+
+      slotBtn.append(canvas);
+
+      if (!slot.isUnlocked) {
+        const lockOverlay = document.createElement('div');
+        lockOverlay.className = 'domi-slot-lock';
+        lockOverlay.innerHTML = `
+          <svg viewBox="0 0 16 16" width="16" height="16" shape-rendering="crispEdges">
+            <rect x="5" y="3" width="6" height="4" fill="#ffe066" opacity="0.8"/>
+            <rect x="4" y="6" width="8" height="7" fill="#f59e0b"/>
+            <rect x="7" y="8" width="2" height="3" fill="#0f172a"/>
+          </svg>
+          <span class="domi-lock-label">${slot.lockText}</span>
+        `;
+        slotBtn.append(lockOverlay);
+      }
+
+      slotBtn.onclick = () => {
+        this.selectedSlot = slot;
+        this.renderCollectibles(container, profile);
+        this.game.audio.play('navigate');
+      };
+
+      grid.append(slotBtn);
+    }
+
+    // Panel de pedestal de exhibición derecho
+    const panel = document.createElement('aside');
+    panel.className = 'domi-pedestal-panel';
+
+    const stage = document.createElement('div');
+    stage.className = 'domi-pedestal-stage';
+    const previewCanvas = document.createElement('canvas');
+    previewCanvas.width = 320;
+    previewCanvas.height = 220;
+    previewCanvas.id = 'domiPreview';
+    this.previewCanvas = previewCanvas;
+    stage.append(previewCanvas);
+
+    const badge = document.createElement('span');
+    badge.className = 'domi-pedestal-cat-badge';
+    badge.textContent = `${current.category} · ${current.isUnlocked ? 'DESBLOQUEADO' : 'BLOQUEADO'}`;
+    stage.append(badge);
+
+    const body = document.createElement('div');
+    body.className = 'domi-pedestal-body';
+    body.innerHTML = `
+      <strong class="domi-pedestal-title">${current.name}</strong>
+      <p class="domi-pedestal-desc">${current.desc}</p>
+      <div class="domi-pedestal-stats">
+        <div class="stat-box"><small>VIDA</small><b>${current.stats.hp}</b></div>
+        <div class="stat-box"><small>VEL</small><b>${current.stats.spd}</b></div>
+        <div class="stat-box"><small>DAÑO</small><b>${current.stats.dmg}</b></div>
+      </div>
+      <div class="stat-perk">
+        <small>EFECTO ESPECIAL</small>
+        <b>${current.stats.perk}</b>
+      </div>
+    `;
+
+    const action = document.createElement('div');
+    action.className = 'domi-pedestal-action';
+    const actionBtn = document.createElement('button');
+    actionBtn.type = 'button';
+    actionBtn.className = 'pixel-button domi-action-btn';
+
+    if (current.isUnlocked) {
+      actionBtn.textContent = current.type === 'skin' ? 'VER EN ARMARIO' : current.type === 'pet' ? 'VER MASCOTAS' : 'EQUIPAR ACCESORIO';
+      actionBtn.onclick = () => {
+        if (current.type === 'skin') this.game.shop.show('skin', true);
+        else if (current.type === 'pet') this.game.shop.show('pet', true);
+        else this.game.shop.show('accessory', false);
+      };
+    } else {
+      actionBtn.disabled = true;
+      actionBtn.textContent = `BLOQUEADO (${current.lockText})`;
+    }
+    action.append(actionBtn);
+
+    panel.append(stage, body, action);
+    layout.append(grid, panel);
+    container.append(layout);
+
+    this.drawPedestalPreview(previewCanvas, current, profile);
+  }
+
+  drawSlotIcon(canvas, slot, profile) {
+    const c = canvas.getContext('2d');
+    c.clearRect(0, 0, canvas.width, canvas.height);
+    c.imageSmoothingEnabled = false;
+
+    if (!slot.isUnlocked) {
+      c.save();
+      c.filter = 'brightness(0.22) contrast(1.2)';
+    }
+
+    drawItemPreview(canvas, { type: slot.type, id: slot.id, name: slot.name }, profile, 0);
+
+    if (!slot.isUnlocked) {
+      c.restore();
+    }
+  }
+
+  drawPedestalPreview(canvas, item, profile, time = 0) {
     const c = canvas.getContext('2d');
     const w = canvas.width, h = canvas.height;
     c.clearRect(0, 0, w, h);
 
-    if (item.rewardType === 'accessory' || item.rewardType === 'pet') {
-      const mockItem = {
-        type: item.rewardType,
-        id: item.rewardId,
-        name: item.rewardName
-      };
-      drawItemPreview(canvas, mockItem, profile, time);
-      return;
-    }
-
-    // Dibujar fondo arcade oscuro
-    c.fillStyle = '#142127';
+    // Fondo sci-fi oscuro de exhibición
+    c.fillStyle = '#0a1216';
     c.fillRect(0, 0, w, h);
-    for (let x = 0; x < w; x += 24) {
-      c.fillStyle = 'rgba(255,255,255,0.02)';
-      c.fillRect(x, 0, 1, h);
-    }
 
-    // Sombra del podio
-    c.fillStyle = 'rgba(0,0,0,0.45)';
+    // Cuadrícula sutil
+    c.fillStyle = 'rgba(56, 189, 248, 0.05)';
+    for (let x = 0; x < w; x += 16) c.fillRect(x, 0, 1, h);
+    for (let y = 0; y < h; y += 16) c.fillRect(0, y, w, 1);
+
+    // Pedestal cilíndrico de 16 bits
+    const px = w / 2, py = h * 0.76;
+    c.fillStyle = '#060d11';
     c.beginPath();
-    c.ellipse(w / 2, h * 0.78, w * 0.28, h * 0.1, 0, 0, Math.PI * 2);
+    c.ellipse(px, py + 8, 70, 18, 0, 0, Math.PI * 2);
     c.fill();
-    c.strokeStyle = '#5ce1e6';
+
+    // Superficie del pedestal con brillo cian
+    c.fillStyle = '#163138';
+    c.beginPath();
+    c.ellipse(px, py, 64, 16, 0, 0, Math.PI * 2);
+    c.fill();
+    c.strokeStyle = '#22d3ee';
     c.lineWidth = 2;
     c.stroke();
 
-    // Dibujar a Don Domi animado
-    this.drawDomiCharacter(c, w / 2, h * 0.54, Math.min(w / 140, h / 100), time);
+    // Haz de luz cenital suave
+    const light = c.createLinearGradient(px, 10, px, py);
+    light.addColorStop(0, 'rgba(34, 211, 238, 0.15)');
+    light.addColorStop(1, 'rgba(34, 211, 238, 0)');
+    c.fillStyle = light;
+    c.beginPath();
+    c.moveTo(px - 30, 0);
+    c.lineTo(px + 30, 0);
+    c.lineTo(px + 64, py);
+    c.lineTo(px - 64, py);
+    c.closePath();
+    c.fill();
+
+    // Si es desbloqueado o bloqueado
+    c.save();
+    if (!item.isUnlocked) {
+      c.filter = 'brightness(0.3) saturate(0.2)';
+    }
+
+    if (item.id === 'domi') {
+      this.drawDomiCharacter(c, px, py - 32, 2.2, time);
+    } else {
+      drawItemPreview(canvas, { type: item.type, id: item.id, name: item.name }, profile, time);
+    }
+    c.restore();
   }
 
   drawDomiCharacter(c, cx, cy, scale = 2, time = 0) {
@@ -553,7 +624,7 @@ export class DomiScreen {
     c.translate(cx, cy + Math.sin(time * 3) * 3);
     c.scale(scale, scale);
 
-    // Sombra bajo la empanada
+    // Sombra
     c.fillStyle = 'rgba(0,0,0,0.3)';
     c.beginPath();
     c.ellipse(0, 10, 18, 5, 0, 0, Math.PI * 2);
@@ -596,12 +667,12 @@ export class DomiScreen {
       c.fillRect(5, 0, 1, 1);
     }
 
-    // Bigote y sonrisa de chef
+    // Bigote y sonrisa
     c.fillStyle = '#78350f';
     c.fillRect(-5, 6, 10, 2);
     c.fillRect(-2, 8, 4, 2);
 
-    // Gorro de chef blanco alto con volumen
+    // Gorro de chef blanco alto
     c.fillStyle = '#ffffff';
     c.fillRect(-13, -18, 26, 7);
     c.fillRect(-17, -27, 34, 10);
@@ -614,7 +685,7 @@ export class DomiScreen {
     c.fillRect(0, -25, 2, 8);
     c.fillRect(7, -24, 2, 7);
 
-    // Humo / vapor aromático saliendo del gorro
+    // Vapor aromático
     const steamY = -36 - ((time * 20) % 18);
     const steamAlpha = Math.max(0, 1 - ((time * 20) % 18) / 18);
     c.fillStyle = `rgba(255, 255, 255, ${steamAlpha * 0.7})`;
@@ -627,8 +698,8 @@ export class DomiScreen {
   }
 
   update(time) {
-    if (this.previewCanvas && this.selected) {
-      this.drawCardPreview(this.previewCanvas, this.selected, this.profile, this.game.reducedMotion ? 0 : time);
+    if (this.previewCanvas && this.type === 'collectibles' && this.selectedSlot) {
+      this.drawPedestalPreview(this.previewCanvas, this.selectedSlot, this.profile, this.game.reducedMotion ? 0 : time);
     }
   }
 }
