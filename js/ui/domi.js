@@ -1,12 +1,15 @@
 import {currentAccount, grantItem, equip} from '../systems/accountSystem.js';
 import {shopItems, isOwned} from '../data/shop.js';
 import {drawItemPreview, drawAccessoryIcon} from '../core/presentation.js';
+import {drawFood} from '../core/art.js';
 import {icon, refreshIcons} from './icons.js';
+import {enemyTypes} from '../entities/Enemy.js';
+import {skins} from '../data/skins.js';
 
 const tabs = [
   ['missions', 'Misiones', 'Scroll'],
   ['advice', 'Consejos', 'MessageSquare'],
-  ['collectibles', 'Colección', 'Star']
+  ['collectibles', 'Almanaque', 'BookOpen']
 ];
 
 export const adviceList = [
@@ -348,29 +351,36 @@ export class DomiScreen {
   }
 
   getCollectionSlots(profile) {
+    const runs = profile.runs || [];
+    const totalBosses = runs.reduce((sum, r) => sum + (r.bossesKilled || 0), 0);
+    const totalKills = runs.reduce((sum, r) => sum + (r.kills || 0), 0);
+
     return [
-      { id: 'pancho', type: 'skin', name: 'Pancho Clásico', category: 'CHEF', stats: { hp: '100', spd: '100', dmg: '100', perk: 'Disparo Balanceado' }, desc: 'El héroe del mostrador. Preciso y confiable.', lockText: 'INICIAL', isUnlocked: true },
-      { id: 'nugget', type: 'skin', name: 'Nugget Veloz', category: 'CHEF', stats: { hp: '80', spd: '130', dmg: '90', perk: '+30% Velocidad' }, desc: 'Escurridizo entre las comandas rápidas.', lockText: '450 PT', isUnlocked: isOwned(profile, 'skin', 'nugget') },
-      { id: 'papas', type: 'skin', name: 'Papas Fritas', category: 'CHEF', stats: { hp: '90', spd: '105', dmg: '110', perk: '+1 Proyectil' }, desc: 'Lluvia constante de bastones dorados.', lockText: '650 PT', isUnlocked: isOwned(profile, 'skin', 'papas') },
-      { id: 'pizza', type: 'skin', name: 'Pizza Suprema', category: 'CHEF', stats: { hp: '130', spd: '90', dmg: '120', perk: 'Resistencia Máx' }, desc: 'Masa gruesa que absorbe castigo pesado.', lockText: '850 PT', isUnlocked: isOwned(profile, 'skin', 'pizza') },
-      { id: 'empanada', type: 'skin', name: 'Empanada Criolla', category: 'CHEF', stats: { hp: '110', spd: '115', dmg: '105', perk: 'Defensa Blindada' }, desc: 'Repulgue de acero y esquiva rápida.', lockText: '950 PT', isUnlocked: isOwned(profile, 'skin', 'empanada') },
-      { id: 'choripan', type: 'skin', name: 'Choripán Bravo', category: 'CHEF', stats: { hp: '120', spd: '95', dmg: '140', perk: 'Cazajefes' }, desc: 'Impacto brutal con chimichurri picante.', lockText: '1600 PT', isUnlocked: isOwned(profile, 'skin', 'choripan') },
-      { id: 'parrilla', type: 'pet', name: 'Mini Parrilla', category: 'MASCOTA', stats: { hp: 'AUTO', spd: 'ALTO', dmg: '85', perk: 'Lanza Brasas' }, desc: 'Compañero ígneo exclusivo de Don Domi.', lockText: 'Misión 50 KOs', isUnlocked: isOwned(profile, 'pet', 'parrilla') },
-      { id: 'ketchup', type: 'pet', name: 'Mini Ketchup', category: 'MASCOTA', stats: { hp: 'AUTO', spd: 'MED', dmg: '45', perk: 'Charcos Lentos' }, desc: 'Frena el avance de masas de clientes.', lockText: '700 PT', isUnlocked: isOwned(profile, 'pet', 'ketchup') },
-      { id: 'drone', type: 'pet', name: 'Dron Delivery', category: 'MASCOTA', stats: { hp: 'AUTO', spd: 'MAX', dmg: '65', perk: 'Imán + Rayos' }, desc: 'Atrae ingredientes y descarga voltios.', lockText: '850 PT', isUnlocked: isOwned(profile, 'pet', 'drone') },
-      { id: 'taco', type: 'pet', name: 'Taco Guardián', category: 'MASCOTA', stats: { hp: 'AUTO', spd: 'MED', dmg: '75', perk: 'Escudo Frontal' }, desc: 'Bloquea proyectiles e impactos directos.', lockText: '950 PT', isUnlocked: isOwned(profile, 'pet', 'taco') },
-      { id: 'chef_hat', type: 'accessory', name: 'Gorro de Chef', category: 'ACCESORIO', stats: { hp: '-', spd: '-', dmg: '+12%', perk: '+12% Daño Total' }, desc: 'Gorro artesanal concedido por Don Domi.', lockText: 'Misión Nivel 5', isUnlocked: isOwned(profile, 'accessory', 'chef_hat') },
-      { id: 'leg_crown', type: 'accessory', name: 'Corona Imperial', category: 'LEGENDARIO', stats: { hp: '+25', spd: '-', dmg: '+15%', perk: '+25 HP +15% Dmg' }, desc: 'Símbolo del amo absoluto del local.', lockText: 'Misión Combo 20', isUnlocked: isOwned(profile, 'accessory', 'leg_crown') },
-      { id: 'leg_halo', type: 'accessory', name: 'Aureola Celestial', category: 'LEGENDARIO', stats: { hp: 'REGEN', spd: '+15%', dmg: '-', perk: '+15% Spd +Regen' }, desc: 'Bendición culinaria con regeneración pasiva.', lockText: 'Misión 3 Min', isUnlocked: isOwned(profile, 'accessory', 'leg_halo') },
-      { id: 'leg_viking', type: 'accessory', name: 'Casco Vikingo', category: 'LEGENDARIO', stats: { hp: '+20', spd: '-', dmg: '+20%', perk: '+20 HP +20% Dmg' }, desc: 'Yelmo nórdico para batallas voraces.', lockText: 'Misión 100 KOs', isUnlocked: isOwned(profile, 'accessory', 'leg_viking') },
-      { id: 'leg_horns', type: 'accessory', name: 'Cuernos Demoníacos', category: 'LEGENDARIO', stats: { hp: '-', spd: '+8%', dmg: '+28%', perk: '+28% Daño Puro' }, desc: 'Forjados en las brasas del infierno.', lockText: 'Misión Combo 35', isUnlocked: isOwned(profile, 'accessory', 'leg_horns') },
-      { id: 'leg_visor', type: 'accessory', name: 'Visor Cibernético', category: 'LEGENDARIO', stats: { hp: '-', spd: '-', dmg: '+20% Crit', perk: '+20% Crit +Imán' }, desc: 'Óptica láser esmeralda de Don Domi.', lockText: 'Misión 5 Turnos', isUnlocked: isOwned(profile, 'accessory', 'leg_visor') },
-      { id: 'leg_archmage', type: 'accessory', name: 'Sombrero de Arquimago', category: 'LEGENDARIO', stats: { hp: '-', spd: '-', dmg: '+22%', perk: '+22% Dmg +Cadencia' }, desc: 'Reliquia estelar de la cocina arcana.', lockText: 'Misión Nivel 10', isUnlocked: isOwned(profile, 'accessory', 'leg_archmage') },
-      { id: 'leg_cape', type: 'accessory', name: 'Manto Real Carmesí', category: 'LEGENDARIO', stats: { hp: '+30', spd: '-', dmg: '+12%', perk: '+30 HP +12% Dmg' }, desc: 'Manto de terciopelo real y cuello de armiño.', lockText: 'Misión 300 KOs', isUnlocked: isOwned(profile, 'accessory', 'leg_cape') },
-      { id: 'leg_angel_wings', type: 'accessory', name: 'Alas de Ángel', category: 'LEGENDARIO', stats: { hp: '-', spd: '+22%', dmg: '-', perk: '+22% Spd -Recarga' }, desc: 'Plumas sagradas sobre el aceite hirviendo.', lockText: 'Misión 4 Min', isUnlocked: isOwned(profile, 'accessory', 'leg_angel_wings') },
-      { id: 'leg_fire_wings', type: 'accessory', name: 'Alas de Fénix Ígneo', category: 'LEGENDARIO', stats: { hp: '-', spd: '+12%', dmg: '+25%', perk: '+25% Dmg +12% Spd' }, desc: 'Envergadura de fuego que calcina comandas.', lockText: 'Misión Nivel 8', isUnlocked: isOwned(profile, 'accessory', 'leg_fire_wings') },
-      { id: 'leg_excalibur', type: 'accessory', name: 'Espada Dorada Excalibur', category: 'LEGENDARIO', stats: { hp: '-', spd: '-', dmg: '+18% +1Proy', perk: '+1 Proyectil Extra' }, desc: 'Hoja sagrada de soberanía gastronómica.', lockText: 'Vencer 1 Jefe', isUnlocked: isOwned(profile, 'accessory', 'leg_excalibur') },
-      { id: 'leg_medallion', type: 'accessory', name: 'Medallón Rubí Sagrado', category: 'LEGENDARIO', stats: { hp: '+40', spd: '-', dmg: '-', perk: '+40 Vida +Defensa' }, desc: 'Joya real encantada por el Señor Domi.', lockText: 'Vencer 3 Jefes', isUnlocked: isOwned(profile, 'accessory', 'leg_medallion') }
+      // --- PERSONAJES JUGABLES ---
+      { id: 'pancho', type: 'skin', name: 'Pancho Clásico', category: 'PERSONAJE', stats: { hp: '100', spd: '220', dmg: '100%', perk: 'Disparo Balanceado' }, desc: 'El héroe del mostrador. Equilibrado, preciso y fiel a la parrilla.', lockText: 'INICIAL', isUnlocked: true },
+      { id: 'nugget', type: 'skin', name: 'Nugget Veloz', category: 'PERSONAJE', stats: { hp: '78', spd: '270', dmg: '92%', perk: '+23% Velocidad' }, desc: 'Crujiente y escurridizo entre comandas apresuradas.', lockText: '450 PT', isUnlocked: isOwned(profile, 'skin', 'nugget') },
+      { id: 'papas', type: 'skin', name: 'Papas Fritas', category: 'PERSONAJE', stats: { hp: '86', spd: '235', dmg: '82%', perk: '+1 Proyectil Extra' }, desc: 'Dispara salvas dobles continuas de bastones dorados.', lockText: '650 PT', isUnlocked: isOwned(profile, 'skin', 'papas') },
+      { id: 'pizza', type: 'skin', name: 'Pizza Suprema', category: 'PERSONAJE', stats: { hp: '140', spd: '185', dmg: '112%', perk: '+40% Resistencia' }, desc: 'Masa gruesa horneada a la piedra. Absorbe castigo implacable.', lockText: '850 PT', isUnlocked: isOwned(profile, 'skin', 'pizza') },
+      { id: 'empanada', type: 'skin', name: 'Empanada Criolla', category: 'PERSONAJE', stats: { hp: '110', spd: '210', dmg: '105%', perk: 'Repulgue Defensivo' }, desc: 'Borde blindado de hojaldre y giros letales.', lockText: '950 PT', isUnlocked: isOwned(profile, 'skin', 'empanada') },
+      { id: 'choripan', type: 'skin', name: 'Choripán Bravo', category: 'PERSONAJE', stats: { hp: '120', spd: '200', dmg: '140%', perk: '+40% Daño a Jefes' }, desc: 'Asado al carbón con chimichurri casero. Destroza defensas enemigas.', lockText: '1600 PT', isUnlocked: isOwned(profile, 'skin', 'choripan') },
+
+      // --- CLIENTES Y ENEMIGOS REGULARES ---
+      { id: 'burger', type: 'enemy', name: 'Hamburguesa Común', category: 'ENEMIGO', stats: { hp: '28', spd: '92', dmg: '11', perk: 'Avance en Horda' }, desc: 'Cliente hambriento estándar. Solitario es inofensivo; en masa abruma.', lockText: 'Visto en Turno 1', isUnlocked: true },
+      { id: 'soda', type: 'enemy', name: 'Gaseosa Explosiva', category: 'ENEMIGO', stats: { hp: '20', spd: '132', dmg: '22', perk: 'Detonación de Gas' }, desc: 'Alta presión y velocidad. Al acercarse detona liberando gas ardiente.', lockText: '10 KOs Totales', isUnlocked: totalKills >= 10 },
+      { id: 'fries_enemy', type: 'enemy', enemyId: 'fries', name: 'Papas Mutantes', category: 'ENEMIGO', stats: { hp: '16', spd: '152', dmg: '8', perk: 'Embestida Rápida' }, desc: 'Extremadamente veloces y ligeras. Enjambran los flancos del jugador.', lockText: '25 KOs Totales', isUnlocked: totalKills >= 25 },
+      { id: 'ketchup_enemy', type: 'enemy', enemyId: 'ketchup', name: 'Ketchup Francotirador', category: 'ENEMIGO', stats: { hp: '30', spd: '48', dmg: '13', perk: 'Disparo a Distancia' }, desc: 'Se mantiene a distancia prudencial disparando chorros de salsa ácida.', lockText: '50 KOs Totales', isUnlocked: totalKills >= 50 },
+      { id: 'onion', type: 'enemy', name: 'Cebolla Sorpresa', category: 'ENEMIGO', stats: { hp: '23', spd: '168', dmg: '17', perk: 'Teletransporte' }, desc: 'Surge de la nada detrás de tu campo de visión buscando emboscadas.', lockText: '75 KOs Totales', isUnlocked: totalKills >= 75 },
+      { id: 'tray', type: 'enemy', name: 'Bandeja Blindada', category: 'ENEMIGO', stats: { hp: '105', spd: '48', dmg: '16', perk: 'Blindaje Pesado (x2)' }, desc: 'Cuerpo metálico que reduce el daño recibido un 50%. Bloquea pasajes.', lockText: '100 KOs Totales', isUnlocked: totalKills >= 100 },
+      { id: 'mayo', type: 'enemy', name: 'Mayonesa Médica', category: 'ENEMIGO', stats: { hp: '52', speed: '57', dmg: '9', perk: 'Aura Sanadora' }, desc: 'Unidad de apoyo. Regenera la salud de los clientes molestos cercanos.', lockText: '150 KOs Totales', isUnlocked: totalKills >= 150 },
+      { id: 'chef', type: 'enemy', name: 'Chef Invocador', category: 'ENEMIGO', stats: { hp: '78', spd: '44', dmg: '12', perk: 'Invoca Refuerzos' }, desc: 'Cocina nuevos pedidos sobre la marcha atrayendo hordas sin cesar.', lockText: '200 KOs Totales', isUnlocked: totalKills >= 200 },
+
+      // --- GRANDES JEFES DE LA COCINA ---
+      { id: 'boss_double', type: 'boss', enemyId: 'double', name: 'Rey del Mostrador', category: 'GRAN JEFE', stats: { hp: '820', spd: '58', dmg: '24', perk: 'Salva Radial x10' }, desc: 'El soberano indiscutido del Local Domi. Furia desatada bajo el 50% de vida.', lockText: 'Vence 1 Jefe', isUnlocked: totalBosses >= 1 },
+      { id: 'boss_ketchup', type: 'boss', enemyId: 'ketchup', name: 'Señor Ketchup', category: 'GRAN JEFE', stats: { hp: '960', spd: '78', dmg: '25', perk: 'Triple Sniper' }, desc: 'Tirador implacable de la cocina industrial. Marca líneas rojas antes de disparar.', lockText: 'Vence 2 Jefes', isUnlocked: totalBosses >= 2 },
+      { id: 'boss_fries', type: 'boss', enemyId: 'fries', name: 'La Papota Suprema', category: 'GRAN JEFE', stats: { hp: '1120', spd: '80', dmg: '28', perk: 'Lluvia Dorada' }, desc: 'Cae en picada causando terremotos en el asfalto del estacionamiento.', lockText: 'Vence 3 Jefes', isUnlocked: totalBosses >= 3 },
+      { id: 'boss_pizza', type: 'boss', enemyId: 'pizza', name: 'Don Muzza el Padrino', category: 'GRAN JEFE', stats: { hp: '1350', spd: '60', dmg: '32', perk: 'Meteorito de Queso' }, desc: 'Pesado, blindado e implacable. Invocador de ondas de choque sísmicas.', lockText: 'Vence 4 Jefes', isUnlocked: totalBosses >= 4 },
+      { id: 'boss_icecream', type: 'boss', enemyId: 'icecream', name: 'Emperador Subcero', category: 'GRAN JEFE', stats: { hp: '1080', spd: '66', dmg: '24', perk: 'Ventisca Congelante' }, desc: 'Monarca de la estepa nevada. Desata ráfagas gélidas que entumecen el movimiento.', lockText: 'Vence 5 Jefes', isUnlocked: totalBosses >= 5 },
+      { id: 'domi', type: 'npc', name: 'Don Domi', category: 'LEYENDA', stats: { hp: '∞', spd: '∞', dmg: '∞', perk: 'Sabiduría Arcana' }, desc: 'El fundador original de la franquicia. Guarda las 11 reliquias legendarias sagradas.', lockText: 'SIEMPRE ACTIVO', isUnlocked: true }
     ];
   }
 
@@ -603,8 +613,9 @@ export class DomiScreen {
       const slotBtn = document.createElement('button');
       slotBtn.type = 'button';
       slotBtn.className = `domi-slot ${slot.isUnlocked ? 'is-unlocked' : 'is-locked'} ${current.id === slot.id ? 'is-selected' : ''}`;
+      slotBtn.dataset.category = slot.category;
       slotBtn.setAttribute('aria-pressed', String(current.id === slot.id));
-      slotBtn.title = slot.name;
+      slotBtn.title = `${slot.name} (${slot.category})`;
 
       const canvas = document.createElement('canvas');
       canvas.width = 64;
@@ -687,11 +698,25 @@ export class DomiScreen {
           this.game.audio.play('purchase');
           this.render();
         };
-      } else {
-        actionBtn.textContent = current.type === 'skin' ? 'VER EN ARMARIO' : 'VER MASCOTAS';
+      } else if (current.type === 'skin') {
+        actionBtn.textContent = 'VER EN ARMARIO';
+        actionBtn.onclick = () => this.game.shop.show('skin', true);
+      } else if (current.type === 'pet') {
+        actionBtn.textContent = 'VER MASCOTAS';
+        actionBtn.onclick = () => this.game.shop.show('pet', true);
+      } else if (current.type === 'boss') {
+        actionBtn.textContent = '⚔ DUELO DE JEFES';
         actionBtn.onclick = () => {
-          if (current.type === 'skin') this.game.shop.show('skin', true);
-          else if (current.type === 'pet') this.game.shop.show('pet', true);
+          this.game.menu.prepareAccount();
+          this.game.showScreen('setupScreen');
+          const modeSelect = document.querySelector('#setupMode');
+          if (modeSelect) modeSelect.value = 'rush';
+        };
+      } else {
+        actionBtn.textContent = 'INICIAR PARTIDA';
+        actionBtn.onclick = () => {
+          this.game.menu.prepareAccount();
+          this.game.showScreen('setupScreen');
         };
       }
     } else {
@@ -713,18 +738,38 @@ export class DomiScreen {
     c.clearRect(0, 0, w, h);
     c.imageSmoothingEnabled = false;
 
+    // Fondo oscuro con gradiente según categoría
+    const bg = c.createRadialGradient(w / 2, h / 2, 4, w / 2, h / 2, w * 0.55);
+    if (slot.category === 'GRAN JEFE') {
+      bg.addColorStop(0, '#36151c');
+      bg.addColorStop(1, '#0e0508');
+    } else if (slot.category === 'ENEMIGO') {
+      bg.addColorStop(0, '#1d261e');
+      bg.addColorStop(1, '#09100a');
+    } else if (slot.category === 'LEYENDA') {
+      bg.addColorStop(0, '#3a2b0e');
+      bg.addColorStop(1, '#0e0b04');
+    } else {
+      bg.addColorStop(0, '#152933');
+      bg.addColorStop(1, '#081115');
+    }
+    c.fillStyle = bg;
+    c.fillRect(0, 0, w, h);
+
     if (!slot.isUnlocked) {
       c.save();
       c.filter = 'brightness(0.22) contrast(1.2)';
     }
 
-    if (slot.type === 'accessory') {
-      // Fondo oscuro de casilla con resplandor sutil
-      const bg = c.createRadialGradient(w / 2, h / 2, 4, w / 2, h / 2, w * 0.55);
-      bg.addColorStop(0, slot.category === 'LEGENDARIO' ? '#2c1f0e' : '#132830');
-      bg.addColorStop(1, '#081115');
-      c.fillStyle = bg;
-      c.fillRect(0, 0, w, h);
+    if (slot.type === 'enemy' || slot.type === 'boss') {
+      const enemyKind = slot.enemyId || slot.id;
+      const isBoss = slot.type === 'boss';
+      drawFood(c, enemyKind, w / 2, h * 0.54, isBoss ? 0.72 : 0.62, 0);
+    } else if (slot.type === 'skin') {
+      drawFood(c, slot.id, w / 2, h * 0.54, 0.68, 0);
+    } else if (slot.id === 'domi') {
+      this.drawDomiCharacter(c, w / 2, h * 0.65, 0.75, 0);
+    } else if (slot.type === 'accessory') {
       drawAccessoryIcon(c, slot.id, w / 2, h / 2, 48);
     } else {
       drawItemPreview(canvas, { type: slot.type, id: slot.id, name: slot.name }, profile, 0);
@@ -740,6 +785,46 @@ export class DomiScreen {
     const w = canvas.width, h = canvas.height;
     c.clearRect(0, 0, w, h);
 
+    // Fondo vitrina con atmósfera por categoría
+    const isBoss = item.category === 'GRAN JEFE';
+    const isEnemy = item.category === 'ENEMIGO';
+    const isLegend = item.category === 'LEYENDA';
+
+    const bgGrad = c.createRadialGradient(w/2, h*0.5, 10, w/2, h*0.5, w*0.7);
+    if (isBoss) {
+      bgGrad.addColorStop(0, '#3c141d');
+      bgGrad.addColorStop(0.6, '#1f090f');
+      bgGrad.addColorStop(1, '#0c0406');
+    } else if (isEnemy) {
+      bgGrad.addColorStop(0, '#1b3024');
+      bgGrad.addColorStop(0.6, '#0f1f16');
+      bgGrad.addColorStop(1, '#060d09');
+    } else if (isLegend) {
+      bgGrad.addColorStop(0, '#3f2d0e');
+      bgGrad.addColorStop(0.6, '#241a08');
+      bgGrad.addColorStop(1, '#0e0a03');
+    } else {
+      bgGrad.addColorStop(0, '#1a333a');
+      bgGrad.addColorStop(0.6, '#102227');
+      bgGrad.addColorStop(1, '#091316');
+    }
+    c.fillStyle = bgGrad;
+    c.fillRect(0, 0, w, h);
+
+    // Pedestal
+    const pedGlow = c.createRadialGradient(w/2, h*.78, 5, w/2, h*.78, w*.35);
+    const glowColor = isBoss ? 'rgba(255, 75, 100, 0.35)' : isLegend ? 'rgba(251, 191, 36, 0.45)' : isEnemy ? 'rgba(56, 239, 125, 0.25)' : 'rgba(56, 189, 248, 0.25)';
+    pedGlow.addColorStop(0, glowColor);
+    pedGlow.addColorStop(0.6, '#0a1014');
+    pedGlow.addColorStop(1, 'transparent');
+    c.fillStyle = pedGlow;
+    c.beginPath();
+    c.ellipse(w/2, h*.78, w*.33, h*.13, 0, 0, Math.PI * 2);
+    c.fill();
+    c.strokeStyle = isBoss ? '#ff4f75' : isLegend ? '#fbbf24' : isEnemy ? '#34d399' : '#38bdf8';
+    c.lineWidth = 2;
+    c.stroke();
+
     c.save();
     if (!item.isUnlocked) {
       c.filter = 'brightness(0.3) saturate(0.2)';
@@ -747,6 +832,11 @@ export class DomiScreen {
 
     if (item.id === 'domi') {
       this.drawDomiCharacter(c, w / 2, h * 0.65, 2.2, time);
+    } else if (item.type === 'enemy' || item.type === 'boss') {
+      const enemyKind = item.enemyId || item.id;
+      const bob = Math.round(Math.sin(time * 5) * 2);
+      const scale = item.type === 'boss' ? 1.4 : 1.1;
+      drawFood(c, enemyKind, w / 2, h * 0.54 + bob, scale, time);
     } else {
       drawItemPreview(canvas, { type: item.type, id: item.id, name: item.name }, profile, time);
     }

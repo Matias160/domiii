@@ -21,20 +21,53 @@ export function drawItemPreview(canvas,item,profile,time=0){
     return;
   }
   // Fondo de vitrina con degradado atmosférico
+  const accMeta = item.type === 'accessory' ? resolveAccessory(item.id) : null;
+  const isLegendary = accMeta?.tier === 'legendary' || item.tier === 'legendary';
+
   const bgGrad = c.createRadialGradient(w/2, h*0.5, 10, w/2, h*0.5, w*0.7);
-  bgGrad.addColorStop(0, '#1a333a');
-  bgGrad.addColorStop(0.6, '#102227');
-  bgGrad.addColorStop(1, '#091316');
+  if (isLegendary) {
+    bgGrad.addColorStop(0, '#3d2b0f');
+    bgGrad.addColorStop(0.5, '#241a08');
+    bgGrad.addColorStop(1, '#0e0b04');
+  } else {
+    bgGrad.addColorStop(0, '#1a333a');
+    bgGrad.addColorStop(0.6, '#102227');
+    bgGrad.addColorStop(1, '#091316');
+  }
   c.fillStyle = bgGrad; c.fillRect(0, 0, w, h);
-  for(let x=0;x<w;x+=24){c.fillStyle='#38bdf80a';c.fillRect(x,0,1,h);}
+
+  const gridColor = isLegendary ? 'rgba(251, 191, 36, 0.08)' : '#38bdf80a';
+  for(let x=0;x<w;x+=24){c.fillStyle=gridColor;c.fillRect(x,0,1,h);}
 
   // Pedestal con resplandor de vitrina
   const pedGlow = c.createRadialGradient(w/2, h*.78, 5, w/2, h*.78, w*.35);
-  pedGlow.addColorStop(0, 'rgba(56, 189, 248, 0.22)');
-  pedGlow.addColorStop(0.6, '#0f1e24');
-  pedGlow.addColorStop(1, 'transparent');
+  if (isLegendary) {
+    pedGlow.addColorStop(0, 'rgba(251, 191, 36, 0.42)');
+    pedGlow.addColorStop(0.6, '#31230d');
+    pedGlow.addColorStop(1, 'transparent');
+  } else {
+    pedGlow.addColorStop(0, 'rgba(56, 189, 248, 0.22)');
+    pedGlow.addColorStop(0.6, '#0f1e24');
+    pedGlow.addColorStop(1, 'transparent');
+  }
   c.fillStyle = pedGlow; c.beginPath(); c.ellipse(w/2, h*.78, w*.33, h*.13, 0, 0, Math.PI * 2); c.fill();
-  c.strokeStyle = '#38bdf888'; c.lineWidth = 2; c.stroke();
+  c.strokeStyle = isLegendary ? '#fbbf24' : '#38bdf888'; c.lineWidth = 2; c.stroke();
+
+  // Partículas y destellos dorados en la vitrina para legendarios
+  if (isLegendary) {
+    c.save();
+    for (let i = 0; i < 6; i++) {
+      const px = (w * 0.22) + ((i * 47 + Math.sin(time * 3 + i) * 18) % (w * 0.56));
+      const py = (h * 0.72) - ((time * 25 + i * 28) % (h * 0.45));
+      const sparkAlpha = Math.max(0, Math.sin(time * 4 + i));
+      c.fillStyle = `rgba(254, 240, 138, ${sparkAlpha * 0.85})`;
+      c.fillRect(px, py, 2.5, 2.5);
+      c.fillStyle = `rgba(251, 191, 36, ${sparkAlpha * 0.45})`;
+      c.fillRect(px - 1, py, 4.5, 1);
+      c.fillRect(px, py - 1, 1, 4.5);
+    }
+    c.restore();
+  }
   const scale=Math.min(w/115,h/84);
   if(item.type==='pet'){
     if(item.id==='none'){c.fillStyle='#9aafa1';c.font='bold 14px monospace';c.textAlign='center';c.fillText('SIN MASCOTA',w/2,h*.5);}
