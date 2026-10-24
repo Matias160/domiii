@@ -11,7 +11,7 @@ export class Enemy {
     this.y = y;
     this.type = type;
     this.radius = type.radius;
-    this.maxHp = type.hp * difficulty.hp;
+    this.maxHp = Math.round(type.hp * difficulty.hp);
     this.hp = this.maxHp;
     this.speed = type.speed * difficulty.speed;
     this.damage = type.damage * difficulty.damage;
@@ -22,7 +22,7 @@ export class Enemy {
     this.armor = type.armor || 1;
     this.isBoss = Boolean(type.boss);
     this.bossPhase = 'stalk';
-    this.bossTimer = 3.8;
+    this.bossTimer = 3.6;
     this.chargeTarget = null;
     this.shotTimer = 1.5 + Math.random();
     this.shotReady = false;
@@ -33,9 +33,11 @@ export class Enemy {
     this.spawnTime = type.boss ? 1.6 : type.id === 'onion' ? .9 : 0;
     this.slowFactor = 1;
     this.speedMultiplier = 1;
-    this.volleyTimer = 5;
+    this.volleyTimer = 4.4;
     this.phaseTwo = false;
-    this.specialTimer = 3.5;
+    this.phaseThree = false;
+    this.specialTimer = 3.2;
+    this.summonTimer = 7.5;
     this.roleTimer = type.role === 'healer' ? 2.2 : type.role === 'summoner' ? 4 : 0;
     this.flockAngle = Math.random() * Math.PI * 2;
     this.flockTimer = Math.random() * 2;
@@ -53,72 +55,132 @@ export class Enemy {
     this.spawnTime = Math.max(0, this.spawnTime - delta);
     if (this.spawnTime > 0 || this.hp <= 0) return;
     if (this.isBoss) {
-      if (!this.phaseTwo && this.hp <= this.maxHp * .5) {
-        this.phaseTwo=true;this.speed*=1.12;this.volleyTimer=Math.min(this.volleyTimer,1.2);
-        if(state){state.directorNotice=`${this.type.name.toUpperCase()} / FASE 2`;state.shake=Math.max(state.shake,.35);state.rings?.push({x:this.x,y:this.y,radius:this.radius+70,life:.7,maxLife:.7,color:'#ff4f9a'});}
+      // Fase 2 al 65% de vida
+      if (!this.phaseTwo && this.hp <= this.maxHp * 0.65) {
+        this.phaseTwo = true;
+        this.speed *= 1.14;
+        this.volleyTimer = Math.min(this.volleyTimer, 1.0);
+        if (state) {
+          state.directorNotice = `${this.type.name.toUpperCase()} / FASE 2`;
+          state.shake = Math.max(state.shake, 0.35);
+          state.rings?.push({ x: this.x, y: this.y, radius: this.radius + 75, life: 0.7, maxLife: 0.7, color: '#ff4f9a' });
+        }
       }
+      // Fase 3 (FURIA MAXIMA) al 30% de vida
+      if (!this.phaseThree && this.hp <= this.maxHp * 0.30) {
+        this.phaseThree = true;
+        this.speed *= 1.18;
+        this.armor = (this.armor || 1) * 1.25;
+        this.volleyTimer = 0.5;
+        this.specialTimer = 0.6;
+        if (state) {
+          state.directorNotice = `¡${this.type.name.toUpperCase()} EN FURIA TOTAL!`;
+          state.shake = Math.max(state.shake, 0.48);
+          state.rings?.push({ x: this.x, y: this.y, radius: this.radius + 110, life: 0.85, maxLife: 0.85, color: '#ff0044' });
+          state.rings?.push({ x: this.x, y: this.y, radius: this.radius + 65, life: 0.6, maxLife: 0.6, color: '#ffd700' });
+        }
+      }
+
       if (this.type.bossStyle === 'ranged') {
-        const dx=player.x-this.x,dy=player.y-this.y,length=Math.hypot(dx,dy)||1;
-        const approach=length<185?-.5:length>280?1:0;
-        this.x+=(dx/length*approach-dy/length*.5)*this.speed*delta;
-        this.y+=(dy/length*approach+dx/length*.5)*this.speed*delta;
+        const dx = player.x - this.x, dy = player.y - this.y, length = Math.hypot(dx, dy) || 1;
+        const approach = length < 185 ? -0.5 : length > 280 ? 1 : 0;
+        this.x += (dx / length * approach - dy / length * 0.5) * this.speed * delta;
+        this.y += (dy / length * approach + dx / length * 0.5) * this.speed * delta;
       } else this.updateBoss(delta, player);
+
       const worldW = state?.world?.width || 960;
       const worldH = state?.world?.height || 540;
       this.x = Math.max(this.radius + 8, Math.min(worldW - 8 - this.radius, this.x));
       this.y = Math.max(115 + this.radius, Math.min(worldH - 25 - this.radius, this.y));
-      this.volleyTimer -= delta;this.specialTimer-=delta;
+
+      this.volleyTimer -= delta * (this.phaseThree ? 1.35 : 1);
+      this.specialTimer -= delta * (this.phaseThree ? 1.3 : 1);
+      this.summonTimer -= delta;
+
       if (this.volleyTimer <= 0 && state) {
-        state.rings?.push({x:this.x,y:this.y,radius:this.radius+38,life:.45,maxLife:.45,color:'#ff879e'});
-        this.volleyTimer = this.type.bossStyle === 'ranged' ? (this.phaseTwo?2.05:2.7) :
-                           this.type.bossStyle === 'heavy' ? (this.phaseTwo?2.8:3.8) :
-                           this.type.bossStyle === 'frost' ? (this.phaseTwo?2.4:3.2) :
-                           this.phaseTwo ? 3.5 : 5;
-        const count = this.type.bossStyle === 'ranged' ? 14 :
-                      this.type.bossStyle === 'heavy' ? 18 :
-                      this.type.bossStyle === 'frost' ? 12 : 10;
-        const bulletSpeed = this.type.bossStyle === 'heavy' ? 110 : this.type.bossStyle === 'frost' ? 130 : 145;
-        const bulletColor = this.type.bossStyle === 'frost' ? '#a855f7' : this.type.bossStyle === 'heavy' ? '#ffaa00' : undefined;
-        for (let i=0;i<count;i++) {
-          const angle = i * Math.PI * 2 / count + state.time * .4;
-          state.enemyProjectiles.push({x:this.x,y:this.y,vx:Math.cos(angle)*bulletSpeed,vy:Math.sin(angle)*bulletSpeed,radius:6,damage:this.damage*.45,life:4,color:bulletColor});
+        state.rings?.push({ x: this.x, y: this.y, radius: this.radius + 38, life: 0.45, maxLife: 0.45, color: this.phaseThree ? '#ff0055' : '#ff879e' });
+        this.volleyTimer = this.type.bossStyle === 'ranged' ? (this.phaseTwo ? 1.95 : 2.6) :
+                           this.type.bossStyle === 'heavy' ? (this.phaseTwo ? 2.6 : 3.5) :
+                           this.type.bossStyle === 'frost' ? (this.phaseTwo ? 2.2 : 3.0) :
+                           this.phaseTwo ? 3.1 : 4.4;
+        const baseCount = this.type.bossStyle === 'ranged' ? 14 :
+                          this.type.bossStyle === 'heavy' ? 18 :
+                          this.type.bossStyle === 'frost' ? 12 : 10;
+        const count = this.phaseThree ? baseCount + 6 : baseCount;
+        const bulletSpeed = (this.type.bossStyle === 'heavy' ? 115 : this.type.bossStyle === 'frost' ? 135 : 150) * (this.phaseThree ? 1.2 : 1);
+        const bulletColor = this.phaseThree ? '#ff2255' : this.type.bossStyle === 'frost' ? '#a855f7' : this.type.bossStyle === 'heavy' ? '#ffaa00' : undefined;
+        for (let i = 0; i < count; i++) {
+          const angle = i * Math.PI * 2 / count + state.time * 0.45;
+          state.enemyProjectiles.push({
+            x: this.x, y: this.y,
+            vx: Math.cos(angle) * bulletSpeed, vy: Math.sin(angle) * bulletSpeed,
+            radius: this.phaseThree ? 7 : 6,
+            damage: this.damage * 0.45,
+            life: 4.2,
+            color: bulletColor
+          });
         }
       }
-      if(this.phaseTwo&&state&&this.specialTimer<=0){
-        const kind = this.type.bossStyle==='ranged' ? 'snipe' :
-                     this.type.bossStyle==='fast' ? 'rain' :
-                     this.type.bossStyle==='frost' ? 'freeze' :
-                     this.type.bossStyle==='heavy' ? 'meteor' : 'shockwave';
-        this.specialTimer = kind==='snipe'?3.6:kind==='rain'?3.1:kind==='freeze'?3.4:4.8;
-        state.bossZones.push({
-          kind,
-          x:this.x,y:this.y,targetX:player.x,targetY:player.y,
-          radius:kind==='shockwave'?145:kind==='meteor'?85:kind==='freeze'?120:40,
-          delay:kind==='snipe'?.8:kind==='meteor'?1.1:.9,
-          life:kind==='shockwave'?1.15:1.25,
-          damage:this.damage*(kind==='snipe'?.65:kind==='meteor'?1.2:.75),
-          triggered:false
-        });
+
+      if (this.phaseTwo && state && this.specialTimer <= 0) {
+        const kind = this.type.bossStyle === 'ranged' ? 'snipe' :
+                     this.type.bossStyle === 'fast' ? 'rain' :
+                     this.type.bossStyle === 'frost' ? 'freeze' :
+                     this.type.bossStyle === 'heavy' ? 'meteor' : 'shockwave';
+        this.specialTimer = kind === 'snipe' ? 3.2 : kind === 'rain' ? 2.8 : kind === 'freeze' ? 3.0 : 4.2;
+        const zonesCount = this.phaseThree ? 2 : 1;
+        for (let z = 0; z < zonesCount; z++) {
+          const offsetX = z === 0 ? 0 : (Math.random() - 0.5) * 160;
+          const offsetY = z === 0 ? 0 : (Math.random() - 0.5) * 160;
+          state.bossZones.push({
+            kind,
+            x: this.x, y: this.y,
+            targetX: player.x + offsetX, targetY: player.y + offsetY,
+            radius: kind === 'shockwave' ? 145 : kind === 'meteor' ? 88 : kind === 'freeze' ? 120 : 44,
+            delay: kind === 'snipe' ? 0.75 : kind === 'meteor' ? 1.0 : 0.85,
+            life: kind === 'shockwave' ? 1.15 : 1.25,
+            damage: this.damage * (kind === 'snipe' ? 0.65 : kind === 'meteor' ? 1.2 : 0.75),
+            triggered: false
+          });
+        }
+      }
+
+      // Invocación de escoltas de élite durante Duelo de Jefes o en Fase 2+
+      if (state && this.summonTimer <= 0 && (state.modeId === 'rush' || this.phaseTwo) && state.enemies.length < 35) {
+        this.summonTimer = this.phaseThree ? 5.5 : 8.0;
+        const escortPool = enemyTypes.filter(t => !t.boss && (t.id === 'fries' || t.id === 'soda' || t.id === 'ketchup'));
+        const escortType = escortPool[Math.floor(Math.random() * escortPool.length)];
+        for (const side of [-1, 1]) {
+          const escort = new Enemy({
+            x: Math.max(60, Math.min(worldW - 60, this.x + side * 62)),
+            y: Math.max(130, Math.min(worldH - 40, this.y + 24)),
+            type: escortType,
+            difficulty: state.difficulty
+          });
+          escort.spawnTime = 0.6;
+          state.enemies.push(escort);
+        }
+        state.rings?.push({ x: this.x, y: this.y, radius: 75, life: 0.5, maxLife: 0.5, color: '#ffae00' });
       }
       return;
     }
+
     const dx = player.x - this.x;
     const dy = player.y - this.y;
     const length = Math.hypot(dx, dy) || 1;
-    const supportRange=this.role==='healer'?185:this.role==='summoner'?230:0;
-    const approach = this.type.id === 'ketchup' ? (length < 155 ? -.65 : length > 245 ? 1 : 0) : supportRange ? (length<supportRange-35?-.55:length>supportRange+45?1:0) : this.fuse !== undefined ? .35 : 1;
+    const supportRange = this.role === 'healer' ? 185 : this.role === 'summoner' ? 230 : 0;
+    const approach = this.type.id === 'ketchup' ? (length < 155 ? -.65 : length > 245 ? 1 : 0) : supportRange ? (length < supportRange - 35 ? -.55 : length > supportRange + 45 ? 1 : 0) : this.fuse !== undefined ? .35 : 1;
 
     // Vector de persecución base
     let moveX = (dx / length) * approach;
     let moveY = (dy / length) * approach;
 
-    // Flanqueo / Rodeado dinámico (para no apilarse en una sola línea recta hacia el centro)
+    // Flanqueo / Rodeado dinámico
     this.flockTimer -= delta;
     if (this.flockTimer <= 0) {
       this.flockTimer = 1.2 + Math.random() * 1.5;
       this.flockAngle = (Math.random() - 0.5) * 1.2;
     }
-    // Añadimos componente tangencial (flanqueo circular alrededor del jugador)
     if (length > 80 && length < 380 && this.fuse === undefined) {
       const tangentX = -dy / length;
       const tangentY = dx / length;
@@ -126,7 +188,7 @@ export class Enemy {
       moveY += tangentY * Math.sin(this.flockAngle) * 0.42;
     }
 
-    // Separación entre enemigos cercanos (Anti-clumping / Boids separation O(1) con SpatialGrid)
+    // Separación entre enemigos cercanos
     if (state) {
       let sepX = 0, sepY = 0, neighbors = 0;
       const minDistance = this.radius * 2.2;
@@ -159,11 +221,9 @@ export class Enemy {
     this.x += (moveX / moveMag) * finalSpeed * delta;
     this.y += (moveY / moveMag) * finalSpeed * delta;
 
-    // Mantener a los enemigos dentro de los límites del mapa 1920x1080 (salvo al perseguir al clon señuelo)
     const worldW = state?.world?.width || 1920;
     const worldH = state?.world?.height || 1080;
     if (state?.decoy) {
-      // Si el señuelo está activo, los enemigos lo persiguen hacia afuera del mapa
       if (this.x < -80 || this.x > worldW + 80 || this.y < -80 || this.y > worldH + 80) {
         this.hp = 0;
         if (state.player) state.player.kills = (state.player.kills || 0) + 1;
@@ -186,24 +246,34 @@ export class Enemy {
     }
     if (this.type.id === 'soda' && this.fuse === undefined && Math.hypot(dx, dy) < 105) this.fuse = 0.72;
     if (this.fuse !== undefined && !this.exploded) this.fuse -= delta;
-    if(this.role==='healer'){
-      this.roleTimer-=delta;
-      if(this.roleTimer<=0){
-        this.roleTimer=3.4;
-        let healed=false;
-        for(const ally of state.enemies){
-          if(ally!==this&&ally.hp>0&&ally.hp<ally.maxHp&&Math.hypot(ally.x-this.x,ally.y-this.y)<175){ally.hp=Math.min(ally.maxHp,ally.hp+Math.max(8,ally.maxHp*.13));healed=true;}
+    if (this.role === 'healer') {
+      this.roleTimer -= delta;
+      if (this.roleTimer <= 0) {
+        this.roleTimer = 3.4;
+        let healed = false;
+        for (const ally of state.enemies) {
+          if (ally !== this && ally.hp > 0 && ally.hp < ally.maxHp && Math.hypot(ally.x - this.x, ally.y - this.y) < 175) {
+            ally.hp = Math.min(ally.maxHp, ally.hp + Math.max(8, ally.maxHp * .13));
+            healed = true;
+          }
         }
-        if(healed){state.rings?.push({x:this.x,y:this.y,radius:175,life:.6,maxLife:.6,color:'#72ffa8'});state.floaters?.push({x:this.x,y:this.y-30,text:'+ CURA',life:.8,color:'#72ffa8',scale:1.1});}
+        if (healed) {
+          state.rings?.push({ x: this.x, y: this.y, radius: 175, life: .6, maxLife: .6, color: '#72ffa8' });
+          state.floaters?.push({ x: this.x, y: this.y - 30, text: '+ CURA', life: .8, color: '#72ffa8', scale: 1.1 });
+        }
       }
     }
-    if(this.role==='summoner'){
-      this.roleTimer-=delta;
-      if(this.roleTimer<=0&&state.enemies.length<58){
-        this.roleTimer=6.2;
-        const minionType=enemyTypes.find(type=>!type.boss&&type.id==='fries');
-        for(const side of [-1,1]){const minion=new Enemy({x:this.x+side*38,y:this.y+18,type:minionType,difficulty:state.difficulty});minion.spawnTime=.65;state.enemies.push(minion);}
-        state.rings?.push({x:this.x,y:this.y,radius:64,life:.65,maxLife:.65,color:'#c58cff'});
+    if (this.role === 'summoner') {
+      this.roleTimer -= delta;
+      if (this.roleTimer <= 0 && state.enemies.length < 58) {
+        this.roleTimer = 6.2;
+        const minionType = enemyTypes.find(type => !type.boss && type.id === 'fries');
+        for (const side of [-1, 1]) {
+          const minion = new Enemy({ x: this.x + side * 38, y: this.y + 18, type: minionType, difficulty: state.difficulty });
+          minion.spawnTime = .65;
+          state.enemies.push(minion);
+        }
+        state.rings?.push({ x: this.x, y: this.y, radius: 64, life: .65, maxLife: .65, color: '#c58cff' });
       }
     }
   }
@@ -215,22 +285,23 @@ export class Enemy {
         const angle = Math.atan2(this.chargeTarget.y - this.y, this.chargeTarget.x - this.x);
         this.chargeVelocity = { x: Math.cos(angle), y: Math.sin(angle) };
         this.bossPhase = 'charge';
-        this.bossTimer = 0.82;
+        this.bossTimer = this.phaseThree ? 0.95 : 0.82;
       }
       return;
     }
     if (this.bossPhase === 'charge') {
-      this.x += this.chargeVelocity.x * this.speed * 3.15 * delta;
-      this.y += this.chargeVelocity.y * this.speed * 3.15 * delta;
+      const chargeMult = this.phaseThree ? 3.55 : 3.15;
+      this.x += this.chargeVelocity.x * this.speed * chargeMult * delta;
+      this.y += this.chargeVelocity.y * this.speed * chargeMult * delta;
       if (this.bossTimer <= 0) {
         this.bossPhase = 'recover';
-        this.bossTimer = 1.35;
+        this.bossTimer = this.phaseThree ? 0.9 : 1.35;
       }
       return;
     }
     if (this.bossPhase === 'recover' && this.bossTimer <= 0) {
       this.bossPhase = 'stalk';
-      this.bossTimer = 3.8;
+      this.bossTimer = this.phaseThree ? 2.4 : 3.5;
     }
     const dx = player.x - this.x;
     const dy = player.y - this.y;
@@ -240,7 +311,7 @@ export class Enemy {
     this.y += (dy / length) * speed * delta;
     if (this.bossPhase === 'stalk' && this.bossTimer <= 0) {
       this.bossPhase = 'telegraph';
-      this.bossTimer = this.type.bossStyle === 'fast' ? .65 : .9;
+      this.bossTimer = this.type.bossStyle === 'fast' ? .6 : .85;
       this.chargeTarget = { x: player.x, y: player.y };
     }
   }
@@ -258,7 +329,6 @@ export class Enemy {
       ctx.restore(); return;
     }
 
-    // Indicador de ataque inminente (ketchup apuntando a disparar)
     if (this.type.id === 'ketchup' && this.shotTimer < 0.55) {
       const pulse = 0.5 + Math.sin(performance.now() / 55) * 0.5;
       ctx.save(); ctx.globalAlpha = pulse;
@@ -284,23 +354,41 @@ export class Enemy {
       ctx.fill(); ctx.stroke(); ctx.restore();
     }
 
-    if(this.phaseTwo){
-      const pulse=.55+Math.sin(performance.now()/110)*.25;ctx.save();ctx.globalAlpha=pulse;ctx.strokeStyle='#ff4f9a';ctx.lineWidth=3;ctx.setLineDash([7,5]);ctx.beginPath();ctx.arc(this.x,this.y,this.radius+13,0,Math.PI*2);ctx.stroke();ctx.restore();
+    if (this.phaseTwo) {
+      const pulse = .55 + Math.sin(performance.now() / 90) * .25;
+      ctx.save();
+      ctx.globalAlpha = pulse;
+      ctx.strokeStyle = this.phaseThree ? '#ff0044' : '#ff4f9a';
+      ctx.lineWidth = this.phaseThree ? 4 : 3;
+      ctx.setLineDash([7, 5]);
+      ctx.beginPath();
+      ctx.arc(this.x, this.y, this.radius + 13, 0, Math.PI * 2);
+      ctx.stroke();
+      if (this.phaseThree) {
+        ctx.strokeStyle = '#ffd700';
+        ctx.lineWidth = 2;
+        ctx.setLineDash([4, 6]);
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.radius + 20, 0, Math.PI * 2);
+        ctx.stroke();
+      }
+      ctx.restore();
     }
     drawFood(ctx, this.type.id, this.x, this.y, this.radius / 23, performance.now() / 1000, true, this.hitFlash > 0);
 
-    if(this.role){
-      ctx.save();ctx.textAlign='center';ctx.font='bold 13px monospace';ctx.lineWidth=3;ctx.strokeStyle='#102126';
-      const symbol=this.role==='shield'?'◆':this.role==='healer'?'+':'✦';
-      ctx.fillStyle=this.role==='shield'?'#8be6ff':this.role==='healer'?'#72ffa8':'#cf91ff';
-      ctx.strokeText(symbol,this.x,this.y-this.radius-14);ctx.fillText(symbol,this.x,this.y-this.radius-14);
-      if(this.role==='shield'){ctx.globalAlpha=.72;ctx.strokeStyle='#8be6ff';ctx.lineWidth=4;ctx.beginPath();ctx.arc(this.x,this.y,this.radius+7,-1.1,1.1);ctx.stroke();}
+    if (this.role) {
+      ctx.save(); ctx.textAlign = 'center'; ctx.font = 'bold 13px monospace'; ctx.lineWidth = 3; ctx.strokeStyle = '#102126';
+      const symbol = this.role === 'shield' ? '◆' : this.role === 'healer' ? '+' : '✦';
+      ctx.fillStyle = this.role === 'shield' ? '#8be6ff' : this.role === 'healer' ? '#72ffa8' : '#cf91ff';
+      ctx.strokeText(symbol, this.x, this.y - this.radius - 14); ctx.fillText(symbol, this.x, this.y - this.radius - 14);
+      if (this.role === 'shield') { ctx.globalAlpha = .72; ctx.strokeStyle = '#8be6ff'; ctx.lineWidth = 4; ctx.beginPath(); ctx.arc(this.x, this.y, this.radius + 7, -1.1, 1.1); ctx.stroke(); }
       ctx.restore();
     }
 
     if (this.isBoss) {
       ctx.save();
-      ctx.fillStyle = '#ffd33d'; ctx.strokeStyle = '#523521'; ctx.lineWidth = 3;
+      ctx.fillStyle = this.phaseThree ? '#ff2255' : '#ffd33d';
+      ctx.strokeStyle = '#523521'; ctx.lineWidth = 3;
       ctx.beginPath();
       ctx.moveTo(this.x - this.radius * .55, this.y - this.radius * .72);
       ctx.lineTo(this.x - this.radius * .52, this.y - this.radius * 1.18);
@@ -311,33 +399,30 @@ export class Enemy {
       ctx.lineTo(this.x + this.radius * .55, this.y - this.radius * .72); ctx.closePath(); ctx.fill(); ctx.stroke();
       ctx.font = 'bold 11px monospace'; ctx.textAlign = 'center'; ctx.lineWidth = 3;
       ctx.strokeStyle = '#10272b'; ctx.fillStyle = '#fff8dd';
-      ctx.strokeText(this.type.name.toUpperCase(), this.x, this.y - this.radius * 1.48);
-      ctx.fillText(this.type.name.toUpperCase(), this.x, this.y - this.radius * 1.48);
+      const bossLabel = this.bossRank ? `#${this.bossRank} ${this.type.name.toUpperCase()}` : this.type.name.toUpperCase();
+      ctx.strokeText(bossLabel, this.x, this.y - this.radius * 1.48);
+      ctx.fillText(bossLabel, this.x, this.y - this.radius * 1.48);
       ctx.restore();
     }
 
-    // Barra de vida: siempre visible para fuertes (hp >= 40 o boss), solo cuando dañados para débiles
     const isStrong = this.maxHp >= 40 || this.isBoss;
     if (this.hp >= this.maxHp && !isStrong) return;
 
-    const barWidth = this.isBoss ? this.radius * 2.5 : this.radius * 2.1;
-    const barHeight = this.isBoss ? 9 : 5;
+    const barWidth = this.isBoss ? this.radius * 2.6 : this.radius * 2.1;
+    const barHeight = this.isBoss ? 10 : 5;
     const barY = this.y - this.radius - (this.isBoss ? 12 : 9);
     const hpRatio = Math.max(0, this.hp / this.maxHp);
 
-    // Fondo de barra
     ctx.fillStyle = '#0d1f24'; ctx.fillRect(this.x - barWidth / 2 - 1, barY - 1, barWidth + 2, barHeight + 2);
     ctx.fillStyle = '#10272b'; ctx.fillRect(this.x - barWidth / 2, barY, barWidth, barHeight);
 
-    // Color de la barra según tipo de enemigo
     const typeColor = this.isBoss
-      ? (hpRatio < 0.4 ? '#ff4444' : hpRatio < 0.7 ? '#ffaa00' : '#f47779')
+      ? (hpRatio < 0.3 ? '#ff0044' : hpRatio < 0.65 ? '#ffaa00' : '#f47779')
       : (this.type.color || '#3bd671');
 
     ctx.fillStyle = typeColor;
     ctx.fillRect(this.x - barWidth / 2, barY, hpRatio * barWidth, barHeight);
 
-    // Brillo sutil en la barra
     ctx.fillStyle = '#ffffff22';
     ctx.fillRect(this.x - barWidth / 2, barY, hpRatio * barWidth, Math.ceil(barHeight / 3));
   }
@@ -354,9 +439,9 @@ export const enemyTypes = [
   { id: "tray", name: "Bandeja blindada", hp: 105, speed: 48, damage: 16, score: 72, xp: 18, radius: 23, color: "#74cbe3", role: "shield", armor: 2 },
   { id: "mayo", name: "Mayonesa medica", hp: 52, speed: 57, damage: 9, score: 68, xp: 17, radius: 18, color: "#76e8a4", role: "healer" },
   { id: "chef", name: "Chef invocador", hp: 78, speed: 44, damage: 12, score: 92, xp: 22, radius: 22, color: "#be82ec", role: "summoner" },
-  { id: "double", name: "Rey del mostrador", hp: 560, speed: 54, damage: 24, score: 550, xp: 42, radius: 48, color: "#ffd33d", boss: true },
-  { id: "ketchup", name: "Senor Ketchup", hp: 680, speed: 76, damage: 25, score: 750, xp: 55, radius: 42, color: "#ff6e76", boss: true, bossStyle: 'ranged' },
-  { id: "fries", name: "La Papota Suprema", hp: 820, speed: 76, damage: 28, score: 950, xp: 70, radius: 46, color: "#ffdd61", boss: true, bossStyle: 'fast' },
-  { id: "pizza", name: "Don Muzza el Padrino", hp: 980, speed: 58, damage: 32, score: 1200, xp: 85, radius: 52, color: "#e63946", boss: true, bossStyle: 'heavy' },
-  { id: "icecream", name: "Emperador Subcero", hp: 740, speed: 64, damage: 22, score: 1100, xp: 75, radius: 44, color: "#a855f7", boss: true, bossStyle: 'frost' },
+  { id: "double", name: "Rey del mostrador", hp: 820, speed: 58, damage: 24, score: 650, xp: 48, radius: 48, color: "#ffd33d", boss: true },
+  { id: "ketchup", name: "Senor Ketchup", hp: 960, speed: 78, damage: 25, score: 850, xp: 60, radius: 42, color: "#ff6e76", boss: true, bossStyle: 'ranged' },
+  { id: "fries", name: "La Papota Suprema", hp: 1120, speed: 80, damage: 28, score: 1050, xp: 75, radius: 46, color: "#ffdd61", boss: true, bossStyle: 'fast' },
+  { id: "pizza", name: "Don Muzza el Padrino", hp: 1350, speed: 60, damage: 32, score: 1350, xp: 90, radius: 52, color: "#e63946", boss: true, bossStyle: 'heavy' },
+  { id: "icecream", name: "Emperador Subcero", hp: 1080, speed: 66, damage: 24, score: 1200, xp: 82, radius: 44, color: "#a855f7", boss: true, bossStyle: 'frost' },
 ];

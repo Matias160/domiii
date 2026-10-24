@@ -7,9 +7,9 @@ export const items = {
 };
 
 export const rarities = [
-  { id:'Comun', color:'#d7e5d8', multiplier:1, weight:68 },
-  { id:'Raro', color:'#77ccff', multiplier:1.45, weight:22 },
-  { id:'Epico', color:'#db96ff', multiplier:2, weight:8 },
-  { id:'Legendario', color:'#ffb650', multiplier:2.8, weight:1.7 },
-  { id:'Mitico', color:'#ff668f', multiplier:4, weight:.3 },
+  { id:'Comun', color:'#38ef7d', glow:'rgba(56, 239, 125, 0.35)', accent:'#a7f3d0', multiplier:1, weight:54 },
+  { id:'Raro', color:'#00f0ff', glow:'rgba(0, 240, 255, 0.42)', accent:'#bae6fd', multiplier:1.45, weight:26 },
+  { id:'Epico', color:'#d946ef', glow:'rgba(217, 70, 239, 0.48)', accent:'#f5d0fe', multiplier:2, weight:13 },
+  { id:'Legendario', color:'#ffd000', glow:'rgba(255, 208, 0, 0.55)', accent:'#fef08a', multiplier:2.8, weight:5.5 },
+  { id:'Mitico', color:'#ff0055', glow:'rgba(255, 0, 85, 0.62)', accent:'#fecdd3', multiplier:4, weight:1.5 },
 ];

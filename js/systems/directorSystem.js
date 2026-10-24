@@ -1,9 +1,11 @@
 import { spawnItem } from './itemSystem.js';
 
+export const RUSH_BOSS_GOAL = 10;
+
 export const modes = {
   survival: { name: 'Supervivencia', goal: 'Aguanta el ultimo turno' },
   waves: { name: 'Oleadas', goal: 'Completa las 8 oleadas' },
-  rush: { name: 'Duelo de jefes', goal: 'Derrota a los 3 jefes' },
+  rush: { name: 'Duelo de jefes', goal: `Derrota a los ${RUSH_BOSS_GOAL} Grandes Jefes` },
 };
 
 const events = [
@@ -19,7 +21,7 @@ export function initializeDirector(state) {
   state.waveRest = 2;
   state.waveBossPending = false;
   state.nextBossAt = state.modeId === 'rush' ? 3 : state.modeId === 'waves' ? Infinity : 55;
-  state.nextEventAt = 32;
+  state.nextEventAt = state.modeId === 'rush' ? 25 : 32;
   state.activeEvent = null;
   state.eventRemaining = 0;
   state.eventItemTimer = 0;
@@ -28,7 +30,7 @@ export function initializeDirector(state) {
 
 export function updateDirector(state, delta, bounds, random = Math.random) {
   state.peakCombo = Math.max(state.peakCombo, state.combo || 0);
-  if (state.modeId === 'rush' && state.bossesKilled >= 3) state.victory = true;
+  if (state.modeId === 'rush' && state.bossesKilled >= RUSH_BOSS_GOAL) state.victory = true;
   if (state.modeId === 'waves') {
     state.waveRest = Math.max(0, state.waveRest - delta);
     if (state.waveRemaining === 0 && !state.waveBossPending && state.enemies.length === 0) {
@@ -47,7 +49,7 @@ export function updateDirector(state, delta, bounds, random = Math.random) {
     state.eventRemaining = Math.max(0, state.eventRemaining - delta);
     if (state.eventRemaining <= 0) {
       state.activeEvent = null;
-      state.nextEventAt = state.time + 35 + random() * 15;
+      state.nextEventAt = state.time + 32 + random() * 14;
     } else if (state.activeEvent.id !== 'promo') {
       state.eventItemTimer -= delta;
       if (state.eventItemTimer <= 0 && state.items.length < 9) {
@@ -55,7 +57,7 @@ export function updateDirector(state, delta, bounds, random = Math.random) {
         state.eventItemTimer = state.activeEvent.id === 'sauces' ? 2 : 4;
       }
     }
-  } else if (state.modeId !== 'rush' && state.time >= state.nextEventAt && !state.enemies.some(e => e.isBoss)) {
+  } else if (state.time >= state.nextEventAt && (state.modeId === 'rush' || !state.enemies.some(e => e.isBoss))) {
     state.activeEvent = events[Math.floor(random() * events.length)];
     state.eventRemaining = state.activeEvent.duration;
     state.eventItemTimer = 0;

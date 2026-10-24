@@ -6,6 +6,7 @@ import { difficulties } from '../systems/enemySystem.js';
 import { initializeDirector } from '../systems/directorSystem.js';
 import { SpatialHashGrid } from './SpatialHashGrid.js';
 import { SkillController } from '../skills/SkillSystem.js';
+import { resolveAccessory } from './accessories.js';
 
 export function createRunState(setup = {}, audio = null) {
   const world = { width: 1920, height: 1080 };
@@ -35,33 +36,34 @@ export function createRunState(setup = {}, audio = null) {
     shake: 0, combo: 0, comboTime: 0, pendingLevels: 0, bossesKilled: 0, distance: 0,
   };
   initializeDirector(state);
-  player.accessory = setup.accessoryId || 'none';
+  const resolvedAcc = resolveAccessory(setup.accessoryId);
+  player.accessory = resolvedAcc ? resolvedAcc.id : 'none';
   const a = player.accessory;
-  // Accesorios Estándar
-  if (a === 'headband') player.speed *= 1.07;
-  if (a === 'shades') player.damageMultiplier *= 1.06;
-  if (a === 'cyber_shades') player.damageMultiplier *= 1.08;
-  if (a === 'red_bandana') player.speed *= 1.08;
-  if (a === 'headphones') player.speed *= 1.06;
-  if (a === 'neon_cap') { player.speed *= 1.05; player.damageMultiplier *= 1.05; }
+
+  // --- Bonificaciones de Accesorios Estándar (8 reales de accesorios.png) ---
+  if (a === 'bowtie') player.projectileSpeedMultiplier = (player.projectileSpeedMultiplier || 1) * 1.15;
+  if (a === 'shades') player.damageMultiplier *= 1.08;
+  if (a === 'party_hat') { player.speed *= 1.06; player.damageMultiplier *= 1.06; }
+  if (a === 'cap') player.speed *= 1.10;
+  if (a === 'headphones') player.speed *= 1.08;
   if (a === 'crown') { player.maxHp += 15; player.hp += 15; }
-  if (a === 'blue_visor') player.projectileSpeedMultiplier = (player.projectileSpeedMultiplier || 1) * 1.15;
-  if (a === 'magic_hat') player.attackCooldownMultiplier = (player.attackCooldownMultiplier || 1) * 0.90;
-  if (a === 'void_hood') player.critChance = (player.critChance || 0) + 0.12;
-  if (a === 'cyber_helmet') { player.maxHp += 15; player.hp += 15; player.defense = (player.defense || 0) + 0.05; }
-  if (a === 'energy_halo') { player.maxHp += 12; player.hp += 12; player.damageMultiplier *= 1.06; }
+  if (a === 'top_hat') player.critChance = (player.critChance || 0) + 0.12;
+  if (a === 'wizard_hat') player.fireRateMultiplier = (player.fireRateMultiplier || 1) * 1.12;
+
+  // --- Accesorio Especial ---
   if (a === 'chef_hat') player.damageMultiplier *= 1.12;
 
-  // Accesorios Legendarios (Señor Domi)
+  // --- Bonificaciones de Accesorios Legendarios (11 reliquias del Señor Domi) ---
   if (a === 'leg_crown') { player.maxHp += 25; player.hp += 25; player.damageMultiplier *= 1.15; }
-  if (a === 'leg_tiara') { player.speed *= 1.15; player.hpRegen = (player.hpRegen || 0) + 1; }
-  if (a === 'leg_valkyrie') { player.maxHp += 15; player.hp += 15; player.damageMultiplier *= 1.20; }
-  if (a === 'leg_visor') { player.critChance = (player.critChance || 0) + 0.20; player.magnetRadius = (player.magnetRadius || 80) * 1.5; }
-  if (a === 'leg_void_crown') player.damageMultiplier *= 1.22;
-  if (a === 'leg_crimson_cape') { player.maxHp += 25; player.hp += 25; player.damageMultiplier *= 1.10; }
-  if (a === 'leg_angel_wings') { player.speed *= 1.22; player.dashCooldownMultiplier = 0.8; }
-  if (a === 'leg_dragon_wings') player.damageMultiplier *= 1.25;
-  if (a === 'leg_golden_staff') { player.damageMultiplier *= 1.15; player.bonusProjectiles = (player.bonusProjectiles || 0) + 1; }
-  if (a === 'leg_golden_chalice') { player.maxHp += 35; player.hp += 35; }
+  if (a === 'leg_halo') { player.speed *= 1.15; player.regen = (player.regen || 0) + 1.2; }
+  if (a === 'leg_viking') { player.maxHp += 20; player.hp += 20; player.damageMultiplier *= 1.20; }
+  if (a === 'leg_horns') { player.speed *= 1.08; player.damageMultiplier *= 1.28; }
+  if (a === 'leg_visor') { player.critChance = (player.critChance || 0) + 0.20; player.magnetRadius = (player.magnetRadius || 80) * 1.6; }
+  if (a === 'leg_archmage') { player.damageMultiplier *= 1.22; player.fireRateMultiplier = (player.fireRateMultiplier || 1) * 1.15; }
+  if (a === 'leg_cape') { player.maxHp += 30; player.hp += 30; player.damageMultiplier *= 1.12; }
+  if (a === 'leg_angel_wings') { player.speed *= 1.22; player.dashCooldownMultiplier = 0.78; }
+  if (a === 'leg_fire_wings') { player.speed *= 1.12; player.damageMultiplier *= 1.25; }
+  if (a === 'leg_excalibur') { player.damageMultiplier *= 1.18; player.extraProjectiles = (player.extraProjectiles || 0) + 1; }
+  if (a === 'leg_medallion') { player.maxHp += 40; player.hp += 40; player.defense = (player.defense || 1) + 0.1; }
   return state;
 }

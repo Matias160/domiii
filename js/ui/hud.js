@@ -1,5 +1,5 @@
 import { drawFood } from '../core/art.js';
-import { modes } from '../systems/directorSystem.js';
+import { modes, RUSH_BOSS_GOAL } from '../systems/directorSystem.js';
 const maps = {diner:'01 / LOCAL DOMI',kitchen:'02 / COCINA INDUSTRIAL',parking:'03 / ESTACIONAMIENTO',snow:'04 / BAJO CERO',desert:'05 / DESIERTO',football:'06 / ESTADIO'};
 export class Hud {
   constructor() {
@@ -76,6 +76,7 @@ export class Hud {
     const isDashReady = p.dashCooldown <= 0;
     if (isDashReady && this.wasDashReady === false) this.dashControl.classList.add('dash-refilled');
     this.wasDashReady = isDashReady;
+    const maxDashCd = 2.8 * (p.dashCooldownMultiplier || 1);
     this.dashControl.setAttribute('aria-disabled', String(!isDashReady));
     this.dashControl.dataset.active = String(p.dashTime > 0);
     this.set('dashLabel',p.dashTime>0?'IMPACTO':p.dashCooldown>0?`${p.dashCooldown.toFixed(1)} s`:'LISTO');
@@ -84,19 +85,23 @@ export class Hud {
       this.dashControl.dataset.ready = String(isDashReady);
       this.dashControl.classList.toggle('is-ready', isDashReady);
       this.dashControl.classList.toggle('is-cooldown', !isDashReady);
-      this.dashControl.style.setProperty('--charge', `${Math.max(0, Math.min(1, 1-p.dashCooldown/2.8))*100}%`);
+      this.dashControl.style.setProperty('--charge', `${Math.max(0, Math.min(1, 1-p.dashCooldown/maxDashCd))*100}%`);
     }
     if (this.nodes.dashFill) {
-      this.nodes.dashFill.style.width = `${Math.max(0, Math.min(1, 1-p.dashCooldown/2.8))*100}%`;
+      this.nodes.dashFill.style.width = `${Math.max(0, Math.min(1, 1-p.dashCooldown/maxDashCd))*100}%`;
     }
     this.set('runLocation',maps[state.mapId]); this.set('runDifficulty',state.difficulty.name.toUpperCase());
-    const progress=state.modeId==='waves'?'OLEADA '+state.wave+'/8':state.modeId==='rush'?'JEFES '+state.bossesKilled+'/3':modes[state.modeId].name.toUpperCase();
+    const progress=state.modeId==='waves'?'OLEADA '+state.wave+'/8':state.modeId==='rush'?`DUELO DE JEFES ${state.bossesKilled}/${RUSH_BOSS_GOAL}`:modes[state.modeId].name.toUpperCase();
     this.nodes.runLocation.title = progress;
     const boss = state.enemies.find(e=>e.isBoss&&e.hp>0);
     this.bossMeter.hidden = !boss;
-    if (boss) { this.nodes.bossFill.style.width = `${Math.max(0,boss.hp/boss.maxHp)*100}%`;this.set('bossName',boss.type.name.toUpperCase()); }
+    if (boss) {
+      this.nodes.bossFill.style.width = `${Math.max(0,boss.hp/boss.maxHp)*100}%`;
+      const bossTitle = boss.bossRank ? `#${boss.bossRank} ${boss.type.name.toUpperCase()}` : boss.type.name.toUpperCase();
+      this.set('bossName', bossTitle);
+    }
     const event=state.activeEvent,snowAlert=state.mapId==='snow'&&(state.mapWarning||state.wasFreezing);
-    this.eventBanner.hidden=!(event||snowAlert);
+    this.eventBanner.hidden=!(event||snowAlert||state.modeId==='rush');
     this.set('eventName',event?event.name:progress);
     this.set('eventTime',event?Math.ceil(state.eventRemaining)+'s':state.modeId==='waves'&&state.waveRest>0?'EN '+Math.ceil(state.waveRest)+'s':'');
     if(snowAlert){

@@ -1,5 +1,5 @@
 import { damageEnemy, burst, impactRing } from './effectSystem.js';
-import { scoreMultiplier } from './directorSystem.js';
+import { scoreMultiplier, RUSH_BOSS_GOAL } from './directorSystem.js';
 import { gameEvents } from '../core/EventBus.js';
 
 const explosionCandidates = [];
@@ -123,7 +123,12 @@ export function resolveDeaths(state, onLevelUp) {
     if (enemy.isBoss) {
       state.bossesKilled = (state.bossesKilled || 0) + 1;
       state.bossDefeated = true;
-      if (state.modeId === 'rush') state.nextBossAt = state.time + 9;
+      if (state.modeId === 'rush') {
+        state.nextBossAt = state.time + 5.5;
+        if (state.bossesKilled < RUSH_BOSS_GOAL) {
+          state.directorNotice = `¡JEFE ${state.bossesKilled} / ${RUSH_BOSS_GOAL} ABATIDO!`;
+        }
+      }
     }
     state.audio?.play(enemy.isBoss ? 'boss' : 'kill');
 
@@ -153,7 +158,6 @@ export function resolveDeaths(state, onLevelUp) {
 
     const levels = state.player.gainXp(enemy.xp);
     for (let level = 0; level < levels; level += 1) {
-      // Las cartas de habilidades pasivas se eligen en cada subida de nivel
       onLevelUp(true);
     }
   }

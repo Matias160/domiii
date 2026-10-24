@@ -62,7 +62,7 @@ export class Player {
     if (input.consume?.(' ') && this.dashCooldown <= 0) {
       this.dashDirection = { ...this.facing };
       this.dashSequence += 1;
-      this.dashTime = .19; this.dashCooldown = 2.8; this.invulnerable = Math.max(this.invulnerable, .26);
+      this.dashTime = .19; this.dashCooldown = 2.8 * (this.dashCooldownMultiplier || 1); this.invulnerable = Math.max(this.invulnerable, .26);
     }
     const speed=this.speed*this.buffs.speedMultiplier*(this.buffs.slowTime>0?.58:1);
     const movement = this.dashTime > 0 ? this.dashDirection : axis;
@@ -100,10 +100,11 @@ export class Player {
     ctx.strokeStyle = '#95d6a888';
     ctx.lineWidth = 2;
     ctx.beginPath();ctx.ellipse(this.x,this.y+18,27,10,0,0,7);ctx.stroke();
-    drawFood(ctx, this.skin.id, this.x, this.y, 0.85, this.walkTime);
-    drawWeapon(ctx, this.weapon.id, this.x + Math.cos(this.aimAngle) * 22, this.y + Math.sin(this.aimAngle) * 15, .48, this.aimAngle + Math.PI / 2);
     const bob = Math.round(Math.sin(this.walkTime * 7 + this.x * .05) * 1.5);
-    drawAccessory(ctx, this.accessory, this.x, this.y + bob, 0.85);
+    drawAccessory(ctx, this.accessory, this.x, this.y + bob, 0.85, 'back');
+    drawFood(ctx, this.skin.id, this.x, this.y, 0.85, this.walkTime);
+    drawAccessory(ctx, this.accessory, this.x, this.y + bob, 0.85, 'front');
+    drawWeapon(ctx, this.weapon.id, this.x + Math.cos(this.aimAngle) * 22, this.y + Math.sin(this.aimAngle) * 15, .48, this.aimAngle + Math.PI / 2);
     if(this.muzzleTime>0&&(this.weapon.id==='fork'||this.weapon.id==='skewer')){
       ctx.save();ctx.translate(this.x,this.y);ctx.rotate(this.aimAngle);ctx.globalAlpha=Math.min(1,this.muzzleTime/.06);
       const slash=ctx.createRadialGradient(0,0,8,0,0,52);slash.addColorStop(0,'#ffffff00');slash.addColorStop(.55,this.weapon.color+'dd');slash.addColorStop(1,'#ffffff00');

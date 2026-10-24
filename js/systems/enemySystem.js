@@ -1,6 +1,7 @@
 import { Enemy, enemyTypes } from "../entities/Enemy.js";
 import { circlesOverlap } from "../core/collision.js";
 import { damageEnemy, explosionBurst, burst, impactRing } from './effectSystem.js';
+import { RUSH_BOSS_GOAL } from './directorSystem.js';
 
 export const difficulties = {
   suave: { id: "suave", name: "Suave", hp: 0.85, speed: 0.85, damage: 0.7, spawn: 1.25, score: 0.9 },
@@ -15,20 +16,30 @@ export function updateEnemies(state, delta, canvas) {
   const spawnEvery = state.difficulty.spawn * Math.max(0.32, 1.15 * pressure) * (state.activeEvent?.id === 'promo' ? .55 : 1);
   let bossSpawned = false;
 
+  const activeBossCount = state.enemies.filter(enemy => enemy.isBoss && enemy.hp > 0).length;
+  const maxConcurrentBosses = state.modeId === 'rush' && (state.bossesKilled || 0) >= 6 ? 2 : 1;
   const waveBoss = state.modeId === 'waves' && state.waveRest <= 0 && state.waveBossPending;
-  if ((state.time >= state.nextBossAt || waveBoss) && !state.enemies.some(enemy => enemy.isBoss)) {
-    spawnEnemy(state, canvas, true);
-    state.waveBossPending = false;
-    state.nextBossAt = state.modeId === 'survival' || !state.modeId ? state.time + 85 : Infinity;
-    bossSpawned = true;
+
+  if ((state.time >= state.nextBossAt || waveBoss) && activeBossCount < maxConcurrentBosses) {
+    if (state.modeId !== 'rush' || (state.bossesKilled || 0) + activeBossCount < RUSH_BOSS_GOAL) {
+      spawnEnemy(state, canvas, true);
+      state.waveBossPending = false;
+      if (state.modeId === 'rush') {
+        const nextAllowed = (state.bossesKilled || 0) >= 6 && activeBossCount + 1 < maxConcurrentBosses;
+        state.nextBossAt = nextAllowed ? state.time + 14 : Infinity;
+      } else {
+        state.nextBossAt = state.modeId === 'survival' || !state.modeId ? state.time + 85 : Infinity;
+      }
+      bossSpawned = true;
+    }
   }
 
   const canSpawn = state.modeId === 'waves' ? state.waveRest <= 0 && state.waveRemaining > 0 :
-    state.modeId === 'rush' ? state.enemies.some(e=>e.isBoss) && state.enemies.length < 7 : true;
+    state.modeId === 'rush' ? activeBossCount > 0 && state.enemies.length < 18 : true;
   if (canSpawn && state.spawnTimer <= 0 && state.enemies.length < 100) {
     spawnEnemy(state, canvas);
     if (state.modeId === 'waves') state.waveRemaining -= 1;
-    state.spawnTimer = state.modeId === 'rush' ? 3.2 : spawnEvery;
+    state.spawnTimer = state.modeId === 'rush' ? 1.85 : spawnEvery;
   }
 
   for (const enemy of state.enemies) {
@@ -51,12 +62,23 @@ export function updateEnemies(state, delta, canvas) {
       }
       enemy.hp = 0;
     }
-    // Modo Dios: Aniquilación automática al contacto
+    // Modo Dios: Aniquilación automática a esbirros, daño radiante gradual a Jefes
     if (state.player.godMode && Math.hypot(enemy.x - state.player.x, enemy.y - state.player.y) < 130) {
-      damageEnemy(state, enemy, 9999, 'god');
-      burst(state, enemy.x, enemy.y, '#ffd700', 16, 180);
-      impactRing(state, enemy.x, enemy.y, '#ffd700');
-      state.floaters?.push({ x: enemy.x, y: enemy.y - 30, text: '¡EXTERMINIO!', life: 0.85, color: '#ffd700', scale: 1.35, kind: 'crit' });
+      if (enemy.isBoss) {
+        enemy.godTickTimer = (enemy.godTickTimer || 0) - delta;
+        if (enemy.godTickTimer <= 0) {
+          enemy.godTickTimer = 0.45;
+          const bossBurn = Math.round((28 + state.player.level * 4) * state.player.damageMultiplier);
+          damageEnemy(state, enemy, bossBurn, 'god');
+          burst(state, enemy.x, enemy.y, '#ffd700', 8, 120);
+          state.floaters?.push({ x: enemy.x, y: enemy.y - 36, text: `🔥 -${bossBurn}`, life: 0.65, color: '#ffd700', scale: 1.15, kind: 'crit' });
+        }
+      } else {
+        damageEnemy(state, enemy, 9999, 'god');
+        burst(state, enemy.x, enemy.y, '#ffd700', 16, 180);
+        impactRing(state, enemy.x, enemy.y, '#ffd700');
+        state.floaters?.push({ x: enemy.x, y: enemy.y - 30, text: '¡EXTERMINIO!', life: 0.85, color: '#ffd700', scale: 1.35, kind: 'crit' });
+      }
     }
 
     if (enemy.hp > 0 && circlesOverlap(enemy, state.player)) {
@@ -86,7 +108,7 @@ function updateBossZones(state,delta){
     zone.triggered=true;state.shake=Math.max(state.shake,.2);
     if(zone.kind==='snipe'){
       const dx=zone.targetX-zone.x,dy=zone.targetY-zone.y,length=Math.hypot(dx,dy)||1;
-      for(const offset of [-.1,0,.1]){const angle=Math.atan2(dy,dx)+offset;state.enemyProjectiles.push({x:zone.x,y:zone.y,vx:Math.cos(angle)*365,vy:Math.sin(angle)*365,radius:6,damage:zone.damage,life:3,color:'#ff4f9a'});}
+      for(const offset of [-.12,0,.12]){const angle=Math.atan2(dy,dx)+offset;state.enemyProjectiles.push({x:zone.x,y:zone.y,vx:Math.cos(angle)*365,vy:Math.sin(angle)*365,radius:6,damage:zone.damage,life:3,color:'#ff4f9a'});}
     }else{
       const x=zone.kind==='rain'?zone.targetX:zone.x,y=zone.kind==='rain'?zone.targetY:zone.y;
       if(Math.hypot(state.player.x-x,state.player.y-y)<zone.radius+state.player.radius&&state.player.takeDamage(zone.damage)){state.audio?.play('damage');}
@@ -106,28 +128,26 @@ function spawnEnemy(state, canvas, boss = false) {
   let px, py;
   if (boss) {
     // Los jefes aparecen a una distancia épica frente a la cámara
-    px = Math.max(80, Math.min(worldW - 80, cam.x + 480 + (Math.random() - 0.5) * 160));
+    px = Math.max(80, Math.min(worldW - 80, cam.x + 480 + (Math.random() - 0.5) * 180));
     py = Math.max(160, Math.min(worldH - 120, cam.y + 110));
   } else {
-    // 70% de spawn alrededor de la pantalla actual (desfasado del jugador) y 30% en sectores dispersos del mapa 1920x1080
     if (Math.random() < 0.7) {
       const side = Math.floor(Math.random() * 4);
       const margin = 40 + Math.random() * 60;
-      if (side === 0) { // Arriba de la cámara
+      if (side === 0) {
         px = cam.x + Math.random() * 960;
         py = cam.y - margin;
-      } else if (side === 1) { // Derecha de la cámara
+      } else if (side === 1) {
         px = cam.x + 960 + margin;
         py = cam.y + Math.random() * 540;
-      } else if (side === 2) { // Abajo de la cámara
+      } else if (side === 2) {
         px = cam.x + Math.random() * 960;
         py = cam.y + 540 + margin;
-      } else { // Izquierda de la cámara
+      } else {
         px = cam.x - margin;
         py = cam.y + Math.random() * 540;
       }
     } else {
-      // Spawn en abanico circular amplio alrededor del jugador (radio 500-750px) para rodearlo orgánicamente
       const angle = Math.random() * Math.PI * 2;
       const dist = 520 + Math.random() * 240;
       px = p.x + Math.cos(angle) * dist;
@@ -141,13 +161,27 @@ function spawnEnemy(state, canvas, boss = false) {
   const normalTypes = enemyTypes.filter(type => !type.boss);
   const maxType = state.time > 65 ? normalTypes.length : state.time > 35 ? 5 : state.time > 15 ? 4 : 2;
   const bosses = enemyTypes.filter(record => record.boss);
-  const type = boss ? bosses[(state.bossesKilled || 0) % bosses.length] : normalTypes[Math.floor(Math.random() * maxType)];
+  const spawnedBossIndex = (state.bossesKilled || 0) + state.enemies.filter(e => e.isBoss && e.hp > 0).length;
+  const type = boss ? bosses[spawnedBossIndex % bosses.length] : normalTypes[Math.floor(Math.random() * maxType)];
   if (type.id === 'onion') {
     const angle = Math.random() * Math.PI * 2;
     position.x = Math.max(62, Math.min(worldW - 62, state.player.x + Math.cos(angle) * 165));
     position.y = Math.max(130, Math.min(worldH - 40, state.player.y + Math.sin(angle) * 165));
   }
-  const growth = 1 + Math.max(0, state.time - 60) / 300;
-  const difficulty = { ...state.difficulty, hp: state.difficulty.hp * growth, speed: state.difficulty.speed * (state.mapId === 'kitchen' ? 1.08 : 1) };
-  state.enemies.push(new Enemy({ ...position, type, difficulty }));
+  const growth = 1 + Math.max(0, state.time - 60) / 260;
+  // En modo Duelo de Jefes ("rush"), los jefes son mucho más resistentes y escalan en cada ronda
+  const rushBossHpMult = (boss && state.modeId === 'rush')
+    ? (2.45 + spawnedBossIndex * 0.48)
+    : (boss ? (1.35 + (state.bossesKilled || 0) * 0.3) : 1);
+  const rushBossSpdMult = (boss && state.modeId === 'rush') ? (1.06 + spawnedBossIndex * 0.03) : 1;
+  const difficulty = {
+    ...state.difficulty,
+    hp: state.difficulty.hp * growth * rushBossHpMult,
+    speed: state.difficulty.speed * (state.mapId === 'kitchen' ? 1.08 : 1) * rushBossSpdMult
+  };
+  const spawned = new Enemy({ ...position, type, difficulty });
+  if (boss && state.modeId === 'rush') {
+    spawned.bossRank = spawnedBossIndex + 1;
+  }
+  state.enemies.push(spawned);
 }

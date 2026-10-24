@@ -86,11 +86,18 @@ export function drawWorldProps(ctx, map = 'diner', time = 0, world = { width: 19
     machine(ctx, 220, h - 220, '#72958e'); machine(ctx, w - 220, h - 220, '#72958e');
     steam(ctx, 200, 140, time, '#d9fff5'); steam(ctx, w - 200, 140, time + .6, '#d9fff5');
   } else if (map === 'parking') {
-    machine(ctx, 200, 170, '#697c7c'); machine(ctx, w - 200, 170, '#697c7c');
-    machine(ctx, 200, h - 200, '#697c7c'); machine(ctx, w - 200, h - 200, '#697c7c');
+    machine(ctx, 200, 170, '#1e293b'); machine(ctx, w - 200, 170, '#1e293b');
+    machine(ctx, 200, h - 200, '#1e293b'); machine(ctx, w - 200, h - 200, '#1e293b');
+    billboard(ctx, 420, 145, 'NEON DRIVE', '#00f0ff');
+    billboard(ctx, w - 420, 145, 'CYBER DELIVERY', '#ff007f');
+    billboard(ctx, 420, h - 105, 'TURBO PANCHO', '#ffbe0b');
+    billboard(ctx, w - 420, h - 105, '24H VIP LOT', '#a855f7');
+    floodLight(ctx, 120, 95, time);
+    floodLight(ctx, w - 120, 95, time + 0.7);
+    steam(ctx, 340, 360, time, '#00f0ff');
+    steam(ctx, w - 340, 660, time + 1.1, '#ff007f');
   } else {
     // Diner clásico: mobiliario con sombras de contacto profundas y reflejos cálidos
-    // Sombras oclusivas de base en el piso antes de dibujar los muebles
     ctx.save();
     ctx.fillStyle = 'rgba(5, 10, 14, 0.42)';
     for (const [tx, ty] of [[220, 170], [w - 220, 170], [220, h - 180], [w - 220, h - 180]]) {
@@ -110,7 +117,6 @@ export function drawWorldProps(ctx, map = 'diner', time = 0, world = { width: 19
     showcase(ctx, 450, 150); showcase(ctx, w - 450, 150);
     steam(ctx, 240, 150, time); steam(ctx, w - 240, 150, time + .8);
 
-    // Resplandor cálido de neón/vidrio de las vitrinas
     ctx.save();
     for (const sx of [450, w - 450]) {
       const showGlow = ctx.createRadialGradient(sx, 160, 10, sx, 165, 85);

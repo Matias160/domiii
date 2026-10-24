@@ -1,6 +1,6 @@
-import {currentAccount, grantItem} from '../systems/accountSystem.js';
+import {currentAccount, grantItem, equip} from '../systems/accountSystem.js';
 import {shopItems, isOwned} from '../data/shop.js';
-import {drawItemPreview} from '../core/presentation.js';
+import {drawItemPreview, drawAccessoryIcon} from '../core/presentation.js';
 import {icon, refreshIcons} from './icons.js';
 
 const tabs = [
@@ -29,7 +29,7 @@ export const adviceList = [
     category: 'movement',
     title: 'Visión y Derrapes',
     badge: 'MOVIMIENTO',
-    description: 'En el estacionamiento la luz es escasa. Tu linterna frontal ilumina el camino y las manchas de aceite alteran la tracción.'
+    description: 'En el estacionamiento la luz neón refleja sobre el asfalto húmedo y las manchas de aceite alteran la tracción.'
   },
   {
     id: 'adv_skills',
@@ -43,7 +43,7 @@ export const adviceList = [
     category: 'combat',
     title: 'Aura Modo Dios',
     badge: 'COMBATE',
-    description: 'Al alcanzar el Nivel 3, tu personaje desata el aura dorada celestial: fulmina instantáneamente a cualquier cliente que intente tocarte.'
+    description: 'Al alcanzar el Nivel 3, tu personaje desata el aura dorada celestial: fulmina a clientes comunes y quema gradualmente a los jefes.'
   },
   {
     id: 'adv_evo',
@@ -111,7 +111,9 @@ export class DomiScreen {
     const maxKills = runs.reduce((m, r) => Math.max(m, r.kills || 0), 0);
     const maxCombo = runs.reduce((m, r) => Math.max(m, r.combo || 0), 0);
     const maxTime = runs.reduce((m, r) => Math.max(m, r.time || 0), 0);
-    const purchases = profile.purchases || [];
+    const totalKills = runs.reduce((sum, r) => sum + (r.kills || 0), 0);
+    const totalRuns = runs.length;
+    const totalBosses = runs.reduce((sum, r) => sum + (r.bossesKilled || 0), 0);
 
     return [
       {
@@ -119,8 +121,8 @@ export class DomiScreen {
         type: 'mission',
         rewardType: 'accessory',
         rewardId: 'chef_hat',
-        rewardName: 'Gorro Chef',
-        rewardTooltip: 'GORRO CHEF: +12% de daño permanente en combate (Accesorio Especial)',
+        rewardName: 'Gorro de Chef',
+        rewardTooltip: 'GORRO DE CHEF: +12% de daño permanente en combate (Especial Don Domi)',
         name: 'Prueba de Fuego',
         iconType: 'star',
         description: 'Sobrevive y alcanza el Nivel 5 en combate.',
@@ -166,29 +168,114 @@ export class DomiScreen {
         claim: () => { grantItem('accessory', 'leg_crown'); }
       },
       {
+        id: 'm_time3min',
+        type: 'mission',
+        rewardType: 'accessory',
+        rewardId: 'leg_halo',
+        rewardName: 'Aureola Celestial',
+        rewardTooltip: 'AUREOLA CELESTIAL: +15% Velocidad y Regeneración pasiva (Legendario Don Domi)',
+        name: 'Luz de Medianoche',
+        iconType: 'time',
+        description: 'Sobrevive más de 3 minutos (180 s) bajo asedio.',
+        current: Math.min(180, Math.floor(maxTime)),
+        target: 180,
+        unit: 'segundos',
+        isDone: maxTime >= 180,
+        isClaimed: isOwned(profile, 'accessory', 'leg_halo'),
+        claim: () => { grantItem('accessory', 'leg_halo'); }
+      },
+      {
         id: 'm_kills100',
         type: 'mission',
         rewardType: 'accessory',
-        rewardId: 'leg_valkyrie',
-        rewardName: 'Yelmo Valquiria',
-        rewardTooltip: 'YELMO VALQUIRIA: +20% Daño masivo y +15 Vida (Legendario Don Domi)',
-        name: 'Furia Gastronómica',
+        rewardId: 'leg_viking',
+        rewardName: 'Casco Vikingo',
+        rewardTooltip: 'CASCO VIKINGO: +20% Daño masivo y +20 Vida (Legendario Don Domi)',
+        name: 'Furia Nórdica',
         iconType: 'skull',
         description: 'Elimina 100 clientes molestos en una sola partida.',
         current: Math.min(100, maxKills),
         target: 100,
         unit: 'KOs',
         isDone: maxKills >= 100,
-        isClaimed: isOwned(profile, 'accessory', 'leg_valkyrie'),
-        claim: () => { grantItem('accessory', 'leg_valkyrie'); }
+        isClaimed: isOwned(profile, 'accessory', 'leg_viking'),
+        claim: () => { grantItem('accessory', 'leg_viking'); }
+      },
+      {
+        id: 'm_combo35',
+        type: 'mission',
+        rewardType: 'accessory',
+        rewardId: 'leg_horns',
+        rewardName: 'Cuernos Demoníacos',
+        rewardTooltip: 'CUERNOS DEMONÍACOS: +28% Daño puro y +8% Velocidad (Legendario Don Domi)',
+        name: 'Fiebre Infernal',
+        iconType: 'combo',
+        description: 'Alcanza una racha de 35 bajas seguidas en combo.',
+        current: Math.min(35, maxCombo),
+        target: 35,
+        unit: 'Combo',
+        isDone: maxCombo >= 35,
+        isClaimed: isOwned(profile, 'accessory', 'leg_horns'),
+        claim: () => { grantItem('accessory', 'leg_horns'); }
+      },
+      {
+        id: 'm_runs5',
+        type: 'mission',
+        rewardType: 'accessory',
+        rewardId: 'leg_visor',
+        rewardName: 'Visor Cibernético',
+        rewardTooltip: 'VISOR CIBERNÉTICO: +20% Crítico y Súper Imán de botín (Legendario Don Domi)',
+        name: 'Ojo de Halcón',
+        iconType: 'god',
+        description: 'Completa 5 turnos de servicio en cualquier modo.',
+        current: Math.min(5, totalRuns),
+        target: 5,
+        unit: 'Turnos',
+        isDone: totalRuns >= 5,
+        isClaimed: isOwned(profile, 'accessory', 'leg_visor'),
+        claim: () => { grantItem('accessory', 'leg_visor'); }
+      },
+      {
+        id: 'm_level10',
+        type: 'mission',
+        rewardType: 'accessory',
+        rewardId: 'leg_archmage',
+        rewardName: 'Sombrero Arquimago',
+        rewardTooltip: 'SOMBRERO DE ARQUIMAGO: +22% Daño y +15% Cadencia (Legendario Don Domi)',
+        name: 'Alquimia Suprema',
+        iconType: 'star',
+        description: 'Alcanza el Nivel 10 en una partida.',
+        current: Math.min(10, maxLevel),
+        target: 10,
+        unit: 'Nivel',
+        isDone: maxLevel >= 10,
+        isClaimed: isOwned(profile, 'accessory', 'leg_archmage'),
+        claim: () => { grantItem('accessory', 'leg_archmage'); }
+      },
+      {
+        id: 'm_totalkills300',
+        type: 'mission',
+        rewardType: 'accessory',
+        rewardId: 'leg_cape',
+        rewardName: 'Manto Real Carmesí',
+        rewardTooltip: 'MANTO REAL CARMESÍ: +30 Vida Máx y +12% Daño (Legendario Don Domi)',
+        name: 'Honor de la Casa',
+        iconType: 'skull',
+        description: 'Acumula 300 clientes atendidos entre todas tus partidas.',
+        current: Math.min(300, totalKills),
+        target: 300,
+        unit: 'KOs Totales',
+        isDone: totalKills >= 300,
+        isClaimed: isOwned(profile, 'accessory', 'leg_cape'),
+        claim: () => { grantItem('accessory', 'leg_cape'); }
       },
       {
         id: 'm_time4min',
         type: 'mission',
         rewardType: 'accessory',
         rewardId: 'leg_angel_wings',
-        rewardName: 'Alas Celestiales',
-        rewardTooltip: 'ALAS CELESTIALES: +22% Velocidad y recarga de acelerón reducida (Legendario Don Domi)',
+        rewardName: 'Alas de Ángel',
+        rewardTooltip: 'ALAS DE ÁNGEL: +22% Velocidad y recarga de acelerón reducida (Legendario Don Domi)',
         name: 'Vuelo del Maestro',
         iconType: 'time',
         description: 'Sobrevive 4 minutos (240 s) continuos en el tablero.',
@@ -203,52 +290,52 @@ export class DomiScreen {
         id: 'm_level8',
         type: 'mission',
         rewardType: 'accessory',
-        rewardId: 'leg_dragon_wings',
-        rewardName: 'Alas Dracónicas',
-        rewardTooltip: 'ALAS DRACÓNICAS: +25% Daño ígneo destructivo (Legendario Don Domi)',
-        name: 'Horno Infernal',
+        rewardId: 'leg_fire_wings',
+        rewardName: 'Alas de Fénix Ígneo',
+        rewardTooltip: 'ALAS DE FÉNIX ÍGNEO: +25% Daño y +12% Velocidad (Legendario Don Domi)',
+        name: 'Horno Solar',
         iconType: 'star',
         description: 'Alcanza el Nivel 8 en combate.',
         current: Math.min(8, maxLevel),
         target: 8,
         unit: 'Nivel',
         isDone: maxLevel >= 8,
-        isClaimed: isOwned(profile, 'accessory', 'leg_dragon_wings'),
-        claim: () => { grantItem('accessory', 'leg_dragon_wings'); }
+        isClaimed: isOwned(profile, 'accessory', 'leg_fire_wings'),
+        claim: () => { grantItem('accessory', 'leg_fire_wings'); }
       },
       {
         id: 'm_boss1',
         type: 'mission',
         rewardType: 'accessory',
-        rewardId: 'leg_golden_staff',
-        rewardName: 'Cetro de Oro',
-        rewardTooltip: 'CETRO DE ORO: +1 Proyectil Extra y +15% Daño (Legendario Don Domi)',
+        rewardId: 'leg_excalibur',
+        rewardName: 'Espada Excalibur',
+        rewardTooltip: 'ESPADA DORADA EXCALIBUR: +1 Proyectil Extra y +18% Daño (Legendario Don Domi)',
         name: 'Mandato Culinario',
         iconType: 'star',
-        description: 'Vence al Gran Jefe de la Cocina en turno.',
-        current: runs.some(r => (r.bossesKilled || 0) >= 1) ? 1 : 0,
+        description: 'Derrota a un Gran Jefe de la Cocina en turno.',
+        current: Math.min(1, totalBosses),
         target: 1,
         unit: 'Jefe',
-        isDone: runs.some(r => (r.bossesKilled || 0) >= 1),
-        isClaimed: isOwned(profile, 'accessory', 'leg_golden_staff'),
-        claim: () => { grantItem('accessory', 'leg_golden_staff'); }
+        isDone: totalBosses >= 1,
+        isClaimed: isOwned(profile, 'accessory', 'leg_excalibur'),
+        claim: () => { grantItem('accessory', 'leg_excalibur'); }
       },
       {
-        id: 'm_time3min',
+        id: 'm_boss3',
         type: 'mission',
         rewardType: 'accessory',
-        rewardId: 'leg_tiara',
-        rewardName: 'Diadema Sagrada',
-        rewardTooltip: 'DIADEMA SAGRADA: +15% Velocidad y Regeneración pasiva (Legendario Don Domi)',
-        name: 'Resistencia Nocturna',
-        iconType: 'time',
-        description: 'Sobrevive más de 3 minutos (180 s) bajo asedio.',
-        current: Math.min(180, Math.floor(maxTime)),
-        target: 180,
-        unit: 'segundos',
-        isDone: maxTime >= 180,
-        isClaimed: isOwned(profile, 'accessory', 'leg_tiara'),
-        claim: () => { grantItem('accessory', 'leg_tiara'); }
+        rewardId: 'leg_medallion',
+        rewardName: 'Medallón Rubí Sagrado',
+        rewardTooltip: 'MEDALLÓN RUBÍ SAGRADO: +40 Vida Máxima y blindaje real (Legendario Don Domi)',
+        name: 'Campeón de Jefes',
+        iconType: 'god',
+        description: 'Derrota a 3 Grandes Jefes acumulados en tus partidas.',
+        current: Math.min(3, totalBosses),
+        target: 3,
+        unit: 'Jefes',
+        isDone: totalBosses >= 3,
+        isClaimed: isOwned(profile, 'accessory', 'leg_medallion'),
+        claim: () => { grantItem('accessory', 'leg_medallion'); }
       }
     ];
   }
@@ -261,21 +348,22 @@ export class DomiScreen {
       { id: 'pizza', type: 'skin', name: 'Pizza Suprema', category: 'CHEF', stats: { hp: '130', spd: '90', dmg: '120', perk: 'Resistencia Máx' }, desc: 'Masa gruesa que absorbe castigo pesado.', lockText: '850 PT', isUnlocked: isOwned(profile, 'skin', 'pizza') },
       { id: 'empanada', type: 'skin', name: 'Empanada Criolla', category: 'CHEF', stats: { hp: '110', spd: '115', dmg: '105', perk: 'Defensa Blindada' }, desc: 'Repulgue de acero y esquiva rápida.', lockText: '950 PT', isUnlocked: isOwned(profile, 'skin', 'empanada') },
       { id: 'choripan', type: 'skin', name: 'Choripán Bravo', category: 'CHEF', stats: { hp: '120', spd: '95', dmg: '140', perk: 'Cazajefes' }, desc: 'Impacto brutal con chimichurri picante.', lockText: '1600 PT', isUnlocked: isOwned(profile, 'skin', 'choripan') },
-      { id: 'parrilla', type: 'pet', name: 'Mini Parrilla', category: 'MASCOTA', stats: { hp: 'AUTO', spd: 'ALTO', dmg: '85', perk: 'Lanza Brasas' }, desc: 'Compañero ígneo exclusivo de Don Domi.', lockText: 'Misión #2', isUnlocked: isOwned(profile, 'pet', 'parrilla') },
+      { id: 'parrilla', type: 'pet', name: 'Mini Parrilla', category: 'MASCOTA', stats: { hp: 'AUTO', spd: 'ALTO', dmg: '85', perk: 'Lanza Brasas' }, desc: 'Compañero ígneo exclusivo de Don Domi.', lockText: 'Misión 50 KOs', isUnlocked: isOwned(profile, 'pet', 'parrilla') },
       { id: 'ketchup', type: 'pet', name: 'Mini Ketchup', category: 'MASCOTA', stats: { hp: 'AUTO', spd: 'MED', dmg: '45', perk: 'Charcos Lentos' }, desc: 'Frena el avance de masas de clientes.', lockText: '700 PT', isUnlocked: isOwned(profile, 'pet', 'ketchup') },
       { id: 'drone', type: 'pet', name: 'Dron Delivery', category: 'MASCOTA', stats: { hp: 'AUTO', spd: 'MAX', dmg: '65', perk: 'Imán + Rayos' }, desc: 'Atrae ingredientes y descarga voltios.', lockText: '850 PT', isUnlocked: isOwned(profile, 'pet', 'drone') },
       { id: 'taco', type: 'pet', name: 'Taco Guardián', category: 'MASCOTA', stats: { hp: 'AUTO', spd: 'MED', dmg: '75', perk: 'Escudo Frontal' }, desc: 'Bloquea proyectiles e impactos directos.', lockText: '950 PT', isUnlocked: isOwned(profile, 'pet', 'taco') },
-      { id: 'chef_hat', type: 'accessory', name: 'Gorro de Chef', category: 'ACCESORIO', stats: { hp: '-', spd: '-', dmg: '+12%', perk: '+12% Daño Total' }, desc: 'Gorro artesanal concedido por Don Domi.', lockText: 'Misión #1', isUnlocked: isOwned(profile, 'accessory', 'chef_hat') },
+      { id: 'chef_hat', type: 'accessory', name: 'Gorro de Chef', category: 'ACCESORIO', stats: { hp: '-', spd: '-', dmg: '+12%', perk: '+12% Daño Total' }, desc: 'Gorro artesanal concedido por Don Domi.', lockText: 'Misión Nivel 5', isUnlocked: isOwned(profile, 'accessory', 'chef_hat') },
       { id: 'leg_crown', type: 'accessory', name: 'Corona Imperial', category: 'LEGENDARIO', stats: { hp: '+25', spd: '-', dmg: '+15%', perk: '+25 HP +15% Dmg' }, desc: 'Símbolo del amo absoluto del local.', lockText: 'Misión Combo 20', isUnlocked: isOwned(profile, 'accessory', 'leg_crown') },
-      { id: 'leg_tiara', type: 'accessory', name: 'Diadema Sagrada', category: 'LEGENDARIO', stats: { hp: 'REGEN', spd: '+15%', dmg: '-', perk: '+15% Spd +Regen' }, desc: 'Bendición culinaria con regeneración pasiva.', lockText: 'Misión 3 Min', isUnlocked: isOwned(profile, 'accessory', 'leg_tiara') },
-      { id: 'leg_valkyrie', type: 'accessory', name: 'Yelmo Valquiria', category: 'LEGENDARIO', stats: { hp: '+15', spd: '-', dmg: '+20%', perk: '+20% Daño Total' }, desc: 'Forjado para resistir batallas voraces.', lockText: 'Misión 100 KOs', isUnlocked: isOwned(profile, 'accessory', 'leg_valkyrie') },
-      { id: 'leg_angel_wings', type: 'accessory', name: 'Alas Celestiales', category: 'LEGENDARIO', stats: { hp: '-', spd: '+22%', dmg: '-', perk: '+22% Spd -Recarga' }, desc: 'Vuelo ligero sobre el aceite hirviendo.', lockText: 'Misión 4 Min', isUnlocked: isOwned(profile, 'accessory', 'leg_angel_wings') },
-      { id: 'leg_dragon_wings', type: 'accessory', name: 'Alas Dracónicas', category: 'LEGENDARIO', stats: { hp: '-', spd: '+10%', dmg: '+25%', perk: '+25% Daño Fuego' }, desc: 'Alas de fuego que calcinan comandas.', lockText: 'Misión Nivel 8', isUnlocked: isOwned(profile, 'accessory', 'leg_dragon_wings') },
-      { id: 'leg_golden_staff', type: 'accessory', name: 'Cetro de Oro', category: 'LEGENDARIO', stats: { hp: '-', spd: '-', dmg: '+15% +1Proy', perk: '+1 Proyectil' }, desc: 'Cetro de soberanía sobre los ingredientes.', lockText: 'Vencer Jefe', isUnlocked: isOwned(profile, 'accessory', 'leg_golden_staff') },
-      { id: 'leg_visor', type: 'accessory', name: 'Visor Cuántico', category: 'LEGENDARIO', stats: { hp: '-', spd: '-', dmg: '+20% Crit', perk: '+20% Crit +Imán' }, desc: 'Óptica de precisión cuántica de Don Domi.', lockText: 'Señor Domi', isUnlocked: isOwned(profile, 'accessory', 'leg_visor') },
-      { id: 'leg_void_crown', type: 'accessory', name: 'Corona del Vacío', category: 'LEGENDARIO', stats: { hp: '-', spd: '-', dmg: '+22%', perk: '+22% Daño Arcano' }, desc: 'Reliquia prohibida de la cocina cósmica.', lockText: 'Señor Domi', isUnlocked: isOwned(profile, 'accessory', 'leg_void_crown') },
-      { id: 'leg_crimson_cape', type: 'accessory', name: 'Manto Carmesí', category: 'LEGENDARIO', stats: { hp: '+25', spd: '-', dmg: '+10%', perk: '+25 HP +10% Dmg' }, desc: 'Manto de seda y salsa picante.', lockText: 'Señor Domi', isUnlocked: isOwned(profile, 'accessory', 'leg_crimson_cape') },
-      { id: 'leg_golden_chalice', type: 'accessory', name: 'Cáliz Sagrado', category: 'LEGENDARIO', stats: { hp: '+35', spd: '-', dmg: '-', perk: '+35 Vida Máx' }, desc: 'El Santo Grial culinario de Don Domi.', lockText: 'Señor Domi', isUnlocked: isOwned(profile, 'accessory', 'leg_golden_chalice') }
+      { id: 'leg_halo', type: 'accessory', name: 'Aureola Celestial', category: 'LEGENDARIO', stats: { hp: 'REGEN', spd: '+15%', dmg: '-', perk: '+15% Spd +Regen' }, desc: 'Bendición culinaria con regeneración pasiva.', lockText: 'Misión 3 Min', isUnlocked: isOwned(profile, 'accessory', 'leg_halo') },
+      { id: 'leg_viking', type: 'accessory', name: 'Casco Vikingo', category: 'LEGENDARIO', stats: { hp: '+20', spd: '-', dmg: '+20%', perk: '+20 HP +20% Dmg' }, desc: 'Yelmo nórdico para batallas voraces.', lockText: 'Misión 100 KOs', isUnlocked: isOwned(profile, 'accessory', 'leg_viking') },
+      { id: 'leg_horns', type: 'accessory', name: 'Cuernos Demoníacos', category: 'LEGENDARIO', stats: { hp: '-', spd: '+8%', dmg: '+28%', perk: '+28% Daño Puro' }, desc: 'Forjados en las brasas del infierno.', lockText: 'Misión Combo 35', isUnlocked: isOwned(profile, 'accessory', 'leg_horns') },
+      { id: 'leg_visor', type: 'accessory', name: 'Visor Cibernético', category: 'LEGENDARIO', stats: { hp: '-', spd: '-', dmg: '+20% Crit', perk: '+20% Crit +Imán' }, desc: 'Óptica láser esmeralda de Don Domi.', lockText: 'Misión 5 Turnos', isUnlocked: isOwned(profile, 'accessory', 'leg_visor') },
+      { id: 'leg_archmage', type: 'accessory', name: 'Sombrero de Arquimago', category: 'LEGENDARIO', stats: { hp: '-', spd: '-', dmg: '+22%', perk: '+22% Dmg +Cadencia' }, desc: 'Reliquia estelar de la cocina arcana.', lockText: 'Misión Nivel 10', isUnlocked: isOwned(profile, 'accessory', 'leg_archmage') },
+      { id: 'leg_cape', type: 'accessory', name: 'Manto Real Carmesí', category: 'LEGENDARIO', stats: { hp: '+30', spd: '-', dmg: '+12%', perk: '+30 HP +12% Dmg' }, desc: 'Manto de terciopelo real y cuello de armiño.', lockText: 'Misión 300 KOs', isUnlocked: isOwned(profile, 'accessory', 'leg_cape') },
+      { id: 'leg_angel_wings', type: 'accessory', name: 'Alas de Ángel', category: 'LEGENDARIO', stats: { hp: '-', spd: '+22%', dmg: '-', perk: '+22% Spd -Recarga' }, desc: 'Plumas sagradas sobre el aceite hirviendo.', lockText: 'Misión 4 Min', isUnlocked: isOwned(profile, 'accessory', 'leg_angel_wings') },
+      { id: 'leg_fire_wings', type: 'accessory', name: 'Alas de Fénix Ígneo', category: 'LEGENDARIO', stats: { hp: '-', spd: '+12%', dmg: '+25%', perk: '+25% Dmg +12% Spd' }, desc: 'Envergadura de fuego que calcina comandas.', lockText: 'Misión Nivel 8', isUnlocked: isOwned(profile, 'accessory', 'leg_fire_wings') },
+      { id: 'leg_excalibur', type: 'accessory', name: 'Espada Dorada Excalibur', category: 'LEGENDARIO', stats: { hp: '-', spd: '-', dmg: '+18% +1Proy', perk: '+1 Proyectil Extra' }, desc: 'Hoja sagrada de soberanía gastronómica.', lockText: 'Vencer 1 Jefe', isUnlocked: isOwned(profile, 'accessory', 'leg_excalibur') },
+      { id: 'leg_medallion', type: 'accessory', name: 'Medallón Rubí Sagrado', category: 'LEGENDARIO', stats: { hp: '+40', spd: '-', dmg: '-', perk: '+40 Vida +Defensa' }, desc: 'Joya real encantada por el Señor Domi.', lockText: 'Vencer 3 Jefes', isUnlocked: isOwned(profile, 'accessory', 'leg_medallion') }
     ];
   }
 
@@ -319,7 +407,7 @@ export class DomiScreen {
   }
 
   /* =========================================================================
-     1. MISIONES: Barra gruesa cian/oro (3/5) y lista vertical ordenada
+     1. MISIONES: Barra gruesa cian/oro y lista vertical ordenada
      ========================================================================= */
   renderMissions(container, profile) {
     this.previewCanvas = null;
@@ -327,7 +415,6 @@ export class DomiScreen {
     const claimedCount = missions.filter(m => m.isClaimed).length;
     const pct = Math.round((claimedCount / missions.length) * 100);
 
-    // Barra de progreso gruesa superior (3/5)
     const header = document.createElement('div');
     header.className = 'domi-missions-header';
     header.innerHTML = `
@@ -341,7 +428,6 @@ export class DomiScreen {
     `;
     container.append(header);
 
-    // Lista vertical ordenada de tarjetas rectangulares
     const list = document.createElement('div');
     list.className = 'domi-missions-list';
 
@@ -349,12 +435,10 @@ export class DomiScreen {
       const card = document.createElement('div');
       card.className = `domi-mission-card ${m.isClaimed ? 'is-claimed' : m.isDone ? 'is-done' : 'is-progress'}`;
 
-      // Ícono/casilla en pixel art a la izquierda
       const iconBox = document.createElement('div');
       iconBox.className = 'domi-mission-icon-box';
       iconBox.innerHTML = this.getMissionIcon(m.iconType);
 
-      // Centro: Título y mini barra de progreso
       const center = document.createElement('div');
       center.className = 'domi-mission-center';
       const mPct = Math.min(100, Math.round((m.current / m.target) * 100));
@@ -369,7 +453,6 @@ export class DomiScreen {
         </div>
       `;
 
-      // Derecha: Badge dorado de recompensa con tooltip pixel art + Botón Reclamar
       const right = document.createElement('div');
       right.className = 'domi-mission-right';
 
@@ -401,6 +484,7 @@ export class DomiScreen {
           btn.disabled = true;
           m.claim();
           this.game.audio.play('levelUp');
+          this.game.menu?.prepareAccount?.();
           this.game.showToast?.(`¡RECOMPENSA OBTENIDA: ${m.rewardName}!`);
           const fb = document.querySelector('#domiFeedback');
           if (fb) fb.textContent = `¡Excelente trabajo! Desbloqueaste: ${m.rewardName}.`;
@@ -442,7 +526,6 @@ export class DomiScreen {
   renderAdvice(container) {
     this.previewCanvas = null;
 
-    // Barra de filtros arcade
     const filtersBar = document.createElement('div');
     filtersBar.className = 'domi-advice-filters';
     filtersBar.innerHTML = `
@@ -460,7 +543,6 @@ export class DomiScreen {
     });
     container.append(filtersBar);
 
-    // Contenido: Tarjetas estilo "ticket de receta" con acento cian
     const list = document.createElement('div');
     list.className = 'domi-tickets-list';
 
@@ -470,14 +552,12 @@ export class DomiScreen {
       const ticket = document.createElement('div');
       ticket.className = 'domi-recipe-ticket';
 
-      // Ilustración pixel art
       const artBox = document.createElement('div');
       artBox.className = 'domi-ticket-art';
       artBox.innerHTML = adv.category === 'movement'
         ? `<svg viewBox="0 0 24 24" width="32" height="32" shape-rendering="crispEdges"><rect x="3" y="11" width="5" height="2" fill="#38bdf8"/><polygon points="14,2 7,13 13,13 10,22 20,10 14,10" fill="#22d3ee"/><polygon points="14,4 9,12 13,12 11,19 18,11 14,11" fill="#ffe066"/></svg>`
         : `<svg viewBox="0 0 24 24" width="32" height="32" shape-rendering="crispEdges"><rect x="10" y="2" width="4" height="2" fill="#fbbf24"/><rect x="8" y="4" width="8" height="4" fill="#f59e0b"/><rect x="4" y="8" width="16" height="5" fill="#ef4444"/><rect x="7" y="13" width="10" height="4" fill="#fbbf24"/><rect x="10" y="17" width="4" height="5" fill="#e2e8f0"/></svg>`;
 
-      // Cuerpo del ticket con texto instructivo claro sin redundancias
       const body = document.createElement('div');
       body.className = 'domi-ticket-body';
       body.innerHTML = `
@@ -497,7 +577,7 @@ export class DomiScreen {
   }
 
   /* =========================================================================
-     3. COLECCIÓN: Grilla 4x3 de 12 ranuras oscuras + Pedestal de exhibición
+     3. COLECCIÓN: Grilla 4x3 de ranuras oscuras + Pedestal de exhibición
      ========================================================================= */
   renderCollectibles(container, profile) {
     const slots = this.getCollectionSlots(profile);
@@ -509,7 +589,6 @@ export class DomiScreen {
     const layout = document.createElement('div');
     layout.className = 'domi-collection-layout';
 
-    // Grilla 4x3
     const grid = document.createElement('div');
     grid.className = 'domi-grid-4x3';
 
@@ -551,7 +630,6 @@ export class DomiScreen {
       grid.append(slotBtn);
     }
 
-    // Panel de pedestal de exhibición derecho
     const panel = document.createElement('aside');
     panel.className = 'domi-pedestal-panel';
 
@@ -594,10 +672,11 @@ export class DomiScreen {
     if (current.isUnlocked) {
       if (current.type === 'accessory') {
         const isEquipped = profile.loadout?.accessory === current.id;
-        actionBtn.textContent = isEquipped ? 'EQUIPADO ✓' : 'EQUIPAR ACCESORIO';
+        actionBtn.textContent = isEquipped ? '✓ EN USO' : 'EQUIPAR ACCESORIO';
         actionBtn.disabled = isEquipped;
         actionBtn.onclick = () => {
-          this.account.equip('accessory', current.id);
+          equip('accessory', current.id);
+          this.game.menu?.prepareAccount?.();
           this.game.audio.play('purchase');
           this.render();
         };
@@ -623,7 +702,8 @@ export class DomiScreen {
 
   drawSlotIcon(canvas, slot, profile) {
     const c = canvas.getContext('2d');
-    c.clearRect(0, 0, canvas.width, canvas.height);
+    const w = canvas.width, h = canvas.height;
+    c.clearRect(0, 0, w, h);
     c.imageSmoothingEnabled = false;
 
     if (!slot.isUnlocked) {
@@ -631,7 +711,17 @@ export class DomiScreen {
       c.filter = 'brightness(0.22) contrast(1.2)';
     }
 
-    drawItemPreview(canvas, { type: slot.type, id: slot.id, name: slot.name }, profile, 0);
+    if (slot.type === 'accessory') {
+      // Fondo oscuro de casilla con resplandor sutil
+      const bg = c.createRadialGradient(w / 2, h / 2, 4, w / 2, h / 2, w * 0.55);
+      bg.addColorStop(0, slot.category === 'LEGENDARIO' ? '#2c1f0e' : '#132830');
+      bg.addColorStop(1, '#081115');
+      c.fillStyle = bg;
+      c.fillRect(0, 0, w, h);
+      drawAccessoryIcon(c, slot.id, w / 2, h / 2, 48);
+    } else {
+      drawItemPreview(canvas, { type: slot.type, id: slot.id, name: slot.name }, profile, 0);
+    }
 
     if (!slot.isUnlocked) {
       c.restore();
@@ -643,52 +733,13 @@ export class DomiScreen {
     const w = canvas.width, h = canvas.height;
     c.clearRect(0, 0, w, h);
 
-    // Fondo sci-fi oscuro de exhibición
-    c.fillStyle = '#0a1216';
-    c.fillRect(0, 0, w, h);
-
-    // Cuadrícula sutil
-    c.fillStyle = 'rgba(56, 189, 248, 0.05)';
-    for (let x = 0; x < w; x += 16) c.fillRect(x, 0, 1, h);
-    for (let y = 0; y < h; y += 16) c.fillRect(0, y, w, 1);
-
-    // Pedestal cilíndrico de 16 bits
-    const px = w / 2, py = h * 0.76;
-    c.fillStyle = '#060d11';
-    c.beginPath();
-    c.ellipse(px, py + 8, 70, 18, 0, 0, Math.PI * 2);
-    c.fill();
-
-    // Superficie del pedestal con brillo cian
-    c.fillStyle = '#163138';
-    c.beginPath();
-    c.ellipse(px, py, 64, 16, 0, 0, Math.PI * 2);
-    c.fill();
-    c.strokeStyle = '#22d3ee';
-    c.lineWidth = 2;
-    c.stroke();
-
-    // Haz de luz cenital suave
-    const light = c.createLinearGradient(px, 10, px, py);
-    light.addColorStop(0, 'rgba(34, 211, 238, 0.15)');
-    light.addColorStop(1, 'rgba(34, 211, 238, 0)');
-    c.fillStyle = light;
-    c.beginPath();
-    c.moveTo(px - 30, 0);
-    c.lineTo(px + 30, 0);
-    c.lineTo(px + 64, py);
-    c.lineTo(px - 64, py);
-    c.closePath();
-    c.fill();
-
-    // Si es desbloqueado o bloqueado
     c.save();
     if (!item.isUnlocked) {
       c.filter = 'brightness(0.3) saturate(0.2)';
     }
 
     if (item.id === 'domi') {
-      this.drawDomiCharacter(c, px, py - 32, 2.2, time);
+      this.drawDomiCharacter(c, w / 2, h * 0.65, 2.2, time);
     } else {
       drawItemPreview(canvas, { type: item.type, id: item.id, name: item.name }, profile, time);
     }
@@ -700,13 +751,11 @@ export class DomiScreen {
     c.translate(cx, cy + Math.sin(time * 3) * 3);
     c.scale(scale, scale);
 
-    // Sombra
     c.fillStyle = 'rgba(0,0,0,0.3)';
     c.beginPath();
     c.ellipse(0, 10, 18, 5, 0, 0, Math.PI * 2);
     c.fill();
 
-    // Empanada dorada (Don Domi)
     c.fillStyle = '#f59e0b';
     c.beginPath();
     c.arc(0, 4, 18, Math.PI, 0, false);
@@ -716,7 +765,6 @@ export class DomiScreen {
     c.lineWidth = 2;
     c.stroke();
 
-    // Repulgue artesanal
     c.fillStyle = '#fde68a';
     for (let a = Math.PI; a <= 0.05; a += Math.PI / 6.5) {
       const rx = Math.cos(a) * 18;
@@ -724,12 +772,10 @@ export class DomiScreen {
       c.fillRect(rx - 1.5, ry - 1.5, 3, 3);
     }
 
-    // Mejillas sonrojadas
     c.fillStyle = '#f43f5e';
     c.fillRect(-11, 4, 4, 2);
     c.fillRect(7, 4, 4, 2);
 
-    // Ojos animados
     const blink = Math.sin(time * 1.5) > 0.96;
     c.fillStyle = '#0a0f14';
     if (blink) {
@@ -743,12 +789,10 @@ export class DomiScreen {
       c.fillRect(5, 0, 1, 1);
     }
 
-    // Bigote y sonrisa
     c.fillStyle = '#78350f';
     c.fillRect(-5, 6, 10, 2);
     c.fillRect(-2, 8, 4, 2);
 
-    // Gorro de chef blanco alto
     c.fillStyle = '#ffffff';
     c.fillRect(-13, -18, 26, 7);
     c.fillRect(-17, -27, 34, 10);
@@ -761,7 +805,6 @@ export class DomiScreen {
     c.fillRect(0, -25, 2, 8);
     c.fillRect(7, -24, 2, 7);
 
-    // Vapor aromático
     const steamY = -36 - ((time * 20) % 18);
     const steamAlpha = Math.max(0, 1 - ((time * 20) % 18) / 18);
     c.fillStyle = `rgba(255, 255, 255, ${steamAlpha * 0.7})`;

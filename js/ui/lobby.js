@@ -118,9 +118,10 @@ export class Lobby {
     const drawPlayer=()=>{
       c.fillStyle='rgba(0,0,0,0.4)';c.beginPath();c.ellipse(this.x,this.y+26,26,8,0,0,7);c.fill();
       c.strokeStyle='#ffe39a';c.lineWidth=2;c.beginPath();c.ellipse(this.x,this.y+24,25,8,0,0,7);c.stroke();
-      drawFood(c,this.profile?.loadout.skin||'pancho',this.x,this.y,.9,this.moving?t:0);
       const bob = this.moving ? Math.round(Math.sin(t * 7 + this.x * .05) * 1.5) : 0;
-      drawAccessory(c,this.profile?.loadout.accessory,this.x,this.y + bob, 0.9);
+      drawAccessory(c,this.profile?.loadout.accessory,this.x,this.y + bob, 0.9, 'back');
+      drawFood(c,this.profile?.loadout.skin||'pancho',this.x,this.y,.9,this.moving?t:0);
+      drawAccessory(c,this.profile?.loadout.accessory,this.x,this.y + bob, 0.9, 'front');
       if(this.profile?.loadout.pet&&this.profile.loadout.pet!=='none')drawPet(c,this.profile.loadout.pet,this.x-37,this.y+20,t);
     };
     if(this.destination){

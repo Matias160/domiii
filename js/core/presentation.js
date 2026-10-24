@@ -1,9 +1,9 @@
 import {drawFood, drawDiner} from './art.js';
 import {Companion} from '../entities/Companion.js';
 import {drawWorldProps} from './worldProps.js';
-import {drawAccessory, drawAccessoryIcon} from './accessories.js';
+import {drawAccessory, drawAccessoryIcon, resolveAccessory} from './accessories.js';
 
-export { drawAccessory, drawAccessoryIcon };
+export { drawAccessory, drawAccessoryIcon, resolveAccessory };
 
 export function drawPet(ctx,id,x,y,time=0,scale=1){
   ctx.save();ctx.translate(x,y);ctx.scale(scale,scale);
@@ -40,8 +40,13 @@ export function drawItemPreview(canvas,item,profile,time=0){
     if(item.id==='none'){c.fillStyle='#9aafa1';c.font='bold 14px monospace';c.textAlign='center';c.fillText('SIN MASCOTA',w/2,h*.5);}
     else drawPet(c,item.id,w/2,h*.5,time,scale*1.6);
   }else{
-    drawFood(c,item.type==='skin'?item.id:profile?.loadout.skin||'pancho',w/2,h*.48,scale,time);
-    drawAccessory(c,item.type==='accessory'?item.id:profile?.loadout.accessory,w/2,h*.48,scale/.85);
+    const skinId = item.type==='skin'?item.id:profile?.loadout.skin||'pancho';
+    const accId = item.type==='accessory'?item.id:profile?.loadout.accessory;
+    const py = h * 0.54;
+    const bob = Math.round(Math.sin(time * 5) * 1.5);
+    drawAccessory(c, accId, w/2, py + bob, scale, 'back');
+    drawFood(c, skinId, w/2, py, scale, time);
+    drawAccessory(c, accId, w/2, py + bob, scale, 'front');
   }
 }
 

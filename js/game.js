@@ -12,7 +12,7 @@ import { getBestScore, getRanking, saveRun } from "./systems/rankingSystem.js";
 import { Hud, formatTime } from "./ui/hud.js";
 import { MenuScreen } from "./ui/menuScreen.js";
 import { GameOverScreen } from "./ui/gameOverScreen.js";
-import { updateItems } from "./systems/itemSystem.js";
+import { updateItems, drawPickupAnimations } from "./systems/itemSystem.js";
 import { AudioSystem } from "./systems/audioSystem.js";
 import { recordRun, unlockedAchievements } from "./systems/achievementSystem.js";
 import { updateEffects } from './systems/effectSystem.js';
@@ -663,6 +663,7 @@ export class Game {
     drawMapObstacles(this.ctx,state);
     drawCombatFeedback(this.ctx,state,this.reducedMotion);
     state.items.forEach(item => item.draw(this.ctx, state.time));
+    drawPickupAnimations(this.ctx, state);
     if (state.player.auraLevel) {
       this.ctx.strokeStyle='#86e3bf44';this.ctx.lineWidth=2;this.ctx.beginPath();this.ctx.arc(state.player.x,state.player.y,105,0,Math.PI*2);this.ctx.stroke();
     }
@@ -777,12 +778,12 @@ export class Game {
     ctx.fillRect(mapX + camXRatio * mapW, mapY + camYRatio * mapH, camWRatio * mapW, camHRatio * mapH);
     ctx.strokeRect(mapX + camXRatio * mapW, mapY + camYRatio * mapH, camWRatio * mapW, camHRatio * mapH);
 
-    // 3. Items coleccionables / botines (puntos celestes / dorados)
+    // 3. Items coleccionables / botines (puntos coloreados por rareza)
     for (let i = 0; i < state.items.length; i++) {
       const it = state.items[i];
       const ix = mapX + (it.x / worldW) * mapW;
       const iy = mapY + (it.y / worldH) * mapH;
-      ctx.fillStyle = '#38bdf8';
+      ctx.fillStyle = it.rarity?.color || '#38bdf8';
       ctx.fillRect(Math.round(ix) - 1, Math.round(iy) - 1, 3, 3);
     }
 

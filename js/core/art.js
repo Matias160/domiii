@@ -198,28 +198,79 @@ function dinerFloor(map = 'diner') {
     }
     floors.set(map,canvas);return canvas;
   }
-  rect(c, '#171f24', 0, 0, 1920, 1080);
+  rect(c, parking ? '#121822' : '#171f24', 0, 0, 1920, 1080);
   for (let y = 0; y < 1080; y += 32) for (let x = 0; x < 1920; x += 32) {
     const alternate = ((x + y) / 32) % 2;
-    rect(c, parking ? (alternate ? '#343c40' : '#363e42') : kitchen ? (alternate ? '#465550' : '#3e4c49') : (alternate ? '#4a5550' : '#394441'), x + 1, y + 1, 31, 31);
-    rect(c, '#ffffff04', x + 3, y + 3, 27, 1);
+    rect(c, parking ? (alternate ? '#1c2432' : '#1f2837') : kitchen ? (alternate ? '#465550' : '#3e4c49') : (alternate ? '#4a5550' : '#394441'), x + 1, y + 1, 31, 31);
+    rect(c, parking ? '#38bdf808' : '#ffffff04', x + 3, y + 3, 27, 1);
     if ((x * 3 + y) % 224 === 0) rect(c, '#0a18181a', x + 9, y + 20, 8, 2);
   }
   if (parking) {
-    for (let x = 120; x < 1860; x += 140) { rect(c, '#b4b59b', x, 130, 3, 160); rect(c, '#b4b59b', x, 750, 3, 220); }
-    for (let x = 120; x < 1860; x += 70) rect(c, '#c5ad5e', x, 520, 35, 4);
+    // Líneas de cajones de estacionamiento con brillo neón cian y magenta
+    for (let x = 120; x < 1860; x += 140) {
+      // Halo neón de las líneas
+      rect(c, '#00f0ff22', x - 3, 126, 10, 168);
+      rect(c, '#00f0ff', x, 130, 4, 160);
+      rect(c, '#ff007f22', x - 3, 746, 10, 228);
+      rect(c, '#ff007f', x, 750, 4, 220);
+      // Topes de rueda reflectivos
+      rect(c, '#0f172a', x + 28, 125, 84, 10);
+      rect(c, '#ffe066', x + 34, 127, 24, 4);
+      rect(c, '#ffe066', x + 82, 127, 24, 4);
+      rect(c, '#0f172a', x + 28, 965, 84, 10);
+      rect(c, '#00f0ff', x + 34, 967, 24, 4);
+      rect(c, '#00f0ff', x + 82, 967, 24, 4);
+    }
+    // Carril central con pintura reflectiva dorada neón
+    for (let x = 120; x < 1860; x += 70) {
+      rect(c, '#ffbe0b24', x - 3, 517, 41, 10);
+      rect(c, '#ffbe0b', x, 520, 35, 4);
+    }
+    // Charcos de asfalto húmedo con reflejos de neón cian, magenta y púrpura
+    const puddles = [
+      { x: 340, y: 370, rx: 68, ry: 24, col: 'rgba(0, 240, 255, 0.18)' },
+      { x: 780, y: 640, rx: 82, ry: 28, col: 'rgba(255, 0, 127, 0.18)' },
+      { x: 1180, y: 390, rx: 74, ry: 25, col: 'rgba(168, 85, 247, 0.20)' },
+      { x: 1560, y: 670, rx: 64, ry: 22, col: 'rgba(0, 240, 255, 0.18)' },
+      { x: 520, y: 840, rx: 58, ry: 20, col: 'rgba(255, 190, 11, 0.16)' },
+      { x: 1380, y: 830, rx: 70, ry: 24, col: 'rgba(255, 0, 127, 0.17)' },
+    ];
+    for (const p of puddles) {
+      c.save();
+      c.fillStyle = '#090d14cc';
+      c.beginPath(); c.ellipse(p.x, p.y, p.rx + 6, p.ry + 3, 0, 0, Math.PI * 2); c.fill();
+      c.fillStyle = p.col;
+      c.beginPath(); c.ellipse(p.x, p.y, p.rx, p.ry, 0, 0, Math.PI * 2); c.fill();
+      c.strokeStyle = '#ffffff22'; c.lineWidth = 1.5;
+      c.beginPath(); c.ellipse(p.x, p.y, p.rx * 0.7, p.ry * 0.6, 0, 0, Math.PI); c.stroke();
+      c.restore();
+    }
   }
-  rect(c, '#172327', 0, 0, 1920, 80); rect(c, '#253637', 0, 76, 1920, 14); rect(c, '#7b9282', 0, 77, 1920, 3);
+  rect(c, parking ? '#0d131d' : '#172327', 0, 0, 1920, 80);
+  rect(c, parking ? '#162032' : '#253637', 0, 76, 1920, 14);
+  rect(c, parking ? '#00f0ff' : '#7b9282', 0, 77, 1920, 3);
+  if (parking) rect(c, '#ff007f', 0, 86, 1920, 2);
+
   for (let x = 8; x < 1920; x += 80) {
-    block(c, '#415953', x, 7, 72, 60, 3); rect(c, '#6e8576', x + 4, 10, 64, 5);
-    rect(c, '#15242a', x + 9, 27, 52, 24); rect(c, '#73958c', x + 16, 30, 35, 2);
-    if ((x - 8) % 160 === 0) { rect(c, '#eecc70', x + 14, 36, 23, 3); rect(c, '#839e8c', x + 14, 43, 38, 2); }
-    else for (let i = 0; i < 3; i++) { rect(c, '#92b1a4', x + 13 + i * 15, 30, 7, 16); rect(c, '#536f69', x + 14 + i * 15, 34, 5, 8); }
+    block(c, parking ? '#1e293b' : '#415953', x, 7, 72, 60, 3);
+    rect(c, parking ? '#38bdf8' : '#6e8576', x + 4, 10, 64, 5);
+    rect(c, '#0f172a', x + 9, 27, 52, 24);
+    rect(c, parking ? '#ff007f' : '#73958c', x + 16, 30, 35, 2);
+    if ((x - 8) % 160 === 0) {
+      rect(c, parking ? '#00f0ff' : '#eecc70', x + 14, 36, 23, 3);
+      rect(c, parking ? '#a855f7' : '#839e8c', x + 14, 43, 38, 2);
+    } else {
+      for (let i = 0; i < 3; i++) {
+        rect(c, parking ? '#38bdf8' : '#92b1a4', x + 13 + i * 15, 30, 7, 16);
+        rect(c, parking ? '#1e1b4b' : '#536f69', x + 14 + i * 15, 34, 5, 8);
+      }
+    }
   }
-  rect(c, '#1e2c2c', 48, 98, 1824, 4); rect(c, '#819e7d40', 48, 102, 1824, 1);
-  for (let x = 50; x < 1870; x += 22) rect(c, '#d7b76a', x, 1050, 12, 3);
-  c.save(); c.globalAlpha = .1; c.fillStyle = '#dbe6c5'; c.font = '900 68px monospace'; c.textAlign = 'center';
-  c.fillText(parking ? 'DELIVERY HUB' : kitchen ? 'COCINA INDUSTRIAL 02' : 'DOMI 24/7 ARCADE', 960, 560);
+  rect(c, '#1e2c2c', 48, 98, 1824, 4); rect(c, parking ? '#00f0ff55' : '#819e7d40', 48, 102, 1824, 1);
+  for (let x = 50; x < 1870; x += 22) rect(c, parking ? ((x / 22) % 2 === 0 ? '#00f0ff' : '#ff007f') : '#d7b76a', x, 1050, 12, 3);
+  c.save(); c.globalAlpha = parking ? .16 : .1; c.fillStyle = parking ? '#00f0ff' : '#dbe6c5'; c.font = '900 68px monospace'; c.textAlign = 'center';
+  if (parking) { c.shadowColor = '#ff007f'; c.shadowBlur = 18; }
+  c.fillText(parking ? 'NEON DELIVERY HUB' : kitchen ? 'COCINA INDUSTRIAL 02' : 'DOMI 24/7 ARCADE', 960, 560);
   c.restore();
   floors.set(map, canvas); return canvas;
 }
@@ -329,7 +380,6 @@ export function drawDiner(c, width, height, time, menu, map = 'diner') {
       for (let i = 0; i < 6; i++) {
         const cx = [160, 520, 880, 1240, 1600, 1820][i], cy = 45;
         const pulse = 0.12 + Math.sin(time * 3.2 + i * 1.3) * 0.05;
-        // Haz de luz cónico hacia la cancha
         const cone = c.createRadialGradient(cx, cy, 10, cx, cy + 180, 320);
         cone.addColorStop(0, `rgba(255, 252, 220, ${pulse * 1.5})`);
         cone.addColorStop(0.5, `rgba(180, 245, 220, ${pulse * 0.6})`);
@@ -355,11 +405,9 @@ export function drawDiner(c, width, height, time, menu, map = 'diner') {
     } else if (map === 'kitchen') {
       c.save();
       // EFECTO "SE CORTÓ LA LUZ" / BLACKOUT ATMOSFÉRICO:
-      // Capa de penumbra en toda la cocina industrial
       c.fillStyle = 'rgba(5, 12, 16, 0.78)';
       c.fillRect(0, 0, width, height);
 
-      // Linternas de emergencia / luces de gas verde tenue parpadeante
       for (let i = 0; i < 4; i++) {
         const lx = [280, 800, 1320, 1720][i];
         const ly = 130;
@@ -372,7 +420,6 @@ export function drawDiner(c, width, height, time, menu, map = 'diner') {
         c.fillRect(lx - 240, ly - 50, 480, 380);
       }
 
-      // Chispas y brasas al rojo vivo que brillan en la oscuridad
       for (let i = 0; i < 28; i++) {
         const sx = ((i * 179 + time * (18 + (i % 3) * 12)) % width);
         const sy = height - 90 - ((i * 61 + time * (40 + (i % 3) * 18)) % 240);
@@ -383,15 +430,116 @@ export function drawDiner(c, width, height, time, menu, map = 'diner') {
       c.restore();
     } else if (map === 'parking') {
       c.save();
-      // Luces de farolas de estacionamiento / neón de delivery
-      for (let i = 0; i < 5; i++) {
-        const lx = 200 + i * 380, ly = 90;
-        const lamp = c.createRadialGradient(lx, ly, 0, lx, ly + 140, 260);
-        lamp.addColorStop(0, 'rgba(255, 230, 150, 0.16)');
-        lamp.addColorStop(0.6, 'rgba(255, 200, 100, 0.05)');
-        lamp.addColorStop(1, 'transparent');
-        c.fillStyle = lamp;
-        c.fillRect(lx - 260, ly, 520, 360);
+      // 1. Atmósfera nocturna cyberpunk / synthwave con viñeta azul profunda
+      const nightVignette = c.createRadialGradient(width / 2, height / 2, height * 0.3, width / 2, height / 2, Math.max(width, height) * 0.75);
+      nightVignette.addColorStop(0, 'rgba(6, 12, 24, 0.05)');
+      nightVignette.addColorStop(0.65, 'rgba(8, 12, 28, 0.26)');
+      nightVignette.addColorStop(1, 'rgba(3, 6, 16, 0.58)');
+      c.fillStyle = nightVignette;
+      c.fillRect(0, 0, width, height);
+
+      // 2. Farolas de neón superiores (Cian, Magenta, Violeta, Ámbar, Azul Eléctrico) con conos volumétricos y reflejos en el asfalto
+      const neonLamps = [
+        { x: 200, color: '0, 240, 255', hex: '#00f0ff' },
+        { x: 580, color: '255, 0, 127', hex: '#ff007f' },
+        { x: 960, color: '168, 85, 247', hex: '#a855f7' },
+        { x: 1340, color: '0, 240, 255', hex: '#00f0ff' },
+        { x: 1720, color: '255, 190, 11', hex: '#ffbe0b' }
+      ];
+      for (let i = 0; i < neonLamps.length; i++) {
+        const nl = neonLamps[i];
+        const pulse = 0.18 + Math.sin(time * 3.4 + i * 1.5) * 0.04 + (Math.sin(time * 19 + i * 7) > 0.94 ? -0.05 : 0);
+
+        // Cono de luz neón desde el muro superior
+        const cone = c.createLinearGradient(nl.x, 78, nl.x, 380);
+        cone.addColorStop(0, `rgba(${nl.color}, ${pulse * 1.7})`);
+        cone.addColorStop(0.5, `rgba(${nl.color}, ${pulse * 0.65})`);
+        cone.addColorStop(1, 'transparent');
+        c.fillStyle = cone;
+        c.beginPath();
+        c.moveTo(nl.x - 28, 78);
+        c.lineTo(nl.x + 28, 78);
+        c.lineTo(nl.x + 195, 380);
+        c.lineTo(nl.x - 195, 380);
+        c.closePath();
+        c.fill();
+
+        // Piscina de neón reflejada sobre el pavimento húmedo
+        const pool = c.createRadialGradient(nl.x, 250, 12, nl.x, 250, 220);
+        pool.addColorStop(0, `rgba(${nl.color}, ${pulse * 1.4})`);
+        pool.addColorStop(0.55, `rgba(${nl.color}, ${pulse * 0.45})`);
+        pool.addColorStop(1, 'transparent');
+        c.fillStyle = pool;
+        c.beginPath();
+        c.ellipse(nl.x, 250, 210, 85, 0, 0, Math.PI * 2);
+        c.fill();
+
+        // Tubo de neón brillante en la cornisa
+        c.fillStyle = nl.hex;
+        c.fillRect(nl.x - 26, 74, 52, 4);
+      }
+
+      // 3. Reflejos pulsantes de neón en la parte inferior del estacionamiento y charcos
+      const bottomPools = [
+        { x: 340, y: 820, color: '255, 0, 127' },
+        { x: 960, y: 850, color: '0, 240, 255' },
+        { x: 1560, y: 820, color: '168, 85, 247' }
+      ];
+      for (let i = 0; i < bottomPools.length; i++) {
+        const bp = bottomPools[i];
+        const bPulse = 0.14 + Math.cos(time * 2.8 + i * 2.1) * 0.04;
+        const bGrad = c.createRadialGradient(bp.x, bp.y, 10, bp.x, bp.y, 240);
+        bGrad.addColorStop(0, `rgba(${bp.color}, ${bPulse * 1.5})`);
+        bGrad.addColorStop(0.6, `rgba(${bp.color}, ${bPulse * 0.4})`);
+        bGrad.addColorStop(1, 'transparent');
+        c.fillStyle = bGrad;
+        c.beginPath();
+        c.ellipse(bp.x, bp.y, 230, 95, 0, 0, Math.PI * 2);
+        c.fill();
+      }
+
+      // 4. Haces de faros de motos/autos delivery que cruzan suavemente el carril central
+      const sweepX = ((time * 160) % (width + 600)) - 300;
+      const beamGrad = c.createLinearGradient(sweepX, 520, sweepX + 320, 520);
+      beamGrad.addColorStop(0, 'transparent');
+      beamGrad.addColorStop(0.5, 'rgba(56, 189, 248, 0.10)');
+      beamGrad.addColorStop(0.85, 'rgba(255, 240, 180, 0.16)');
+      beamGrad.addColorStop(1, 'transparent');
+      c.fillStyle = beamGrad;
+      c.fillRect(0, 430, width, 180);
+
+      // 5. Abundantes partículas de neón flotantes, chispas eléctricas y llovizna synthwave
+      const neonPalette = ['#00f0ff', '#ff007f', '#ffe066', '#a855f7', '#38ef7d', '#ffffff'];
+      for (let i = 0; i < 95; i++) {
+        const speedX = 18 + (i % 5) * 9;
+        const speedY = -22 - (i % 4) * 11;
+        const px = ((i * 157 + time * speedX + Math.sin(time * 2 + i) * 14) % width);
+        const py = 95 + ((i * 97 - time * speedY) % (height - 120));
+        const col = neonPalette[i % neonPalette.length];
+        const size = (i % 6 === 0) ? 4 : (i % 3 === 0) ? 3 : 2;
+        const alpha = 0.45 + Math.sin(time * 4.2 + i * 1.3) * 0.35;
+
+        c.fillStyle = col;
+        c.globalAlpha = Math.max(0.12, alpha);
+        c.fillRect(Math.round(px), Math.round(py), size, size);
+
+        // Halo de brillo alrededor de las partículas más grandes
+        if (i % 6 === 0) {
+          c.globalAlpha = Math.max(0.05, alpha * 0.32);
+          c.fillRect(Math.round(px) - 2, Math.round(py) - 2, size + 4, size + 4);
+        }
+      }
+
+      // 6. Trazos de llovizna neón reflejando la luz urbana
+      c.lineWidth = 1.5;
+      for (let i = 0; i < 24; i++) {
+        const rx = ((i * 193 + time * 45) % width);
+        const ry = 90 + ((i * 109 + time * 210) % (height - 130));
+        c.strokeStyle = (i % 2 === 0) ? 'rgba(0, 240, 255, 0.28)' : 'rgba(255, 0, 127, 0.25)';
+        c.beginPath();
+        c.moveTo(rx, ry);
+        c.lineTo(rx - 4, ry + 16);
+        c.stroke();
       }
       c.restore();
     } else {
@@ -431,7 +579,6 @@ export function drawDiner(c, width, height, time, menu, map = 'diner') {
         const { x: lx, y: ly, floorY, r } = lampPositions[i];
         const lampFlicker = 0.12 + Math.sin(time * 2.2 + i * 1.7) * 0.025;
 
-        // Cono volumétrico de luz que desciende
         c.save();
         const coneGrad = c.createLinearGradient(lx, ly, lx, floorY + 40);
         coneGrad.addColorStop(0, `rgba(255, 238, 180, ${lampFlicker * 1.5})`);
@@ -447,7 +594,6 @@ export function drawDiner(c, width, height, time, menu, map = 'diner') {
         c.fill();
         c.restore();
 
-        // Piscina de luz cálida en el suelo (reflejo especular en las baldosas)
         const poolGrad = c.createRadialGradient(lx, floorY, 10, lx, floorY, r);
         poolGrad.addColorStop(0, `rgba(255, 230, 160, ${lampFlicker * 1.6})`);
         poolGrad.addColorStop(0.4, `rgba(255, 195, 110, ${lampFlicker * 0.8})`);
