@@ -57,65 +57,94 @@ function heatHaze(c, x, y, time) {
 }
 
 /** Decorative depth layer for expanded maps. */
-export function drawWorldProps(ctx, map = 'diner', time = 0, world = { width: 1920, height: 1080 }) {
+export function drawWorldProps(ctx, map = 'diner', time = 0, world = { width: 1920, height: 1080 }, cam = null) {
   ctx.save(); ctx.imageSmoothingEnabled = false; ctx.globalAlpha = .94; const shimmer = Math.sin(time * 1.6) * .5 + .5;
   const w = world.width, h = world.height;
+  const isVisible = (x, y, radius = 90) => {
+    if (!cam) return true;
+    return x >= cam.x - radius && x <= cam.x + 960 + radius && y >= cam.y - radius && y <= cam.y + 540 + radius;
+  };
 
   if (map === 'snow') {
-    bench(ctx, 160, 160, '#6f9ca1'); bench(ctx, w - 160, 160, '#6f9ca1');
-    bench(ctx, 160, h - 160, '#6f9ca1'); bench(ctx, w - 160, h - 160, '#6f9ca1');
-    snowPile(ctx, 180, 240); snowPile(ctx, w - 180, 240);
-    snowPile(ctx, w / 2 - 200, 160); snowPile(ctx, w / 2 + 200, 160);
+    if (isVisible(160, 160)) bench(ctx, 160, 160, '#6f9ca1');
+    if (isVisible(w - 160, 160)) bench(ctx, w - 160, 160, '#6f9ca1');
+    if (isVisible(160, h - 160)) bench(ctx, 160, h - 160, '#6f9ca1');
+    if (isVisible(w - 160, h - 160)) bench(ctx, w - 160, h - 160, '#6f9ca1');
+    if (isVisible(180, 240)) snowPile(ctx, 180, 240);
+    if (isVisible(w - 180, 240)) snowPile(ctx, w - 180, 240);
+    if (isVisible(w / 2 - 200, 160)) snowPile(ctx, w / 2 - 200, 160);
+    if (isVisible(w / 2 + 200, 160)) snowPile(ctx, w / 2 + 200, 160);
     ctx.globalAlpha = .55 + shimmer * .15;
     rect(ctx, '#e8ffff', 80, 108, 90, 3); rect(ctx, '#e8ffff', w - 170, 108, 90, 3);
   } else if (map === 'desert') {
-    canopy(ctx, 180, 160); canopy(ctx, w - 180, 160);
-    canopy(ctx, 180, h - 180); canopy(ctx, w - 180, h - 180);
-    rect(ctx, '#9a623b', 110, 210, 90, 36); rect(ctx, '#d39a4e', 116, 215, 78, 26);
-    rect(ctx, '#9a623b', w - 200, 210, 90, 36); rect(ctx, '#d39a4e', w - 194, 215, 78, 26);
-    heatHaze(ctx, 220, 280, time); heatHaze(ctx, w - 220, 280, time + .8);
+    if (isVisible(180, 160)) canopy(ctx, 180, 160);
+    if (isVisible(w - 180, 160)) canopy(ctx, w - 180, 160);
+    if (isVisible(180, h - 180)) canopy(ctx, 180, h - 180);
+    if (isVisible(w - 180, h - 180)) canopy(ctx, w - 180, h - 180);
+    if (isVisible(150, 220)) { rect(ctx, '#9a623b', 110, 210, 90, 36); rect(ctx, '#d39a4e', 116, 215, 78, 26); }
+    if (isVisible(w - 150, 220)) { rect(ctx, '#9a623b', w - 200, 210, 90, 36); rect(ctx, '#d39a4e', w - 194, 215, 78, 26); }
+    if (isVisible(220, 280)) heatHaze(ctx, 220, 280, time);
+    if (isVisible(w - 220, 280)) heatHaze(ctx, w - 220, 280, time + .8);
   } else if (map === 'football') {
-    scoreboard(ctx, w / 2 - 250, 140); scoreboard(ctx, w / 2 + 250, 140);
-    bench(ctx, 280, 160, '#386c59'); bench(ctx, w - 280, 160, '#386c59');
-    billboard(ctx, 350, h - 90, 'DOMI COLA'); billboard(ctx, w - 350, h - 90, 'PANCHO PRO', '#4df8dc');
-    floodLight(ctx, 120, 90, time); floodLight(ctx, w - 120, 90, time + .6);
-    floodLight(ctx, w / 2, 90, time + .3);
+    if (isVisible(w / 2 - 250, 140)) scoreboard(ctx, w / 2 - 250, 140);
+    if (isVisible(w / 2 + 250, 140)) scoreboard(ctx, w / 2 + 250, 140);
+    if (isVisible(280, 160)) bench(ctx, 280, 160, '#386c59');
+    if (isVisible(w - 280, 160)) bench(ctx, w - 280, 160, '#386c59');
+    if (isVisible(350, h - 90)) billboard(ctx, 350, h - 90, 'DOMI COLA');
+    if (isVisible(w - 350, h - 90)) billboard(ctx, w - 350, h - 90, 'PANCHO PRO', '#4df8dc');
+    if (isVisible(120, 90)) floodLight(ctx, 120, 90, time);
+    if (isVisible(w - 120, 90)) floodLight(ctx, w - 120, 90, time + .6);
+    if (isVisible(w / 2, 90)) floodLight(ctx, w / 2, 90, time + .3);
   } else if (map === 'kitchen') {
-    showcase(ctx, 200, 170, '#72958e'); showcase(ctx, w - 200, 170, '#72958e');
-    machine(ctx, 220, 280, '#72958e'); machine(ctx, w - 220, 280, '#72958e');
-    machine(ctx, 220, h - 220, '#72958e'); machine(ctx, w - 220, h - 220, '#72958e');
-    steam(ctx, 200, 140, time, '#d9fff5'); steam(ctx, w - 200, 140, time + .6, '#d9fff5');
+    if (isVisible(200, 170)) showcase(ctx, 200, 170, '#72958e');
+    if (isVisible(w - 200, 170)) showcase(ctx, w - 200, 170, '#72958e');
+    if (isVisible(220, 280)) machine(ctx, 220, 280, '#72958e');
+    if (isVisible(w - 220, 280)) machine(ctx, w - 220, 280, '#72958e');
+    if (isVisible(220, h - 220)) machine(ctx, 220, h - 220, '#72958e');
+    if (isVisible(w - 220, h - 220)) machine(ctx, w - 220, h - 220, '#72958e');
+    if (isVisible(200, 140)) steam(ctx, 200, 140, time, '#d9fff5');
+    if (isVisible(w - 200, 140)) steam(ctx, w - 200, 140, time + .6, '#d9fff5');
   } else if (map === 'parking') {
-    machine(ctx, 200, 170, '#1e293b'); machine(ctx, w - 200, 170, '#1e293b');
-    machine(ctx, 200, h - 200, '#1e293b'); machine(ctx, w - 200, h - 200, '#1e293b');
-    billboard(ctx, 420, 145, 'NEON DRIVE', '#00f0ff');
-    billboard(ctx, w - 420, 145, 'CYBER DELIVERY', '#ff007f');
-    billboard(ctx, 420, h - 105, 'TURBO PANCHO', '#ffbe0b');
-    billboard(ctx, w - 420, h - 105, '24H VIP LOT', '#a855f7');
-    floodLight(ctx, 120, 95, time);
-    floodLight(ctx, w - 120, 95, time + 0.7);
-    steam(ctx, 340, 360, time, '#00f0ff');
-    steam(ctx, w - 340, 660, time + 1.1, '#ff007f');
+    if (isVisible(200, 170)) machine(ctx, 200, 170, '#1e293b');
+    if (isVisible(w - 200, 170)) machine(ctx, w - 200, 170, '#1e293b');
+    if (isVisible(200, h - 200)) machine(ctx, 200, h - 200, '#1e293b');
+    if (isVisible(w - 200, h - 200)) machine(ctx, w - 200, h - 200, '#1e293b');
+    if (isVisible(420, 145)) billboard(ctx, 420, 145, 'NEON DRIVE', '#00f0ff');
+    if (isVisible(w - 420, 145)) billboard(ctx, w - 420, 145, 'CYBER DELIVERY', '#ff007f');
+    if (isVisible(420, h - 105)) billboard(ctx, 420, h - 105, 'TURBO PANCHO', '#ffbe0b');
+    if (isVisible(w - 420, h - 105)) billboard(ctx, w - 420, h - 105, '24H VIP LOT', '#a855f7');
+    if (isVisible(120, 95)) floodLight(ctx, 120, 95, time);
+    if (isVisible(w - 120, 95)) floodLight(ctx, w - 120, 95, time + 0.7);
+    if (isVisible(340, 360)) steam(ctx, 340, 360, time, '#00f0ff');
+    if (isVisible(w - 340, 660)) steam(ctx, w - 340, 660, time + 1.1, '#ff007f');
   } else {
-    // Diner clásico: mobiliario con sombras de contacto profundas y reflejos cálidos
+    // Diner clásico: mobiliario con sombras de contacto profundas
     ctx.save();
     ctx.fillStyle = 'rgba(5, 10, 14, 0.42)';
     for (const [tx, ty] of [[220, 170], [w - 220, 170], [220, h - 180], [w - 220, h - 180]]) {
-      ctx.beginPath();
-      ctx.ellipse(tx, ty + 26, 62, 14, 0, 0, Math.PI * 2);
-      ctx.fill();
+      if (isVisible(tx, ty)) {
+        ctx.beginPath();
+        ctx.ellipse(tx, ty + 26, 62, 14, 0, 0, Math.PI * 2);
+        ctx.fill();
+      }
     }
     for (const [sx, sy] of [[450, 150], [w - 450, 150]]) {
-      ctx.beginPath();
-      ctx.ellipse(sx, sy + 38, 72, 16, 0, 0, Math.PI * 2);
-      ctx.fill();
+      if (isVisible(sx, sy)) {
+        ctx.beginPath();
+        ctx.ellipse(sx, sy + 38, 72, 16, 0, 0, Math.PI * 2);
+        ctx.fill();
+      }
     }
     ctx.restore();
 
-    table(ctx, 220, 170); table(ctx, w - 220, 170);
-    table(ctx, 220, h - 180); table(ctx, w - 220, h - 180);
-    showcase(ctx, 450, 150); showcase(ctx, w - 450, 150);
-    steam(ctx, 240, 150, time); steam(ctx, w - 240, 150, time + .8);
+    if (isVisible(220, 170)) table(ctx, 220, 170);
+    if (isVisible(w - 220, 170)) table(ctx, w - 220, 170);
+    if (isVisible(220, h - 180)) table(ctx, 220, h - 180);
+    if (isVisible(w - 220, h - 180)) table(ctx, w - 220, h - 180);
+    if (isVisible(450, 150)) showcase(ctx, 450, 150);
+    if (isVisible(w - 450, 150)) showcase(ctx, w - 450, 150);
+    if (isVisible(240, 150)) steam(ctx, 240, 150, time);
+    if (isVisible(w - 240, 150)) steam(ctx, w - 240, 150, time + .8);
 
     ctx.save();
     for (const sx of [450, w - 450]) {

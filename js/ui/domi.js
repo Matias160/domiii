@@ -39,11 +39,11 @@ export const adviceList = [
     description: 'Se desbloquean por nivel de partida: Q al Nivel 5 (ráfaga radial), E al Nivel 10 (clon señuelo) y R al Nivel 15 (escudo de inmunidad).'
   },
   {
-    id: 'adv_godmode',
+    id: 'adv_primes',
     category: 'combat',
-    title: 'Aura Modo Dios',
+    title: 'Habilidades Primarias',
     badge: 'COMBATE',
-    description: 'Al alcanzar el Nivel 3, tu personaje desata el aura dorada celestial: fulmina a clientes comunes y quema gradualmente a los jefes.'
+    description: 'Q desata una ráfaga radial en el Nivel 5, E invoca un clon señuelo en el Nivel 10 y R genera un escudo de invulnerabilidad temporal en el Nivel 15.'
   },
   {
     id: 'adv_evo',

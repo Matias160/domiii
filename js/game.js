@@ -365,7 +365,7 @@ export class Game {
       this.state.pendingLevels += 1;
     }
     this.state.score = (this.state.score || 0) + 50;
-    // Pequeño buff pasivo por nivel regular para recompensar el progreso
+    // Recompensa pasiva normal al subir de nivel
     this.state.player.hp = Math.min(this.state.player.maxHp, this.state.player.hp + 12);
     if (!isAbilityLevel) {
       this.state.floaters?.push({
@@ -376,17 +376,6 @@ export class Game {
         color: '#86e3bf',
         scale: 1.1
       });
-    }
-    // Modo Dios al Nivel 3: Aura dorada omnipotente
-    if (this.state.player.level === 3) {
-      this.state.player.godMode = true;
-      this.state.player.invulnerable = Math.max(this.state.player.invulnerable, 999);
-      this.state.player.buffs.damageMultiplier = Math.max(this.state.player.buffs.damageMultiplier, 10);
-      this.state.directorNotice = '¡MODO DIOS ACTIVADO! / ANIQUILACIÓN TOTAL';
-      this.state.shake = Math.max(this.state.shake || 0, 0.45);
-      this.state.rings.push({ x: this.state.player.x, y: this.state.player.y, radius: 180, life: 1.5, maxLife: 1.5, color: '#ffd700' });
-      burst(this.state, this.state.player.x, this.state.player.y, '#ffd700', 50, 300);
-      this.audio?.play('level');
     }
 
     const evolution=evolveWeapon(this.state.player);
@@ -637,7 +626,7 @@ export class Game {
     const worldW = state.world?.width || 1920;
     const worldH = state.world?.height || 1080;
     drawDiner(this.ctx, worldW, worldH, time, false, state.mapId);
-    drawWorldProps(this.ctx, state.mapId || 'diner', time);
+    drawWorldProps(this.ctx, state.mapId || 'diner', time, state.world, cam);
 
     for (const hazard of state.hazards) {
       this.ctx.save();
@@ -662,19 +651,31 @@ export class Game {
     }
     drawMapObstacles(this.ctx,state);
     drawCombatFeedback(this.ctx,state,this.reducedMotion);
-    state.items.forEach(item => item.draw(this.ctx, state.time));
+    for (let i = 0; i < state.items.length; i++) {
+      const it = state.items[i];
+      if (it.x >= cam.x - 40 && it.x <= cam.x + 1000 && it.y >= cam.y - 40 && it.y <= cam.y + 580) {
+        it.draw(this.ctx, state.time);
+      }
+    }
     drawPickupAnimations(this.ctx, state);
     if (state.player.auraLevel) {
       this.ctx.strokeStyle='#86e3bf44';this.ctx.lineWidth=2;this.ctx.beginPath();this.ctx.arc(state.player.x,state.player.y,105,0,Math.PI*2);this.ctx.stroke();
     }
     for (const ring of state.rings) {
+      if (ring.x < cam.x - 160 || ring.x > cam.x + 1120 || ring.y < cam.y - 160 || ring.y > cam.y + 700) continue;
       const remaining=Math.max(0,Math.min(1,ring.life/(ring.maxLife||ring.life||1)));
       this.ctx.save();this.ctx.globalAlpha=remaining;this.ctx.strokeStyle=ring.color;this.ctx.lineWidth=1+3*remaining;
       this.ctx.beginPath();this.ctx.arc(ring.x,ring.y,ring.radius*(.25+.75*(1-remaining)),0,Math.PI*2);this.ctx.stroke();this.ctx.restore();
     }
     this.ctx.save();this.ctx.globalCompositeOperation='lighter';
-    state.projectiles.forEach((projectile) => projectile.draw(this.ctx));
+    for (let i = 0; i < state.projectiles.length; i++) {
+      const proj = state.projectiles[i];
+      if (proj.x >= cam.x - 50 && proj.x <= cam.x + 1010 && proj.y >= cam.y - 50 && proj.y <= cam.y + 590) {
+        proj.draw(this.ctx);
+      }
+    }
     for (const shot of state.enemyProjectiles) {
+      if (shot.x < cam.x - 60 || shot.x > cam.x + 1020 || shot.y < cam.y - 60 || shot.y > cam.y + 600) continue;
       const speed=Math.hypot(shot.vx,shot.vy)||1;
       for(let i=0;i<(shot.trail?.length||0);i++){const point=shot.trail[i],ratio=(i+1)/shot.trail.length,s=Math.max(1,shot.radius*ratio*.8);this.ctx.globalAlpha=ratio*.35;this.ctx.fillStyle=shot.color||'#ff6573';this.ctx.fillRect(point.x-s/2,point.y-s/2,s,s);}
       this.ctx.globalAlpha=1;
@@ -686,12 +687,19 @@ export class Game {
     }
     this.ctx.restore();
 
-    // Reusable sort buffer without allocation
+    // Reusable sort buffer with camera frustum culling (zero allocation)
     this.renderSortBuffer.length = 0;
     const enemyLen = state.enemies.length;
-    for (let i = 0; i < enemyLen; i++) this.renderSortBuffer.push(state.enemies[i]);
+    for (let i = 0; i < enemyLen; i++) {
+      const e = state.enemies[i];
+      if (e.x >= cam.x - 70 && e.x <= cam.x + 1030 && e.y >= cam.y - 70 && e.y <= cam.y + 610) {
+        this.renderSortBuffer.push(e);
+      }
+    }
     this.renderSortBuffer.push(state.player);
-    if (state.companion) this.renderSortBuffer.push(state.companion);
+    if (state.companion && state.companion.x >= cam.x - 70 && state.companion.x <= cam.x + 1030 && state.companion.y >= cam.y - 70 && state.companion.y <= cam.y + 610) {
+      this.renderSortBuffer.push(state.companion);
+    }
     this.renderSortBuffer.sort((a,b)=>a.y-b.y);
     const actorLen = this.renderSortBuffer.length;
     for (let i = 0; i < actorLen; i++) {
@@ -700,6 +708,7 @@ export class Game {
     drawPrimeEffects(this.ctx,state);
     this.ctx.save();this.ctx.globalCompositeOperation='lighter';
     for (const p of state.particles) {
+      if (p.x < cam.x - 30 || p.x > cam.x + 990 || p.y < cam.y - 30 || p.y > cam.y + 570) continue;
       const ratio=Math.max(0,Math.min(1,p.life/(p.maxLife||.6))),palette=p.palette||[p.color],index=Math.min(palette.length-1,Math.floor((1-ratio)*palette.length));
       this.ctx.globalAlpha = ratio;
       this.ctx.fillStyle = palette[index]||p.color;
@@ -710,7 +719,9 @@ export class Game {
     this.ctx.globalAlpha = 1;
     this.ctx.textAlign='center';
     for (const text of state.floaters) {
-      drawFloatingText(this.ctx,text,this.reducedMotion);
+      if (text.x >= cam.x - 80 && text.x <= cam.x + 1040 && text.y >= cam.y - 80 && text.y <= cam.y + 620) {
+        drawFloatingText(this.ctx,text,this.reducedMotion);
+      }
     }
     this.ctx.restore(); // Salimos del espacio de mundo (cámara)
 

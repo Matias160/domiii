@@ -284,23 +284,23 @@ export function drawDiner(c, width, height, time, menu, map = 'diner') {
     if (map === 'snow') {
       c.save();
       // Aurora Boreal dinámica ondulante en el cielo/muro
-      for (let a = 0; a < 3; a++) {
+      for (let a = 0; a < 2; a++) {
         const aGrad = c.createLinearGradient(0, 0, width, 0);
         const shift = time * 0.3 + a * 0.5;
-        const alpha = 0.12 + Math.sin(time * 1.5 + a) * 0.05;
+        const alpha = 0.10 + Math.sin(time * 1.5 + a) * 0.04;
         aGrad.addColorStop(0, 'transparent');
         aGrad.addColorStop(Math.max(0.1, Math.min(0.9, 0.35 + Math.sin(shift) * 0.2)), `rgba(56, 189, 248, ${alpha})`);
-        aGrad.addColorStop(Math.max(0.1, Math.min(0.9, 0.65 + Math.cos(shift * 1.2) * 0.2)), `rgba(14, 165, 233, ${alpha * 1.2})`);
+        aGrad.addColorStop(Math.max(0.1, Math.min(0.9, 0.65 + Math.cos(shift * 1.2) * 0.2)), `rgba(14, 165, 233, ${alpha * 1.1})`);
         aGrad.addColorStop(1, 'transparent');
         c.fillStyle = aGrad;
-        c.fillRect(0, 5 + a * 26, width, 85);
+        c.fillRect(0, 5 + a * 32, width, 85);
       }
 
       // Conos de luz dinámica azulada desde los faroles del muro
       for (const lx of [160, 540, 960, 1380, 1760]) {
         if (lx < width + 100) {
           const lGrad = c.createRadialGradient(lx + 40, 78, 5, lx + 40, 150, 120);
-          const flicker = 0.16 + Math.sin(time * 3 + lx) * 0.04;
+          const flicker = 0.14 + Math.sin(time * 3 + lx) * 0.03;
           lGrad.addColorStop(0, `rgba(224, 242, 254, ${flicker})`);
           lGrad.addColorStop(0.5, `rgba(56, 189, 248, ${flicker * 0.5})`);
           lGrad.addColorStop(1, 'transparent');
@@ -315,130 +315,125 @@ export function drawDiner(c, width, height, time, menu, map = 'diner') {
         }
       }
 
-      // Ventisca de nieve en capas: partículas lentas pequeñas y copos rápidos grandes
-      for (let i = 0; i < 90; i++) {
+      // Ventisca de nieve optimizada en capas
+      for (let i = 0; i < 48; i++) {
         const speedX = 45 + (i % 5) * 18;
         const speedY = 32 + (i % 4) * 12;
         const x = ((i * 137 + time * speedX) % width);
         const y = ((i * 89 + time * speedY) % (height - 90)) + 90;
-        const size = (i % 4 === 0) ? 3 : (i % 2 === 0) ? 2 : 1.5;
+        const size = (i % 4 === 0) ? 3 : 2;
         c.fillStyle = (i % 3 === 0) ? '#ffffff' : '#bae6fd';
-        c.globalAlpha = 0.5 + Math.sin(time * 2.5 + i) * 0.35;
+        c.globalAlpha = 0.45 + Math.sin(time * 2.5 + i) * 0.25;
         c.fillRect(Math.round(x), Math.round(y), size, size);
       }
       // Ráfagas de viento helado
-      c.strokeStyle = '#bae6fdcc'; c.lineWidth = 1.5;
-      for (let i = 0; i < 14; i++) {
-        const y = 130 + (i * 73 + time * 30) % (height - 200);
-        const x = ((i * 181 + time * 95) % width);
-        c.globalAlpha = 0.25 + Math.sin(time * 1.8 + i) * 0.12;
+      c.strokeStyle = '#bae6fd99'; c.lineWidth = 1.5;
+      for (let i = 0; i < 6; i++) {
+        const y = 130 + (i * 113 + time * 30) % (height - 200);
+        const x = ((i * 241 + time * 95) % width);
+        c.globalAlpha = 0.22 + Math.sin(time * 1.8 + i) * 0.1;
         c.beginPath(); c.moveTo(x, y); c.lineTo(x + 75 + (i % 3) * 35, y); c.stroke();
       }
       // Brillos y destellos de escarcha azulada en el suelo
-      for (let i = 0; i < 16; i++) {
-        const gx = (i * 155 + 70) % width, gy = 150 + (i * 83) % (height - 220);
+      for (let i = 0; i < 8; i++) {
+        const gx = (i * 235 + 70) % width, gy = 150 + (i * 113) % (height - 220);
         const twinkle = Math.max(0, Math.sin(time * 4 + i * 1.7));
         if (twinkle > 0.4) {
           c.fillStyle = '#f0f9ff';
           c.globalAlpha = twinkle * 0.7;
           c.fillRect(Math.round(gx), Math.round(gy), 2, 2);
         }
-        const glow = c.createRadialGradient(gx, gy, 0, gx, gy, 110);
-        glow.addColorStop(0, 'rgba(56, 189, 248, 0.09)');
+        const glow = c.createRadialGradient(gx, gy, 0, gx, gy, 100);
+        glow.addColorStop(0, 'rgba(56, 189, 248, 0.08)');
         glow.addColorStop(1, 'transparent');
-        c.fillStyle = glow; c.fillRect(gx - 110, gy - 110, 220, 220);
+        c.fillStyle = glow; c.fillRect(gx - 100, gy - 100, 200, 200);
       }
       c.restore();
     } else if (map === 'desert') {
       c.save();
-      // Tormenta de polvo y arena dorada en capas
-      for (let i = 0; i < 80; i++) {
+      // Tormenta de arena optimizada
+      for (let i = 0; i < 40; i++) {
         const x = ((i * 163 + time * (65 + (i % 4) * 22)) % width);
         const y = 110 + ((i * 107 + time * (16 + (i % 3) * 9)) % (height - 140));
         c.fillStyle = (i % 2 === 0) ? '#f4c57c' : '#ffdca0';
-        c.globalAlpha = 0.35 + Math.sin(time * 1.8 + i) * 0.2;
+        c.globalAlpha = 0.3 + Math.sin(time * 1.8 + i) * 0.18;
         c.fillRect(Math.round(x), Math.round(y), 3 + (i % 3) * 2, 2);
       }
-      // Ondas de calor / espejismos en el suelo
+      // Ondas de calor
       c.strokeStyle = '#ffdd9933'; c.lineWidth = 2;
-      for (let i = 0; i < 8; i++) {
-        const y = 200 + i * 90;
-        const offset = Math.sin(time * 2.2 + i * 1.4) * 18;
+      for (let i = 0; i < 5; i++) {
+        const y = 200 + i * 140;
+        const offset = Math.sin(time * 2.2 + i * 1.4) * 16;
         c.beginPath(); c.moveTo(0, y + offset);
         c.bezierCurveTo(width * 0.33, y - offset, width * 0.66, y + offset, width, y - offset);
         c.stroke();
       }
-      // Resplandor cálido de atardecer desértico
-      const sunGrad = c.createRadialGradient(width / 2, 80, 0, width / 2, 80, 480);
-      sunGrad.addColorStop(0, 'rgba(255, 185, 80, 0.12)');
-      sunGrad.addColorStop(1, 'transparent');
-      c.fillStyle = sunGrad; c.fillRect(0, 0, width, 400);
       c.restore();
     } else if (map === 'football') {
       c.save();
-      // Focos de estadio con conos de luz volumétrica reales
+      // Focos de estadio
       for (let i = 0; i < 6; i++) {
         const cx = [160, 520, 880, 1240, 1600, 1820][i], cy = 45;
-        const pulse = 0.12 + Math.sin(time * 3.2 + i * 1.3) * 0.05;
+        const pulse = 0.12 + Math.sin(time * 3.2 + i * 1.3) * 0.04;
         const cone = c.createRadialGradient(cx, cy, 10, cx, cy + 180, 320);
-        cone.addColorStop(0, `rgba(255, 252, 220, ${pulse * 1.5})`);
-        cone.addColorStop(0.5, `rgba(180, 245, 220, ${pulse * 0.6})`);
+        cone.addColorStop(0, `rgba(255, 252, 220, ${pulse * 1.4})`);
+        cone.addColorStop(0.5, `rgba(180, 245, 220, ${pulse * 0.5})`);
         cone.addColorStop(1, 'transparent');
         c.fillStyle = cone;
         c.beginPath();
         c.moveTo(cx - 30, cy);
         c.lineTo(cx + 30, cy);
-        c.lineTo(cx + 240, cy + 500);
-        c.lineTo(cx - 240, cy + 500);
+        c.lineTo(cx + 220, cy + 500);
+        c.lineTo(cx - 220, cy + 500);
         c.closePath();
         c.fill();
       }
-      // Confeti de hinchada flotante
-      for (let i = 0; i < 40; i++) {
+      // Confeti optimizado
+      for (let i = 0; i < 22; i++) {
         const fx = ((i * 149 + time * 28) % width);
         const fy = 100 + ((i * 93 + time * 38) % (height - 180));
         c.fillStyle = ['#4ade80', '#38bdf8', '#ffbe3b', '#f43f5e', '#ffffff'][i % 5];
-        c.globalAlpha = 0.55 + Math.sin(time * 3 + i) * 0.3;
+        c.globalAlpha = 0.5 + Math.sin(time * 3 + i) * 0.25;
         c.fillRect(Math.round(fx), Math.round(fy), 3, 3);
       }
       c.restore();
     } else if (map === 'kitchen') {
       c.save();
       // EFECTO "SE CORTÓ LA LUZ" / BLACKOUT ATMOSFÉRICO:
-      c.fillStyle = 'rgba(5, 12, 16, 0.78)';
+      c.fillStyle = 'rgba(5, 12, 16, 0.75)';
       c.fillRect(0, 0, width, height);
 
       for (let i = 0; i < 4; i++) {
         const lx = [280, 800, 1320, 1720][i];
         const ly = 130;
-        const flicker = 0.12 + Math.sin(time * 8 + i * 2.3) * 0.05 + (Math.random() < 0.03 ? -0.06 : 0);
-        const lamp = c.createRadialGradient(lx, ly, 10, lx, ly + 90, 240);
-        lamp.addColorStop(0, `rgba(56, 189, 248, ${flicker * 1.8})`);
-        lamp.addColorStop(0.5, `rgba(16, 185, 129, ${flicker * 0.6})`);
+        const flicker = 0.12 + Math.sin(time * 8 + i * 2.3) * 0.04;
+        const lamp = c.createRadialGradient(lx, ly, 10, lx, ly + 90, 220);
+        lamp.addColorStop(0, `rgba(56, 189, 248, ${flicker * 1.6})`);
+        lamp.addColorStop(0.5, `rgba(16, 185, 129, ${flicker * 0.5})`);
         lamp.addColorStop(1, 'transparent');
         c.fillStyle = lamp;
-        c.fillRect(lx - 240, ly - 50, 480, 380);
+        c.fillRect(lx - 220, ly - 50, 440, 360);
       }
 
-      for (let i = 0; i < 28; i++) {
+      for (let i = 0; i < 18; i++) {
         const sx = ((i * 179 + time * (18 + (i % 3) * 12)) % width);
         const sy = height - 90 - ((i * 61 + time * (40 + (i % 3) * 18)) % 240);
         c.fillStyle = (i % 2 === 0) ? '#ff4500' : '#ffaa00';
-        c.globalAlpha = 0.85 + Math.sin(time * 7 + i) * 0.15;
+        c.globalAlpha = 0.8 + Math.sin(time * 7 + i) * 0.2;
         c.fillRect(Math.round(sx), Math.round(sy), 3, 3);
       }
       c.restore();
     } else if (map === 'parking') {
       c.save();
-      // 1. Atmósfera nocturna cyberpunk / synthwave con viñeta azul profunda
-      const nightVignette = c.createRadialGradient(width / 2, height / 2, height * 0.3, width / 2, height / 2, Math.max(width, height) * 0.75);
-      nightVignette.addColorStop(0, 'rgba(6, 12, 24, 0.05)');
-      nightVignette.addColorStop(0.65, 'rgba(8, 12, 28, 0.26)');
-      nightVignette.addColorStop(1, 'rgba(3, 6, 16, 0.58)');
+      // 1. Atmósfera nocturna synthwave
+      const nightVignette = c.createRadialGradient(width / 2, height / 2, height * 0.35, width / 2, height / 2, Math.max(width, height) * 0.72);
+      nightVignette.addColorStop(0, 'rgba(6, 12, 24, 0.04)');
+      nightVignette.addColorStop(0.65, 'rgba(8, 12, 28, 0.24)');
+      nightVignette.addColorStop(1, 'rgba(3, 6, 16, 0.52)');
       c.fillStyle = nightVignette;
       c.fillRect(0, 0, width, height);
 
-      // 2. Farolas de neón superiores (Cian, Magenta, Violeta, Ámbar, Azul Eléctrico) con conos volumétricos y reflejos en el asfalto
+      // 2. Farolas de neón superiores optimizadas
       const neonLamps = [
         { x: 200, color: '0, 240, 255', hex: '#00f0ff' },
         { x: 580, color: '255, 0, 127', hex: '#ff007f' },
@@ -448,30 +443,20 @@ export function drawDiner(c, width, height, time, menu, map = 'diner') {
       ];
       for (let i = 0; i < neonLamps.length; i++) {
         const nl = neonLamps[i];
-        const pulse = 0.18 + Math.sin(time * 3.4 + i * 1.5) * 0.04 + (Math.sin(time * 19 + i * 7) > 0.94 ? -0.05 : 0);
+        const pulse = 0.16 + Math.sin(time * 3.4 + i * 1.5) * 0.035;
 
         // Cono de luz neón desde el muro superior
         const cone = c.createLinearGradient(nl.x, 78, nl.x, 380);
-        cone.addColorStop(0, `rgba(${nl.color}, ${pulse * 1.7})`);
-        cone.addColorStop(0.5, `rgba(${nl.color}, ${pulse * 0.65})`);
+        cone.addColorStop(0, `rgba(${nl.color}, ${pulse * 1.5})`);
+        cone.addColorStop(0.5, `rgba(${nl.color}, ${pulse * 0.55})`);
         cone.addColorStop(1, 'transparent');
         c.fillStyle = cone;
         c.beginPath();
-        c.moveTo(nl.x - 28, 78);
-        c.lineTo(nl.x + 28, 78);
-        c.lineTo(nl.x + 195, 380);
-        c.lineTo(nl.x - 195, 380);
+        c.moveTo(nl.x - 26, 78);
+        c.lineTo(nl.x + 26, 78);
+        c.lineTo(nl.x + 185, 380);
+        c.lineTo(nl.x - 185, 380);
         c.closePath();
-        c.fill();
-
-        // Piscina de neón reflejada sobre el pavimento húmedo
-        const pool = c.createRadialGradient(nl.x, 250, 12, nl.x, 250, 220);
-        pool.addColorStop(0, `rgba(${nl.color}, ${pulse * 1.4})`);
-        pool.addColorStop(0.55, `rgba(${nl.color}, ${pulse * 0.45})`);
-        pool.addColorStop(1, 'transparent');
-        c.fillStyle = pool;
-        c.beginPath();
-        c.ellipse(nl.x, 250, 210, 85, 0, 0, Math.PI * 2);
         c.fill();
 
         // Tubo de neón brillante en la cornisa
@@ -479,125 +464,71 @@ export function drawDiner(c, width, height, time, menu, map = 'diner') {
         c.fillRect(nl.x - 26, 74, 52, 4);
       }
 
-      // 3. Reflejos pulsantes de neón en la parte inferior del estacionamiento y charcos
-      const bottomPools = [
-        { x: 340, y: 820, color: '255, 0, 127' },
-        { x: 960, y: 850, color: '0, 240, 255' },
-        { x: 1560, y: 820, color: '168, 85, 247' }
-      ];
-      for (let i = 0; i < bottomPools.length; i++) {
-        const bp = bottomPools[i];
-        const bPulse = 0.14 + Math.cos(time * 2.8 + i * 2.1) * 0.04;
-        const bGrad = c.createRadialGradient(bp.x, bp.y, 10, bp.x, bp.y, 240);
-        bGrad.addColorStop(0, `rgba(${bp.color}, ${bPulse * 1.5})`);
-        bGrad.addColorStop(0.6, `rgba(${bp.color}, ${bPulse * 0.4})`);
-        bGrad.addColorStop(1, 'transparent');
-        c.fillStyle = bGrad;
-        c.beginPath();
-        c.ellipse(bp.x, bp.y, 230, 95, 0, 0, Math.PI * 2);
-        c.fill();
-      }
-
-      // 4. Haces de faros de motos/autos delivery que cruzan suavemente el carril central
-      const sweepX = ((time * 160) % (width + 600)) - 300;
-      const beamGrad = c.createLinearGradient(sweepX, 520, sweepX + 320, 520);
-      beamGrad.addColorStop(0, 'transparent');
-      beamGrad.addColorStop(0.5, 'rgba(56, 189, 248, 0.10)');
-      beamGrad.addColorStop(0.85, 'rgba(255, 240, 180, 0.16)');
-      beamGrad.addColorStop(1, 'transparent');
-      c.fillStyle = beamGrad;
-      c.fillRect(0, 430, width, 180);
-
-      // 5. Abundantes partículas de neón flotantes, chispas eléctricas y llovizna synthwave
-      const neonPalette = ['#00f0ff', '#ff007f', '#ffe066', '#a855f7', '#38ef7d', '#ffffff'];
-      for (let i = 0; i < 95; i++) {
+      // 3. Partículas de neón optimizadas (38 partículas nítidas y livianas)
+      const neonPalette = ['#00f0ff', '#ff007f', '#ffe066', '#a855f7', '#38ef7d'];
+      for (let i = 0; i < 38; i++) {
         const speedX = 18 + (i % 5) * 9;
         const speedY = -22 - (i % 4) * 11;
         const px = ((i * 157 + time * speedX + Math.sin(time * 2 + i) * 14) % width);
         const py = 95 + ((i * 97 - time * speedY) % (height - 120));
         const col = neonPalette[i % neonPalette.length];
-        const size = (i % 6 === 0) ? 4 : (i % 3 === 0) ? 3 : 2;
-        const alpha = 0.45 + Math.sin(time * 4.2 + i * 1.3) * 0.35;
+        const size = (i % 5 === 0) ? 3 : 2;
+        const alpha = 0.4 + Math.sin(time * 4.2 + i * 1.3) * 0.3;
 
         c.fillStyle = col;
         c.globalAlpha = Math.max(0.12, alpha);
         c.fillRect(Math.round(px), Math.round(py), size, size);
-
-        // Halo de brillo alrededor de las partículas más grandes
-        if (i % 6 === 0) {
-          c.globalAlpha = Math.max(0.05, alpha * 0.32);
-          c.fillRect(Math.round(px) - 2, Math.round(py) - 2, size + 4, size + 4);
-        }
-      }
-
-      // 6. Trazos de llovizna neón reflejando la luz urbana
-      c.lineWidth = 1.5;
-      for (let i = 0; i < 24; i++) {
-        const rx = ((i * 193 + time * 45) % width);
-        const ry = 90 + ((i * 109 + time * 210) % (height - 130));
-        c.strokeStyle = (i % 2 === 0) ? 'rgba(0, 240, 255, 0.28)' : 'rgba(255, 0, 127, 0.25)';
-        c.beginPath();
-        c.moveTo(rx, ry);
-        c.lineTo(rx - 4, ry + 16);
-        c.stroke();
       }
       c.restore();
     } else {
-      // Diner clásico (Local DOMI): Iluminación retro inmersiva con luces volumétricas, viñeta y sombras
+      // Diner clásico (Local DOMI): Iluminación retro inmersiva optimizada
       c.save();
-
-      // 1. Oclusión ambiental perimetral / Viñeta en los bordes de la sala
       const vignette = c.createRadialGradient(width / 2, height / 2, height * 0.35, width / 2, height / 2, Math.max(width, height) * 0.72);
       vignette.addColorStop(0, 'rgba(0, 0, 0, 0)');
-      vignette.addColorStop(0.65, 'rgba(10, 16, 20, 0.28)');
-      vignette.addColorStop(1, 'rgba(4, 8, 12, 0.65)');
+      vignette.addColorStop(0.65, 'rgba(10, 16, 20, 0.24)');
+      vignette.addColorStop(1, 'rgba(4, 8, 12, 0.58)');
       c.fillStyle = vignette;
       c.fillRect(0, 0, width, height);
 
-      // 2. Resplandor del letrero de neón DOMI en la pared superior
-      const neonGlow = c.createRadialGradient(width / 2, 70, 10, width / 2, 70, 320);
-      const neonPulse = 0.18 + Math.sin(time * 3.5) * 0.04 + (Math.random() < 0.02 ? -0.06 : 0);
-      neonGlow.addColorStop(0, `rgba(255, 90, 80, ${neonPulse * 1.4})`);
-      neonGlow.addColorStop(0.4, `rgba(255, 170, 80, ${neonPulse * 0.6})`);
+      // Resplandor del letrero de neón DOMI
+      const neonGlow = c.createRadialGradient(width / 2, 70, 10, width / 2, 70, 300);
+      const neonPulse = 0.16 + Math.sin(time * 3.5) * 0.035;
+      neonGlow.addColorStop(0, `rgba(255, 90, 80, ${neonPulse * 1.3})`);
+      neonGlow.addColorStop(0.4, `rgba(255, 170, 80, ${neonPulse * 0.55})`);
       neonGlow.addColorStop(1, 'transparent');
       c.fillStyle = neonGlow;
-      c.fillRect(width / 2 - 320, 0, 640, 220);
+      c.fillRect(width / 2 - 300, 0, 600, 200);
 
-      // 3. Luces colgantes retro (conos volumétricos y pisadas de luz cálida sobre el suelo)
+      // 4 lámparas clave en lugar de 8 para máximo rendimiento
       const lampPositions = [
-        { x: 220, y: 78, floorY: 190, r: 190 },
-        { x: 500, y: 78, floorY: 180, r: 170 },
-        { x: 820, y: 78, floorY: 200, r: 210 },
-        { x: 1100, y: 78, floorY: 200, r: 210 },
-        { x: 1420, y: 78, floorY: 180, r: 170 },
-        { x: width - 220, y: 78, floorY: 190, r: 190 },
-        { x: 300, y: 78, floorY: height - 170, r: 220 },
-        { x: width - 300, y: 78, floorY: height - 170, r: 220 }
+        { x: 300, y: 78, floorY: 200, r: 210 },
+        { x: 800, y: 78, floorY: 200, r: 210 },
+        { x: 1120, y: 78, floorY: 200, r: 210 },
+        { x: 1620, y: 78, floorY: 200, r: 210 }
       ];
 
       for (let i = 0; i < lampPositions.length; i++) {
         const { x: lx, y: ly, floorY, r } = lampPositions[i];
-        const lampFlicker = 0.12 + Math.sin(time * 2.2 + i * 1.7) * 0.025;
+        const lampFlicker = 0.12 + Math.sin(time * 2.2 + i * 1.7) * 0.02;
 
         c.save();
         const coneGrad = c.createLinearGradient(lx, ly, lx, floorY + 40);
-        coneGrad.addColorStop(0, `rgba(255, 238, 180, ${lampFlicker * 1.5})`);
-        coneGrad.addColorStop(0.4, `rgba(255, 215, 130, ${lampFlicker * 0.7})`);
+        coneGrad.addColorStop(0, `rgba(255, 238, 180, ${lampFlicker * 1.4})`);
+        coneGrad.addColorStop(0.4, `rgba(255, 215, 130, ${lampFlicker * 0.65})`);
         coneGrad.addColorStop(1, 'rgba(255, 190, 90, 0)');
         c.fillStyle = coneGrad;
         c.beginPath();
-        c.moveTo(lx - 18, ly);
-        c.lineTo(lx + 18, ly);
-        c.lineTo(lx + r * 0.75, floorY + 30);
-        c.lineTo(lx - r * 0.75, floorY + 30);
+        c.moveTo(lx - 16, ly);
+        c.lineTo(lx + 16, ly);
+        c.lineTo(lx + r * 0.7, floorY + 25);
+        c.lineTo(lx - r * 0.7, floorY + 25);
         c.closePath();
         c.fill();
         c.restore();
 
         const poolGrad = c.createRadialGradient(lx, floorY, 10, lx, floorY, r);
-        poolGrad.addColorStop(0, `rgba(255, 230, 160, ${lampFlicker * 1.6})`);
-        poolGrad.addColorStop(0.4, `rgba(255, 195, 110, ${lampFlicker * 0.8})`);
-        poolGrad.addColorStop(0.8, `rgba(220, 150, 70, ${lampFlicker * 0.2})`);
+        poolGrad.addColorStop(0, `rgba(255, 230, 160, ${lampFlicker * 1.4})`);
+        poolGrad.addColorStop(0.4, `rgba(255, 195, 110, ${lampFlicker * 0.7})`);
         poolGrad.addColorStop(1, 'transparent');
         c.fillStyle = poolGrad;
         c.beginPath();
@@ -605,14 +536,14 @@ export function drawDiner(c, width, height, time, menu, map = 'diner') {
         c.fill();
       }
 
-      // 4. Rayos tenues y motas de polvo dorado en suspensión
-      for (let i = 0; i < 42; i++) {
+      // Motas de polvo dorado sutiles
+      for (let i = 0; i < 20; i++) {
         const dx = ((i * 139 + time * 12) % width);
         const dy = 90 + ((i * 83 + Math.sin(time * 1.4 + i) * 16) % (height - 160));
-        const alpha = 0.35 + Math.sin(time * 2.5 + i) * 0.25;
-        c.fillStyle = (i % 3 === 0) ? '#fff2b2' : '#ffd580';
+        const alpha = 0.3 + Math.sin(time * 2.5 + i) * 0.2;
+        c.fillStyle = (i % 2 === 0) ? '#fff2b2' : '#ffd580';
         c.globalAlpha = Math.max(0.1, alpha);
-        c.fillRect(Math.round(dx), Math.round(dy), (i % 5 === 0) ? 3 : 2, (i % 5 === 0) ? 3 : 2);
+        c.fillRect(Math.round(dx), Math.round(dy), 2, 2);
       }
       c.restore();
     }

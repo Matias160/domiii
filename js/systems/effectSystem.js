@@ -133,33 +133,37 @@ export function damageEnemy(state, enemy, damage, type = 'normal') {
   damage = beforeEvent.damage;
 
   damage /= (enemy.armor || 1);
-  const isCrit = type === 'crit' || damage > 60 || (state.running && Math.random() < 0.10);
-  const finalDamage = isCrit ? damage * 1.4 : damage;
+  const isCrit = type === 'crit' || damage > 85;
+  const finalDamage = isCrit ? damage * 1.35 : damage;
   enemy.hp -= finalDamage;
-  enemy.hitFlash = isCrit ? 0.22 : 0.12;
-  if (isCrit) state.shake = Math.max(state.shake || 0, 0.12);
+  enemy.hitFlash = isCrit ? 0.20 : 0.10;
+  if (isCrit) state.shake = Math.max(state.shake || 0, 0.08);
 
-  if (state.floaters && state.floaters.length < 90) {
+  // Filtrado de floaters: mostrar siempre críticos, curaciones y dash; para daño normal sólo 1 de cada 3 para evitar saturar el canvas
+  const shouldSpawnFloater = isCrit || type === 'heal' || type === 'dash' || (state.enemies.length < 25) || (Math.random() < 0.35);
+
+  if (state.floaters && state.floaters.length < 50 && shouldSpawnFloater) {
     const color = isCrit ? DAMAGE_COLORS.crit : (DAMAGE_COLORS[type] || DAMAGE_COLORS.normal);
     const floater = floaterPool.acquire();
-    floater.x = enemy.x + (Math.random() - 0.5) * 18;
-    floater.y = enemy.y - 22;
+    floater.x = enemy.x + (Math.random() - 0.5) * 14;
+    floater.y = enemy.y - 20;
     floater.text = isCrit ? `✦${Math.ceil(finalDamage)}` : String(Math.ceil(finalDamage));
-    floater.life = isCrit ? 0.95 : 0.65;
+    floater.life = isCrit ? 0.75 : 0.5;
     floater.maxLife = floater.life;
     floater.color = color;
-    floater.scale = isCrit ? 1.65 : 1;
+    floater.scale = isCrit ? 1.4 : 0.95;
     floater.kind = isCrit ? 'crit' : type;
     state.floaters.push(floater);
   }
 
+  // Partículas de impacto reducidas para mantener 60 FPS estables
   const particleColor = isCrit ? '#fff700' : (DAMAGE_COLORS[type] || '#ffd468');
-  burst(state, enemy.x, enemy.y, particleColor, isCrit ? 30 : 20, isCrit ? 170 : 115);
+  burst(state, enemy.x, enemy.y, particleColor, isCrit ? 10 : 4, isCrit ? 130 : 85);
   if (isCrit) {
     critBurst(state, enemy.x, enemy.y);
     impactRing(state, enemy.x, enemy.y, '#ffe500aa');
-  } else {
-    impactRing(state, enemy.x, enemy.y, particleColor + '88');
+  } else if (Math.random() < 0.25) {
+    impactRing(state, enemy.x, enemy.y, particleColor + '66');
   }
 
   // EventBus hook: onEnemyDamage

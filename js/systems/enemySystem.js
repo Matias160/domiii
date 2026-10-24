@@ -62,25 +62,6 @@ export function updateEnemies(state, delta, canvas) {
       }
       enemy.hp = 0;
     }
-    // Modo Dios: Aniquilación automática a esbirros, daño radiante gradual a Jefes
-    if (state.player.godMode && Math.hypot(enemy.x - state.player.x, enemy.y - state.player.y) < 130) {
-      if (enemy.isBoss) {
-        enemy.godTickTimer = (enemy.godTickTimer || 0) - delta;
-        if (enemy.godTickTimer <= 0) {
-          enemy.godTickTimer = 0.45;
-          const bossBurn = Math.round((28 + state.player.level * 4) * state.player.damageMultiplier);
-          damageEnemy(state, enemy, bossBurn, 'god');
-          burst(state, enemy.x, enemy.y, '#ffd700', 8, 120);
-          state.floaters?.push({ x: enemy.x, y: enemy.y - 36, text: `🔥 -${bossBurn}`, life: 0.65, color: '#ffd700', scale: 1.15, kind: 'crit' });
-        }
-      } else {
-        damageEnemy(state, enemy, 9999, 'god');
-        burst(state, enemy.x, enemy.y, '#ffd700', 16, 180);
-        impactRing(state, enemy.x, enemy.y, '#ffd700');
-        state.floaters?.push({ x: enemy.x, y: enemy.y - 30, text: '¡EXTERMINIO!', life: 0.85, color: '#ffd700', scale: 1.35, kind: 'crit' });
-      }
-    }
-
     if (enemy.hp > 0 && circlesOverlap(enemy, state.player)) {
       const player=state.player;
       if(player.dashTime>0&&enemy.lastDashSequence!==player.dashSequence){

@@ -17,25 +17,6 @@ export function drawCombatFeedback(ctx, state, reducedMotion = false) {
     for(let i=0;i<3;i++) { const x=-22-i*15;ctx.beginPath();ctx.moveTo(x-7,-12);ctx.lineTo(x,0);ctx.lineTo(x-7,12);ctx.stroke(); }
     ctx.restore();
   }
-    // Modo Dios: Aura dorada omnipotente animada
-    if (p.godMode) {
-      const pulse = state.time * 6;
-      ctx.save();
-      // Corona de rayos dorados
-      ctx.strokeStyle = '#ffd700'; ctx.lineWidth = 3;
-      ctx.shadowColor = '#ffd700'; ctx.shadowBlur = 18;
-      ctx.beginPath(); ctx.arc(p.x, p.y, 85 + Math.sin(pulse) * 8, 0, Math.PI * 2); ctx.stroke();
-      ctx.strokeStyle = '#fff59d'; ctx.lineWidth = 2;
-      ctx.beginPath(); ctx.arc(p.x, p.y, 65 + Math.cos(pulse * 1.5) * 6, 0, Math.PI * 2); ctx.stroke();
-      // Rayos orbitales
-      for (let i = 0; i < 6; i++) {
-        const a = pulse * 0.7 + i * Math.PI / 3;
-        const rx = p.x + Math.cos(a) * 88, ry = p.y + Math.sin(a) * 88;
-        ctx.fillStyle = '#ffffff'; ctx.fillRect(rx - 3, ry - 3, 6, 6);
-      }
-      ctx.restore();
-    }
-
   // Linterna minúscula / luz personal del personaje en cocina a oscuras
   if (state.mapId === 'kitchen') {
     ctx.save();
