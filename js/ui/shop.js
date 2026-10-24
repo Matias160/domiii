@@ -110,8 +110,12 @@ export class Shop{
     const action=node('div','detail-action'),missing=Math.max(0,item.cost-profile.bank);
     action.append(node('p','purchase-explainer',equipped?'Ya forma parte de tu combo actual.':owned?'Es tuyo. Equiparlo no cuesta puntos.':missing?`Te faltan ${missing.toLocaleString('es-AR')} PT. Ganá puntos jugando partidas.`:`Tu saldo después de comprar: ${(profile.bank-item.cost).toLocaleString('es-AR')} PT.`));
     if(!owned){const progress=node('progress','purchase-progress');progress.max=item.cost;progress.value=Math.min(profile.bank,item.cost);progress.setAttribute('aria-label','Puntos disponibles para comprar este artículo');action.append(progress);}
-    const button=node('button','pixel-button purchase-button');button.type='button';button.disabled=equipped||(!owned&&missing>0);
-    button.innerHTML=icon(equipped?'CircleCheck':owned?'Shirt':'ShoppingBag');button.append(node('span','',equipped?'EQUIPADO':owned?'EQUIPAR':missing?'PUNTOS INSUFICIENTES':`COMPRAR Y EQUIPAR · ${item.cost} PT`));
+    const button=node('button','pixel-button purchase-button arcade-action');button.type='button';button.disabled=equipped||(!owned&&missing>0);
+    button.innerHTML=icon(equipped?'CircleCheck':owned?'Shirt':'ShoppingBag');
+    const copy=node('span','purchase-copy');
+    copy.append(node('span','purchase-label',equipped?'EQUIPADO':owned?'EQUIPAR':missing?'FALTAN PUNTOS':'COMPRAR Y EQUIPAR'));
+    if(!owned) copy.append(node('small','purchase-price',`${item.cost.toLocaleString('es-AR')} PT`));
+    button.append(copy);
     button.onclick=()=>{
       button.disabled=true;
       try{const alreadyOwned=isOwned(this.account.currentAccount(),item.type,item.id);if(!alreadyOwned)this.account.purchase(item.type,item.id);

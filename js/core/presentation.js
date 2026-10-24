@@ -1,29 +1,9 @@
 import {drawFood, drawDiner} from './art.js';
 import {Companion} from '../entities/Companion.js';
 import {drawWorldProps} from './worldProps.js';
+import {drawAccessory, drawAccessoryIcon} from './accessories.js';
 
-export function drawAccessory(ctx, id, x, y, scale = 1) {
-  ctx.save();ctx.translate(x,y);ctx.scale(scale,scale);
-  if(id==='headband'){ctx.fillStyle='#ef6575';ctx.fillRect(-21,-27,42,5);ctx.fillRect(18,-24,10,4);}
-  if(id==='shades'){ctx.fillStyle='#122124';ctx.fillRect(-17,-8,34,8);ctx.fillStyle='#8fe4d6';ctx.fillRect(-13,-7,8,2);ctx.fillRect(4,-7,8,2);}
-  if(id==='crown'){
-    ctx.fillStyle='#ffd960';ctx.beginPath();ctx.moveTo(-17,-26);ctx.lineTo(-18,-42);ctx.lineTo(-8,-33);ctx.lineTo(0,-46);ctx.lineTo(8,-33);ctx.lineTo(18,-42);ctx.lineTo(17,-26);ctx.fill();
-    ctx.fillStyle='#ed6472';ctx.fillRect(-2,-32,4,4);
-  }
-  if(id==='chef_hat'){
-    // Base y pliegues del gorro de chef en pixel art
-    ctx.fillStyle='#e2e8f0';ctx.fillRect(-16,-28,32,6); // Banda base
-    ctx.fillStyle='#ef4444';ctx.fillRect(-16,-24,32,2); // Ribete rojo
-    // Copa inflada blanca
-    ctx.fillStyle='#ffffff';ctx.fillRect(-20,-48,40,20);
-    // Pliegues y sombras pixel
-    ctx.fillStyle='#cbd5e1';
-    ctx.fillRect(-12,-46,3,16);ctx.fillRect(-2,-46,4,16);ctx.fillRect(9,-46,3,16);
-    ctx.fillStyle='#0f172a';ctx.fillRect(-20,-48,2,20);ctx.fillRect(18,-48,2,20); // Bordes laterales
-    ctx.fillRect(-18,-50,36,2); // Borde superior
-  }
-  ctx.restore();
-}
+export { drawAccessory, drawAccessoryIcon };
 
 export function drawPet(ctx,id,x,y,time=0,scale=1){
   ctx.save();ctx.translate(x,y);ctx.scale(scale,scale);

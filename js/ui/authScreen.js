@@ -11,8 +11,6 @@ export function bindAuth(game) {
   const toggle = document.querySelector('#authPasswordToggle');
   const error = document.querySelector('#authError');
   const capsLock = document.querySelector('#authCapsLock');
-  const tabLogin = document.querySelector('#tabAuthLogin');
-  const tabRegister = document.querySelector('#tabAuthRegister');
   let mode = 'login';
   let busy = false;
 
@@ -24,22 +22,19 @@ export function bindAuth(game) {
     capsLock.hidden = true;
   }
 
-  function setMode(newMode) {
+  function setMode(newMode, clearError = true) {
     mode = newMode;
     const signingUp = mode === 'register';
-    tabLogin?.classList.toggle('is-active', !signingUp);
-    tabRegister?.classList.toggle('is-active', signingUp);
-    document.querySelector('#authTitle').textContent = signingUp ? 'Sumate al club.' : 'Entrar al local.';
-    submit.textContent = signingUp ? 'CREAR CUENTA' : 'INICIAR SESIÓN';
-    switchMode.textContent = signingUp ? 'Ya tengo cuenta (Iniciar sesión)' : 'Crear una cuenta nueva';
+    document.querySelector('#authTitle').textContent = signingUp ? 'Creá tu cuenta' : 'Entrá al club';
+    submit.textContent = signingUp ? 'CREAR CUENTA' : 'ENTRAR';
+    switchMode.textContent = signingUp ? 'Ya tengo cuenta' : 'Crear cuenta';
+    resetBtn.hidden = signingUp;
+    guestBtn.hidden = signingUp;
     password.autocomplete = signingUp ? 'new-password' : 'current-password';
     document.querySelector('#authNameHint').hidden = !signingUp;
     document.querySelector('#authPasswordHint').hidden = !signingUp;
-    error.hidden = true;
+    if (clearError) error.hidden = true;
   }
-
-  tabLogin?.addEventListener('click', () => { if (!busy) { setMode('login'); name.focus(); } });
-  tabRegister?.addEventListener('click', () => { if (!busy) { setMode('register'); name.focus(); } });
 
   switchMode.addEventListener('click', () => {
     if (busy) return;
@@ -110,7 +105,7 @@ export function bindAuth(game) {
     submit.disabled = switchMode.disabled = toggle.disabled = true;
     if (guestBtn) guestBtn.disabled = true;
     name.readOnly = password.readOnly = true;
-    submit.textContent = mode === 'login' ? 'ENTRANDO…' : 'CREANDO CUENTA…';
+    submit.textContent = mode === 'login' ? 'ENTRANDO...' : 'CREANDO CUENTA...';
     try {
       await (mode === 'login' ? login : register)(name.value, password.value);
       password.value = '';
@@ -127,7 +122,7 @@ export function bindAuth(game) {
       submit.disabled = switchMode.disabled = toggle.disabled = false;
       if (guestBtn) guestBtn.disabled = false;
       name.readOnly = password.readOnly = false;
-      setMode(mode);
+      setMode(mode, false);
     }
   });
 }

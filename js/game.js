@@ -9,7 +9,7 @@ import { updateProjectiles } from "./systems/projectileSystem.js";
 import { updatePlayer } from "./systems/playerSystem.js";
 import { addSurvivalScore, resolveDeaths } from "./systems/scoreSystem.js";
 import { getBestScore, getRanking, saveRun } from "./systems/rankingSystem.js";
-import { Hud } from "./ui/hud.js";
+import { Hud, formatTime } from "./ui/hud.js";
 import { MenuScreen } from "./ui/menuScreen.js";
 import { GameOverScreen } from "./ui/gameOverScreen.js";
 import { updateItems } from "./systems/itemSystem.js";
@@ -88,22 +88,6 @@ export class Game {
     });
     document.querySelector('#resumeButton').addEventListener('click', () => this.resume());
     document.querySelector('#abandonButton').addEventListener('click', () => this.endRun('abandoned'));
-    document.querySelector('#pauseTabActives')?.addEventListener('click', () => {
-      document.querySelector('#pauseTabActives').classList.add('is-active');
-      document.querySelector('#pauseTabPassives')?.classList.remove('is-active');
-      const av = document.querySelector('#pauseActivesView');
-      const pv = document.querySelector('#pausePassivesView');
-      if (av) av.hidden = false;
-      if (pv) pv.hidden = true;
-    });
-    document.querySelector('#pauseTabPassives')?.addEventListener('click', () => {
-      document.querySelector('#pauseTabPassives').classList.add('is-active');
-      document.querySelector('#pauseTabActives')?.classList.remove('is-active');
-      const av = document.querySelector('#pauseActivesView');
-      const pv = document.querySelector('#pausePassivesView');
-      if (av) av.hidden = true;
-      if (pv) pv.hidden = false;
-    });
     window.addEventListener('keydown', event => {
       if (event.target.closest?.('input, select, textarea')) return;
       if (event.key === 'Escape' && !event.repeat) { if (this.running) this.pause(); else if (this.screenId === 'pauseScreen') this.resume(); }
@@ -176,23 +160,62 @@ export class Game {
     const root = document.querySelector('#buildList');
     if (!root || !this.state) return;
     root.replaceChildren();
-    const p = this.state.player;
+    const state = this.state;
+    const p = state.player;
+    document.querySelector('#pauseScreen').dataset.danger = String(p.hp / p.maxHp < .25);
+    const values = {
+      pauseHp: Math.ceil(p.hp) + ' / ' + p.maxHp,
+      pauseLevel: String(p.level),
+      pauseTime: formatTime(state.time),
+      pauseKills: String(state.kills),
+      pauseScore: Math.floor(state.score).toLocaleString('es-AR'),
+      pauseLoadout: p.skin.name + ' / ' + (p.weaponEvolution?.name || p.weapon.name),
+    };
+    for (const [id, value] of Object.entries(values)) {
+      const node = document.getElementById(id);
+      if (node) node.textContent = value;
+    }
+    const addRecipe = (name, level, evolved = false) => {
+      const item = document.createElement('div');
+      item.className = 'pause-recipe-item' + (evolved ? ' is-evolved' : '');
+      const title = document.createElement('strong');
+      const rank = document.createElement('small');
+      title.textContent = name;
+      rank.textContent = level;
+      item.append(title, rank);
+      root.append(item);
+    };
     if (p.weaponEvolution) {
-      const evo = document.createElement('span');
-      evo.className = 'build-evo';
-      evo.textContent = '? ' + p.weaponEvolution.name;
-      root.append(evo);
+      addRecipe(p.weaponEvolution.name, 'EVOLUCIÓN', true);
     }
     for (const [id, count] of Object.entries(p.abilities || {})) {
-      const item = document.createElement('span');
       const ab = abilityCatalog.find(ability => ability.id === id);
-      item.textContent = (ab?.name || id) + ' / ' + count;
-      root.append(item);
+      addRecipe(ab?.name || id, 'NV ' + count);
     }
-    if (!root.children.length) {
-      const empty = document.createElement('span');
-      empty.textContent = 'Combo original (sin mejoras)';
-      root.append(empty);
+    if (!root.children.length) addRecipe('Combo original', 'SIN MEJORAS');
+    const powers = document.querySelector('#pausePowers');
+    if (powers) {
+      powers.replaceChildren();
+      const available = primes.map(prime => ({
+        key: prime.key.toUpperCase(),
+        name: prime.name,
+        locked: p.level < prime.level,
+        level: prime.level,
+        remaining: state.primeCooldowns[prime.key] || 0,
+      }));
+      available.push({key: 'ESPACIO', name: 'Acelerón', locked: false, remaining: p.dashCooldown || 0});
+      for (const power of available) {
+        const item = document.createElement('div');
+        item.className = 'pause-power ' + (power.locked ? 'is-locked' : power.remaining > 0 ? 'is-cooling' : 'is-ready');
+        const key = document.createElement('kbd');
+        const name = document.createElement('strong');
+        const status = document.createElement('span');
+        key.textContent = power.key;
+        name.textContent = power.name;
+        status.textContent = power.locked ? 'NV ' + power.level : power.remaining > 0 ? Math.ceil(power.remaining) + ' s' : 'LISTO';
+        item.append(key, name, status);
+        powers.append(item);
+      }
     }
     const goal = document.querySelector('#pauseGoal');
     if (goal && modes[this.state.modeId]) {

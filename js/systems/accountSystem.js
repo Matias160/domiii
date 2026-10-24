@@ -120,7 +120,7 @@ export async function register(name,password){
 export async function login(name,password){
   const data=all(),id=clean(name),profile=data[id];
   if(!profile){
-    throw Error(`La cuenta "${name}" no está registrada. Si es tu primera vez, hacé clic abajo en "Crear una cuenta nueva" o entrá como Invitado.`);
+    throw Error('Ese usuario no está registrado. Usá "Crear cuenta" o jugá como invitado.');
   }
   if(!profile.hash){
     throw Error('Datos de cuenta dañados. Creá una cuenta nueva o entrá como Invitado.');

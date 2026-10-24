@@ -19,27 +19,23 @@
       <canvas id="gameCanvas" width="960" height="540" aria-label="DOMI 2: PANCHO"></canvas>
 
       <section id="authScreen" class="screen screen--active auth-screen">
-        <div class="auth-brand"><span>DOMI <b>2</b></span><strong>PANCHO</strong><small>ARCADE CLUB / TU TURNO EMPIEZA ACÁ</small><p class="auth-intro">Sobreviví al turno. Armá tu combo.<br />Volvé por más.</p><span class="keyboard-note">Juego para teclado y mouse</span></div>
+        <div class="auth-brand"><span>DOMI <b>2</b></span><strong>PANCHO</strong><small>ARCADE CLUB / TU TURNO EMPIEZA ACÁ</small><p class="auth-intro">Sobreviví al turno. Armá tu combo.</p></div>
         <form id="authForm" class="auth-panel screen__panel">
           <p class="eyebrow">TARJETA DE SOCIO</p>
-          <div class="auth-tabs" style="display:flex;gap:8px;margin-bottom:14px;">
-            <button type="button" class="dialogue-tab is-active" id="tabAuthLogin" style="flex:1;">INICIAR SESIÓN</button>
-            <button type="button" class="dialogue-tab" id="tabAuthRegister" style="flex:1;">CREAR CUENTA</button>
-          </div>
-          <h2 id="authTitle" style="font-size:13px;margin-bottom:12px;">Entrar al local.</h2>
+          <h2 id="authTitle">Entrá al club</h2>
           <label class="field" for="authName">Usuario<input id="authName" name="username" autocomplete="username" autocapitalize="none" spellcheck="false" minlength="3" maxlength="16" aria-describedby="authNameHint" required /></label>
-          <p id="authNameHint" class="field-hint" hidden>De 3 a 16 caracteres: letras, números, espacios, guion o guion bajo.</p>
+          <p id="authNameHint" class="field-hint" hidden>De 3 a 16 caracteres. Letras, números o espacios.</p>
           <div class="field"><label for="authPassword">Contraseña</label><div class="password-field"><input id="authPassword" name="password" type="password" autocomplete="current-password" minlength="6" aria-describedby="authPasswordHint authCapsLock" required /><button id="authPasswordToggle" class="password-toggle" type="button" aria-controls="authPassword" aria-label="Mostrar contraseña" aria-pressed="false">Mostrar</button></div></div>
-          <p id="authPasswordHint" class="field-hint" hidden>Usá al menos 6 caracteres. Elegí una contraseña para este juego.</p>
+          <p id="authPasswordHint" class="field-hint" hidden>Mínimo 6 caracteres.</p>
           <p id="authCapsLock" class="field-hint caps-lock" role="status" hidden>Bloq Mayús está activado.</p>
           <p id="authError" class="form-error" role="alert" tabindex="-1" hidden></p>
-          <button class="pixel-button" type="submit" id="authSubmit">INICIAR SESIÓN</button>
-          <button class="pixel-button pixel-button--guest" type="button" id="authGuest" style="background:#2563eb;border-color:#60a5fa;color:#fff;margin-top:8px;">🎮 ENTRAR COMO INVITADO (JUGAR YA)</button>
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-top:10px;">
-            <button class="text-button" type="button" id="authSwitch">Crear una cuenta nueva</button>
-            <button class="text-button" type="button" id="authReset" style="color:#f59e0b;font-size:9px;">Restablecer clave</button>
+          <button class="pixel-button" type="submit" id="authSubmit">ENTRAR</button>
+          <button class="pixel-button pixel-button--guest" type="button" id="authGuest">JUGAR COMO INVITADO</button>
+          <div class="auth-links">
+            <button class="text-button" type="button" id="authSwitch">Crear cuenta</button>
+            <button class="text-button" type="button" id="authReset">Recuperar clave</button>
           </div>
-          <small class="save-note">Tu cuenta y progreso se guardan solo en este navegador. Si borrás sus datos o cambiás de dispositivo, no se trasladan.</small>
+          <small class="save-note">El progreso queda guardado en este navegador.</small>
         </form>
       </section>
 
@@ -88,7 +84,7 @@
           <h1>DOMI 2<span>PANCHO</span></h1>
           <p class="menu-copy">La cocina cerro.<br />El menu se levanto.</p>
           <div class="menu-actions">
-            <button id="playButton" class="pixel-button play-button">A LA COCINA <span aria-hidden="true">&#8599;</span></button>
+            <button id="playButton" class="pixel-button play-button arcade-action"><i data-lucide="play" aria-hidden="true"></i><span>A LA COCINA</span></button>
             <button id="rankingButton" class="pixel-button pixel-button--secondary">HISTORIAL <span aria-hidden="true">&#8594;</span></button>
           </div>
           <nav class="menu-links" aria-label="Accesos directos">
@@ -279,7 +275,7 @@
           </div>
 
           <!-- Selects nativos ocultos para compatibilidad con logica de juego y accesibilidad -->
-          <div class="setup-fields sr-hidden" aria-hidden="true">
+          <div class="setup-fields sr-hidden" aria-hidden="true" inert>
             <select id="difficultySelect" class="difficulty-select">
               <option value="suave">Suave</option><option value="picante" selected>Picante</option>
               <option value="extra">Extra picante</option><option value="quemado">Modo quemado</option>
@@ -317,8 +313,8 @@
             <p>Las mejoras aparecen durante la partida y tienen tiempo limitado. Elegilas con el teclado o haciendo clic. Para apuntar con el mouse, activá la mira en la barra superior.</p>
           </details>
           <div class="menu-actions">
-            <button id="startRunButton" class="pixel-button">SERVIR COMBO <span aria-hidden="true">&#8594;</span></button>
-            <button id="setupBackButton" class="pixel-button pixel-button--secondary">Volver</button>
+            <button id="startRunButton" class="pixel-button arcade-action"><i data-lucide="play" aria-hidden="true"></i><span>INICIAR TURNO</span></button>
+            <button id="setupBackButton" class="pixel-button pixel-button--secondary arcade-action arcade-action--quiet"><i data-lucide="arrow-left" aria-hidden="true"></i><span>VOLVER</span></button>
           </div>
         </div>
       </section>
@@ -337,16 +333,35 @@
       <section id="optionsScreen" class="screen"><div class="screen__panel options-panel"><h2>Opciones</h2><label class="toggle-field">Musica<input id="musicToggle" type="checkbox"></label><label class="toggle-field">Efectos de sonido<input id="sfxToggle" type="checkbox"></label><label class="volume-field">Volumen<input id="volumeSlider" type="range" min="0" max="1" step="0.05" value="0.35"></label><div class="menu-actions"><button id="clearRankingButton" class="pixel-button pixel-button--secondary">Borrar ranking</button><button id="clearAchievementsButton" class="pixel-button pixel-button--secondary">Borrar logros</button><button id="optionsBackButton" class="pixel-button">Volver</button></div></div></section>
       <section id="skinsScreen" class="screen"><div class="screen__panel"><p class="eyebrow">EL EQUIPO DEL MOSTRADOR</p><h2>Fuera de carta.</h2><div id="skinsPreview" class="skins-preview"></div><div class="menu-actions"><button id="skinsBackButton" class="pixel-button">Volver</button></div></div></section>
 
-      <section id="pauseScreen" class="screen pause-screen">
+      <section id="pauseScreen" class="screen pause-screen" aria-labelledby="pauseTitle">
         <div class="screen__panel pause-panel">
-          <p class="eyebrow">PEDIDO EN ESPERA</p>
-          <h2>La cocina espera.</h2>
-          <p id="pauseGoal" class="pause-goal"></p>
-          <h3>Tu receta</h3>
-          <div id="buildList" class="build-list"></div>
+          <header class="pause-header">
+            <span class="pause-emblem" aria-hidden="true"><i data-lucide="chef-hat"></i></span>
+            <div class="pause-header-copy"><p class="eyebrow">DOMI / PEDIDO EN ESPERA</p><h2 id="pauseTitle">La cocina espera.</h2></div>
+            <span class="pause-stamp">EN PAUSA</span>
+          </header>
+          <div class="pause-summary" aria-label="Resumen del turno">
+            <div class="pause-stat"><span>VIDA</span><strong id="pauseHp">100 / 100</strong></div>
+            <div class="pause-stat"><span>NIVEL</span><strong id="pauseLevel">1</strong></div>
+            <div class="pause-stat"><span>TIEMPO</span><strong id="pauseTime">00:00</strong></div>
+            <div class="pause-stat"><span>BAJAS</span><strong id="pauseKills">0</strong></div>
+            <div class="pause-stat"><span>PUNTOS</span><strong id="pauseScore">0</strong></div>
+          </div>
+          <div class="pause-objective"><span>OBJETIVO DEL TURNO</span><p id="pauseGoal" class="pause-goal"></p></div>
+          <div class="pause-columns">
+            <section class="pause-section" aria-labelledby="pauseRecipeTitle">
+              <h3 id="pauseRecipeTitle"><i data-lucide="utensils-crossed" aria-hidden="true"></i> TU RECETA</h3>
+              <p id="pauseLoadout" class="pause-loadout"></p>
+              <div id="buildList" class="build-list"></div>
+            </section>
+            <section class="pause-section" aria-labelledby="pausePowersTitle">
+              <h3 id="pausePowersTitle"><i data-lucide="zap" aria-hidden="true"></i> PODERES</h3>
+              <div id="pausePowers" class="pause-powers"></div>
+            </section>
+          </div>
           <div class="menu-actions">
-            <button id="resumeButton" class="pixel-button pixel-button--green">SEGUIR COCINANDO <span aria-hidden="true">&#9654;</span></button>
-            <button id="abandonButton" class="pixel-button pixel-button--secondary">TERMINAR PARTIDA</button>
+            <button id="resumeButton" class="pixel-button arcade-action"><i data-lucide="play" aria-hidden="true"></i><span>CONTINUAR</span></button>
+            <button id="abandonButton" class="pixel-button pixel-button--secondary arcade-action arcade-action--quiet"><i data-lucide="log-out" aria-hidden="true"></i><span>TERMINAR PARTIDA</span></button>
           </div>
         </div>
       </section>

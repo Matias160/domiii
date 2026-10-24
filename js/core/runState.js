@@ -36,8 +36,32 @@ export function createRunState(setup = {}, audio = null) {
   };
   initializeDirector(state);
   player.accessory = setup.accessoryId || 'none';
-  if (player.accessory === 'headband') player.speed *= 1.05;
-  if (player.accessory === 'shades') player.damageMultiplier *= 1.05;
-  if (player.accessory === 'crown') { player.maxHp += 10; player.hp += 10; }
+  const a = player.accessory;
+  // Accesorios Estándar
+  if (a === 'headband') player.speed *= 1.07;
+  if (a === 'shades') player.damageMultiplier *= 1.06;
+  if (a === 'cyber_shades') player.damageMultiplier *= 1.08;
+  if (a === 'red_bandana') player.speed *= 1.08;
+  if (a === 'headphones') player.speed *= 1.06;
+  if (a === 'neon_cap') { player.speed *= 1.05; player.damageMultiplier *= 1.05; }
+  if (a === 'crown') { player.maxHp += 15; player.hp += 15; }
+  if (a === 'blue_visor') player.projectileSpeedMultiplier = (player.projectileSpeedMultiplier || 1) * 1.15;
+  if (a === 'magic_hat') player.attackCooldownMultiplier = (player.attackCooldownMultiplier || 1) * 0.90;
+  if (a === 'void_hood') player.critChance = (player.critChance || 0) + 0.12;
+  if (a === 'cyber_helmet') { player.maxHp += 15; player.hp += 15; player.defense = (player.defense || 0) + 0.05; }
+  if (a === 'energy_halo') { player.maxHp += 12; player.hp += 12; player.damageMultiplier *= 1.06; }
+  if (a === 'chef_hat') player.damageMultiplier *= 1.12;
+
+  // Accesorios Legendarios (Señor Domi)
+  if (a === 'leg_crown') { player.maxHp += 25; player.hp += 25; player.damageMultiplier *= 1.15; }
+  if (a === 'leg_tiara') { player.speed *= 1.15; player.hpRegen = (player.hpRegen || 0) + 1; }
+  if (a === 'leg_valkyrie') { player.maxHp += 15; player.hp += 15; player.damageMultiplier *= 1.20; }
+  if (a === 'leg_visor') { player.critChance = (player.critChance || 0) + 0.20; player.magnetRadius = (player.magnetRadius || 80) * 1.5; }
+  if (a === 'leg_void_crown') player.damageMultiplier *= 1.22;
+  if (a === 'leg_crimson_cape') { player.maxHp += 25; player.hp += 25; player.damageMultiplier *= 1.10; }
+  if (a === 'leg_angel_wings') { player.speed *= 1.22; player.dashCooldownMultiplier = 0.8; }
+  if (a === 'leg_dragon_wings') player.damageMultiplier *= 1.25;
+  if (a === 'leg_golden_staff') { player.damageMultiplier *= 1.15; player.bonusProjectiles = (player.bonusProjectiles || 0) + 1; }
+  if (a === 'leg_golden_chalice') { player.maxHp += 35; player.hp += 35; }
   return state;
 }
