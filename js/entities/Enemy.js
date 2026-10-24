@@ -64,6 +64,7 @@ export class Enemy {
           state.directorNotice = `${this.type.name.toUpperCase()} / FASE 2`;
           state.shake = Math.max(state.shake, 0.35);
           state.rings?.push({ x: this.x, y: this.y, radius: this.radius + 75, life: 0.7, maxLife: 0.7, color: '#ff4f9a' });
+          state.audio?.play('bossPhase');
         }
       }
       // Fase 3 (FURIA MAXIMA) al 30% de vida
@@ -78,6 +79,7 @@ export class Enemy {
           state.shake = Math.max(state.shake, 0.48);
           state.rings?.push({ x: this.x, y: this.y, radius: this.radius + 110, life: 0.85, maxLife: 0.85, color: '#ff0044' });
           state.rings?.push({ x: this.x, y: this.y, radius: this.radius + 65, life: 0.6, maxLife: 0.6, color: '#ffd700' });
+          state.audio?.play('bossPhase');
         }
       }
 
@@ -129,6 +131,7 @@ export class Enemy {
                      this.type.bossStyle === 'heavy' ? 'meteor' : 'shockwave';
         this.specialTimer = kind === 'snipe' ? 3.2 : kind === 'rain' ? 2.8 : kind === 'freeze' ? 3.0 : 4.2;
         const zonesCount = this.phaseThree ? 2 : 1;
+        state.audio?.play('telegraph');
         for (let z = 0; z < zonesCount; z++) {
           const offsetX = z === 0 ? 0 : (Math.random() - 0.5) * 160;
           const offsetY = z === 0 ? 0 : (Math.random() - 0.5) * 160;

@@ -368,6 +368,20 @@ export function drawAccessory(ctx, id, x, y, scale = 1, layerFilter = null) {
   ctx.translate(x, y);
   ctx.scale(scale, scale);
 
+  // Aura mística sutil si es un accesorio legendario del Señor Domi
+  if (acc.tier === 'legendary') {
+    ctx.save();
+    const t = performance.now() * 0.003;
+    const pulse = 0.5 + Math.sin(t * 3) * 0.25;
+    ctx.shadowColor = '#fbbf24';
+    ctx.shadowBlur = 8 * pulse;
+    ctx.fillStyle = `rgba(251, 191, 36, ${0.12 * pulse})`;
+    ctx.beginPath();
+    ctx.arc(acc.ox + acc.dw / 2, acc.oy + acc.dh / 2, Math.max(acc.dw, acc.dh) * 0.65, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+  }
+
   if (acc.sheet === 'procedural') {
     drawProceduralChefHat(ctx, acc.ox, acc.oy, acc.dw, acc.dh);
     ctx.restore();

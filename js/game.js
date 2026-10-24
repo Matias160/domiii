@@ -100,6 +100,14 @@ export class Game {
     document.addEventListener('visibilitychange', () => { if (document.hidden) this.pause(); });
     document.addEventListener('pointerdown', () => this.audio.unlock(), { once: true });
     document.addEventListener('keydown', () => this.audio.unlock(), { once: true });
+
+    // Audio click feedback para todos los botones pixel art del juego
+    document.addEventListener('click', (event) => {
+      const btn = event.target.closest('button');
+      if (btn && !btn.disabled) {
+        this.audio?.play('button_click');
+      }
+    });
   }
 
   start() {

@@ -162,6 +162,7 @@ export function damageEnemy(state, enemy, damage, type = 'normal') {
   if (isCrit) {
     critBurst(state, enemy.x, enemy.y);
     impactRing(state, enemy.x, enemy.y, '#ffe500aa');
+    state.audio?.play('crit');
   } else if (Math.random() < 0.25) {
     impactRing(state, enemy.x, enemy.y, particleColor + '66');
   }

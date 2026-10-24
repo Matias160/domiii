@@ -39,7 +39,31 @@ export class AudioSystem {
   }
   play(kind='shoot'){
     if(!this.sfxEnabled||!this.context)return;
-    const now=this.context.currentTime;if(now-(this.lastSounds[kind]??-1)<.065)return;this.lastSounds[kind]=now;
+    const now=this.context.currentTime;if(now-(this.lastSounds[kind]??-1)<.045)return;this.lastSounds[kind]=now;
+    if (kind === 'crit') {
+      this.tone(1200, .06, .08, 'square', 1850);
+      setTimeout(() => this.tone(1850, .14, .09, 'triangle', 2400), 40);
+      return;
+    }
+    if (kind === 'telegraph') {
+      this.tone(320, .18, .07, 'sawtooth', 140);
+      return;
+    }
+    if (kind === 'bossPhase') {
+      this.tone(130, .45, .14, 'sawtooth', 55);
+      setTimeout(() => this.tone(520, .3, .10, 'square', 1040), 90);
+      return;
+    }
+    if (kind === 'synergy') {
+      this.tone(587, .12, .07, 'triangle', 880);
+      setTimeout(() => this.tone(880, .16, .09, 'triangle', 1320), 80);
+      setTimeout(() => this.tone(1320, .22, .11, 'square', 1760), 160);
+      return;
+    }
+    if (kind === 'button_click') {
+      this.tone(740, .035, .04, 'square', 980);
+      return;
+    }
     const config={navigate:[540,.035,.025,680],confirm:[660,.09,.04,990],purchase:[880,.25,.07,1760],dash:[210,.12,.045,680],shoot:[750,.05,.045,260],pickup:[720,.18,.10,1200],kill:[370,.075,.035,160],damage:[130,.18,.10,45],boss:[110,.45,.12,55],level:[660,.30,.11,1320],death:[220,.65,.12,30]}[kind]||[440,.1,.06,440];
     this.tone(config[0],config[1],config[2],kind==='pickup'||kind==='level'?'triangle':'square',config[3]);
   }

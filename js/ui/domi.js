@@ -65,6 +65,13 @@ export const adviceList = [
     title: 'Mascotas de Apoyo',
     badge: 'COMBATE',
     description: 'Equipá un compañero desde el lobby: atacan automáticamente, aplican salsa ralentizadora o generan zonas seguras para curarte.'
+  },
+  {
+    id: 'adv_synergies',
+    category: 'combat',
+    title: 'Sinergias de Reliquias',
+    badge: 'COMBATE',
+    description: 'Combiná accesorios legendarios con mascotas o trajes específicos (ej: Alas de Fénix + Mini Parrilla o Corona + Choripán) para activar potenciadores únicos.'
   }
 ];
 

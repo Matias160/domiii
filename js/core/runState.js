@@ -65,5 +65,35 @@ export function createRunState(setup = {}, audio = null) {
   if (a === 'leg_fire_wings') { player.speed *= 1.12; player.damageMultiplier *= 1.25; }
   if (a === 'leg_excalibur') { player.damageMultiplier *= 1.18; player.extraProjectiles = (player.extraProjectiles || 0) + 1; }
   if (a === 'leg_medallion') { player.maxHp += 40; player.hp += 40; player.defense = (player.defense || 1) + 0.1; }
+
+  // --- Sinergias Especiales Culinarias (Accesorios + Mascotas / Personajes) ---
+  const pet = setup.companionId;
+  const skin = setup.skinId;
+  let activeSynergy = null;
+
+  if (a === 'leg_fire_wings' && pet === 'parrilla') {
+    activeSynergy = 'FUEGO ETERNO (Alas Fénix + Parrilla)';
+    player.damageMultiplier *= 1.15;
+    player.explosionDamage = (player.explosionDamage || 0) + 25;
+  } else if ((a === 'crown' || a === 'leg_crown' || a === 'leg_cape') && skin === 'choripan') {
+    activeSynergy = 'REALEZA CRIOLLA (Corona/Capa + Choripán)';
+    player.maxHp += 25; player.hp += 25;
+    player.damageMultiplier *= 1.10;
+  } else if (a === 'chef_hat' && (pet === 'papas' || pet === 'parrilla')) {
+    activeSynergy = 'COCINA MAESTRA (Gorro Chef + Mascota Culinaria)';
+    player.fireRateMultiplier = (player.fireRateMultiplier || 1) * 1.15;
+    player.regen = (player.regen || 0) + 0.8;
+  } else if (a === 'leg_visor' && (skin === 'double' || skin === 'burger')) {
+    activeSynergy = 'CYBER BURGER (Visor Láser + Hamburguesa)';
+    player.critChance = (player.critChance || 0) + 0.15;
+    player.speed *= 1.10;
+  }
+
+  if (activeSynergy) {
+    state.synergy = activeSynergy;
+    state.directorNotice = `¡SINERGIA ACTIVA: ${activeSynergy}!`;
+    state.audio?.play('synergy');
+  }
+
   return state;
 }
