@@ -369,6 +369,36 @@ button:focus-visible, input:focus-visible, select:focus-visible {
 .setup-card--purple .setup-card__value {
   color: var(--pixel-purple);
 }
+
+/* Caldero de Lava & Modo Legendario Bloqueado */
+.setup-card--lava {
+  outline: 3px solid #ff3b00 !important;
+  box-shadow: 4px 4px 0 #000, 0 0 18px rgba(255, 60, 0, 0.5), inset 0 0 12px rgba(255, 60, 0, 0.2) !important;
+  animation: lavaPulse 2s ease-in-out infinite alternate;
+}
+.setup-card--lava .setup-card__icon-box {
+  border-color: #ff3b00 !important;
+  background: #24070a !important;
+}
+.setup-card--lava .setup-card__value {
+  color: #ff7700 !important;
+  text-shadow: 0 0 8px #ff2200, 2px 2px 0 #000;
+}
+.setup-card--locked-lava {
+  outline: 3px solid #ea580c !important;
+  box-shadow: 4px 4px 0 #000, 0 0 14px rgba(234, 88, 12, 0.4) !important;
+}
+.setup-card--locked-lava .setup-card__value {
+  color: #ff3300 !important;
+  letter-spacing: 2px;
+  text-shadow: 0 0 10px #ff0000;
+}
+
+@keyframes lavaPulse {
+  0% { box-shadow: 4px 4px 0 #000, 0 0 12px rgba(255, 59, 0, 0.35); }
+  100% { box-shadow: 4px 4px 0 #000, 0 0 24px rgba(255, 120, 0, 0.65), inset 0 0 16px rgba(255, 40, 0, 0.3); }
+}
+
 .setup-card--compact {
   padding: 10px 16px;
 }

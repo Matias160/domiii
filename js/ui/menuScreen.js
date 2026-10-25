@@ -97,6 +97,11 @@ export class MenuScreen {
 
   cycleOption(select) {
     if (!select || !select.options) return;
+    if (select === this.modeInput && this.mapInput.value === 'lava') {
+      this.game.showToast?.('En el Caldero de Lava solo existe el Encuentro Final (???)');
+      this.game.audio?.play?.('hit');
+      return;
+    }
     const available = [...select.options].filter(opt => !opt.disabled);
     if (available.length <= 1) return;
     const currentVal = select.value;
@@ -109,17 +114,24 @@ export class MenuScreen {
   }
 
   syncCards() {
+    const isLava = this.mapInput?.value === 'lava';
     const getCleanLabel = (sel) => {
       if (!sel || !sel.options || sel.selectedIndex < 0) return '';
       const opt = sel.options[sel.selectedIndex];
-      return opt ? opt.textContent.replace(/ \[TIENDA\]$/, '') : '';
+      return opt ? opt.textContent.replace(/ \[TIENDA\]$/, '').replace(/ \[BLOQUEADO\]$/, '') : '';
     };
 
-    if (this.cardModeVal) this.cardModeVal.textContent = getCleanLabel(this.modeInput);
+    if (this.cardModeVal) {
+      this.cardModeVal.textContent = isLava ? '??? (Encuentro Final)' : getCleanLabel(this.modeInput);
+    }
     if (this.cardMapVal) this.cardMapVal.textContent = getCleanLabel(this.mapInput);
     if (this.cardCompanionVal) this.cardCompanionVal.textContent = getCleanLabel(this.companionInput);
     if (this.cardDifficultyVal) this.cardDifficultyVal.textContent = getCleanLabel(this.difficultyInput);
     if (this.cardAccessoryVal) this.cardAccessoryVal.textContent = getCleanLabel(this.accessoryInput);
+
+    if (this.cardMap) this.cardMap.classList.toggle('setup-card--lava', isLava);
+    if (this.cardMode) this.cardMode.classList.toggle('setup-card--locked-lava', isLava);
+
     refreshIcons();
   }
 
@@ -165,7 +177,15 @@ export class MenuScreen {
     this.companionInput.value=p.loadout.pet;
     this.accessoryInput.value=p.loadout.accessory;
     for(const [input,type] of [[this.mapInput,'map'],[this.companionInput,'pet'],[this.accessoryInput,'accessory']]){
-      for(const option of input.options){const owned=isOwned(p,type,option.value);option.disabled=!owned;option.textContent=option.textContent.replace(/ \[TIENDA\]$/,'')+(owned?'':' [TIENDA]');}
+      for(const option of input.options){
+        const owned=isOwned(p,type,option.value);
+        option.disabled=!owned;
+        if (type === 'map' && option.value === 'lava') {
+          option.textContent = owned ? '07 / Caldero de Lava' : '💀 ??? [BLOQUEADO]';
+        } else {
+          option.textContent=option.textContent.replace(/ \[TIENDA\]$/,'')+(owned?'':' [TIENDA]');
+        }
+      }
     }
     this.renderOptions();
     this.syncCards();

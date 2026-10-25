@@ -6,6 +6,7 @@ export const modes = {
   survival: { name: 'Supervivencia', goal: 'Aguanta el ultimo turno' },
   waves: { name: 'Oleadas', goal: 'Completa las 8 oleadas' },
   rush: { name: 'Duelo de jefes', goal: `Derrota a los ${RUSH_BOSS_GOAL} Grandes Jefes` },
+  boss_legendary: { name: '???', goal: 'Derrota al Coloso Final de la Lava' },
 };
 
 const events = [
@@ -15,12 +16,12 @@ const events = [
 ];
 
 export function initializeDirector(state) {
-  state.modeId = modes[state.modeId] ? state.modeId : 'survival';
+  state.modeId = state.mapId === 'lava' ? 'boss_legendary' : (modes[state.modeId] ? state.modeId : 'survival');
   state.wave = 1;
   state.waveRemaining = 10;
   state.waveRest = 2;
   state.waveBossPending = false;
-  state.nextBossAt = state.modeId === 'rush' ? 3 : state.modeId === 'waves' ? Infinity : 55;
+  state.nextBossAt = state.mapId === 'lava' ? 2 : state.modeId === 'rush' ? 3 : state.modeId === 'waves' ? Infinity : 55;
   state.nextEventAt = state.modeId === 'rush' ? 25 : 32;
   state.activeEvent = null;
   state.eventRemaining = 0;
@@ -30,7 +31,8 @@ export function initializeDirector(state) {
 
 export function updateDirector(state, delta, bounds, random = Math.random) {
   state.peakCombo = Math.max(state.peakCombo, state.combo || 0);
-  if (state.modeId === 'rush' && state.bossesKilled >= RUSH_BOSS_GOAL) state.victory = true;
+  if (state.mapId === 'lava' && state.bossesKilled >= 1) state.victory = true;
+  if (state.modeId === 'rush' && state.bossesKilled >= 3) state.victory = true;
   if (state.modeId === 'waves') {
     state.waveRest = Math.max(0, state.waveRest - delta);
     if (state.waveRemaining === 0 && !state.waveBossPending && state.enemies.length === 0) {

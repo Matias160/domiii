@@ -50,17 +50,21 @@ function sha256Sync(ascii) {
 
 function all(){
   let raw = null;
-  try{raw=localStorage.getItem(KEY);}catch{return Object.create(null);}
+  try{raw=localStorage.getItem(KEY);}catch{throw Error('No se pudo leer el almacenamiento local.');}
   if(!raw)return Object.create(null);
   try{
     const data=JSON.parse(raw);
-    if(!data||typeof data!=='object'||Array.isArray(data))return Object.create(null);
+    if(!data||typeof data!=='object'||Array.isArray(data))throw Error('No se pudo leer datos de cuentas.');
     return Object.assign(Object.create(null),data);
-  }catch{
-    return Object.create(null);
+  }catch(e){
+    if (e.message?.includes('No se pudo leer')) throw e;
+    throw Error('No se pudo leer los datos guardados.');
   }
 }
-function write(data){try{localStorage.setItem(KEY,JSON.stringify(data));}catch{}}
+function write(data){
+  try{localStorage.setItem(KEY,JSON.stringify(data));}
+  catch(e){throw Error('No se pudo guardar la información de la cuenta.');}
+}
 function setSession(id){try{sessionStorage.setItem(SESSION,id);}catch{}}
 function bytesToHex(bytes){return [...bytes].map(x=>x.toString(16).padStart(2,'0')).join('');}
 
@@ -120,7 +124,7 @@ export async function register(name,password){
 export async function login(name,password){
   const data=all(),id=clean(name),profile=data[id];
   if(!profile){
-    throw Error('Ese usuario no está registrado. Usá "Crear cuenta" o jugá como invitado.');
+    throw Error('Datos incorrectos. Ese usuario no está registrado.');
   }
   if(!profile.hash){
     throw Error('Datos de cuenta dañados. Creá una cuenta nueva o entrá como Invitado.');
@@ -130,7 +134,7 @@ export async function login(name,password){
   const fallbackH=sha256Sync(password+':'+(profile.salt||'00'));
   const isMatch=(hash&&hash===profile.hash)||(fallbackH===profile.hash)||(profile.hash==='guest');
   if(!isMatch){
-    throw Error('Contraseña incorrecta. Revisá mayúsculas o hacé clic en "Restablecer clave".');
+    throw Error('Credenciales o contraseña incorrectos. Revisá mayúsculas o hacé clic en "Restablecer clave".');
   }
   setSession(id);return profile;
 }

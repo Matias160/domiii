@@ -20,7 +20,7 @@ import { updateEffects } from './systems/effectSystem.js';
 import { createRunState } from './core/runState.js';
 import { updateDirector, modes } from './systems/directorSystem.js';
 import { companions } from './entities/Companion.js';
-import {currentAccount,logout,awardRun} from './systems/accountSystem.js';
+import {currentAccount,logout,awardRun,grantItem,guestLogin} from './systems/accountSystem.js';
 import {bindAuth} from './ui/authScreen.js';
 import {isOwned} from './data/shop.js';
 import {Lobby} from './ui/lobby.js';
@@ -100,8 +100,60 @@ export class Game {
       this.showScreen('lobbyScreen');
     });
 
+    // Comando secreto para desbloquear inmediatamente el mapa de lava y corona:
+    // 1) Escribir 'domilava' o 'lava' en cualquier pantalla
+    // 2) Presionar Ctrl + Shift + L
+    // 3) Función global window.unlockLavaMap() o window.unlockLava() desde la consola
+    let secretBuffer = '';
+    const triggerLavaCheat = () => {
+      let p = currentAccount();
+      if (!p) p = guestLogin();
+      grantItem('map', 'lava');
+      grantItem('accessory', 'leg_lava_crown');
+      p.unlockedLava = true;
+      try {
+        const KEY = 'domi2pancho.accounts.v1';
+        const raw = JSON.parse(localStorage.getItem(KEY) || '{}');
+        const id = sessionStorage.getItem('domi2pancho.session.v1') || 'invitado';
+        if (raw[id]) {
+          raw[id].unlockedLava = true;
+          raw[id].purchases = raw[id].purchases || [];
+          if (!raw[id].purchases.includes('map:lava')) raw[id].purchases.push('map:lava');
+          if (!raw[id].purchases.includes('accessory:leg_lava_crown')) raw[id].purchases.push('accessory:leg_lava_crown');
+          localStorage.setItem(KEY, JSON.stringify(raw));
+        }
+      } catch {}
+      this.audio?.play('victory');
+      this.showToast('🌋 ¡COMANDO SECRETO! Caldero de Lava y Corona Magmática desbloqueados.');
+      if (this.menu) {
+        this.menu.prepareAccount();
+        if (this.menu.mapInput) {
+          this.menu.mapInput.value = 'lava';
+          this.menu.syncCards();
+        }
+      }
+      if (this.domi && this.screenId === 'domiScreen') {
+        this.domi.render();
+      }
+      console.log('%c🌋 ¡CALDERO DE LAVA DESBLOQUEADO! Modo: ??? (Encuentro Final)', 'color: #ff3300; font-size: 16px; font-weight: bold;');
+    };
+
+    window.unlockLavaMap = triggerLavaCheat;
+    window.unlockLava = triggerLavaCheat;
+
     window.addEventListener('keydown', event => {
+      if (event.ctrlKey && event.shiftKey && event.key.toLowerCase() === 'l') {
+        event.preventDefault();
+        triggerLavaCheat();
+        return;
+      }
       if (event.target.closest?.('input, select, textarea')) return;
+      secretBuffer = (secretBuffer + event.key.toLowerCase()).slice(-8);
+      if (secretBuffer.endsWith('domilava') || secretBuffer.endsWith('lava')) {
+        secretBuffer = '';
+        triggerLavaCheat();
+        return;
+      }
       if (this.screenId === 'onboardingScreen' && (event.key.toLowerCase() === 'e' || event.key === 'Enter' || event.key === ' ')) {
         this.audio.play('door_bell');
         this.showScreen('lobbyScreen');
@@ -757,6 +809,13 @@ export class Game {
     };
     const previousUnlocks = new Set(unlockedAchievements().map(item=>item.id));
     result.newAchievements = recordRun(result).filter(item=>!previousUnlocks.has(item.id)).map(item=>item.name);
+    if (outcome === 'victory' && this.state.mapId === 'lava') {
+      grantItem('accessory', 'leg_lava_crown');
+      result.newAchievements = result.newAchievements || [];
+      if (!result.newAchievements.some(a => a.includes('Corona Magmática'))) {
+        result.newAchievements.push('Corona Magmática Imperial (Victoria sobre Domi Colosal)');
+      }
+    }
     this.audio.play(outcome === 'victory' ? 'victory' : 'death');
     saveRun(result);
     awardRun(result);

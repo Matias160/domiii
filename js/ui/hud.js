@@ -1,6 +1,6 @@
 import { drawFood } from '../core/art.js';
 import { modes, RUSH_BOSS_GOAL } from '../systems/directorSystem.js';
-const maps = {diner:'01 / LOCAL DOMI',kitchen:'02 / COCINA INDUSTRIAL',parking:'03 / ESTACIONAMIENTO',snow:'04 / BAJO CERO',desert:'05 / DESIERTO',football:'06 / ESTADIO'};
+const maps = {diner:'01 / LOCAL DOMI',kitchen:'02 / COCINA INDUSTRIAL',parking:'03 / ESTACIONAMIENTO',snow:'04 / BAJO CERO',desert:'05 / DESIERTO',football:'06 / ESTADIO',lava:'07 / CALDERO DE LAVA'};
 export class Hud {
   constructor() {
     this.root = document.querySelector('#hud');

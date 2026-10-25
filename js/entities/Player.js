@@ -97,7 +97,23 @@ export class Player {
   draw(ctx) {
     ctx.save();
     if (this.invulnerable > 0) ctx.globalAlpha = 0.55 + Math.sin(performance.now() / 45) * 0.25;
-    ctx.strokeStyle = '#95d6a888';
+    if (this.hasLavaAura) {
+      // Aura de fuego y brasas incandescentes bajo los pies de Pancho
+      const t = performance.now() / 1000;
+      const auraGrad = ctx.createRadialGradient(this.x, this.y + 16, 4, this.x, this.y + 16, 36);
+      auraGrad.addColorStop(0, 'rgba(255, 68, 0, 0.45)');
+      auraGrad.addColorStop(0.5, 'rgba(255, 170, 0, 0.22)');
+      auraGrad.addColorStop(1, 'transparent');
+      ctx.fillStyle = auraGrad;
+      ctx.beginPath(); ctx.ellipse(this.x, this.y + 16, 36, 14, 0, 0, Math.PI * 2); ctx.fill();
+      for (let i = 0; i < 4; i++) {
+        const ex = this.x + Math.sin(t * 5 + i * 2) * 18;
+        const ey = this.y + 16 - ((t * 28 + i * 14) % 26);
+        ctx.fillStyle = (i % 2 === 0) ? '#ff4400' : '#ffcc00';
+        ctx.fillRect(ex, ey, 2, 2);
+      }
+    }
+    ctx.strokeStyle = this.hasLavaAura ? '#ff5500aa' : '#95d6a888';
     ctx.lineWidth = 2;
     ctx.beginPath();ctx.ellipse(this.x,this.y+18,27,10,0,0,7);ctx.stroke();
     const bob = Math.round(Math.sin(this.walkTime * 7 + this.x * .05) * 1.5);

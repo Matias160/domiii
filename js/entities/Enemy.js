@@ -99,18 +99,45 @@ export class Enemy {
       this.specialTimer -= delta * (this.phaseThree ? 1.3 : 1);
       this.summonTimer -= delta;
 
+      // Pisotón tectónico y rocas ígneas para Domi Colosal
+      if (this.type.bossStyle === 'colossus') {
+        this.stompTimer = (this.stompTimer || 3.5) - delta;
+        if (this.stompTimer <= 0 && state) {
+          this.stompTimer = this.phaseThree ? 2.2 : 3.6;
+          state.shake = Math.max(state.shake, 0.28);
+          state.rings?.push({ x: this.x, y: this.y, radius: this.radius + 80, life: 0.6, maxLife: 0.6, color: '#ff3300' });
+          state.audio?.play('telegraph');
+          // Lanza 3 proyectiles de roca magmática pesada
+          const dx = player.x - this.x, dy = player.y - this.y;
+          const baseAngle = Math.atan2(dy, dx);
+          for (const off of [-0.25, 0, 0.25]) {
+            const a = baseAngle + off;
+            state.enemyProjectiles.push({
+              x: this.x, y: this.y,
+              vx: Math.cos(a) * 220, vy: Math.sin(a) * 220,
+              radius: 9,
+              damage: this.damage * 0.75,
+              life: 3.5,
+              color: '#ff5500'
+            });
+          }
+        }
+      }
+
       if (this.volleyTimer <= 0 && state) {
         state.rings?.push({ x: this.x, y: this.y, radius: this.radius + 38, life: 0.45, maxLife: 0.45, color: this.phaseThree ? '#ff0055' : '#ff879e' });
-        this.volleyTimer = this.type.bossStyle === 'ranged' ? (this.phaseTwo ? 1.95 : 2.6) :
+        this.volleyTimer = this.type.bossStyle === 'colossus' ? (this.phaseThree ? 1.5 : this.phaseTwo ? 2.2 : 3.0) :
+                           this.type.bossStyle === 'ranged' ? (this.phaseTwo ? 1.95 : 2.6) :
                            this.type.bossStyle === 'heavy' ? (this.phaseTwo ? 2.6 : 3.5) :
                            this.type.bossStyle === 'frost' ? (this.phaseTwo ? 2.2 : 3.0) :
                            this.phaseTwo ? 3.1 : 4.4;
-        const baseCount = this.type.bossStyle === 'ranged' ? 14 :
+        const baseCount = this.type.bossStyle === 'colossus' ? 20 :
+                          this.type.bossStyle === 'ranged' ? 14 :
                           this.type.bossStyle === 'heavy' ? 18 :
                           this.type.bossStyle === 'frost' ? 12 : 10;
         const count = this.phaseThree ? baseCount + 6 : baseCount;
-        const bulletSpeed = (this.type.bossStyle === 'heavy' ? 115 : this.type.bossStyle === 'frost' ? 135 : 150) * (this.phaseThree ? 1.2 : 1);
-        const bulletColor = this.phaseThree ? '#ff2255' : this.type.bossStyle === 'frost' ? '#a855f7' : this.type.bossStyle === 'heavy' ? '#ffaa00' : undefined;
+        const bulletSpeed = (this.type.bossStyle === 'colossus' ? 135 : this.type.bossStyle === 'heavy' ? 115 : this.type.bossStyle === 'frost' ? 135 : 150) * (this.phaseThree ? 1.2 : 1);
+        const bulletColor = this.type.bossStyle === 'colossus' ? (this.phaseThree ? '#ff1100' : '#ff6600') : this.phaseThree ? '#ff2255' : this.type.bossStyle === 'frost' ? '#a855f7' : this.type.bossStyle === 'heavy' ? '#ffaa00' : undefined;
         for (let i = 0; i < count; i++) {
           const angle = i * Math.PI * 2 / count + state.time * 0.45;
           state.enemyProjectiles.push({
@@ -125,11 +152,13 @@ export class Enemy {
       }
 
       if (this.phaseTwo && state && this.specialTimer <= 0) {
-        const kind = this.type.bossStyle === 'ranged' ? 'snipe' :
-                     this.type.bossStyle === 'fast' ? 'rain' :
-                     this.type.bossStyle === 'frost' ? 'freeze' :
-                     this.type.bossStyle === 'heavy' ? 'meteor' : 'shockwave';
-        this.specialTimer = kind === 'snipe' ? 3.2 : kind === 'rain' ? 2.8 : kind === 'freeze' ? 3.0 : 4.2;
+        const kind = (this.type.bossStyle === 'colossus')
+          ? (this.phaseThree ? 'laser_sweep' : 'meteor')
+          : this.type.bossStyle === 'ranged' ? 'snipe' :
+            this.type.bossStyle === 'fast' ? 'rain' :
+            this.type.bossStyle === 'frost' ? 'freeze' :
+            this.type.bossStyle === 'heavy' ? 'meteor' : 'shockwave';
+        this.specialTimer = kind === 'laser_sweep' ? 3.4 : kind === 'snipe' ? 3.2 : kind === 'rain' ? 2.8 : kind === 'freeze' ? 3.0 : 4.2;
         const zonesCount = this.phaseThree ? 2 : 1;
         state.audio?.play('telegraph');
         for (let z = 0; z < zonesCount; z++) {
@@ -140,9 +169,9 @@ export class Enemy {
             x: this.x, y: this.y,
             targetX: player.x + offsetX, targetY: player.y + offsetY,
             radius: kind === 'shockwave' ? 145 : kind === 'meteor' ? 88 : kind === 'freeze' ? 120 : 44,
-            delay: kind === 'snipe' ? 0.75 : kind === 'meteor' ? 1.0 : 0.85,
+            delay: kind === 'laser_sweep' ? 0.85 : kind === 'snipe' ? 0.75 : kind === 'meteor' ? 1.0 : 0.85,
             life: kind === 'shockwave' ? 1.15 : 1.25,
-            damage: this.damage * (kind === 'snipe' ? 0.65 : kind === 'meteor' ? 1.2 : 0.75),
+            damage: this.damage * (kind === 'laser_sweep' ? 0.85 : kind === 'snipe' ? 0.65 : kind === 'meteor' ? 1.2 : 0.75),
             triggered: false
           });
         }
@@ -447,4 +476,5 @@ export const enemyTypes = [
   { id: "fries", name: "La Papota Suprema", hp: 1120, speed: 80, damage: 28, score: 1050, xp: 75, radius: 46, color: "#ffdd61", boss: true, bossStyle: 'fast' },
   { id: "pizza", name: "Don Muzza el Padrino", hp: 1350, speed: 60, damage: 32, score: 1350, xp: 90, radius: 52, color: "#e63946", boss: true, bossStyle: 'heavy' },
   { id: "icecream", name: "Emperador Subcero", hp: 1080, speed: 66, damage: 24, score: 1200, xp: 82, radius: 44, color: "#a855f7", boss: true, bossStyle: 'frost' },
+  { id: "lava_boss", name: "Domi Colosal", hp: 4600, speed: 52, damage: 38, score: 6000, xp: 300, radius: 80, color: "#ff2200", boss: true, bossStyle: 'colossus' },
 ];

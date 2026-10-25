@@ -5,7 +5,7 @@ import {shopItems,isOwned} from '../data/shop.js';
 
 export function nextUnlock(profile){
   if(!profile)return '';
-  const next=shopItems.filter(item=>!isOwned(profile,item.type,item.id)).sort((a,b)=>a.cost-b.cost)[0];
+  const next=shopItems.filter(item=>item.cost > 0 && !isOwned(profile,item.type,item.id)).sort((a,b)=>a.cost-b.cost)[0];
   if(!next)return '¡Completaste la colección!';
   const missing=Math.max(0,next.cost-profile.bank);
   return missing?`Próximo desbloqueo: ${next.name}. Te faltan ${missing} PT.`:`¡Ya podés comprar ${next.name} en la tienda!`;

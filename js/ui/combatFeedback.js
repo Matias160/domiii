@@ -56,9 +56,11 @@ export function drawCombatFeedback(ctx, state, reducedMotion = false) {
 
   for(const zone of state.bossZones||[]){
     const warning=zone.delay>0,pulse=.55+Math.sin(state.time*12)*.25;ctx.save();ctx.globalAlpha=warning?pulse:.35;
-    if(zone.kind==='snipe'){
-      ctx.strokeStyle='#ff4f9a';ctx.lineWidth=warning?3:7;ctx.setLineDash(warning?[9,7]:[]);ctx.beginPath();ctx.moveTo(zone.x,zone.y);ctx.lineTo(zone.targetX,zone.targetY);ctx.stroke();
-      ctx.beginPath();ctx.arc(zone.targetX,zone.targetY,18,0,Math.PI*2);ctx.stroke();
+    if(zone.kind==='snipe'||zone.kind==='laser_sweep'){
+      ctx.strokeStyle=zone.kind==='laser_sweep'?'#ff2200':'#ff4f9a';
+      ctx.lineWidth=warning?(zone.kind==='laser_sweep'?6:3):(zone.kind==='laser_sweep'?10:7);
+      ctx.setLineDash(warning?[9,7]:[]);ctx.beginPath();ctx.moveTo(zone.x,zone.y);ctx.lineTo(zone.targetX,zone.targetY);ctx.stroke();
+      ctx.beginPath();ctx.arc(zone.targetX,zone.targetY,zone.kind==='laser_sweep'?26:18,0,Math.PI*2);ctx.stroke();
     }else{
       const x=zone.kind==='rain'||zone.kind==='meteor'||zone.kind==='freeze'?zone.targetX:zone.x;
       const y=zone.kind==='rain'||zone.kind==='meteor'||zone.kind==='freeze'?zone.targetY:zone.y;

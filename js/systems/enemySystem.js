@@ -87,9 +87,21 @@ function updateBossZones(state,delta){
     zone.delay-=delta;zone.life-=delta;
     if(zone.delay>0||zone.triggered)continue;
     zone.triggered=true;state.shake=Math.max(state.shake,.2);
-    if(zone.kind==='snipe'){
+    if(zone.kind==='snipe'||zone.kind==='laser_sweep'){
       const dx=zone.targetX-zone.x,dy=zone.targetY-zone.y,length=Math.hypot(dx,dy)||1;
-      for(const offset of [-.12,0,.12]){const angle=Math.atan2(dy,dx)+offset;state.enemyProjectiles.push({x:zone.x,y:zone.y,vx:Math.cos(angle)*365,vy:Math.sin(angle)*365,radius:6,damage:zone.damage,life:3,color:'#ff4f9a'});}
+      const offsets = zone.kind==='laser_sweep' ? [-.28,-.18,-.09,0,.09,.18,.28] : [-.12,0,.12];
+      for(const offset of offsets){
+        const angle=Math.atan2(dy,dx)+offset;
+        state.enemyProjectiles.push({
+          x:zone.x,y:zone.y,
+          vx:Math.cos(angle)*(zone.kind==='laser_sweep'?390:365),
+          vy:Math.sin(angle)*(zone.kind==='laser_sweep'?390:365),
+          radius:zone.kind==='laser_sweep'?8:6,
+          damage:zone.damage,
+          life:3,
+          color:zone.kind==='laser_sweep'?'#ff2200':'#ff4f9a'
+        });
+      }
     }else{
       const x=zone.kind==='rain'?zone.targetX:zone.x,y=zone.kind==='rain'?zone.targetY:zone.y;
       if(Math.hypot(state.player.x-x,state.player.y-y)<zone.radius+state.player.radius&&state.player.takeDamage(zone.damage)){state.audio?.play('damage');}
@@ -143,7 +155,11 @@ function spawnEnemy(state, canvas, boss = false) {
   const maxType = state.time > 65 ? normalTypes.length : state.time > 35 ? 5 : state.time > 15 ? 4 : 2;
   const bosses = enemyTypes.filter(record => record.boss);
   const spawnedBossIndex = (state.bossesKilled || 0) + state.enemies.filter(e => e.isBoss && e.hp > 0).length;
-  const type = boss ? bosses[spawnedBossIndex % bosses.length] : normalTypes[Math.floor(Math.random() * maxType)];
+  const colossusBoss = enemyTypes.find(t => t.id === 'lava_boss') || bosses[0];
+  const regularBosses = bosses.filter(b => b.id !== 'lava_boss');
+  const type = boss
+    ? (state.mapId === 'lava' ? colossusBoss : regularBosses[spawnedBossIndex % regularBosses.length])
+    : normalTypes[Math.floor(Math.random() * maxType)];
   if (type.id === 'onion') {
     const angle = Math.random() * Math.PI * 2;
     position.x = Math.max(62, Math.min(worldW - 62, state.player.x + Math.cos(angle) * 165));

@@ -294,6 +294,19 @@ export const ACCESSORIES = {
     sheet: 'legendary',
     sx: 1212, sy: 636, sw: 114, sh: 144,
     dw: 22, dh: 28, ox: -8, oy: 2
+  },
+  leg_lava_crown: {
+    id: 'leg_lava_crown',
+    name: 'Corona Magmática Imperial',
+    tier: 'legendary',
+    category: 'LEGENDARIO',
+    layer: 'front',
+    cost: 0,
+    icon: '🌋',
+    desc: 'Corona forjada en el Caldero de Lava: +50 Vida Máxima, +30% Daño Ígneo y Rastro de Magma.',
+    stats: { hp: '+50', spd: '+10%', dmg: '+30%', perk: '+50 HP +30% Dmg +Magma' },
+    sheet: 'procedural_lava',
+    dw: 46, dh: 30, ox: -23, oy: -46
   }
 };
 
@@ -321,6 +334,55 @@ export function resolveAccessory(id) {
   if (!id || id === 'none') return null;
   const resolvedId = LEGACY_ALIASES[id] || id;
   return ACCESSORIES[resolvedId] || null;
+}
+
+function drawProceduralLavaCrown(ctx, ox, oy, dw, dh) {
+  ctx.save();
+  ctx.translate(ox + dw / 2, oy + dh);
+  const time = performance.now() / 1000;
+  // Llamas místicas danzantes sobre las puntas de la corona
+  for (let i = -2; i <= 2; i++) {
+    const fx = i * 9;
+    const flameH = 8 + Math.sin(time * 8 + i * 1.5) * 4;
+    ctx.fillStyle = '#ff2200';
+    ctx.fillRect(fx - 3, -16 - flameH, 6, flameH + 4);
+    ctx.fillStyle = '#ff8800';
+    ctx.fillRect(fx - 2, -14 - flameH, 4, flameH + 2);
+    ctx.fillStyle = '#ffee33';
+    ctx.fillRect(fx - 1, -12 - flameH, 2, flameH);
+  }
+  // Picos de obsidiana volcánica
+  ctx.fillStyle = '#1c0f14';
+  ctx.beginPath();
+  ctx.moveTo(-22, -6);
+  ctx.lineTo(-20, -18);
+  ctx.lineTo(-12, -10);
+  ctx.lineTo(-9, -22);
+  ctx.lineTo(0, -12);
+  ctx.lineTo(9, -22);
+  ctx.lineTo(12, -10);
+  ctx.lineTo(20, -18);
+  ctx.lineTo(22, -6);
+  ctx.closePath();
+  ctx.fill();
+  ctx.strokeStyle = '#ff3300';
+  ctx.lineWidth = 1.5;
+  ctx.stroke();
+
+  // Borde imperial dorado forjado al calor
+  ctx.fillStyle = '#d97706';
+  ctx.fillRect(-22, -6, 44, 8);
+  ctx.fillStyle = '#fbbf24';
+  ctx.fillRect(-20, -5, 40, 5);
+
+  // Gemas de rubí magmático incrustadas
+  for (const rx of [-14, 0, 14]) {
+    ctx.fillStyle = '#ff0033';
+    ctx.fillRect(rx - 2, -4, 4, 4);
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(rx - 1, -4, 1, 1);
+  }
+  ctx.restore();
 }
 
 function drawProceduralChefHat(ctx, ox, oy, dw, dh) {
@@ -373,6 +435,11 @@ export function drawAccessory(ctx, id, x, y, scale = 1, layerFilter = null) {
     ctx.restore();
     return;
   }
+  if (acc.sheet === 'procedural_lava') {
+    drawProceduralLavaCrown(ctx, acc.ox, acc.oy, acc.dw, acc.dh);
+    ctx.restore();
+    return;
+  }
 
   const sheet = acc.sheet === 'legendary' ? legendarySheet : standardSheet;
 
@@ -405,6 +472,15 @@ export function drawAccessoryIcon(ctx, id, cx, cy, boxSize = 48) {
     ctx.translate(cx, cy + 12 * s);
     ctx.scale(s, s);
     drawProceduralChefHat(ctx, -19, -28, 38, 32);
+    ctx.restore();
+    return;
+  }
+  if (acc.sheet === 'procedural_lava') {
+    const s = boxSize / 48;
+    ctx.save();
+    ctx.translate(cx, cy + 12 * s);
+    ctx.scale(s, s);
+    drawProceduralLavaCrown(ctx, -23, -24, 46, 30);
     ctx.restore();
     return;
   }

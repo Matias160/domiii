@@ -7,6 +7,7 @@ export const shopItems = [
   {id:'snow',type:'map',name:'Nevado',cost:800,icon:'❄',description:'Ventiscas que congelan el tablero.'},
   {id:'desert',type:'map',name:'Desierto',cost:1000,icon:'✳',description:'Cactus rodantes que hacen daño.'},
   {id:'football',type:'map',name:'Cancha de futbol',cost:1200,icon:'⚽',description:'Pelotas peligrosas en juego.'},
+  {id:'lava',type:'map',name:'Caldero de Lava',cost:0,icon:'🌋',description:'Tierra volcánica y magma ardiente. El dominio del Coloso Final.'},
   {id:'ketchup',type:'pet',name:'Mini ketchup',cost:700,icon:'K',description:'Dispara salsa picante y deja charcos pegajosos.'},
   {id:'drone',type:'pet',name:'Dron delivery',cost:850,icon:'D',description:'Imán de ingredientes y descarga rayos relámpago.'},
   {id:'taco',type:'pet',name:'Taco Guardián',cost:950,icon:'T',description:'Otorga escudo al jugador y embiste enemigos cercanos.'},
@@ -35,6 +36,7 @@ export const shopItems = [
   {id:'leg_fire_wings',type:'accessory',name:'Alas de Fénix Ígneo',cost:0,icon:'🔥',description:'Legendario Don Domi: +25% Daño y +12% Velocidad.'},
   {id:'leg_excalibur',type:'accessory',name:'Espada Dorada Excalibur',cost:0,icon:'🗡',description:'Legendario Don Domi: +1 Proyectil Extra y +18% Daño.'},
   {id:'leg_medallion',type:'accessory',name:'Medallón Rubí Sagrado',cost:0,icon:'🎖',description:'Legendario Don Domi: +40 Vida Máxima y Defensa.'},
+  {id:'leg_lava_crown',type:'accessory',name:'Corona Magmática Imperial',cost:0,icon:'🌋',description:'Legendario Jefe Final: +50 Vida Máxima, +30% Daño Ígneo y Rastro de Magma.'},
 ];
 
 const LEGACY_MAP = {
@@ -59,6 +61,7 @@ const LEGACY_MAP = {
 export const freeItems = {skin:['pancho'],map:['diner','kitchen','parking'],pet:['none'],accessory:['none']};
 export function isOwned(profile,type,id){
   if (freeItems[type]?.includes(id)) return true;
+  if (type === 'map' && id === 'lava' && profile?.unlockedLava) return true;
   if (!profile?.purchases) return false;
   if (profile.purchases.includes(`${type}:${id}`)) return true;
   if (type === 'accessory') {

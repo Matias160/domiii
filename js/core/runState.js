@@ -25,7 +25,7 @@ export function createRunState(setup = {}, audio = null) {
     camera: { x: 480, y: 270 },
     companion: new Companion(setup.companionId, player),
     difficulty: difficulties[setup.difficultyId] || difficulties.picante,
-    mapId: ['diner','kitchen','parking','snow','desert','football'].includes(setup.mapId) ? setup.mapId : 'diner',
+    mapId: ['diner','kitchen','parking','snow','desert','football','lava'].includes(setup.mapId) ? setup.mapId : 'diner',
     mapClock: 0, mapObstacles: [], wasFreezing: false, decoy: null, primeCooldowns: {q:0,e:0,r:0},
     modeId: setup.modeId,
     enemies: [], projectiles: [], enemyProjectiles: [], items: [], hazards: [], bossZones: [],
@@ -65,13 +65,17 @@ export function createRunState(setup = {}, audio = null) {
   if (a === 'leg_fire_wings') { player.speed *= 1.12; player.damageMultiplier *= 1.25; }
   if (a === 'leg_excalibur') { player.damageMultiplier *= 1.18; player.extraProjectiles = (player.extraProjectiles || 0) + 1; }
   if (a === 'leg_medallion') { player.maxHp += 40; player.hp += 40; player.defense = (player.defense || 1) + 0.1; }
+  if (a === 'leg_lava_crown') { player.maxHp += 50; player.hp += 50; player.damageMultiplier *= 1.30; player.speed *= 1.10; player.hasLavaAura = true; }
 
   // --- Sinergias Especiales Culinarias (Accesorios + Mascotas / Personajes) ---
   const pet = setup.companionId;
   const skin = setup.skinId;
   let activeSynergy = null;
 
-  if (a === 'leg_fire_wings' && pet === 'parrilla') {
+  if (a === 'leg_lava_crown' && pet === 'parrilla') {
+    activeSynergy = 'PLANCHA INFERNAL (Corona Magmática + Parrilla)';
+    player.damageMultiplier *= 1.25;
+  } else if (a === 'leg_fire_wings' && pet === 'parrilla') {
     activeSynergy = 'FUEGO ETERNO (Alas Fénix + Parrilla)';
     player.damageMultiplier *= 1.15;
     player.explosionDamage = (player.explosionDamage || 0) + 25;

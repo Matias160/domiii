@@ -70,16 +70,52 @@ function foodSprite(kind, enemy, flash = false) {
     block(c, '#aa83b8', 10, 20, 45, 38, 7); rect(c, '#d9b7d8', 15, 28, 5, 20);
     rect(c, '#c9a1cc', 24, 23, 7, 30); block(c, '#8db26c', 27, 9, 10, 16, 2);
     rect(c, '#c4d880', 24, 9, 4, 7); rect(c, '#6f9956', 35, 5, 5, 12);
+  } else if (kind === 'lava_boss') {
+    // Domi Colosal / El Señor de la Plancha Negra
+    // Placas inferiores y pies de roca basáltica
+    block(c, '#0d0608', 8, 54, 20, 12, 3); block(c, '#0d0608', 36, 54, 20, 12, 3);
+    rect(c, '#ff3300', 12, 58, 12, 3); rect(c, '#ff3300', 40, 58, 12, 3);
+    // Pan inferior calcinado
+    block(c, '#241016', 6, 44, 52, 12, 4); rect(c, '#ff5500', 10, 46, 44, 2);
+    // Magma hirviente / carne volcánica con núcleo incandescente
+    block(c, '#d92200', 4, 30, 56, 16, 3);
+    rect(c, '#ff7700', 8, 33, 48, 5);
+    rect(c, '#ffdd33', 14, 35, 36, 3);
+    // Queso de lava fundido goteando
+    rect(c, '#ffaa00', 10, 42, 6, 8); rect(c, '#ffaa00', 26, 44, 8, 7); rect(c, '#ffaa00', 44, 43, 7, 9);
+    // Pan superior / coraza de basalto negro
+    block(c, '#1f0d13', 5, 12, 54, 20, 5);
+    rect(c, '#3a1a24', 9, 14, 46, 6);
+    // Grietas de magma en la cabeza
+    rect(c, '#ff3300', 14, 18, 12, 2); rect(c, '#ff9900', 16, 17, 8, 1);
+    rect(c, '#ff3300', 38, 18, 12, 2); rect(c, '#ff9900', 40, 17, 8, 1);
+    rect(c, '#ff5500', 28, 22, 8, 3);
+    // Ojos ardientes amenazantes
+    rect(c, '#ff0033', 16, 24, 10, 5); rect(c, '#ffdd00', 18, 25, 6, 3); rect(c, '#ffffff', 20, 26, 2, 2);
+    rect(c, '#ff0033', 38, 24, 10, 5); rect(c, '#ffdd00', 40, 25, 6, 3); rect(c, '#ffffff', 42, 26, 2, 2);
+    // Boca volcánica con colmillos de fuego
+    rect(c, '#0a0305', 22, 38, 20, 6);
+    rect(c, '#ffee33', 24, 38, 4, 3); rect(c, '#ffee33', 36, 38, 4, 3);
+    rect(c, '#ff2200', 22, 42, 20, 2);
+    // Corona de hierro negro forjado con picos ardientes
+    block(c, '#0f0508', 10, 2, 44, 12, 2);
+    for (let p = 0; p < 5; p++) {
+      const px = 12 + p * 8;
+      rect(c, '#ff2200', px, 0, 4, 4);
+      rect(c, '#ffbb00', px + 1, 1, 2, 2);
+    }
   } else {
     block(c, kind === 'empanada' ? '#e7ba6e' : '#c68c44', 9, 17, 48, 40, 7);
     rect(c, '#f8d28b', 17, 20, 30, 5); rect(c, '#e4aa52', 14, 27, 6, 22);
     for (let i = 0; i < 7; i++) rect(c, '#a6693c', 17 + (i * 11) % 32, 27 + (i * 7) % 25, 3, 3);
     if (kind === 'empanada') for (let i = 0; i < 7; i++) rect(c, '#a87144', 11 + i * 6, 51, 3, 4);
   }
-  block(c, '#fff8dc', 22, 30, 9, 12, 1); block(c, '#fff8dc', 38, 30, 9, 12, 1);
-  rect(c, INK, 27, 33, 4, 6); rect(c, INK, 42, 33, 4, 6);
-  if (enemy) { rect(c, INK, 21, 28, 7, 3); rect(c, INK, 26, 30, 6, 3); rect(c, INK, 38, 30, 6, 3); rect(c, INK, 43, 28, 7, 3); }
-  rect(c, INK, 31, 46, 10, 3); rect(c, enemy ? '#f9867e' : '#fff2d5', 34, 49, 5, 2);
+  if (kind !== 'lava_boss') {
+    block(c, '#fff8dc', 22, 30, 9, 12, 1); block(c, '#fff8dc', 38, 30, 9, 12, 1);
+    rect(c, INK, 27, 33, 4, 6); rect(c, INK, 42, 33, 4, 6);
+    if (enemy) { rect(c, INK, 21, 28, 7, 3); rect(c, INK, 26, 30, 6, 3); rect(c, INK, 38, 30, 6, 3); rect(c, INK, 43, 28, 7, 3); }
+    rect(c, INK, 31, 46, 10, 3); rect(c, enemy ? '#f9867e' : '#fff2d5', 34, 49, 5, 2);
+  }
 
   // Sombreado y degradado de color vibrante (iluminación cenital cálida y sombra rica)
   c.save();
@@ -108,11 +144,12 @@ function foodSprite(kind, enemy, flash = false) {
 export function drawFood(c, kind, x, y, scale = 1, time = 0, enemy = false, flash = false) {
   const bob = Math.round(Math.sin(time * 7 + x * .05) * 1.5);
   c.save(); c.imageSmoothingEnabled = false;
-  const groundGlow = c.createRadialGradient(x, y + 23 * scale, 3 * scale, x, y + 23 * scale, 28 * scale);
-  groundGlow.addColorStop(0, enemy ? 'rgba(239, 68, 68, 0.25)' : 'rgba(34, 211, 238, 0.2)');
-  groundGlow.addColorStop(0.45, '#080d1360');
+  const isColossus = kind === 'lava_boss';
+  const groundGlow = c.createRadialGradient(x, y + 23 * scale, 3 * scale, x, y + 23 * scale, (isColossus ? 48 : 28) * scale);
+  groundGlow.addColorStop(0, isColossus ? 'rgba(255, 34, 0, 0.55)' : enemy ? 'rgba(239, 68, 68, 0.25)' : 'rgba(34, 211, 238, 0.2)');
+  groundGlow.addColorStop(0.45, isColossus ? 'rgba(255, 120, 0, 0.28)' : '#080d1360');
   groundGlow.addColorStop(1, 'transparent');
-  c.fillStyle = groundGlow; c.beginPath(); c.ellipse(x, y + 23 * scale, 28 * scale, 8 * scale, 0, 0, Math.PI * 2); c.fill();
+  c.fillStyle = groundGlow; c.beginPath(); c.ellipse(x, y + 23 * scale, (isColossus ? 48 : 28) * scale, (isColossus ? 16 : 8) * scale, 0, 0, Math.PI * 2); c.fill();
   c.drawImage(foodSprite(kind, enemy, flash), Math.round(x - 32 * scale), Math.round(y - 36 * scale + bob), 64 * scale, 72 * scale);
   c.restore();
 }
@@ -176,11 +213,125 @@ function footballFloor(c) {
   }
 }
 
+function lavaFloor(c) {
+  // 1. Base de lecho volcánico oscuro de obsidiana y basalto
+  rect(c, '#0d0406', 0, 0, 1920, 1080);
+
+  // 2. Bloques y losas de basalto con textura de piedra volcánica
+  const stoneTones = ['#15080b', '#1c0d12', '#241018', '#1a0b10'];
+  for (let y = 84; y < 1080; y += 40) {
+    for (let x = 0; x < 1920; x += 48) {
+      const idx = Math.floor((x / 48 + y / 40) % 4);
+      rect(c, stoneTones[idx], x + 1, y + 1, 46, 38);
+      rect(c, '#090204', x, y, 48, 1);
+      rect(c, '#090204', x, y, 1, 40);
+      rect(c, '#ffffff06', x + 2, y + 2, 42, 1);
+    }
+  }
+
+  // 3. Red intrincada de grietas de magma y fisuras volcánicas que recorren la arena
+  const fissurePaths = [
+    // Grieta mayor transversal noroeste a sureste
+    [[60, 220], [240, 280], [450, 260], [680, 340], [920, 390], [1180, 480], [1420, 560], [1680, 680], [1860, 780]],
+    // Grieta diagonal suroeste a noreste
+    [[120, 920], [310, 840], [540, 720], [780, 680], [1020, 590], [1280, 510], [1520, 380], [1760, 260], [1880, 210]],
+    // Fisuras secundarias ramificadas
+    [[920, 390], [860, 520], [820, 680], [780, 860], [840, 990]],
+    [[1180, 480], [1240, 350], [1360, 240], [1500, 160]],
+    [[450, 260], [420, 410], [360, 580], [310, 840]],
+    [[1420, 560], [1460, 720], [1580, 890], [1640, 1020]],
+    // Círculo concéntrico de colapso en el centro
+    [[760, 460], [840, 410], [960, 380], [1080, 410], [1160, 460], [1180, 560], [1120, 640], [960, 680], [800, 640], [740, 560], [760, 460]]
+  ];
+
+  for (const path of fissurePaths) {
+    // Capa exterior: resplandor profundo de calor
+    c.save();
+    c.strokeStyle = '#550000'; c.lineWidth = 14; c.lineCap = 'round'; c.lineJoin = 'round';
+    c.beginPath();
+    c.moveTo(path[0][0], path[0][1]);
+    for (let i = 1; i < path.length; i++) c.lineTo(path[i][0], path[i][1]);
+    c.stroke();
+
+    // Capa media: magma rojo-naranja vivo
+    c.strokeStyle = '#e62200'; c.lineWidth = 8;
+    c.beginPath();
+    c.moveTo(path[0][0], path[0][1]);
+    for (let i = 1; i < path.length; i++) c.lineTo(path[i][0], path[i][1]);
+    c.stroke();
+
+    // Capa ardiente: naranja brillante
+    c.strokeStyle = '#ff7700'; c.lineWidth = 4;
+    c.beginPath();
+    c.moveTo(path[0][0], path[0][1]);
+    for (let i = 1; i < path.length; i++) c.lineTo(path[i][0], path[i][1]);
+    c.stroke();
+
+    // Núcleo incandescente: amarillo plasma
+    c.strokeStyle = '#ffea55'; c.lineWidth = 1.5;
+    c.beginPath();
+    c.moveTo(path[0][0], path[0][1]);
+    for (let i = 1; i < path.length; i++) c.lineTo(path[i][0], path[i][1]);
+    c.stroke();
+    c.restore();
+  }
+
+  // 4. Pozas y calderas de lava burbujeante en los bordes
+  const lavaPools = [
+    { x: 180, y: 190, rx: 75, ry: 40 },
+    { x: 1740, y: 190, rx: 75, ry: 40 },
+    { x: 180, y: 920, rx: 80, ry: 44 },
+    { x: 1740, y: 920, rx: 80, ry: 44 },
+    { x: 960, y: 980, rx: 110, ry: 50 },
+    { x: 960, y: 160, rx: 90, ry: 42 }
+  ];
+  for (const pool of lavaPools) {
+    const pGrad = c.createRadialGradient(pool.x, pool.y, pool.rx * 0.1, pool.x, pool.y, pool.rx);
+    pGrad.addColorStop(0, '#ffee55');
+    pGrad.addColorStop(0.3, '#ff6600');
+    pGrad.addColorStop(0.7, '#cc1100');
+    pGrad.addColorStop(0.9, '#440509');
+    pGrad.addColorStop(1, 'transparent');
+    c.fillStyle = pGrad;
+    c.beginPath();
+    c.ellipse(pool.x, pool.y, pool.rx, pool.ry, 0, 0, Math.PI * 2);
+    c.fill();
+    c.strokeStyle = '#180608'; c.lineWidth = 3;
+    c.stroke();
+  }
+
+  // 5. Horizonte superior (cielo ardiente y silueta de caldera volcánica)
+  rect(c, '#090204', 0, 0, 1920, 84);
+  const skyGrad = c.createLinearGradient(0, 0, 0, 84);
+  skyGrad.addColorStop(0, '#220408');
+  skyGrad.addColorStop(0.6, '#3d0a10');
+  skyGrad.addColorStop(1, '#ff3300');
+  c.fillStyle = skyGrad;
+  c.fillRect(0, 0, 1920, 80);
+
+  // Silueta de crestas y conos volcánicos lejanos
+  c.fillStyle = '#0a0204';
+  c.beginPath();
+  c.moveTo(0, 80);
+  for (let x = 0; x <= 1920; x += 60) {
+    const peakH = 35 + Math.sin(x * 0.015) * 22 + Math.cos(x * 0.035) * 14;
+    c.lineTo(x, 80 - peakH);
+  }
+  c.lineTo(1920, 80);
+  c.closePath();
+  c.fill();
+
+  // Borde ardiente de separación de la arena
+  rect(c, '#ff2200', 0, 79, 1920, 4);
+  rect(c, '#ffaa00', 0, 81, 1920, 1.5);
+}
+
 function dinerFloor(map = 'diner') {
   if (floors.has(map)) return floors.get(map);
   const canvas = document.createElement('canvas'); canvas.width = 1920; canvas.height = 1080;
   const c = canvas.getContext('2d'); const parking = map === 'parking', kitchen = map === 'kitchen';
   if(map==='football'){footballFloor(c);floors.set(map,canvas);return canvas;}
+  if(map==='lava'){lavaFloor(c);floors.set(map,canvas);return canvas;}
   if(['snow','desert'].includes(map)){
     const colors=map==='snow'?['#275574','#35688a']:map==='desert'?['#bb8149','#c99355']:['#3c965b','#48a867'];
     for(let y=0;y<1080;y+=32)for(let x=0;x<1920;x+=32){rect(c,colors[(x/32+y/32)%2],x,y,32,32);rect(c,map==='snow'?'#7dd3fc1c':'#ffffff0b',x+2,y+2,28,2);}
@@ -544,6 +695,55 @@ export function drawDiner(c, width, height, time, menu, map = 'diner') {
         c.fillStyle = col;
         c.globalAlpha = Math.max(0.12, Math.min(0.9, alpha));
         c.fillRect(Math.round(px), Math.round(py), size, size);
+      }
+      c.restore();
+    } else if (map === 'lava') {
+      c.save();
+      // 1. Resplandor ambiental de calor magmático pulsante
+      const pulse = 0.12 + Math.sin(time * 2.5) * 0.04;
+      const heatGrad = c.createRadialGradient(width / 2, height / 2, 80, width / 2, height / 2, Math.max(width, height) * 0.72);
+      heatGrad.addColorStop(0, `rgba(255, 60, 0, ${pulse * 0.75})`);
+      heatGrad.addColorStop(0.55, `rgba(220, 30, 0, ${pulse})`);
+      heatGrad.addColorStop(1, `rgba(50, 5, 10, ${pulse * 1.6})`);
+      c.fillStyle = heatGrad;
+      c.fillRect(0, 0, width, height);
+
+      // 2. Brasas y chispas de lava flotantes ascendentes
+      for (let i = 0; i < 54; i++) {
+        const speedY = 55 + (i % 6) * 18;
+        const driftX = Math.sin(time * 2.2 + i * 1.5) * 28;
+        const x = ((i * 127 + driftX) % width + width) % width;
+        const y = height - ((i * 73 + time * speedY) % (height - 80));
+        const sz = (i % 5 === 0) ? 3.5 : (i % 2 === 0) ? 2.5 : 2;
+        const emberColor = (i % 3 === 0) ? '#ffee55' : (i % 2 === 0) ? '#ff6600' : '#ff2200';
+        c.fillStyle = emberColor;
+        c.globalAlpha = 0.45 + Math.sin(time * 4 + i) * 0.35;
+        c.fillRect(Math.round(x), Math.round(y), sz, sz);
+      }
+
+      // 3. Columnas de humo y vapor ardiente saliendo de las fisuras
+      for (let f = 0; f < 6; f++) {
+        const fx = [180, 680, 960, 1280, 1680, 450][f];
+        const fy = [240, 360, 590, 490, 680, 840][f];
+        const smokeH = 40 + Math.sin(time * 3 + f) * 12;
+        const sGrad = c.createRadialGradient(fx, fy - smokeH * 0.5, 5, fx, fy - smokeH * 0.5, 38);
+        sGrad.addColorStop(0, 'rgba(255, 120, 50, 0.22)');
+        sGrad.addColorStop(0.6, 'rgba(100, 30, 20, 0.12)');
+        sGrad.addColorStop(1, 'transparent');
+        c.fillStyle = sGrad;
+        c.beginPath();
+        c.ellipse(fx, fy - smokeH * 0.5, 36, smokeH, 0, 0, Math.PI * 2);
+        c.fill();
+      }
+
+      // 4. Ondas de calor distorsionado
+      c.strokeStyle = '#ff770028'; c.lineWidth = 2;
+      for (let i = 0; i < 4; i++) {
+        const y = 220 + i * 180;
+        const offset = Math.sin(time * 2.8 + i * 1.6) * 22;
+        c.beginPath(); c.moveTo(0, y + offset);
+        c.bezierCurveTo(width * 0.3, y - offset, width * 0.7, y + offset, width, y - offset);
+        c.stroke();
       }
       c.restore();
     } else {

@@ -348,6 +348,27 @@ export class DomiScreen {
         claim: () => { grantItem('accessory', 'leg_medallion'); }
       }
     ];
+
+    const prevDone = list.filter(m => m.isDone).length;
+    list.push({
+      id: 'm_legendary_lava',
+      type: 'mission',
+      rewardType: 'map',
+      rewardId: 'lava',
+      rewardName: 'Caldero de Lava (Legendario)',
+      rewardTooltip: 'MAPA LEGENDARIO: El núcleo volcánico donde aguarda el Coloso Final',
+      name: 'El Despertar del Caldero',
+      iconType: 'god',
+      description: 'Completa todas las misiones anteriores del Señor Domi para romper el sello.',
+      current: Math.min(13, prevDone),
+      target: 13,
+      unit: 'Misiones',
+      isDone: prevDone >= 13,
+      isClaimed: isOwned(profile, 'map', 'lava'),
+      claim: () => { grantItem('map', 'lava'); }
+    });
+
+    return list;
   }
 
   getCollectionSlots(profile) {
@@ -380,6 +401,7 @@ export class DomiScreen {
       { id: 'boss_fries', type: 'boss', enemyId: 'fries', name: 'La Papota Suprema', category: 'GRAN JEFE', stats: { hp: '1120', spd: '80', dmg: '28', perk: 'Lluvia Dorada' }, desc: 'Cae en picada causando terremotos en el asfalto del estacionamiento.', lockText: 'Vence 3 Jefes', isUnlocked: totalBosses >= 3 },
       { id: 'boss_pizza', type: 'boss', enemyId: 'pizza', name: 'Don Muzza el Padrino', category: 'GRAN JEFE', stats: { hp: '1350', spd: '60', dmg: '32', perk: 'Meteorito de Queso' }, desc: 'Pesado, blindado e implacable. Invocador de ondas de choque sísmicas.', lockText: 'Vence 4 Jefes', isUnlocked: totalBosses >= 4 },
       { id: 'boss_icecream', type: 'boss', enemyId: 'icecream', name: 'Emperador Subcero', category: 'GRAN JEFE', stats: { hp: '1080', spd: '66', dmg: '24', perk: 'Ventisca Congelante' }, desc: 'Monarca de la estepa nevada. Desata ráfagas gélidas que entumecen el movimiento.', lockText: 'Vence 5 Jefes', isUnlocked: totalBosses >= 5 },
+      { id: 'boss_colossus', type: 'boss', enemyId: 'lava_boss', name: 'Domi Colosal', category: 'COLOSO FINAL', stats: { hp: '4600', spd: '52', dmg: '38', perk: 'Rayo Magmático y Furia' }, desc: 'El titán del Caldero de Lava. Emperador del fuego subterráneo y portador de la Plancha Negra.', lockText: 'Vence al Coloso', isUnlocked: isOwned(profile, 'accessory', 'leg_lava_crown') },
       { id: 'domi', type: 'npc', name: 'Don Domi', category: 'LEYENDA', stats: { hp: '∞', spd: '∞', dmg: '∞', perk: 'Sabiduría Arcana' }, desc: 'El fundador original de la franquicia. Guarda las 11 reliquias legendarias sagradas.', lockText: 'SIEMPRE ACTIVO', isUnlocked: true }
     ];
   }
