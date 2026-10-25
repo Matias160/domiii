@@ -184,12 +184,13 @@ export function resolveDeaths(state, onLevelUp) {
 export function applyComboReward(state) {
   const combo = state.combo || 0, p = state.player;
   let label = '', color = '#91ffda';
-  if (combo === 10) { p.buffs.speedMultiplier = Math.max(p.buffs.speedMultiplier, 1.35); p.buffs.speedTime = Math.max(p.buffs.speedTime, 6); label = 'COMBO 10 / ACELERON'; }
-  if (combo === 20) { p.buffs.fireRateMultiplier = Math.min(p.buffs.fireRateMultiplier, .55); p.buffs.fireTime = Math.max(p.buffs.fireTime, 6); label = 'COMBO 20 / CADENCIA'; color = '#ffd75f'; }
-  if (combo === 30) { p.buffs.damageMultiplier = Math.max(p.buffs.damageMultiplier, 1.65); p.buffs.damageTime = Math.max(p.buffs.damageTime, 8); p.comboFeverTime = Math.max(p.comboFeverTime, 8); label = 'COMBO 30 / FIEBRE DE COCINA'; color = '#ff5d9e'; }
+  if (combo === 10) { p.buffs.speedMultiplier = Math.max(p.buffs.speedMultiplier, 1.35); p.buffs.speedTime = Math.max(p.buffs.speedTime, 6); label = '¡COMBO 10! / ¡ACELERÓN PICANTE!'; }
+  if (combo === 20) { p.buffs.fireRateMultiplier = Math.min(p.buffs.fireRateMultiplier, .55); p.buffs.fireTime = Math.max(p.buffs.fireTime, 6); label = '¡COMBO 20! / ¡EN LLAMAS!'; color = '#ffd75f'; }
+  if (combo === 30) { p.buffs.damageMultiplier = Math.max(p.buffs.damageMultiplier, 1.65); p.buffs.damageTime = Math.max(p.buffs.damageTime, 8); p.comboFeverTime = Math.max(p.comboFeverTime, 8); label = '¡COMBO 30! / ¡FIESTA EN LA COCINA!'; color = '#ff5d9e'; }
+  if (combo === 50) { p.buffs.damageMultiplier = Math.max(p.buffs.damageMultiplier, 2.0); p.buffs.damageTime = Math.max(p.buffs.damageTime, 10); label = '¡COMBO 50! / ¡MASTER CHEF LEGENDARIO!'; color = '#ffbe3b'; }
   if (!label) return false;
-  state.directorNotice = label; state.shake = Math.max(state.shake, .2); state.audio?.play('level');
-  impactRing(state, p.x, p.y, color); burst(state, p.x, p.y, color, 26, 180);
+  state.directorNotice = label; state.shake = Math.max(state.shake, .25); state.audio?.play('synergy');
+  impactRing(state, p.x, p.y, color); burst(state, p.x, p.y, color, 30, 200);
   state.floaters?.push({
     x: p.x,
     y: p.y - 48,

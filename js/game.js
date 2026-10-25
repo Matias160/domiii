@@ -59,6 +59,10 @@ export class Game {
     bindAuth(this);
     modLoader.loadMod(FrostbiteMod);
     document.querySelector('#logoutButton').addEventListener('click',()=>{logout();this.showScreen('authScreen');});
+    document.querySelector('#lobbyHelp')?.addEventListener('click', () => {
+      this.audio.play('navigate');
+      this.showScreen('onboardingScreen');
+    });
     this.lastSetup = null;
     this.state = null;
     this.lastTime = 0;
@@ -91,12 +95,14 @@ export class Game {
 
     // Botón de proceder en Onboarding hacia el lobby
     document.querySelector('#onboardingProceedBtn')?.addEventListener('click', () => {
+      this.audio.play('door_bell');
       this.showScreen('lobbyScreen');
     });
 
     window.addEventListener('keydown', event => {
       if (event.target.closest?.('input, select, textarea')) return;
       if (this.screenId === 'onboardingScreen' && (event.key.toLowerCase() === 'e' || event.key === 'Enter' || event.key === ' ')) {
+        this.audio.play('door_bell');
         this.showScreen('lobbyScreen');
         return;
       }
@@ -329,6 +335,7 @@ export class Game {
     if (state.directorNotice) { this.showToast(state.directorNotice); state.directorNotice = ''; }
     const before = { x:state.player.x, y:state.player.y };
     const dashBefore=state.player.dashTime;
+    const dashCooldownBefore = state.player.dashCooldown;
     const bounds = state.world || this.canvas;
     updatePlayer(state, delta, this.input, bounds);
     if(dashBefore<=0&&state.player.dashTime>0){
@@ -338,6 +345,15 @@ export class Game {
         dashEl.classList.remove('dash-active');
         requestAnimationFrame(() => dashEl.classList.add('dash-active'));
         setTimeout(() => dashEl.classList.remove('dash-active'), 220);
+      }
+    }
+    if(dashCooldownBefore>0&&state.player.dashCooldown<=0){
+      this.audio.play('dash_ready');
+      const dashEl = document.querySelector('#dashControl');
+      if (dashEl) {
+        dashEl.classList.remove('dash-ready-pulse');
+        requestAnimationFrame(() => dashEl.classList.add('dash-ready-pulse'));
+        setTimeout(() => dashEl.classList.remove('dash-ready-pulse'), 350);
       }
     }
     state.distance += Math.hypot(state.player.x - before.x, state.player.y - before.y);

@@ -76,6 +76,15 @@ export class AudioSystem {
       setTimeout(() => this.tone(90, .09, .07, 'sine', 45), 95);
       return;
     }
+    if (kind === 'door_bell') {
+      this.tone(784, .14, .08, 'triangle', 784);
+      setTimeout(() => this.tone(1174, .28, .10, 'triangle', 1174), 100);
+      return;
+    }
+    if (kind === 'dash_ready') {
+      this.tone(880, .07, .045, 'triangle', 1320);
+      return;
+    }
     const config={navigate:[540,.035,.025,680],confirm:[660,.09,.04,990],purchase:[880,.25,.07,1760],dash:[210,.12,.045,680],shoot:[750,.05,.045,260],pickup:[720,.18,.10,1200],kill:[370,.075,.035,160],damage:[130,.18,.10,45],boss:[110,.45,.12,55],level:[660,.30,.11,1320],death:[220,.65,.12,30]}[kind]||[440,.1,.06,440];
     this.tone(config[0],config[1],config[2],kind==='pickup'||kind==='level'?'triangle':'square',config[3]);
   }
