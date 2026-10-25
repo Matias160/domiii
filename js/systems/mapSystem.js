@@ -1,10 +1,11 @@
 import { damageEnemy } from './effectSystem.js';
 
-export const cactusGif = typeof Image !== 'undefined' ? new Image() : null;
-if (cactusGif) cactusGif.src = './Cactus.gif';
+// Sprite sheets generadas a partir de todos los cuadros de animación de los GIFs originales (16 frames)
+export const cactusSheet = typeof Image !== 'undefined' ? new Image() : null;
+if (cactusSheet) cactusSheet.src = './cactus_sheet.png';
 
-export const pelotaGif = typeof Image !== 'undefined' ? new Image() : null;
-if (pelotaGif) pelotaGif.src = './Pelota.gif';
+export const pelotaSheet = typeof Image !== 'undefined' ? new Image() : null;
+if (pelotaSheet) pelotaSheet.src = './pelota_sheet.png';
 
 export function updateMap(state, dt) {
   const worldW = state.world?.width || 1920;
@@ -40,23 +41,27 @@ export function updateMap(state, dt) {
     state.mapObstacles.push({
       x: startX, y,
       vx: -side * (state.mapId === 'football' ? 220 : 160),
-      vy: 0, // Movimiento en línea recta horizontal
-      radius: state.mapId === 'football' ? 26 : 30, // Hitbox más generosa acorde al tamaño
-      spin: 0, warning: .8, kicked: false
+      vy: 0,
+      radius: state.mapId === 'football' ? 36 : 42, // Hitbox acorde al nuevo gran tamaño
+      animTime: 0,
+      warning: .8, kicked: false
     });
     if (state.mapId === 'football') {
       state.mapObstacles.push({
         x: side < 0 ? worldW + 35 : -35,
         y: 180 + Math.random() * (worldH - 300),
         vx: side * 190,
-        vy: 0, // Movimiento en línea recta horizontal
-        radius: 26, spin: 0, warning: .8, kicked: false
+        vy: 0,
+        radius: 36,
+        animTime: 0.15,
+        warning: .8, kicked: false
       });
     }
   }
   for (const o of state.mapObstacles) {
     if (o.warning > 0) { o.warning = Math.max(0, o.warning - dt); continue; }
-    o.x += o.vx * dt; o.y += o.vy * dt; // Sin rotación añadida para mantener la orientación del gif limpia y recta
+    o.x += o.vx * dt; o.y += o.vy * dt;
+    o.animTime = (o.animTime || 0) + dt;
 
     // Cancha: patear la pelota con el acelerón
     if (state.mapId === 'football' && state.player.dashTime > 0 && Math.hypot(o.x - state.player.x, o.y - state.player.y) < o.radius + state.player.radius + 18) {
@@ -98,50 +103,59 @@ export function drawMapObstacles(ctx, state) {
       ctx.restore(); continue;
     }
     ctx.save(); ctx.translate(o.x, o.y);
-    ctx.fillStyle = '#07151b66'; ctx.beginPath(); ctx.ellipse(0, 24, 28, 10, 0, 0, Math.PI * 2); ctx.fill();
+    const shadowScale = state.mapId === 'football' ? 36 : 42;
+    ctx.fillStyle = '#07151b66'; ctx.beginPath(); ctx.ellipse(0, 32, shadowScale, 12, 0, 0, Math.PI * 2); ctx.fill();
+
+    // 16 cuadros a 0.05s por cuadro = 20 fps (idéntico al delay nativo del GIF)
+    const frameIndex = Math.floor((o.animTime || 0) * 20) % 16;
+
     if (state.mapId === 'football') {
       if (o.kicked) {
-        ctx.shadowColor = '#00ffcc'; ctx.shadowBlur = 18;
+        ctx.shadowColor = '#00ffcc'; ctx.shadowBlur = 24;
       }
-      if (pelotaGif && pelotaGif.complete && pelotaGif.naturalWidth > 0) {
+      if (pelotaSheet && pelotaSheet.complete && pelotaSheet.naturalWidth > 0) {
         ctx.imageSmoothingEnabled = false;
-        // Pelota más grande (58x58 px) y sin girar
-        ctx.drawImage(pelotaGif, -29, -29, 58, 58);
+        // Pelota recortada con tamaño ampliado notable (96x72 px) y animación fluida en vivo
+        const frameW = 318;
+        const frameH = 240;
+        const dw = 96;
+        const dwH = 72;
+        ctx.drawImage(
+          pelotaSheet,
+          frameIndex * frameW, 0, frameW, frameH,
+          -dw / 2, -dwH / 2, dw, dwH
+        );
       } else {
         // Fallback procedural ampliado
-        ctx.fillStyle = '#111b20'; ctx.beginPath(); ctx.arc(0, 0, 26, 0, Math.PI * 2); ctx.fill();
-        ctx.fillStyle = '#f8fafc'; ctx.beginPath(); ctx.arc(0, 0, 24, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = '#111b20'; ctx.beginPath(); ctx.arc(0, 0, 32, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = '#f8fafc'; ctx.beginPath(); ctx.arc(0, 0, 30, 0, Math.PI * 2); ctx.fill();
         ctx.fillStyle = o.kicked ? '#00e5ff' : '#0f172a';
         ctx.beginPath();
         for (let i = 0; i < 5; i++) {
           const a = i * Math.PI * 2 / 5 - Math.PI / 2;
-          const px = Math.cos(a) * 9, py = Math.sin(a) * 9;
+          const px = Math.cos(a) * 11, py = Math.sin(a) * 11;
           i === 0 ? ctx.moveTo(px, py) : ctx.lineTo(px, py);
         }
         ctx.closePath(); ctx.fill();
-        for (let i = 0; i < 5; i++) {
-          const a = i * Math.PI * 2 / 5 - Math.PI / 2;
-          const px = Math.cos(a) * 19, py = Math.sin(a) * 19;
-          ctx.beginPath(); ctx.arc(px, py, 5, 0, Math.PI * 2); ctx.fill();
-        }
-        ctx.fillStyle = '#ffffff'; ctx.fillRect(-8, -16, 6, 4);
       }
     } else {
-      if (cactusGif && cactusGif.complete && cactusGif.naturalWidth > 0) {
+      if (cactusSheet && cactusSheet.complete && cactusSheet.naturalWidth > 0) {
         ctx.imageSmoothingEnabled = false;
-        // Cactus más grande (64x76 px) y sin girar
-        ctx.drawImage(cactusGif, -32, -38, 64, 76);
+        // Cactus recortado con tamaño imponente (114x74 px) y animación fluida en vivo
+        const frameW = 378;
+        const frameH = 246;
+        const dw = 114;
+        const dwH = 74;
+        ctx.drawImage(
+          cactusSheet,
+          frameIndex * frameW, 0, frameW, frameH,
+          -dw / 2, -dwH / 2, dw, dwH
+        );
       } else {
         // Fallback procedural de contingencia ampliado
-        ctx.fillStyle = '#143823'; ctx.fillRect(-14, -26, 28, 52);
-        ctx.fillStyle = '#15803d'; ctx.fillRect(-11, -23, 22, 46);
-        ctx.fillStyle = '#22c55e'; ctx.fillRect(-7, -20, 7, 40);
-        ctx.fillStyle = '#143823'; ctx.fillRect(-30, -9, 18, 16); ctx.fillRect(-30, -22, 11, 16);
-        ctx.fillStyle = '#16a34a'; ctx.fillRect(-27, -6, 15, 10); ctx.fillRect(-27, -19, 8, 15);
-        ctx.fillStyle = '#143823'; ctx.fillRect(12, -18, 18, 16); ctx.fillRect(20, -30, 11, 16);
-        ctx.fillStyle = '#16a34a'; ctx.fillRect(12, -15, 15, 10); ctx.fillRect(20, -27, 8, 13);
-        ctx.fillStyle = '#fef08a';
-        ctx.fillRect(-3, -13, 3, 3); ctx.fillRect(3, -3, 3, 3); ctx.fillRect(-4, 9, 3, 3);
+        ctx.fillStyle = '#143823'; ctx.fillRect(-18, -32, 36, 64);
+        ctx.fillStyle = '#15803d'; ctx.fillRect(-14, -28, 28, 56);
+        ctx.fillStyle = '#22c55e'; ctx.fillRect(-9, -24, 9, 48);
       }
     }
     ctx.restore();
