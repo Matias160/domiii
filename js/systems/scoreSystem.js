@@ -123,6 +123,14 @@ export function resolveDeaths(state, onLevelUp) {
     if (enemy.isBoss) {
       state.bossesKilled = (state.bossesKilled || 0) + 1;
       state.bossDefeated = true;
+      state.shake = Math.max(state.shake || 0, 0.55);
+      state.hitFreeze = 0.22; // Micro cámara lenta / freeze al derrotar un Gran Jefe
+      // Onda dorada purificadora que desintegra proyectiles enemigos cercanos
+      state.rings?.push({ x: enemy.x, y: enemy.y, radius: 240, life: 0.9, maxLife: 0.9, color: '#ffd700' });
+      state.rings?.push({ x: enemy.x, y: enemy.y, radius: 140, life: 0.6, maxLife: 0.6, color: '#ffffff' });
+      if (state.enemyProjectiles) {
+        state.enemyProjectiles = state.enemyProjectiles.filter(p => Math.hypot(p.x - enemy.x, p.y - enemy.y) > 260);
+      }
       if (state.modeId === 'rush') {
         state.nextBossAt = state.time + 5.5;
         if (state.bossesKilled < RUSH_BOSS_GOAL) {

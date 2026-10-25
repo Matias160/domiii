@@ -49,11 +49,11 @@ export function bindAuth(game) {
     try {
       guestLogin();
       game.menu?.prepareAccount?.();
-      game.showScreen('lobbyScreen');
+      game.showScreen('onboardingScreen');
       game.showToast?.('¡Bienvenido al local! Entraste como Invitado.');
     } catch (err) {
       console.error('Error entering guest mode:', err);
-      game.showScreen('lobbyScreen');
+      game.showScreen('onboardingScreen');
     }
   });
 
@@ -75,7 +75,7 @@ export function bindAuth(game) {
       await resetPassword(username, newPass);
       alert(`¡Contraseña restablecida con éxito para "${username}"! Ingresando al juego...`);
       game.menu.prepareAccount();
-      game.showScreen('lobbyScreen');
+      game.showScreen('onboardingScreen');
     } catch (err) {
       alert(err.message || 'No se pudo restablecer la contraseña.');
     }
@@ -111,7 +111,7 @@ export function bindAuth(game) {
       password.value = '';
       concealPassword();
       game.menu.prepareAccount();
-      game.showScreen('lobbyScreen');
+      game.showScreen('onboardingScreen');
     } catch (failure) {
       error.textContent = failure.message || 'No se pudo entrar. Intentá nuevamente.';
       error.hidden = false;

@@ -88,8 +88,18 @@ export class Game {
     });
     document.querySelector('#resumeButton').addEventListener('click', () => this.resume());
     document.querySelector('#abandonButton').addEventListener('click', () => this.endRun('abandoned'));
+
+    // Botón de proceder en Onboarding hacia el lobby
+    document.querySelector('#onboardingProceedBtn')?.addEventListener('click', () => {
+      this.showScreen('lobbyScreen');
+    });
+
     window.addEventListener('keydown', event => {
       if (event.target.closest?.('input, select, textarea')) return;
+      if (this.screenId === 'onboardingScreen' && (event.key.toLowerCase() === 'e' || event.key === 'Enter' || event.key === ' ')) {
+        this.showScreen('lobbyScreen');
+        return;
+      }
       if (event.key === 'Escape' && !event.repeat) { if (this.running) this.pause(); else if (this.screenId === 'pauseScreen') this.resume(); }
       if(this.running&&!event.repeat){
         if(this.choice&&['1','2','3'].includes(event.key))document.querySelectorAll('.ability-card')[Number(event.key)-1]?.click();
@@ -277,9 +287,25 @@ export class Game {
 
   update(delta) {
     const state = this.state;
+    // Micro hit freeze tras derrotar a un gran jefe
+    if (state.hitFreeze > 0) {
+      state.hitFreeze -= delta;
+      delta *= 0.15; // Slow motion dramático
+    }
     state.time += delta;
     state.delta = delta;
     state.shake = Math.max(0, state.shake - delta);
+
+    // Latido y sonido de peligro cuando Pancho está en estado crítico (< 25% HP)
+    if (state.player && state.player.hp > 0 && (state.player.hp / state.player.maxHp) < 0.25) {
+      this.heartbeatTimer = (this.heartbeatTimer || 0) - delta;
+      if (this.heartbeatTimer <= 0) {
+        this.heartbeatTimer = 0.85;
+        this.audio?.play('heartbeat');
+      }
+    } else {
+      this.heartbeatTimer = 0;
+    }
 
     // Rebuild Spatial Hash Grid for O(1) broadphase queries
     if (state.spatialGrid) {
@@ -598,7 +624,7 @@ export class Game {
     };
     const previousUnlocks = new Set(unlockedAchievements().map(item=>item.id));
     result.newAchievements = recordRun(result).filter(item=>!previousUnlocks.has(item.id)).map(item=>item.name);
-    this.audio.play('death');
+    this.audio.play(outcome === 'victory' ? 'victory' : 'death');
     saveRun(result);
     awardRun(result);
     this.running = false;

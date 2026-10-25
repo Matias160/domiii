@@ -39,6 +39,68 @@
         </form>
       </section>
 
+      <!-- Pantalla de Introducción / Presentación del Club Domi -->
+      <section id="onboardingScreen" class="screen onboarding-screen" aria-labelledby="onboardingTitle">
+        <div class="screen__panel onboarding-panel">
+          <p class="eyebrow"><i data-lucide="sparkles"></i> BIENVENIDO AL TURNO</p>
+          <h2 id="onboardingTitle">DOMI 2: PANCHO</h2>
+          <p class="onboarding-subtitle">Guía rápida para sobrevivir y dominar el mostrador.</p>
+
+          <div class="onboarding-cards">
+            <!-- Tarjeta 1 -->
+            <div class="onboarding-card">
+              <div class="onboarding-badge-num">1</div>
+              <div class="onboarding-art">
+                <svg viewBox="0 0 24 24" width="48" height="48" shape-rendering="crispEdges">
+                  <polygon points="12,2 4,8 4,16 12,22 20,16 20,8" fill="#1e293b" stroke="#f43f5e" stroke-width="2"/>
+                  <rect x="7" y="10" width="3" height="4" fill="#ff4444"/>
+                  <rect x="14" y="10" width="3" height="4" fill="#ff4444"/>
+                  <polygon points="12,13 10,17 14,17" fill="#ffe066"/>
+                </svg>
+              </div>
+              <strong class="onboarding-card-title">SOBREVIVÍ AL CAOS</strong>
+              <p class="onboarding-card-desc">Esquivá hordas de clientes y derrotá a los Grandes Jefes de la cocina.</p>
+            </div>
+
+            <!-- Tarjeta 2 -->
+            <div class="onboarding-card">
+              <div class="onboarding-badge-num">2</div>
+              <div class="onboarding-art">
+                <svg viewBox="0 0 24 24" width="48" height="48" shape-rendering="crispEdges">
+                  <circle cx="12" cy="12" r="9" fill="#1e293b" stroke="#eab308" stroke-width="2"/>
+                  <rect x="11" y="6" width="2" height="12" fill="#fde047"/>
+                  <rect x="7" y="9" width="10" height="2" fill="#fde047"/>
+                  <rect x="7" y="13" width="10" height="2" fill="#fde047"/>
+                </svg>
+              </div>
+              <strong class="onboarding-card-title">MISIONES Y MONEDAS</strong>
+              <p class="onboarding-card-desc">Ganá puntos por combo y completá las misiones de Don Domi por reliquias.</p>
+            </div>
+
+            <!-- Tarjeta 3 -->
+            <div class="onboarding-card">
+              <div class="onboarding-badge-num">3</div>
+              <div class="onboarding-art">
+                <svg viewBox="0 0 24 24" width="48" height="48" shape-rendering="crispEdges">
+                  <rect x="3" y="5" width="18" height="15" fill="#1e293b" stroke="#38bdf8" stroke-width="2"/>
+                  <polygon points="12,8 8,14 16,14" fill="#38bdf8"/>
+                  <circle cx="12" cy="11" r="2" fill="#ffffff"/>
+                </svg>
+              </div>
+              <strong class="onboarding-card-title">TIENDA Y ARMARIO</strong>
+              <p class="onboarding-card-desc">Comprá mapas, nuevos personajes, mascotas de combate y accesorios únicos.</p>
+            </div>
+          </div>
+
+          <div class="onboarding-actions">
+            <button id="onboardingProceedBtn" type="button" class="pixel-button pixel-button--green onboarding-enter-btn">
+              <span>¡ENTRAR AL LOCAL!</span>
+              <kbd class="pixel-key">E</kbd>
+            </button>
+          </div>
+        </div>
+      </section>
+
       <section id="lobbyScreen" class="screen lobby-screen">
         <header class="lobby-header"><span class="brand-mark">D<span>2</span></span><div><strong id="lobbyWelcome">PANCHO</strong><small>SOCIO DEL CLUB / EN EL LOCAL</small></div><span class="wallet"><i data-lucide="coins"></i><b id="lobbyBank">0</b><small>PT</small></span><button id="lobbyAchievements" class="lobby-achievements" title="Ver logros" aria-label="Ver logros y progreso"><i data-lucide="trophy"></i><span>LOGROS <b id="lobbyAchievementCount">0 / 6</b></span></button><button id="lobbyOptions" class="icon-button" title="Opciones" aria-label="Opciones"><i data-lucide="settings-2"></i></button><button id="logoutButton" class="icon-button" title="Cerrar sesion" aria-label="Cerrar sesion"><i data-lucide="log-out"></i></button></header>
         <div class="lobby-stage"><canvas id="lobbyCanvas" width="960" height="540" aria-label="Lobby interactivo"></canvas><p class="lobby-controls"><kbd>WASD</kbd> / flechas: moverte <span>·</span> <kbd>E</kbd>: interactuar <span>·</span> También podés hacer clic en los lugares.</p><div class="lobby-tip" id="lobbyTip" hidden></div></div>
