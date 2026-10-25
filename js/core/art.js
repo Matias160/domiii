@@ -288,40 +288,6 @@ function dinerFloor(map = 'diner') {
       rect(c, '#ffbe0b24', x - 3, 517, 41, 10);
       rect(c, '#ffbe0b', x, 520, 35, 4);
     }
-
-    // 6. Charcos de asfalto húmedo / baches con volumen, bordes brillantes y reflejos volumétricos
-    const puddles = [
-      { x: 340, y: 370, rx: 72, ry: 26, glow: '#00f0ff', col: 'rgba(0, 240, 255, 0.22)' },
-      { x: 780, y: 640, rx: 86, ry: 30, glow: '#ff007f', col: 'rgba(255, 0, 127, 0.22)' },
-      { x: 1180, y: 390, rx: 78, ry: 27, glow: '#a855f7', col: 'rgba(168, 85, 247, 0.24)' },
-      { x: 1560, y: 670, rx: 68, ry: 24, glow: '#00f0ff', col: 'rgba(0, 240, 255, 0.22)' },
-      { x: 520, y: 840, rx: 62, ry: 22, glow: '#ffbe0b', col: 'rgba(255, 190, 11, 0.20)' },
-      { x: 1380, y: 830, rx: 74, ry: 26, glow: '#ff007f', col: 'rgba(255, 0, 127, 0.22)' },
-    ];
-    for (const p of puddles) {
-      c.save();
-      // Borde brillante con volumen
-      c.shadowColor = p.glow;
-      c.shadowBlur = 14;
-      c.strokeStyle = p.glow;
-      c.lineWidth = 2;
-      c.beginPath(); c.ellipse(p.x, p.y, p.rx + 2, p.ry + 1, 0, 0, Math.PI * 2); c.stroke();
-
-      // Centro profundo de agua oscura
-      c.shadowBlur = 0;
-      c.fillStyle = '#050810f0';
-      c.beginPath(); c.ellipse(p.x, p.y, p.rx, p.ry, 0, 0, Math.PI * 2); c.fill();
-
-      // Reflejo líquido translúcido
-      c.fillStyle = p.col;
-      c.beginPath(); c.ellipse(p.x, p.y, p.rx * 0.9, p.ry * 0.85, 0, 0, Math.PI * 2); c.fill();
-
-      // Destello especular en forma de media luna
-      c.strokeStyle = '#ffffff55';
-      c.lineWidth = 1.8;
-      c.beginPath(); c.ellipse(p.x, p.y, p.rx * 0.65, p.ry * 0.55, 0, Math.PI * 0.1, Math.PI * 0.9); c.stroke();
-      c.restore();
-    }
   }
   rect(c, parking ? '#0d131d' : '#172327', 0, 0, 1920, 80);
   rect(c, parking ? '#162032' : '#253637', 0, 76, 1920, 14);
@@ -345,40 +311,15 @@ function dinerFloor(map = 'diner') {
   }
   rect(c, '#1e2c2c', 48, 98, 1824, 4); rect(c, parking ? '#00f0ff55' : '#819e7d40', 48, 102, 1824, 1);
   for (let x = 50; x < 1870; x += 22) rect(c, parking ? ((x / 22) % 2 === 0 ? '#00f0ff' : '#ff007f') : '#d7b76a', x, 1050, 12, 3);
-  c.save();
-  if (parking) {
-    // Placa de asfalto oscuro estarcido de alto contraste
-    rect(c, 'rgba(4, 7, 14, 0.90)', 960 - 460, 560 - 64, 920, 116);
-    rect(c, '#00f0ff88', 960 - 460, 560 - 64, 920, 3);
-    rect(c, '#ff007f88', 960 - 460, 560 + 49, 920, 3);
-
-    // Contorno oscuro grueso para máxima legibilidad
-    c.font = '900 62px monospace';
-    c.textAlign = 'center';
-    c.lineWidth = 10;
-    c.strokeStyle = '#020408';
-    c.strokeText('NEON DELIVERY HUB', 960, 555);
-
-    // Texto con resplandor neón cian
-    c.shadowColor = '#00f0ff';
-    c.shadowBlur = 24;
-    c.fillStyle = '#38bdf8';
-    c.fillText('NEON DELIVERY HUB', 960, 555);
-
-    // Subtítulo con resplandor dorado ámbar
-    c.font = '700 15px monospace';
-    c.fillStyle = '#ffbe0b';
-    c.shadowColor = '#ffbe0b';
-    c.shadowBlur = 10;
-    c.fillText('/// SECTOR DE CARGA & DESPACHO 24H ///', 960, 592);
-  } else {
+  if (!parking) {
+    c.save();
     c.globalAlpha = .1;
     c.fillStyle = kitchen ? '#b8d5c8' : '#dbe6c5';
     c.font = '900 68px monospace';
     c.textAlign = 'center';
     c.fillText(kitchen ? 'COCINA INDUSTRIAL 02' : 'DOMI 24/7 ARCADE', 960, 560);
+    c.restore();
   }
-  c.restore();
   floors.set(map, canvas); return canvas;
 }
 
@@ -564,16 +505,6 @@ export function drawDiner(c, width, height, time, menu, map = 'diner') {
         c.lineTo(nl.x + 205, 390);
         c.lineTo(nl.x - 205, 390);
         c.closePath();
-        c.fill();
-
-        // Piscina de luz ambiental en el asfalto bajo el reflector
-        const pool = c.createRadialGradient(nl.x, 380, 15, nl.x, 380, 185);
-        pool.addColorStop(0, `rgba(${nl.color}, ${pulse * 0.85})`);
-        pool.addColorStop(0.6, `rgba(${nl.color}, ${pulse * 0.25})`);
-        pool.addColorStop(1, 'transparent');
-        c.fillStyle = pool;
-        c.beginPath();
-        c.ellipse(nl.x, 380, 180, 52, 0, 0, Math.PI * 2);
         c.fill();
 
         // Tubo de neón brillante en la cornisa
