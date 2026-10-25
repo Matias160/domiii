@@ -40,8 +40,8 @@ export function updateMap(state, dt) {
     state.mapObstacles.push({
       x: startX, y,
       vx: -side * (state.mapId === 'football' ? 220 : 160),
-      vy: (Math.random() - .5) * 60,
-      radius: state.mapId === 'football' ? 18 : 20,
+      vy: 0, // Movimiento en línea recta horizontal
+      radius: state.mapId === 'football' ? 26 : 30, // Hitbox más generosa acorde al tamaño
       spin: 0, warning: .8, kicked: false
     });
     if (state.mapId === 'football') {
@@ -49,14 +49,14 @@ export function updateMap(state, dt) {
         x: side < 0 ? worldW + 35 : -35,
         y: 180 + Math.random() * (worldH - 300),
         vx: side * 190,
-        vy: (Math.random() - .5) * 70,
-        radius: 18, spin: 0, warning: .8, kicked: false
+        vy: 0, // Movimiento en línea recta horizontal
+        radius: 26, spin: 0, warning: .8, kicked: false
       });
     }
   }
   for (const o of state.mapObstacles) {
     if (o.warning > 0) { o.warning = Math.max(0, o.warning - dt); continue; }
-    o.x += o.vx * dt; o.y += o.vy * dt; o.spin += dt * 6;
+    o.x += o.vx * dt; o.y += o.vy * dt; // Sin rotación añadida para mantener la orientación del gif limpia y recta
 
     // Cancha: patear la pelota con el acelerón
     if (state.mapId === 'football' && state.player.dashTime > 0 && Math.hypot(o.x - state.player.x, o.y - state.player.y) < o.radius + state.player.radius + 18) {
@@ -97,49 +97,51 @@ export function drawMapObstacles(ctx, state) {
       ctx.beginPath(); ctx.moveTo(x, o.y); ctx.lineTo(x + direction * 120, o.y); ctx.stroke();
       ctx.restore(); continue;
     }
-    ctx.save(); ctx.translate(o.x, o.y); ctx.rotate(o.spin);
-    ctx.fillStyle = '#07151b66'; ctx.beginPath(); ctx.ellipse(3, 18, 20, 8, 0, 0, 7); ctx.fill();
+    ctx.save(); ctx.translate(o.x, o.y);
+    ctx.fillStyle = '#07151b66'; ctx.beginPath(); ctx.ellipse(0, 24, 28, 10, 0, 0, Math.PI * 2); ctx.fill();
     if (state.mapId === 'football') {
       if (o.kicked) {
-        ctx.shadowColor = '#00ffcc'; ctx.shadowBlur = 14;
+        ctx.shadowColor = '#00ffcc'; ctx.shadowBlur = 18;
       }
       if (pelotaGif && pelotaGif.complete && pelotaGif.naturalWidth > 0) {
         ctx.imageSmoothingEnabled = false;
-        ctx.drawImage(pelotaGif, -22, -22, 44, 44);
+        // Pelota más grande (58x58 px) y sin girar
+        ctx.drawImage(pelotaGif, -29, -29, 58, 58);
       } else {
-        // Fallback procedural si el GIF aún no terminó de cargar
-        ctx.fillStyle = '#111b20'; ctx.beginPath(); ctx.arc(0, 0, 18, 0, Math.PI * 2); ctx.fill();
-        ctx.fillStyle = '#f8fafc'; ctx.beginPath(); ctx.arc(0, 0, 16, 0, Math.PI * 2); ctx.fill();
+        // Fallback procedural ampliado
+        ctx.fillStyle = '#111b20'; ctx.beginPath(); ctx.arc(0, 0, 26, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = '#f8fafc'; ctx.beginPath(); ctx.arc(0, 0, 24, 0, Math.PI * 2); ctx.fill();
         ctx.fillStyle = o.kicked ? '#00e5ff' : '#0f172a';
         ctx.beginPath();
         for (let i = 0; i < 5; i++) {
           const a = i * Math.PI * 2 / 5 - Math.PI / 2;
-          const px = Math.cos(a) * 6, py = Math.sin(a) * 6;
+          const px = Math.cos(a) * 9, py = Math.sin(a) * 9;
           i === 0 ? ctx.moveTo(px, py) : ctx.lineTo(px, py);
         }
         ctx.closePath(); ctx.fill();
         for (let i = 0; i < 5; i++) {
           const a = i * Math.PI * 2 / 5 - Math.PI / 2;
-          const px = Math.cos(a) * 13, py = Math.sin(a) * 13;
-          ctx.beginPath(); ctx.arc(px, py, 3.5, 0, Math.PI * 2); ctx.fill();
+          const px = Math.cos(a) * 19, py = Math.sin(a) * 19;
+          ctx.beginPath(); ctx.arc(px, py, 5, 0, Math.PI * 2); ctx.fill();
         }
-        ctx.fillStyle = '#ffffff'; ctx.fillRect(-6, -11, 4, 3);
+        ctx.fillStyle = '#ffffff'; ctx.fillRect(-8, -16, 6, 4);
       }
     } else {
       if (cactusGif && cactusGif.complete && cactusGif.naturalWidth > 0) {
         ctx.imageSmoothingEnabled = false;
-        ctx.drawImage(cactusGif, -24, -28, 48, 56);
+        // Cactus más grande (64x76 px) y sin girar
+        ctx.drawImage(cactusGif, -32, -38, 64, 76);
       } else {
-        // Fallback procedural de contingencia
-        ctx.fillStyle = '#143823'; ctx.fillRect(-10, -18, 20, 36);
-        ctx.fillStyle = '#15803d'; ctx.fillRect(-8, -16, 16, 32);
-        ctx.fillStyle = '#22c55e'; ctx.fillRect(-5, -14, 5, 28);
-        ctx.fillStyle = '#143823'; ctx.fillRect(-22, -6, 14, 11); ctx.fillRect(-22, -15, 8, 12);
-        ctx.fillStyle = '#16a34a'; ctx.fillRect(-20, -4, 12, 7); ctx.fillRect(-20, -13, 6, 11);
-        ctx.fillStyle = '#143823'; ctx.fillRect(8, -12, 14, 11); ctx.fillRect(14, -20, 8, 11);
-        ctx.fillStyle = '#16a34a'; ctx.fillRect(8, -10, 12, 7); ctx.fillRect(14, -18, 6, 9);
+        // Fallback procedural de contingencia ampliado
+        ctx.fillStyle = '#143823'; ctx.fillRect(-14, -26, 28, 52);
+        ctx.fillStyle = '#15803d'; ctx.fillRect(-11, -23, 22, 46);
+        ctx.fillStyle = '#22c55e'; ctx.fillRect(-7, -20, 7, 40);
+        ctx.fillStyle = '#143823'; ctx.fillRect(-30, -9, 18, 16); ctx.fillRect(-30, -22, 11, 16);
+        ctx.fillStyle = '#16a34a'; ctx.fillRect(-27, -6, 15, 10); ctx.fillRect(-27, -19, 8, 15);
+        ctx.fillStyle = '#143823'; ctx.fillRect(12, -18, 18, 16); ctx.fillRect(20, -30, 11, 16);
+        ctx.fillStyle = '#16a34a'; ctx.fillRect(12, -15, 15, 10); ctx.fillRect(20, -27, 8, 13);
         ctx.fillStyle = '#fef08a';
-        ctx.fillRect(-2, -9, 2, 2); ctx.fillRect(2, -2, 2, 2); ctx.fillRect(-3, 6, 2, 2);
+        ctx.fillRect(-3, -13, 3, 3); ctx.fillRect(3, -3, 3, 3); ctx.fillRect(-4, 9, 3, 3);
       }
     }
     ctx.restore();
