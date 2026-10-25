@@ -1,5 +1,6 @@
 import { Input } from "./core/input.js";
-import { drawDiner } from "./core/art.js";
+import { drawDiner, drawFood, drawWeapon } from "./core/art.js";
+import { drawPet } from "./core/presentation.js";
 import { drawWorldProps } from "./core/worldProps.js";
 import { skins } from "./data/skins.js";
 import { phrases } from "./data/phrases.js";
@@ -248,14 +249,127 @@ export class Game {
   }
 
   showRanking() {
-    const ranking = currentAccount()?.runs||getRanking();
+    const ranking = currentAccount()?.runs || getRanking();
     const list = document.querySelector("#rankingList");
     list.replaceChildren();
-    for (const run of ranking) {
-      const row = document.createElement('li'), name = document.createElement('strong');
-      name.textContent = run.name||currentAccount()?.name||'Jugador'; row.append(name, ` / ${run.score} pts / NV ${run.level||'?'} / ${run.timeText} / ${run.date}`); list.append(row);
+
+    const resolveLoadout = (run) => {
+      let skinId = run.skinId;
+      if (!skinId && run.skin) {
+        const s = String(run.skin).toLowerCase();
+        if (s.includes('nugget')) skinId = 'nugget';
+        else if (s.includes('papa')) skinId = 'papas';
+        else if (s.includes('pizza')) skinId = 'pizza';
+        else if (s.includes('empanada')) skinId = 'empanada';
+        else if (s.includes('chori')) skinId = 'choripan';
+        else skinId = 'pancho';
+      }
+      skinId = skinId || 'pancho';
+
+      let weaponId = run.weaponId;
+      if (!weaponId && run.weapon) {
+        const w = String(run.weapon).toLowerCase();
+        if (w.includes('sniper') || w.includes('mostaza')) weaponId = 'mustardSniper';
+        else if (w.includes('lluvia') || w.includes('papa')) weaponId = 'friesRain';
+        else if (w.includes('pan') || w.includes('explosiv')) weaponId = 'explosiveBread';
+        else if (w.includes('salsa') || w.includes('chimi')) weaponId = 'sauce';
+        else if (w.includes('brocheta') || w.includes('espada') || w.includes('skewer')) weaponId = 'skewer';
+        else weaponId = 'fork';
+      }
+      weaponId = weaponId || 'fork';
+
+      let companionId = run.companionId;
+      if (!companionId && run.companion) {
+        const c = String(run.companion).toLowerCase();
+        if (c.includes('ketchup')) companionId = 'ketchup';
+        else if (c.includes('dron') || c.includes('drone')) companionId = 'drone';
+        else if (c.includes('taco')) companionId = 'taco';
+        else if (c.includes('soda') || c.includes('botell')) companionId = 'soda';
+        else if (c.includes('parrilla')) companionId = 'parrilla';
+        else companionId = 'none';
+      }
+      companionId = companionId || 'none';
+
+      return { skinId, weaponId, companionId };
+    };
+
+    for (let index = 0; index < ranking.length; index++) {
+      const run = ranking[index];
+      const { skinId, weaponId, companionId } = resolveLoadout(run);
+
+      const row = document.createElement('li');
+      row.className = 'ranking-row';
+
+      const pos = document.createElement('span');
+      pos.className = `ranking-pos ${index < 3 ? `ranking-pos--${index + 1}` : ''}`;
+      pos.textContent = `#${index + 1}`;
+
+      const loadout = document.createElement('div');
+      loadout.className = 'ranking-loadout';
+
+      const cSkin = document.createElement('canvas');
+      cSkin.width = 44; cSkin.height = 44; cSkin.className = 'ranking-avatar';
+      cSkin.title = `Personaje: ${skinId.toUpperCase()}`;
+      const ctxSkin = cSkin.getContext('2d');
+      ctxSkin.imageSmoothingEnabled = false;
+      drawFood(ctxSkin, skinId, 22, 24, 0.65);
+
+      const cWep = document.createElement('canvas');
+      cWep.width = 34; cWep.height = 34; cWep.className = 'ranking-weapon';
+      cWep.title = `Arma: ${weaponId.toUpperCase()}`;
+      const ctxWep = cWep.getContext('2d');
+      ctxWep.imageSmoothingEnabled = false;
+      drawWeapon(ctxWep, weaponId, 17, 17, 0.65);
+
+      const cPet = document.createElement('canvas');
+      cPet.width = 34; cPet.height = 34; cPet.className = 'ranking-pet';
+      cPet.title = `Mascota: ${companionId.toUpperCase()}`;
+      const ctxPet = cPet.getContext('2d');
+      ctxPet.imageSmoothingEnabled = false;
+      if (companionId && companionId !== 'none') {
+        drawPet(ctxPet, companionId, 17, 17, 0, 1.05);
+      } else {
+        ctxPet.fillStyle = '#475569';
+        ctxPet.font = 'bold 13px monospace';
+        ctxPet.textAlign = 'center';
+        ctxPet.textBaseline = 'middle';
+        ctxPet.fillText('—', 17, 17);
+      }
+      loadout.append(cSkin, cWep, cPet);
+
+      const info = document.createElement('div');
+      info.className = 'ranking-info';
+
+      const head = document.createElement('div');
+      head.className = 'ranking-header';
+      const name = document.createElement('strong');
+      name.className = 'ranking-name';
+      name.textContent = run.name || currentAccount()?.name || 'Pancho';
+
+      const outcome = document.createElement('span');
+      const isVictory = run.outcome === 'victory';
+      outcome.className = `ranking-badge ${isVictory ? 'ranking-badge--victory' : 'ranking-badge--defeat'}`;
+      outcome.textContent = isVictory ? 'VICTORIA' : 'CAÍDO';
+      head.append(name, outcome);
+
+      const stats = document.createElement('div');
+      stats.className = 'ranking-stats';
+      stats.innerHTML = `<span>NV ${run.level || 1}</span><span>·</span><span>${run.kills || 0} KOs</span><span>·</span><span>${run.timeText || '00:00'}</span><span>·</span><span>${run.date || ''}</span>`;
+      info.append(head, stats);
+
+      const score = document.createElement('div');
+      score.className = 'ranking-score';
+      score.textContent = `${Number(run.score || 0).toLocaleString('es-AR')} PT`;
+
+      row.append(pos, loadout, info, score);
+      list.append(row);
     }
-    if (!ranking.length) { const row = document.createElement('li'); row.textContent = 'El primer lugar te esta esperando.'; list.append(row); }
+    if (!ranking.length) {
+      const empty = document.createElement('li');
+      empty.className = 'ranking-empty';
+      empty.textContent = 'El primer lugar te está esperando. ¡Jugá una partida para inaugurar el ranking!';
+      list.append(empty);
+    }
     this.showScreen("rankingScreen");
   }
 
@@ -624,7 +738,9 @@ export class Game {
       kills: this.state.kills,
       level: this.state.player.level,
       skin: this.state.player.skin.name,
+      skinId: this.state.player.skin.id || 'pancho',
       weapon: this.state.player.weapon.name,
+      weaponId: this.state.player.weapon.id || 'fork',
       difficulty: this.state.difficulty.name,
       map: this.state.mapId,
       bossesKilled: this.state.bossesKilled,
@@ -632,7 +748,8 @@ export class Game {
       pickups: this.state.pickups,
       mode: modes[this.state.modeId].name,
       modeId: this.state.modeId,
-      companion: companions[this.state.companion.id].name,
+      companion: companions[this.state.companion?.id]?.name || 'Sin compañero',
+      companionId: this.state.companion?.id || 'none',
       peakCombo: this.state.peakCombo,
       outcome,
       wave: this.state.wave,

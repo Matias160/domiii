@@ -32,7 +32,26 @@ export class MenuScreen {
 
     this.bindCards();
     this.restoreSetup();
-    document.querySelector("#playButton").addEventListener("click", () => { this.renderOptions(); game.showScreen("setupScreen"); });
+    this.setSetupStep(1);
+
+    document.querySelector("#setupNextBtn")?.addEventListener("click", () => {
+      this.setSetupStep(2);
+      this.game.audio?.play('navigate');
+    });
+    document.querySelector("#setupPrevBtn")?.addEventListener("click", () => {
+      this.setSetupStep(1);
+      this.game.audio?.play('navigate');
+    });
+    document.querySelector("#tabStep1")?.addEventListener("click", () => {
+      this.setSetupStep(1);
+      this.game.audio?.play('navigate');
+    });
+    document.querySelector("#tabStep2")?.addEventListener("click", () => {
+      this.setSetupStep(2);
+      this.game.audio?.play('navigate');
+    });
+
+    document.querySelector("#playButton").addEventListener("click", () => { this.setSetupStep(1); this.renderOptions(); game.showScreen("setupScreen"); });
     document.querySelector("#setupBackButton").addEventListener("click", () => game.showScreen("lobbyScreen"));
     document.querySelector("#rankingButton").addEventListener("click", () => game.showRanking());
     document.querySelector('#skinsButton').addEventListener('click',()=>this.showSkins());
@@ -102,6 +121,22 @@ export class MenuScreen {
     if (this.cardDifficultyVal) this.cardDifficultyVal.textContent = getCleanLabel(this.difficultyInput);
     if (this.cardAccessoryVal) this.cardAccessoryVal.textContent = getCleanLabel(this.accessoryInput);
     refreshIcons();
+  }
+
+  setSetupStep(step = 1) {
+    this.setupStep = step;
+    const s1 = document.querySelector('#setupStep1');
+    const s2 = document.querySelector('#setupStep2');
+    const t1 = document.querySelector('#tabStep1');
+    const t2 = document.querySelector('#tabStep2');
+    if (s1 && s2) {
+      s1.hidden = (step !== 1);
+      s2.hidden = (step !== 2);
+    }
+    if (t1 && t2) {
+      t1.classList.toggle('setup-step-tab--active', step === 1);
+      t2.classList.toggle('setup-step-tab--active', step === 2);
+    }
   }
 
   restoreSetup() {

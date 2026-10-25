@@ -162,164 +162,201 @@
             </div>
           </div>
 
-          <!-- Variante 3: 4 Tarjetas principales en grid 2x2 exacta al mockup -->
-          <div class="setup-cards-grid">
-            <!-- MODO -->
-            <button type="button" class="setup-card setup-card--amber" id="cardMode" aria-label="Cambiar modo de juego">
-              <div class="setup-card__icon-box">
-                <svg viewBox="0 0 24 24" class="card-icon-pixel" shape-rendering="crispEdges" aria-hidden="true">
-                  <!-- Ball Top -->
-                  <rect x="10" y="2" width="4" height="1" fill="#fff"/>
-                  <rect x="9" y="3" width="6" height="4" fill="#ffcc00"/>
-                  <rect x="10" y="3" width="2" height="2" fill="#fff"/>
-                  <rect x="10" y="7" width="4" height="1" fill="#cc8800"/>
-                  <!-- Shaft -->
-                  <rect x="11" y="8" width="2" height="5" fill="#f0f0f0"/>
-                  <rect x="12" y="8" width="1" height="5" fill="#888888"/>
-                  <!-- Washer -->
-                  <rect x="9" y="13" width="6" height="2" fill="#222222"/>
-                  <rect x="10" y="13" width="4" height="1" fill="#555555"/>
-                  <!-- Isometric Pixel Base -->
-                  <rect x="5" y="15" width="14" height="1" fill="#ffcc00"/>
-                  <rect x="3" y="16" width="18" height="2" fill="#ffaa00"/>
-                  <rect x="2" y="18" width="20" height="2" fill="#cc7700"/>
-                  <rect x="2" y="20" width="20" height="1" fill="#884400"/>
-                  <rect x="4" y="21" width="16" height="1" fill="#111111"/>
-                </svg>
-              </div>
-              <div class="setup-card__content">
-                <span class="setup-card__label">Modo</span>
-                <strong class="setup-card__value" id="cardModeVal">8 oleadas</strong>
-                <span class="setup-card__hint">Clic para alternar</span>
-              </div>
-            </button>
-
-            <!-- MAPA -->
-            <button type="button" class="setup-card setup-card--mint" id="cardMap" aria-label="Cambiar mapa de juego">
-              <div class="setup-card__icon-box">
-                <svg viewBox="0 0 24 24" class="card-icon-pixel" shape-rendering="crispEdges" aria-hidden="true">
-                  <!-- Pin Head -->
-                  <rect x="9" y="2" width="6" height="1" fill="#00ff88"/>
-                  <rect x="7" y="3" width="10" height="1" fill="#00ff88"/>
-                  <rect x="6" y="4" width="12" height="4" fill="#00e577"/>
-                  <rect x="8" y="4" width="2" height="2" fill="#ffffff"/>
-                  <rect x="7" y="8" width="10" height="2" fill="#00cc66"/>
-                  <!-- Center Hole -->
-                  <rect x="10" y="5" width="4" height="3" fill="#082315"/>
-                  <!-- Pin Point -->
-                  <rect x="8" y="10" width="8" height="2" fill="#00b355"/>
-                  <rect x="9" y="12" width="6" height="2" fill="#009944"/>
-                  <rect x="10" y="14" width="4" height="2" fill="#008038"/>
-                  <rect x="11" y="16" width="2" height="2" fill="#00662d"/>
-                  <!-- Pixel Shadow -->
-                  <rect x="8" y="19" width="8" height="2" fill="#00ff88" opacity="0.3"/>
-                  <rect x="6" y="20" width="12" height="1" fill="#00ff88" opacity="0.15"/>
-                </svg>
-              </div>
-              <div class="setup-card__content">
-                <span class="setup-card__label">Mapa</span>
-                <strong class="setup-card__value" id="cardMapVal">01 / Local DOMI</strong>
-                <span class="setup-card__hint">Clic para alternar</span>
-              </div>
-            </button>
-
-            <!-- MASCOTA (Companero) -->
-            <button type="button" class="setup-card setup-card--cyan" id="cardCompanion" aria-label="Cambiar mascota o companero">
-              <div class="setup-card__icon-box">
-                <svg viewBox="0 0 24 24" class="card-icon-pixel" shape-rendering="crispEdges" aria-hidden="true">
-                  <!-- Toe Beans -->
-                  <rect x="4" y="7" width="3" height="4" fill="#00e5ff"/>
-                  <rect x="5" y="8" width="1" height="1" fill="#fff"/>
-                  <rect x="8" y="3" width="3" height="4" fill="#00e5ff"/>
-                  <rect x="9" y="4" width="1" height="1" fill="#fff"/>
-                  <rect x="13" y="3" width="3" height="4" fill="#00e5ff"/>
-                  <rect x="14" y="4" width="1" height="1" fill="#fff"/>
-                  <rect x="17" y="7" width="3" height="4" fill="#00e5ff"/>
-                  <rect x="18" y="8" width="1" height="1" fill="#fff"/>
-                  <!-- Main Pad -->
-                  <rect x="8" y="10" width="8" height="2" fill="#00e5ff"/>
-                  <rect x="6" y="12" width="12" height="4" fill="#00d0e8"/>
-                  <rect x="9" y="12" width="2" height="2" fill="#fff"/>
-                  <rect x="7" y="16" width="10" height="2" fill="#009db0"/>
-                  <rect x="9" y="18" width="6" height="1" fill="#006b78"/>
-                  <!-- Shadow -->
-                  <rect x="6" y="20" width="12" height="1" fill="#00e5ff" opacity="0.3"/>
-                </svg>
-              </div>
-              <div class="setup-card__content">
-                <span class="setup-card__label">Mascota</span>
-                <strong class="setup-card__value" id="cardCompanionVal">Sin companero</strong>
-                <span class="setup-card__hint">Clic para alternar</span>
-              </div>
-            </button>
-
-            <!-- DIFICULTAD -->
-            <button type="button" class="setup-card setup-card--red" id="cardDifficulty" aria-label="Cambiar dificultad">
-              <div class="setup-card__icon-box">
-                <svg viewBox="0 0 24 24" class="card-icon-pixel" shape-rendering="crispEdges" aria-hidden="true">
-                  <!-- Cranium Top -->
-                  <rect x="8" y="2" width="8" height="1" fill="#ff4455"/>
-                  <rect x="6" y="3" width="12" height="2" fill="#ff4455"/>
-                  <rect x="8" y="3" width="2" height="1" fill="#ffffff"/>
-                  <rect x="4" y="5" width="16" height="5" fill="#ea2e40"/>
-                  <!-- Eye Sockets with Glowing Red Pupils -->
-                  <rect x="6" y="8" width="4" height="4" fill="#180508"/>
-                  <rect x="7" y="9" width="2" height="2" fill="#ff0022"/>
-                  <rect x="14" y="8" width="4" height="4" fill="#180508"/>
-                  <rect x="15" y="9" width="2" height="2" fill="#ff0022"/>
-                  <!-- Nose Cavity -->
-                  <rect x="11" y="12" width="2" height="2" fill="#180508"/>
-                  <!-- Cheekbones -->
-                  <rect x="5" y="11" width="3" height="3" fill="#c01c2c"/>
-                  <rect x="16" y="11" width="3" height="3" fill="#c01c2c"/>
-                  <!-- Teeth / Jaw -->
-                  <rect x="7" y="15" width="10" height="1" fill="#ea2e40"/>
-                  <rect x="8" y="16" width="8" height="3" fill="#ffffff"/>
-                  <rect x="9" y="16" width="1" height="3" fill="#180508"/>
-                  <rect x="11" y="16" width="2" height="3" fill="#180508"/>
-                  <rect x="14" y="16" width="1" height="3" fill="#180508"/>
-                  <rect x="8" y="19" width="8" height="1" fill="#880011"/>
-                </svg>
-              </div>
-              <div class="setup-card__content">
-                <span class="setup-card__label">Dificultad</span>
-                <strong class="setup-card__value" id="cardDifficultyVal">Picante</strong>
-                <span class="setup-card__hint">Clic para alternar</span>
-              </div>
-            </button>
+          <!-- Pestañas de Paso: 1. Partida / 2. Equipamiento -->
+          <div class="setup-steps-nav">
+            <button type="button" id="tabStep1" class="setup-step-tab setup-step-tab--active"><span class="step-num">1</span> ELEGIR PARTIDA</button>
+            <span class="step-nav-arrow" aria-hidden="true">&#10148;</span>
+            <button type="button" id="tabStep2" class="setup-step-tab"><span class="step-num">2</span> PERSONAJE Y ARMAS</button>
           </div>
 
-          <!-- Accesorio card compact -->
-          <div class="setup-accessory-bar">
-            <button type="button" class="setup-card setup-card--purple setup-card--compact" id="cardAccessory" aria-label="Cambiar accesorio">
-              <div class="setup-card__icon-box">
-                <svg viewBox="0 0 24 24" class="card-icon-pixel" shape-rendering="crispEdges" aria-hidden="true">
-                  <!-- Crown Tips -->
-                  <rect x="4" y="6" width="2" height="2" fill="#b844ff"/>
-                  <rect x="11" y="4" width="2" height="2" fill="#fff"/>
-                  <rect x="18" y="6" width="2" height="2" fill="#b844ff"/>
-                  <!-- Crown Body -->
-                  <rect x="4" y="8" width="3" height="7" fill="#b844ff"/>
-                  <rect x="10" y="6" width="4" height="9" fill="#d47aff"/>
-                  <rect x="17" y="8" width="3" height="7" fill="#b844ff"/>
-                  <rect x="7" y="11" width="3" height="4" fill="#9d22e8"/>
-                  <rect x="14" y="11" width="3" height="4" fill="#9d22e8"/>
-                  <!-- Jewels -->
-                  <rect x="5" y="13" width="1" height="1" fill="#00ffcc"/>
-                  <rect x="11" y="11" width="2" height="2" fill="#ffcc00"/>
-                  <rect x="18" y="13" width="1" height="1" fill="#00ffcc"/>
-                  <!-- Crown Rim -->
-                  <rect x="3" y="15" width="18" height="3" fill="#ffbe3b"/>
-                  <rect x="4" y="16" width="16" height="1" fill="#ffffff"/>
-                  <rect x="3" y="18" width="18" height="1" fill="#8c4400"/>
-                </svg>
-              </div>
-              <div class="setup-card__content">
-                <span class="setup-card__label">Accesorio Extra</span>
-                <strong class="setup-card__value" id="cardAccessoryVal">Sin accesorio</strong>
-                <span class="setup-card__hint">Clic para alternar</span>
-              </div>
-            </button>
+          <!-- PASO 1: Selección de Partida (Modo, Mapa, Mascota, Dificultad, Accesorio) -->
+          <div id="setupStep1" class="setup-step-view">
+            <!-- Variante 3: 4 Tarjetas principales en grid 2x2 exacta al mockup -->
+            <div class="setup-cards-grid">
+              <!-- MODO -->
+              <button type="button" class="setup-card setup-card--amber" id="cardMode" aria-label="Cambiar modo de juego">
+                <div class="setup-card__icon-box">
+                  <svg viewBox="0 0 24 24" class="card-icon-pixel" shape-rendering="crispEdges" aria-hidden="true">
+                    <!-- Ball Top -->
+                    <rect x="10" y="2" width="4" height="1" fill="#fff"/>
+                    <rect x="9" y="3" width="6" height="4" fill="#ffcc00"/>
+                    <rect x="10" y="3" width="2" height="2" fill="#fff"/>
+                    <rect x="10" y="7" width="4" height="1" fill="#cc8800"/>
+                    <!-- Shaft -->
+                    <rect x="11" y="8" width="2" height="5" fill="#f0f0f0"/>
+                    <rect x="12" y="8" width="1" height="5" fill="#888888"/>
+                    <!-- Washer -->
+                    <rect x="9" y="13" width="6" height="2" fill="#222222"/>
+                    <rect x="10" y="13" width="4" height="1" fill="#555555"/>
+                    <!-- Isometric Pixel Base -->
+                    <rect x="5" y="15" width="14" height="1" fill="#ffcc00"/>
+                    <rect x="3" y="16" width="18" height="2" fill="#ffaa00"/>
+                    <rect x="2" y="18" width="20" height="2" fill="#cc7700"/>
+                    <rect x="2" y="20" width="20" height="1" fill="#884400"/>
+                    <rect x="4" y="21" width="16" height="1" fill="#111111"/>
+                  </svg>
+                </div>
+                <div class="setup-card__content">
+                  <span class="setup-card__label">Modo</span>
+                  <strong class="setup-card__value" id="cardModeVal">8 oleadas</strong>
+                  <span class="setup-card__hint">Clic para alternar</span>
+                </div>
+              </button>
+
+              <!-- MAPA -->
+              <button type="button" class="setup-card setup-card--mint" id="cardMap" aria-label="Cambiar mapa de juego">
+                <div class="setup-card__icon-box">
+                  <svg viewBox="0 0 24 24" class="card-icon-pixel" shape-rendering="crispEdges" aria-hidden="true">
+                    <!-- Pin Head -->
+                    <rect x="9" y="2" width="6" height="1" fill="#00ff88"/>
+                    <rect x="7" y="3" width="10" height="1" fill="#00ff88"/>
+                    <rect x="6" y="4" width="12" height="4" fill="#00e577"/>
+                    <rect x="8" y="4" width="2" height="2" fill="#ffffff"/>
+                    <rect x="7" y="8" width="10" height="2" fill="#00cc66"/>
+                    <!-- Center Hole -->
+                    <rect x="10" y="5" width="4" height="3" fill="#082315"/>
+                    <!-- Pin Point -->
+                    <rect x="8" y="10" width="8" height="2" fill="#00b355"/>
+                    <rect x="9" y="12" width="6" height="2" fill="#009944"/>
+                    <rect x="10" y="14" width="4" height="2" fill="#008038"/>
+                    <rect x="11" y="16" width="2" height="2" fill="#00662d"/>
+                    <!-- Pixel Shadow -->
+                    <rect x="8" y="19" width="8" height="2" fill="#00ff88" opacity="0.3"/>
+                    <rect x="6" y="20" width="12" height="1" fill="#00ff88" opacity="0.15"/>
+                  </svg>
+                </div>
+                <div class="setup-card__content">
+                  <span class="setup-card__label">Mapa</span>
+                  <strong class="setup-card__value" id="cardMapVal">01 / Local DOMI</strong>
+                  <span class="setup-card__hint">Clic para alternar</span>
+                </div>
+              </button>
+
+              <!-- MASCOTA (Companero) -->
+              <button type="button" class="setup-card setup-card--cyan" id="cardCompanion" aria-label="Cambiar mascota o companero">
+                <div class="setup-card__icon-box">
+                  <svg viewBox="0 0 24 24" class="card-icon-pixel" shape-rendering="crispEdges" aria-hidden="true">
+                    <!-- Toe Beans -->
+                    <rect x="4" y="7" width="3" height="4" fill="#00e5ff"/>
+                    <rect x="5" y="8" width="1" height="1" fill="#fff"/>
+                    <rect x="8" y="3" width="3" height="4" fill="#00e5ff"/>
+                    <rect x="9" y="4" width="1" height="1" fill="#fff"/>
+                    <rect x="13" y="3" width="3" height="4" fill="#00e5ff"/>
+                    <rect x="14" y="4" width="1" height="1" fill="#fff"/>
+                    <rect x="17" y="7" width="3" height="4" fill="#00e5ff"/>
+                    <rect x="18" y="8" width="1" height="1" fill="#fff"/>
+                    <!-- Main Pad -->
+                    <rect x="8" y="10" width="8" height="2" fill="#00e5ff"/>
+                    <rect x="6" y="12" width="12" height="4" fill="#00d0e8"/>
+                    <rect x="9" y="12" width="2" height="2" fill="#fff"/>
+                    <rect x="7" y="16" width="10" height="2" fill="#009db0"/>
+                    <rect x="9" y="18" width="6" height="1" fill="#006b78"/>
+                    <!-- Shadow -->
+                    <rect x="6" y="20" width="12" height="1" fill="#00e5ff" opacity="0.3"/>
+                  </svg>
+                </div>
+                <div class="setup-card__content">
+                  <span class="setup-card__label">Mascota</span>
+                  <strong class="setup-card__value" id="cardCompanionVal">Sin companero</strong>
+                  <span class="setup-card__hint">Clic para alternar</span>
+                </div>
+              </button>
+
+              <!-- DIFICULTAD -->
+              <button type="button" class="setup-card setup-card--red" id="cardDifficulty" aria-label="Cambiar dificultad">
+                <div class="setup-card__icon-box">
+                  <svg viewBox="0 0 24 24" class="card-icon-pixel" shape-rendering="crispEdges" aria-hidden="true">
+                    <!-- Cranium Top -->
+                    <rect x="8" y="2" width="8" height="1" fill="#ff4455"/>
+                    <rect x="6" y="3" width="12" height="2" fill="#ff4455"/>
+                    <rect x="8" y="3" width="2" height="1" fill="#ffffff"/>
+                    <rect x="4" y="5" width="16" height="5" fill="#ea2e40"/>
+                    <!-- Eye Sockets with Glowing Red Pupils -->
+                    <rect x="6" y="8" width="4" height="4" fill="#180508"/>
+                    <rect x="7" y="9" width="2" height="2" fill="#ff0022"/>
+                    <rect x="14" y="8" width="4" height="4" fill="#180508"/>
+                    <rect x="15" y="9" width="2" height="2" fill="#ff0022"/>
+                    <!-- Nose Cavity -->
+                    <rect x="11" y="12" width="2" height="2" fill="#180508"/>
+                    <!-- Cheekbones -->
+                    <rect x="5" y="11" width="3" height="3" fill="#c01c2c"/>
+                    <rect x="16" y="11" width="3" height="3" fill="#c01c2c"/>
+                    <!-- Teeth / Jaw -->
+                    <rect x="7" y="15" width="10" height="1" fill="#ea2e40"/>
+                    <rect x="8" y="16" width="8" height="3" fill="#ffffff"/>
+                    <rect x="9" y="16" width="1" height="3" fill="#180508"/>
+                    <rect x="11" y="16" width="2" height="3" fill="#180508"/>
+                    <rect x="14" y="16" width="1" height="3" fill="#180508"/>
+                    <rect x="8" y="19" width="8" height="1" fill="#880011"/>
+                  </svg>
+                </div>
+                <div class="setup-card__content">
+                  <span class="setup-card__label">Dificultad</span>
+                  <strong class="setup-card__value" id="cardDifficultyVal">Picante</strong>
+                  <span class="setup-card__hint">Clic para alternar</span>
+                </div>
+              </button>
+            </div>
+
+            <!-- Accesorio card compact -->
+            <div class="setup-accessory-bar">
+              <button type="button" class="setup-card setup-card--purple setup-card--compact" id="cardAccessory" aria-label="Cambiar accesorio">
+                <div class="setup-card__icon-box">
+                  <svg viewBox="0 0 24 24" class="card-icon-pixel" shape-rendering="crispEdges" aria-hidden="true">
+                    <!-- Crown Tips -->
+                    <rect x="4" y="6" width="2" height="2" fill="#b844ff"/>
+                    <rect x="11" y="4" width="2" height="2" fill="#fff"/>
+                    <rect x="18" y="6" width="2" height="2" fill="#b844ff"/>
+                    <!-- Crown Body -->
+                    <rect x="4" y="8" width="3" height="7" fill="#b844ff"/>
+                    <rect x="10" y="6" width="4" height="9" fill="#d47aff"/>
+                    <rect x="17" y="8" width="3" height="7" fill="#b844ff"/>
+                    <rect x="7" y="11" width="3" height="4" fill="#9d22e8"/>
+                    <rect x="14" y="11" width="3" height="4" fill="#9d22e8"/>
+                    <!-- Jewels -->
+                    <rect x="5" y="13" width="1" height="1" fill="#00ffcc"/>
+                    <rect x="11" y="11" width="2" height="2" fill="#ffcc00"/>
+                    <rect x="18" y="13" width="1" height="1" fill="#00ffcc"/>
+                    <!-- Crown Rim -->
+                    <rect x="3" y="15" width="18" height="3" fill="#ffbe3b"/>
+                    <rect x="4" y="16" width="16" height="1" fill="#ffffff"/>
+                    <rect x="3" y="18" width="18" height="1" fill="#8c4400"/>
+                  </svg>
+                </div>
+                <div class="setup-card__content">
+                  <span class="setup-card__label">Accesorio Extra</span>
+                  <strong class="setup-card__value" id="cardAccessoryVal">Sin accesorio</strong>
+                  <span class="setup-card__hint">Clic para alternar</span>
+                </div>
+              </button>
+            </div>
+
+            <div class="menu-actions setup-step-actions">
+              <button id="setupNextBtn" type="button" class="pixel-button arcade-action"><i data-lucide="arrow-right" aria-hidden="true"></i><span>ELEGIR PERSONAJE Y ARMAS</span></button>
+              <button id="setupBackButton" type="button" class="pixel-button pixel-button--secondary arcade-action arcade-action--quiet"><i data-lucide="arrow-left" aria-hidden="true"></i><span>VOLVER</span></button>
+            </div>
+          </div>
+
+          <!-- PASO 2: Selección de Personaje, Armas e Instrucciones -->
+          <div id="setupStep2" class="setup-step-view" hidden>
+            <div>
+              <h3><span>01</span> El protagonista</h3>
+              <div id="skinOptions" class="option-grid"></div>
+            </div>
+            <div>
+              <h3><span>02</span> El ingrediente secreto</h3>
+              <div id="weaponOptions" class="option-grid"></div>
+            </div>
+            <details class="controls-guide">
+              <summary>Cómo jugar & Controles</summary>
+              <p>El ataque es automático. Movete para esquivar enemigos y recoger experiencia.</p>
+              <ul><li><kbd>WASD</kbd> o <kbd>↑ ↓ ← →</kbd> Moverte</li><li><kbd>Espacio</kbd> Esquivar / embestir</li><li><kbd>1</kbd> <kbd>2</kbd> <kbd>3</kbd> Elegir mejora</li><li><kbd>Esc</kbd> Pausar / seguir</li><li><kbd>Q</kbd> <kbd>E</kbd> <kbd>R</kbd> Poderes: niveles 10, 20 y 30</li></ul>
+              <p>Las mejoras aparecen durante la partida y tienen tiempo limitado. Para apuntar manualmente, activá la mira en la barra superior.</p>
+            </details>
+            <div class="menu-actions setup-step-actions">
+              <button id="startRunButton" type="button" class="pixel-button arcade-action"><i data-lucide="play" aria-hidden="true"></i><span>INICIAR TURNO</span></button>
+              <button id="setupPrevBtn" type="button" class="pixel-button pixel-button--secondary arcade-action arcade-action--quiet"><i data-lucide="arrow-left" aria-hidden="true"></i><span>VOLVER A PARTIDA</span></button>
+            </div>
           </div>
 
           <!-- Selects nativos ocultos para compatibilidad con logica de juego y accesibilidad -->
@@ -361,24 +398,6 @@
               <option value="leg_excalibur">Espada Dorada Excalibur</option>
               <option value="leg_medallion">Medallón Rubí Sagrado</option>
             </select>
-          </div>
-          <div>
-            <h3><span>01</span> El protagonista</h3>
-            <div id="skinOptions" class="option-grid"></div>
-          </div>
-          <div>
-            <h3><span>02</span> El ingrediente secreto</h3>
-            <div id="weaponOptions" class="option-grid"></div>
-          </div>
-          <details class="controls-guide" open>
-            <summary>Cómo jugar</summary>
-            <p>El ataque es automático. Movete para esquivar enemigos y recoger experiencia.</p>
-            <ul><li><kbd>WASD</kbd> o <kbd>↑ ↓ ← →</kbd> Moverte</li><li><kbd>Espacio</kbd> Esquivar / embestir</li><li><kbd>1</kbd> <kbd>2</kbd> <kbd>3</kbd> Elegir mejora</li><li><kbd>Esc</kbd> Pausar / seguir</li><li><kbd>Q</kbd> <kbd>E</kbd> <kbd>R</kbd> Poderes: niveles 10, 20 y 30</li></ul>
-            <p>Las mejoras aparecen durante la partida y tienen tiempo limitado. Elegilas con el teclado o haciendo clic. Para apuntar con el mouse, activá la mira en la barra superior.</p>
-          </details>
-          <div class="menu-actions">
-            <button id="startRunButton" class="pixel-button arcade-action"><i data-lucide="play" aria-hidden="true"></i><span>INICIAR TURNO</span></button>
-            <button id="setupBackButton" class="pixel-button pixel-button--secondary arcade-action arcade-action--quiet"><i data-lucide="arrow-left" aria-hidden="true"></i><span>VOLVER</span></button>
           </div>
         </div>
       </section>

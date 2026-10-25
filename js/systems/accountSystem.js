@@ -165,6 +165,19 @@ export function grantItem(type,id){
 export function awardRun(result){return mutate(p=>{
   if(p.runs.some(x=>x.id===result.id))return p;
   const points=Math.max(0,Math.floor(result.score));p.bank+=points;p.totalEarned+=points;
-  p.runs.unshift({id:result.id,score:points,kills:result.kills,level:result.level,timeText:result.timeText,date:new Date().toLocaleDateString('es-AR'),map:result.map,outcome:result.outcome});
+  p.runs.unshift({
+    id: result.id,
+    name: result.name || p.name,
+    score: points,
+    kills: result.kills,
+    level: result.level,
+    timeText: result.timeText,
+    date: new Date().toLocaleDateString('es-AR'),
+    map: result.map,
+    outcome: result.outcome,
+    skinId: result.skinId || result.skin,
+    weaponId: result.weaponId || result.weapon,
+    companionId: result.companionId || result.companion,
+  });
   p.runs=p.runs.slice(0,40);return p;
 });}

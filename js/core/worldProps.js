@@ -30,9 +30,31 @@ function scoreboard(c, x, y) {
   shadow(c, x, y + 37, 45, 8); rect(c, INK, x - 43, y - 31, 86, 57); rect(c, '#264a46', x - 37, y - 25, 74, 44); rect(c, '#e8c868', x - 26, y - 15, 19, 15); rect(c, '#e8c868', x + 7, y - 15, 19, 15); rect(c, '#f5edc8', x - 20, y - 11, 7, 7); rect(c, '#f5edc8', x + 13, y - 11, 7, 7); rect(c, '#9dd3ad', x - 27, y + 8, 54, 4); rect(c, '#536d65', x - 30, y + 26, 7, 16); rect(c, '#536d65', x + 23, y + 26, 7, 16);
 }
 
-function billboard(c,x,y,label,tone='#ff3f8b') {
-  shadow(c,x,y+22,48,7);rect(c,'#050b17',x-50,y-21,100,43);rect(c,'#2a1644',x-46,y-17,92,31);rect(c,tone,x-42,y-13,84,4);
-  c.fillStyle='#f8f0d0';c.font='bold 9px monospace';c.textAlign='center';c.fillText(label,x,y+5);rect(c,'#4df8dc',x-34,y+11,68,3);rect(c,'#34435d',x-40,y+22,7,12);rect(c,'#34435d',x+33,y+22,7,12);
+function billboard(c,x,y,label,tone='#ff3f8b',time=0) {
+  shadow(c,x,y+22,48,7);
+  rect(c,'#040812',x-52,y-22,104,45);
+  rect(c,'#1a102e',x-48,y-18,96,33);
+  rect(c,tone,x-44,y-14,88,4);
+
+  // Luces intermitentes/LEDs en las esquinas superiores del cartel
+  const blink = Math.sin((time || 0) * 7 + x * 0.1) > 0;
+  rect(c, blink ? '#00f0ff' : '#0a1628', x - 47, y - 17, 5, 4);
+  rect(c, !blink ? '#ff007f' : '#0a1628', x + 42, y - 17, 5, 4);
+
+  c.save();
+  c.font = 'bold 9px monospace';
+  c.textAlign = 'center';
+  c.fillStyle = '#05070f';
+  c.fillText(label, x + 1, y + 6);
+  c.fillStyle = '#ffffff';
+  c.shadowColor = tone;
+  c.shadowBlur = 8;
+  c.fillText(label, x, y + 5);
+  c.restore();
+
+  rect(c, tone, x-36, y+11, 72, 3);
+  rect(c, '#243147', x-40, y+23, 7, 12);
+  rect(c, '#243147', x+33, y+23, 7, 12);
 }
 
 function floodLight(c,x,y,time) {
@@ -109,10 +131,10 @@ export function drawWorldProps(ctx, map = 'diner', time = 0, world = { width: 19
     if (isVisible(w - 200, 170)) machine(ctx, w - 200, 170, '#1e293b');
     if (isVisible(200, h - 200)) machine(ctx, 200, h - 200, '#1e293b');
     if (isVisible(w - 200, h - 200)) machine(ctx, w - 200, h - 200, '#1e293b');
-    if (isVisible(420, 145)) billboard(ctx, 420, 145, 'NEON DRIVE', '#00f0ff');
-    if (isVisible(w - 420, 145)) billboard(ctx, w - 420, 145, 'CYBER DELIVERY', '#ff007f');
-    if (isVisible(420, h - 105)) billboard(ctx, 420, h - 105, 'TURBO PANCHO', '#ffbe0b');
-    if (isVisible(w - 420, h - 105)) billboard(ctx, w - 420, h - 105, '24H VIP LOT', '#a855f7');
+    if (isVisible(420, 145)) billboard(ctx, 420, 145, 'NEON DRIVE', '#00f0ff', time);
+    if (isVisible(w - 420, 145)) billboard(ctx, w - 420, 145, 'CYBER DELIVERY', '#ff007f', time + 1.2);
+    if (isVisible(420, h - 105)) billboard(ctx, 420, h - 105, 'TURBO PANCHO', '#ffbe0b', time + 2.4);
+    if (isVisible(w - 420, h - 105)) billboard(ctx, w - 420, h - 105, '24H VIP LOT', '#a855f7', time + 3.6);
     if (isVisible(120, 95)) floodLight(ctx, 120, 95, time);
     if (isVisible(w - 120, 95)) floodLight(ctx, w - 120, 95, time + 0.7);
     if (isVisible(340, 360)) steam(ctx, 340, 360, time, '#00f0ff');
