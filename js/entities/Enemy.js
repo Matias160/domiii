@@ -121,7 +121,7 @@ export class Enemy {
               x: this.x, y: this.y,
               vx: Math.cos(a) * 285, vy: Math.sin(a) * 285,
               radius: 10,
-              damage: this.damage * 0.92,
+              damage: this.damage * 0.55,
               life: 3.8,
               color: '#ff5500'
             });
@@ -150,7 +150,7 @@ export class Enemy {
             x: this.x, y: this.y,
             vx: Math.cos(angle) * bulletSpeed, vy: Math.sin(angle) * bulletSpeed,
             radius: isColossus ? 8 : (this.phaseThree ? 7 : 6),
-            damage: this.damage * (isColossus ? 0.78 : 0.45),
+            damage: this.damage * (isColossus ? 0.45 : 0.45),
             life: 4.2,
             color: bulletColor
           });
@@ -483,5 +483,5 @@ export const enemyTypes = [
   { id: "fries", name: "La Papota Suprema", hp: 1120, speed: 80, damage: 28, score: 1050, xp: 75, radius: 46, color: "#ffdd61", boss: true, bossStyle: 'fast' },
   { id: "pizza", name: "Don Muzza el Padrino", hp: 1350, speed: 60, damage: 32, score: 1350, xp: 90, radius: 52, color: "#e63946", boss: true, bossStyle: 'heavy' },
   { id: "icecream", name: "Emperador Subcero", hp: 1080, speed: 66, damage: 24, score: 1200, xp: 82, radius: 44, color: "#a855f7", boss: true, bossStyle: 'frost' },
-  { id: "lava_boss", name: "Domi Colosal", hp: 5200, speed: 60, damage: 56, score: 8000, xp: 300, radius: 80, color: "#ff2200", boss: true, bossStyle: 'colossus' },
+  { id: "lava_boss", name: "Domi Colosal", hp: 5200, speed: 60, damage: 14, score: 8000, xp: 300, radius: 80, color: "#ff2200", boss: true, bossStyle: 'colossus' },
 ];

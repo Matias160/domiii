@@ -213,282 +213,266 @@ function footballFloor(c) {
   }
 }
 
-function lavaFloor(c) {
-  // 1. Base de lecho volcánico profundo (obsidiana y escoria basáltica)
-  rect(c, '#090204', 0, 0, 1920, 1080);
+// ============================================================================
+// Motor Pixel Art integrado de "Tablero de lava — Pixel art.html" (192x128 px)
+// ============================================================================
+const LAVA_BOARD = (() => {
+  const W = 192, H = 128, N = W * H, THR = 0.45;
+  const hx = s => [parseInt(s.slice(1, 3), 16), parseInt(s.slice(3, 5), 16), parseInt(s.slice(5, 7), 16)];
+  const LAVA = ['#6a1004', '#a82406', '#e04008', '#ff7a14', '#ffb52e', '#ffe88a'].map(hx);
+  const ROCK = ['#0f0c14', '#181320', '#241d2c', '#33293a', '#463b49'].map(hx);
+  const B = [[0, 8, 2, 10], [12, 4, 14, 6], [3, 11, 1, 9], [15, 7, 13, 5]];
+  const bay = (x, y) => B[y & 3][x & 3] / 16;
+  const cl = (v, a, b) => (v < a ? a : v > b ? b : v);
 
-  // 2. Losas de basalto fracturadas e irregulares con relieve, sombras proyectadas y micro-fisuras de calor
-  const stoneTones = ['#14070a', '#1b0b10', '#230e15', '#17090d', '#1f0c12'];
-  for (let y = 84; y < 1080; y += 44) {
-    const rowShift = ((y / 44) % 2) * 22;
-    for (let x = -24; x < 1920; x += 52) {
-      const hash = Math.abs(Math.sin(x * 12.9898 + y * 78.233) * 43758.5453);
-      const idx = Math.floor(hash * stoneTones.length) % stoneTones.length;
-      const w = 48 + Math.floor((hash * 7) % 5) - 2;
-      const h = 40 + Math.floor((hash * 11) % 5) - 2;
-      const tx = x + rowShift;
+  let seed = 7, edge, rock, deco, lavaM, parts = [], t = 0, lastStep = -1;
+  let cv = null, ctx = null, img = null, D = null, built = false;
 
-      // Sombra proyectada de la losa sobre la grieta inferior
-      rect(c, '#040102', tx + 3, y + 3, w, h);
-      // Cuerpo de la losa basáltica
-      rect(c, stoneTones[idx], tx + 1, y + 1, w - 2, h - 2);
-      // Bisel superior iluminado por reflejo cálido
-      rect(c, '#ff662210', tx + 2, y + 2, w - 6, 1.5);
-      rect(c, '#050103', tx, y + h - 1, w, 1.5);
+  function mulberry(s) {
+    return () => {
+      s |= 0; s = (s + 0x6D2B79F5) | 0;
+      let m = Math.imul(s ^ (s >>> 15), 1 | s);
+      m = (m + Math.imul(m ^ (m >>> 7), 61 | m)) ^ m;
+      return ((m ^ (m >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+  function hash(x, y) {
+    let h = (x * 374761393 + y * 668265263 + seed * 1442695041) | 0;
+    h = (h ^ (h >>> 13)) * 1274126177 | 0;
+    return ((h ^ (h >>> 16)) >>> 0) / 4294967296;
+  }
+  function vn(x, y) {
+    const xi = Math.floor(x), yi = Math.floor(y), xf = x - xi, yf = y - yi;
+    const u = xf * xf * (3 - 2 * xf), v = yf * yf * (3 - 2 * yf);
+    const a = hash(xi, yi), b = hash(xi + 1, yi), c = hash(xi, yi + 1), d = hash(xi + 1, yi + 1);
+    return a + (b - a) * u + (c - a) * v + (a - b - c + d) * u * v;
+  }
+  function fbm(x, y, o) {
+    let s = 0, a = 0.5, f = 1;
+    for (let i = 0; i < o; i++) { s += a * vn(x * f, y * f); f *= 2; a *= 0.5; }
+    return s / (1 - Math.pow(0.5, o));
+  }
 
-      // Grietas irregulares de donde se filtra el calor subterráneo en ciertas losas
-      if ((Math.floor(hash * 100) % 4) === 0) {
-        c.save();
-        c.strokeStyle = '#ff330038';
-        c.lineWidth = 3.5;
-        c.beginPath();
-        c.moveTo(tx + 8, y + 10);
-        c.lineTo(tx + w * 0.52, y + h * 0.58);
-        c.lineTo(tx + w - 9, y + h * 0.42);
-        c.stroke();
-        c.strokeStyle = '#ff992288';
-        c.lineWidth = 1.2;
-        c.stroke();
-        c.restore();
+  const set = (x, y, c) => {
+    x |= 0; y |= 0;
+    if (x >= 0 && y >= 0 && x < W && y < H) deco[y * W + x] = typeof c === 'string' ? hx(c) : c;
+  };
+  const safe = (x, y, m) => x > m && y > m && x < W - m && y < H - m && edge[(y | 0) * W + (x | 0)] > 0.06;
+
+  function decorate() {
+    const r = mulberry(seed * 7 + 1), R = (a, b) => a + r() * (b - a);
+    // islotes en lava
+    let n = 0;
+    for (let tr = 0; tr < 400 && n < 16; tr++) {
+      const x = R(8, W - 8) | 0, y = R(8, H - 8) | 0;
+      if (edge[y * W + x] < -0.07) {
+        n++;
+        const rx = R(3, 6), ry = rx * 0.7;
+        for (let dy = -ry - 1; dy <= ry + 1; dy++) {
+          for (let dx = -rx - 1; dx <= rx + 1; dx++) {
+            const d = (dx * dx) / (rx * rx) + (dy * dy) / (ry * ry);
+            if (d <= 1) set(x + dx, y + dy, d > 0.65 ? '#1c1620' : (dx + dy < -1 ? '#4a3f50' : '#33293a'));
+            else if (d < 1.5 && dy > 0) set(x + dx, y + dy, '#8a2a0a');
+          }
+        }
+        if (r() < 0.5) {
+          set(x, y - 1, '#ffd24a'); set(x - 1, y, '#ff8a1c');
+          set(x + 1, y, '#ff8a1c'); set(x, y, '#c4400a');
+        }
       }
     }
-  }
-
-  // 2b. Elevaciones rocosas volcánicas y mesetas de basalto con sombras proyectadas profundas
-  const volcanicElevations = [
-    { x: 340, y: 210, rx: 58, ry: 28 },
-    { x: 610, y: 175, rx: 46, ry: 22 },
-    { x: 1320, y: 195, rx: 64, ry: 30 },
-    { x: 1560, y: 310, rx: 52, ry: 25 },
-    { x: 260, y: 510, rx: 62, ry: 32 },
-    { x: 520, y: 610, rx: 48, ry: 24 },
-    { x: 1380, y: 650, rx: 56, ry: 28 },
-    { x: 1680, y: 540, rx: 50, ry: 26 },
-    { x: 430, y: 890, rx: 66, ry: 30 },
-    { x: 1180, y: 880, rx: 60, ry: 28 },
-    { x: 740, y: 280, rx: 42, ry: 20 },
-    { x: 1140, y: 290, rx: 45, ry: 22 }
-  ];
-  for (const el of volcanicElevations) {
-    c.save();
-    // Sombra proyectada desplazada hacia abajo-derecha
-    c.fillStyle = 'rgba(3, 0, 2, 0.78)';
-    c.beginPath();
-    c.ellipse(el.x + 10, el.y + 12, el.rx * 1.04, el.ry * 1.06, 0.08, 0, Math.PI * 2);
-    c.fill();
-
-    // Pared lateral de la elevación rocosa
-    c.fillStyle = '#120508';
-    c.beginPath();
-    c.ellipse(el.x, el.y + 5, el.rx, el.ry, 0, 0, Math.PI * 2);
-    c.fill();
-
-    // Superficie superior de la meseta basáltica
-    const rockGrad = c.createLinearGradient(el.x - el.rx, el.y - el.ry, el.x + el.rx, el.y + el.ry);
-    rockGrad.addColorStop(0, '#2c1219');
-    rockGrad.addColorStop(0.6, '#1d0a10');
-    rockGrad.addColorStop(1, '#3d1510');
-    c.fillStyle = rockGrad;
-    c.beginPath();
-    c.ellipse(el.x, el.y, el.rx * 0.94, el.ry * 0.88, 0, 0, Math.PI * 2);
-    c.fill();
-
-    // Borde iluminado por el magma cercano (rim light naranja/rojizo)
-    c.strokeStyle = '#ff551155';
-    c.lineWidth = 2;
-    c.beginPath();
-    c.ellipse(el.x, el.y, el.rx * 0.94, el.ry * 0.88, 0, 0.15, Math.PI - 0.15);
-    c.stroke();
-    c.restore();
-  }
-
-  // 3. Piscinas de magma hirviendo en los bordes con iluminación sobre las casillas cercanas
-  const lavaPools = [
-    { x: 180, y: 190, rx: 82, ry: 44 },
-    { x: 1740, y: 190, rx: 82, ry: 44 },
-    { x: 180, y: 920, rx: 88, ry: 48 },
-    { x: 1740, y: 920, rx: 88, ry: 48 },
-    { x: 960, y: 980, rx: 118, ry: 54 },
-    { x: 960, y: 160, rx: 96, ry: 45 }
-  ];
-  for (const pool of lavaPools) {
-    c.save();
-    // Destello amplio de luz cálida que ilumina las baldosas cercanas alrededor de la piscina
-    const tileLight = c.createRadialGradient(pool.x, pool.y, pool.rx * 0.3, pool.x, pool.y, pool.rx * 2.35);
-    tileLight.addColorStop(0, 'rgba(255, 115, 20, 0.42)');
-    tileLight.addColorStop(0.45, 'rgba(255, 55, 0, 0.18)');
-    tileLight.addColorStop(0.8, 'rgba(180, 20, 0, 0.06)');
-    tileLight.addColorStop(1, 'transparent');
-    c.fillStyle = tileLight;
-    c.beginPath();
-    c.ellipse(pool.x, pool.y, pool.rx * 2.35, pool.ry * 2.35, 0, 0, Math.PI * 2);
-    c.fill();
-
-    // Sombra exterior del cráter de la piscina
-    c.fillStyle = '#050102';
-    c.beginPath();
-    c.ellipse(pool.x + 5, pool.y + 6, pool.rx + 12, pool.ry + 9, 0, 0, Math.PI * 2);
-    c.fill();
-
-    // Borde rocoso elevado de escoria volcánica
-    c.fillStyle = '#24090d';
-    c.beginPath();
-    c.ellipse(pool.x, pool.y, pool.rx + 8, pool.ry + 6, 0, 0, Math.PI * 2);
-    c.fill();
-
-    // Magma hirviendo multicapa en el interior del cráter
-    const pGrad = c.createRadialGradient(pool.x - pool.rx * 0.12, pool.y - pool.ry * 0.1, pool.rx * 0.06, pool.x, pool.y, pool.rx);
-    pGrad.addColorStop(0, '#ffffff');
-    pGrad.addColorStop(0.18, '#fff066');
-    pGrad.addColorStop(0.45, '#ff7700');
-    pGrad.addColorStop(0.75, '#d91b00');
-    pGrad.addColorStop(0.92, '#4a0609');
-    pGrad.addColorStop(1, '#1c0305');
-    c.fillStyle = pGrad;
-    c.beginPath();
-    c.ellipse(pool.x, pool.y, pool.rx, pool.ry, 0, 0, Math.PI * 2);
-    c.fill();
-
-    // Ondas concéntricas de calor estáticas grabadas en el magma y costras flotantes
-    c.strokeStyle = 'rgba(255, 238, 120, 0.45)';
-    c.lineWidth = 2;
-    c.beginPath();
-    c.ellipse(pool.x, pool.y, pool.rx * 0.68, pool.ry * 0.65, 0, 0, Math.PI * 2);
-    c.stroke();
-    c.strokeStyle = 'rgba(255, 140, 20, 0.5)';
-    c.lineWidth = 1.5;
-    c.beginPath();
-    c.ellipse(pool.x, pool.y, pool.rx * 0.42, pool.ry * 0.40, 0, 0, Math.PI * 2);
-    c.stroke();
-
-    // Pequeñas costras de roca volcánica flotando dentro de la piscina
-    c.fillStyle = '#21070a';
-    c.beginPath();
-    c.ellipse(pool.x + pool.rx * 0.35, pool.y + pool.ry * 0.2, 11, 5, 0.2, 0, Math.PI * 2);
-    c.ellipse(pool.x - pool.rx * 0.4, pool.y - pool.ry * 0.18, 9, 4, -0.3, 0, Math.PI * 2);
-    c.fill();
-    c.restore();
-  }
-
-  // 4. Jerarquía de Venas de Magma con grosor variable, bifurcaciones orgánicas y glow intenso
-  // Cada punto es [x, y, factorGrosor]
-  const magmaArteries = [
-    // Arteria principal Noroeste -> Centro -> Sureste (grosor variable orgánico)
-    [[160, 195, 1.35], [290, 255, 1.15], [450, 260, 1.3], [575, 310, 1.0], [680, 340, 1.25], [810, 365, 1.1], [920, 390, 1.45], [1055, 435, 1.2], [1180, 480, 1.4], [1310, 520, 1.1], [1420, 560, 1.3], [1565, 625, 1.05], [1680, 680, 1.2], [1750, 895, 1.35]],
-    // Arteria diagonal Suroeste -> Centro -> Noreste
-    [[175, 910, 1.35], [310, 840, 1.25], [435, 775, 1.05], [540, 720, 1.2], [665, 700, 0.95], [780, 680, 1.3], [905, 635, 1.15], [1020, 590, 1.4], [1155, 550, 1.2], [1280, 510, 1.35], [1410, 445, 1.05], [1520, 380, 1.2], [1645, 295, 1.1], [1740, 195, 1.35]],
-    // Anillo fracturado del Caldero Central (variable y asimétrico)
-    [[755, 455, 1.25], [835, 400, 1.1], [920, 390, 1.45], [960, 372, 1.2], [1085, 405, 1.15], [1180, 480, 1.4], [1190, 565, 1.15], [1115, 645, 1.25], [1020, 590, 1.4], [960, 688, 1.3], [820, 680, 1.25], [735, 565, 1.05], [755, 455, 1.25]],
-    // Bifurcaciones secundarias naturales hacia las piscinas norte y sur
-    [[960, 160, 1.3], [945, 245, 0.95], [910, 315, 0.85], [920, 390, 1.3]],
-    [[960, 688, 1.25], [985, 785, 0.95], [945, 880, 1.1], [960, 980, 1.4]],
-    [[450, 260, 1.2], [410, 385, 0.9], [385, 510, 0.75], [345, 675, 0.85], [310, 840, 1.15]],
-    [[1180, 480, 1.25], [1235, 365, 0.9], [1345, 265, 0.78], [1485, 175, 0.6]],
-    [[1420, 560, 1.2], [1455, 705, 0.92], [1545, 825, 0.8], [1660, 910, 1.0]],
-    // Ramificaciones capilares finas (bifurcaciones orgánicas)
-    [[680, 340, 0.95], [630, 445, 0.65], [565, 515, 0.45]],
-    [[540, 720, 0.95], [610, 825, 0.65], [685, 905, 0.45]],
-    [[1280, 510, 1.0], [1365, 585, 0.68], [1440, 645, 0.45]],
-    [[1520, 380, 0.95], [1615, 435, 0.65], [1710, 465, 0.42]],
-    [[820, 680, 1.05], [765, 815, 0.75], [795, 935, 0.52]]
-  ];
-
-  // Dibujar cada segmento con grosor variable y 5 niveles de energía (halo difuminado -> magma -> núcleo amarillo brillante)
-  for (const path of magmaArteries) {
-    c.save();
-    c.lineCap = 'round';
-    c.lineJoin = 'round';
-    for (let i = 0; i < path.length - 1; i++) {
-      const [x1, y1, w1] = path[i];
-      const [x2, y2, w2] = path[i + 1];
-      const w = (w1 + w2) * 0.5;
-
-      // 1) Halo exterior anaranjado difuminado (Glow sobre el suelo oscuro)
-      c.strokeStyle = 'rgba(255, 65, 0, 0.19)';
-      c.lineWidth = 28 * w;
-      c.beginPath(); c.moveTo(x1, y1); c.lineTo(x2, y2); c.stroke();
-
-      c.strokeStyle = 'rgba(255, 105, 15, 0.32)';
-      c.lineWidth = 17 * w;
-      c.beginPath(); c.moveTo(x1, y1); c.lineTo(x2, y2); c.stroke();
-
-      // 2) Borde de roca fundida al rojo vivo
-      c.strokeStyle = '#5c0804';
-      c.lineWidth = 12 * w;
-      c.beginPath(); c.moveTo(x1, y1); c.lineTo(x2, y2); c.stroke();
-
-      // 3) Flujo de magma carmesí-naranja
-      c.strokeStyle = '#e82c00';
-      c.lineWidth = 8.2 * w;
-      c.beginPath(); c.moveTo(x1, y1); c.lineTo(x2, y2); c.stroke();
-
-      // 4) Manto naranja incandescente
-      c.strokeStyle = '#ff8c00';
-      c.lineWidth = 4.6 * w;
-      c.beginPath(); c.moveTo(x1, y1); c.lineTo(x2, y2); c.stroke();
-
-      // 5) Núcleo central amarillo-blanco brillante (energía pura)
-      c.strokeStyle = '#fff380';
-      c.lineWidth = 2.0 * w;
-      c.beginPath(); c.moveTo(x1, y1); c.lineTo(x2, y2); c.stroke();
+    // puentes
+    let br = 0;
+    for (let tr = 0; tr < 300 && br < 4; tr++) {
+      const y = R(10, H - 12) | 0;
+      const x = R(10, W - 60) | 0;
+      if (edge[y * W + x] > 0 && edge[y * W + x + 1] < 0) {
+        let x1 = x + 1;
+        while (x1 < W - 4 && lavaM[y * W + x1]) x1++;
+        if (x1 - x >= 8 && x1 - x <= 44 && edge[y * W + x1] > 0) {
+          br++;
+          for (let px = x - 3; px <= x1 + 3; px++) {
+            set(px, y - 2, '#2a160a'); set(px, y + 2, '#2a160a');
+            for (let py = -1; py <= 1; py++) set(px, y + py, (px % 3 === 0) ? '#4b2c14' : (py === 0 ? '#9a6530' : '#80501f'));
+            if (px % 6 === 0) { set(px, y - 3, '#2a160a'); set(px, y + 3, '#2a160a'); }
+          }
+          for (const px of [x - 3, x1 + 3]) {
+            for (let q = -3; q <= 3; q++) set(px, y + q, '#3a2210');
+          }
+        }
+      }
     }
-    c.restore();
+    // rocas
+    for (let tr = 0, c = 0; tr < 300 && c < 45; tr++) {
+      const x = R(4, W - 4) | 0, y = R(4, H - 4) | 0;
+      if (!safe(x, y, 4)) continue;
+      c++;
+      const rx = R(1.5, 4), ry = rx * 0.75;
+      for (let dy = -ry; dy <= ry; dy++) {
+        for (let dx = -rx; dx <= rx; dx++) {
+          const d = (dx * dx) / (rx * rx) + (dy * dy) / (ry * ry);
+          if (d <= 1) set(x + dx, y + dy, d > 0.7 ? '#14101a' : (dx + dy < -0.5 ? '#5d5264' : (dx + dy < 1 ? '#41364a' : '#2b2332')));
+        }
+      }
+    }
+    // espinas de obsidiana
+    for (let tr = 0, c = 0; tr < 300 && c < 30; tr++) {
+      const x = R(6, W - 6) | 0, y = R(14, H - 4) | 0;
+      if (!safe(x, y, 6)) continue;
+      c++;
+      const k = 1 + (r() * 3 | 0);
+      for (let s = 0; s < k; s++) {
+        const bx = x + s * 4 - k * 2, hh = R(6, 13) | 0, w = R(3, 6) | 0;
+        for (let q = 0; q < hh; q++) {
+          const hw = Math.max(0.5, (1 - q / hh) * w / 2);
+          for (let dx = -hw; dx <= hw; dx++) {
+            const left = dx < -hw + 1;
+            set(bx + dx, y - q, left ? '#5a47a0' : (dx > hw - 1 ? '#0b0912' : '#241b3c'));
+          }
+        }
+        set(bx, y - hh, '#8a78d0');
+      }
+      for (let dx = -3; dx <= 3; dx++) set(x + dx, y + 1, '#0b0912');
+    }
+    // gemas
+    for (let tr = 0, c = 0; tr < 200 && c < 22; tr++) {
+      const x = R(4, W - 4) | 0, y = R(4, H - 4) | 0;
+      if (!safe(x, y, 3)) continue;
+      c++;
+      set(x, y - 2, '#fff0a0'); set(x - 1, y - 1, '#ffd24a'); set(x, y - 1, '#ffb52e'); set(x + 1, y - 1, '#ff8a1c');
+      set(x - 1, y, '#ff8a1c'); set(x, y, '#e04008'); set(x + 1, y, '#b52a07'); set(x, y + 1, '#6a1004');
+    }
+    // cráneos
+    const SK = ['.WWWW.', 'WWWWWW', 'WKWWKW', 'WWWWWW', '.WKKW.', '.W.W.W'];
+    for (let tr = 0, c = 0; tr < 200 && c < 9; tr++) {
+      const x = R(4, W - 8) | 0, y = R(4, H - 8) | 0;
+      if (!safe(x, y, 6)) continue;
+      c++;
+      SK.forEach((row, j) => [...row].forEach((ch, i) => {
+        if (ch === 'W') set(x + i, y + j, j > 3 ? '#a89f80' : '#ddd4b4');
+        else if (ch === 'K') set(x + i, y + j, '#1a1010');
+      }));
+    }
+    // huesos
+    for (let tr = 0, c = 0; tr < 200 && c < 16; tr++) {
+      const x = R(4, W - 10) | 0, y = R(4, H - 6) | 0;
+      if (!safe(x, y, 6)) continue;
+      c++;
+      const dy = r() < 0.5 ? 1 : 0, l = R(4, 8) | 0;
+      for (let i = 0; i < l; i++) set(x + i, y + (dy ? i >> 1 : 0), '#cfc6a4');
+      set(x - 1, y - 1, '#e8dfbe'); set(x - 1, y + 1, '#e8dfbe');
+      set(x + l, y + (dy ? l >> 1 : 0) - 1, '#e8dfbe'); set(x + l, y + (dy ? l >> 1 : 0) + 1, '#e8dfbe');
+    }
   }
 
-  // 4b. Nodos de intersección de alta energía (Glow concentrado donde se cruzan las venas de lava)
-  const intersectionNodes = [
-    { x: 920, y: 390, r: 58 },
-    { x: 1180, y: 480, r: 62 },
-    { x: 1020, y: 590, r: 58 },
-    { x: 820, y: 680, r: 52 },
-    { x: 450, y: 260, r: 48 },
-    { x: 680, y: 340, r: 44 },
-    { x: 1420, y: 560, r: 50 },
-    { x: 1280, y: 510, r: 48 },
-    { x: 310, y: 840, r: 46 },
-    { x: 540, y: 720, r: 44 },
-    { x: 1520, y: 380, r: 44 },
-    { x: 960, y: 688, r: 52 }
-  ];
-  for (const node of intersectionNodes) {
-    c.save();
-    const nGrad = c.createRadialGradient(node.x, node.y, 2, node.x, node.y, node.r);
-    nGrad.addColorStop(0, '#ffffff');
-    nGrad.addColorStop(0.16, '#fff588');
-    nGrad.addColorStop(0.42, 'rgba(255, 130, 10, 0.65)');
-    nGrad.addColorStop(0.75, 'rgba(255, 45, 0, 0.24)');
-    nGrad.addColorStop(1, 'transparent');
-    c.fillStyle = nGrad;
-    c.beginPath();
-    c.arc(node.x, node.y, node.r, 0, Math.PI * 2);
-    c.fill();
-    c.restore();
+  function build() {
+    if (typeof document === 'undefined') return;
+    cv = document.createElement('canvas');
+    cv.width = W; cv.height = H;
+    ctx = cv.getContext('2d');
+    img = ctx.createImageData(W, H);
+    D = img.data;
+    edge = new Float32Array(N);
+    rock = new Uint8Array(N * 3);
+    deco = new Array(N).fill(null);
+    lavaM = new Uint8Array(N);
+    parts = [];
+    const cr = hx('#ffe88a'), co = hx('#ff7a14'), cd = hx('#b52a07');
+    for (let y = 0; y < H; y++) {
+      for (let x = 0; x < W; x++) {
+        const i = y * W + x;
+        const wx = x + (fbm(x / 40 + 9, y / 40, 2) - 0.5) * 34;
+        const wy = y + (fbm(x / 40, y / 40 + 9, 2) - 0.5) * 34;
+        const h = fbm(wx / 36, wy / 36, 4), e = h - THR;
+        edge[i] = e; lavaM[i] = e < 0 ? 1 : 0;
+        const n = fbm(x / 5, y / 5, 3), big = fbm(x / 30 + 4, y / 30, 2);
+        const v = n * 1.1 + big * 0.35 - 0.3 + (bay(x, y) - 0.5) * 0.16;
+        let col = ROCK[cl(Math.floor(v * 5), 0, 4)].slice();
+        const k1 = Math.abs(fbm(x / 20 + 50, y / 20 + 50, 3) - 0.5);
+        const k2 = Math.abs(fbm(x / 9 + 80, y / 9, 2) - 0.5);
+        let k = k1;
+        if (k1 < 0.13) k = Math.min(k1, k2 * 1.5);
+        if (k < 0.006) col = cr.slice();
+        else if (k < 0.012) col = co.slice();
+        else if (k < 0.019) col = cd.slice();
+        else if (k < 0.04) {
+          const g = (0.04 - k) / 0.04;
+          col[0] = Math.min(255, col[0] + g * 70);
+          col[1] += g * 12;
+        }
+        if (e >= 0) {
+          if (e < 0.012) col = cd.slice();
+          else if (e < 0.028) col = hx('#4a1c14');
+          else if (e < 0.05) { col[0] += 24; col[1] += 4; }
+        }
+        rock.set(col, i * 3);
+      }
+    }
+    decorate();
+    built = true;
+    frame();
   }
 
-  // 5. Horizonte superior (cielo ardiente y silueta de caldera volcánica)
-  rect(c, '#090204', 0, 0, 1920, 84);
-  const skyGrad = c.createLinearGradient(0, 0, 0, 84);
-  skyGrad.addColorStop(0, '#220408');
-  skyGrad.addColorStop(0.6, '#3d0a10');
-  skyGrad.addColorStop(1, '#ff3300');
-  c.fillStyle = skyGrad;
-  c.fillRect(0, 0, 1920, 80);
-
-  // Silueta de crestas y conos volcánicos lejanos
-  c.fillStyle = '#0a0204';
-  c.beginPath();
-  c.moveTo(0, 80);
-  for (let x = 0; x <= 1920; x += 60) {
-    const peakH = 35 + Math.sin(x * 0.015) * 22 + Math.cos(x * 0.035) * 14;
-    c.lineTo(x, 80 - peakH);
+  function frame() {
+    if (!built || !D) return;
+    const pal = LAVA;
+    for (let y = 0; y < H; y++) {
+      for (let x = 0; x < W; x++) {
+        const i = y * W + x, o = i * 4;
+        let col;
+        if (deco[i]) col = deco[i];
+        else if (lavaM[i]) {
+          const e = edge[i], n = fbm(x / 8 + t * 0.5, y / 8 + t * 0.2, 3), d = cl(-e * 7, 0, 1);
+          const v = n * 1.25 + d * 0.55 - 0.35 + Math.sin(x * 0.6 + y * 0.35 + t * 2 + n * 8) * 0.07 + (bay(x, y) - 0.5) * 0.14;
+          col = pal[cl(Math.floor(v * 6), 0, 5)];
+        } else {
+          col = [rock[i * 3], rock[i * 3 + 1], rock[i * 3 + 2]];
+        }
+        D[o] = col[0]; D[o + 1] = col[1]; D[o + 2] = col[2]; D[o + 3] = 255;
+      }
+    }
+    // brasas
+    if (parts.length < 70 && Math.random() < 0.8) {
+      const x = (Math.random() * W) | 0, y = (Math.random() * H) | 0;
+      if (lavaM[y * W + x] && !deco[y * W + x]) {
+        parts.push({ x, y, vx: (Math.random() - 0.5) * 0.3, vy: -(0.2 + Math.random() * 0.5), l: 1 });
+      }
+    }
+    parts = parts.filter(p => {
+      p.x += p.vx + Math.sin(t * 3 + p.y) * 0.1;
+      p.y += p.vy;
+      p.l -= 0.012;
+      if (p.l <= 0 || p.y < 0) return false;
+      const px = p.x | 0, py = p.y | 0;
+      if (px >= 0 && px < W) {
+        const o = (py * W + px) * 4;
+        const col = p.l > 0.65 ? LAVA[5] : p.l > 0.35 ? LAVA[4] : LAVA[2];
+        D[o] = col[0]; D[o + 1] = col[1]; D[o + 2] = col[2];
+      }
+      return true;
+    });
+    ctx.putImageData(img, 0, 0);
   }
-  c.lineTo(1920, 80);
-  c.closePath();
-  c.fill();
 
-  // Borde ardiente de separación de la arena
-  rect(c, '#ff2200', 0, 79, 1920, 4);
-  rect(c, '#ffaa00', 0, 81, 1920, 1.5);
+  return {
+    draw(targetCtx, width, height, time = 0) {
+      if (!built) build();
+      if (!cv) return;
+      if (lastStep < 0 || Math.abs(time - lastStep) >= 0.07) {
+        t += 0.07;
+        lastStep = time;
+        frame();
+      }
+      targetCtx.save();
+      targetCtx.imageSmoothingEnabled = false;
+      targetCtx.drawImage(cv, 0, 0, width, height);
+      targetCtx.restore();
+    }
+  };
+})();
+
+function lavaFloor(c) {
+  LAVA_BOARD.draw(c, 1920, 1080, 0);
 }
 
 function dinerFloor(map = 'diner') {
@@ -642,6 +626,10 @@ function dinerFloor(map = 'diner') {
 export function drawDiner(c, width, height, time, menu, map = 'diner') {
   c.imageSmoothingEnabled = false;
   if (!menu) {
+    if (map === 'lava') {
+      LAVA_BOARD.draw(c, width, height, time);
+      return;
+    }
     c.drawImage(dinerFloor(map), 0, 0, width, height);
 
     // Efectos ambientales animados según el mapa con iluminación y partículas ricas
@@ -860,167 +848,6 @@ export function drawDiner(c, width, height, time, menu, map = 'diner') {
         c.fillStyle = col;
         c.globalAlpha = Math.max(0.12, Math.min(0.9, alpha));
         c.fillRect(Math.round(px), Math.round(py), size, size);
-      }
-      c.restore();
-    } else if (map === 'lava') {
-      c.save();
-      // 1. Resplandor ambiental de calor magmático pulsante
-      const pulse = 0.14 + Math.sin(time * 2.5) * 0.04;
-      const heatGrad = c.createRadialGradient(width / 2, height / 2, 80, width / 2, height / 2, Math.max(width, height) * 0.72);
-      heatGrad.addColorStop(0, `rgba(255, 75, 10, ${pulse * 0.85})`);
-      heatGrad.addColorStop(0.55, `rgba(225, 35, 0, ${pulse})`);
-      heatGrad.addColorStop(1, `rgba(55, 6, 12, ${pulse * 1.65})`);
-      c.fillStyle = heatGrad;
-      c.fillRect(0, 0, width, height);
-
-      // 2. Piscinas de magma hirviendo: ondas concéntricas de calor animadas y destellos sobre casillas cercanas
-      const poolCoords = [
-        { x: 180, y: 190, rx: 82, ry: 44 },
-        { x: 1740, y: 190, rx: 82, ry: 44 },
-        { x: 180, y: 920, rx: 88, ry: 48 },
-        { x: 1740, y: 920, rx: 88, ry: 48 },
-        { x: 960, y: 980, rx: 118, ry: 54 },
-        { x: 960, y: 160, rx: 96, ry: 45 }
-      ];
-      for (let pIdx = 0; pIdx < poolCoords.length; pIdx++) {
-        const pool = poolCoords[pIdx];
-        // Destello pulsante de luz que baña las baldosas vecinas
-        const flareAlpha = 0.14 + Math.sin(time * 3.6 + pIdx * 1.3) * 0.07;
-        const flare = c.createRadialGradient(pool.x, pool.y, pool.rx * 0.2, pool.x, pool.y, pool.rx * 1.85);
-        flare.addColorStop(0, `rgba(255, 220, 90, ${flareAlpha})`);
-        flare.addColorStop(0.5, `rgba(255, 90, 10, ${flareAlpha * 0.7})`);
-        flare.addColorStop(1, 'transparent');
-        c.fillStyle = flare;
-        c.beginPath();
-        c.ellipse(pool.x, pool.y, pool.rx * 1.85, pool.ry * 1.85, 0, 0, Math.PI * 2);
-        c.fill();
-
-        // 2 ondas concéntricas de calor expandiéndose desde el centro de la piscina
-        for (let r = 0; r < 2; r++) {
-          const waveProg = ((time * 0.65 + r * 0.5 + pIdx * 0.19) % 1);
-          const wrx = pool.rx * (0.2 + waveProg * 0.75);
-          const wry = pool.ry * (0.2 + waveProg * 0.75);
-          c.strokeStyle = `rgba(255, 240, 130, ${(1 - waveProg) * 0.55})`;
-          c.lineWidth = 2.2 * (1 - waveProg * 0.5);
-          c.beginPath();
-          c.ellipse(pool.x, pool.y, wrx, wry, 0, 0, Math.PI * 2);
-          c.stroke();
-        }
-      }
-
-      // 3. Burbujas de lava creciendo y estallando a lo largo de las líneas de magma e intersecciones
-      const veinAnchors = [
-        [290, 255], [450, 260], [575, 310], [680, 340], [810, 365], [920, 390],
-        [1055, 435], [1180, 480], [1310, 520], [1420, 560], [1565, 625], [1680, 680],
-        [310, 840], [540, 720], [780, 680], [905, 635], [1020, 590], [1280, 510],
-        [1520, 380], [960, 372], [1115, 645], [960, 688], [755, 455], [820, 680],
-        [180, 190], [1740, 190], [180, 920], [1740, 920], [960, 980], [960, 160]
-      ];
-      for (let b = 0; b < veinAnchors.length; b++) {
-        const [bx, by] = veinAnchors[b];
-        const cycle = (time * (1.1 + (b % 4) * 0.22) + b * 0.37) % 1;
-        const ox = bx + Math.sin(b * 3.1) * 8;
-        const oy = by + Math.cos(b * 2.7) * 6;
-
-        if (cycle < 0.72) {
-          // Burbuja de magma hinchándose al rojo-amarillo vivo
-          const grow = cycle / 0.72;
-          const rad = 2.2 + grow * 5.2;
-          c.fillStyle = grow > 0.5 ? '#ffee66' : '#ff7711';
-          c.globalAlpha = 0.85;
-          c.beginPath();
-          c.arc(ox, oy, rad, 0, Math.PI * 2);
-          c.fill();
-          c.fillStyle = '#ffffff';
-          c.beginPath();
-          c.arc(ox - rad * 0.3, oy - rad * 0.3, rad * 0.32, 0, Math.PI * 2);
-          c.fill();
-        } else {
-          // ¡Burbuja estallando! Anillo expansivo + gotas de lava salpicando
-          const pop = (cycle - 0.72) / 0.28;
-          const burstR = 6 + pop * 14;
-          c.strokeStyle = `rgba(255, 240, 130, ${(1 - pop) * 0.9})`;
-          c.lineWidth = 2 * (1 - pop * 0.6);
-          c.beginPath();
-          c.arc(ox, oy, burstR, 0, Math.PI * 2);
-          c.stroke();
-
-          // Chispas radiales del estallido
-          for (let s = 0; s < 4; s++) {
-            const ang = s * (Math.PI / 2) + b * 0.8;
-            const sx = ox + Math.cos(ang) * (4 + pop * 16);
-            const sy = oy + Math.sin(ang) * (4 + pop * 12) - pop * 6;
-            c.fillStyle = s % 2 === 0 ? '#fff380' : '#ff6600';
-            c.globalAlpha = 1 - pop;
-            c.fillRect(sx - 1.5, sy - 1.5, 3, 3);
-          }
-        }
-      }
-      c.globalAlpha = 1;
-
-      // 4. Pequeñas rocas volcánicas flotando/levitando por el calor con sombra proyectada y brillo inferior
-      const floatingRocks = [
-        [380, 340], [720, 490], [1120, 410], [1360, 460],
-        [620, 640], [1060, 710], [1480, 610], [860, 290]
-      ];
-      for (let r = 0; r < floatingRocks.length; r++) {
-        const [rx, ry] = floatingRocks[r];
-        const bob = Math.sin(time * 2.6 + r * 1.4) * 5;
-        // Sombra proyectada en el suelo
-        c.fillStyle = 'rgba(4, 1, 2, 0.65)';
-        c.beginPath();
-        c.ellipse(rx + 4, ry + 14, 9 - bob * 0.2, 4, 0, 0, Math.PI * 2);
-        c.fill();
-        // Resplandor naranja reflejado en la base de la roca
-        c.fillStyle = '#ff5500';
-        c.beginPath();
-        c.ellipse(rx, ry + bob + 2, 8.5, 5, 0, 0, Math.PI * 2);
-        c.fill();
-        // Cuerpo oscuro de roca volcánica
-        c.fillStyle = '#240b10';
-        c.beginPath();
-        c.ellipse(rx, ry + bob, 8, 4.8, 0, 0, Math.PI * 2);
-        c.fill();
-      }
-
-      // 5. Partículas flotantes de fuego, chispas y ceniza volcánica ascendente
-      for (let i = 0; i < 68; i++) {
-        const speedY = 52 + (i % 6) * 19;
-        const driftX = Math.sin(time * 2.4 + i * 1.5) * 30;
-        const x = ((i * 127 + driftX) % width + width) % width;
-        const y = height - ((i * 73 + time * speedY) % (height - 80));
-        const isAsh = i % 5 === 0;
-        const sz = isAsh ? 3 : (i % 3 === 0) ? 3.5 : 2.2;
-        const emberColor = isAsh ? '#5a2e35' : (i % 3 === 0) ? '#fff275' : (i % 2 === 0) ? '#ff7700' : '#ff2200';
-        c.fillStyle = emberColor;
-        c.globalAlpha = isAsh ? 0.55 : (0.48 + Math.sin(time * 4.5 + i) * 0.38);
-        c.fillRect(Math.round(x), Math.round(y), sz, sz);
-      }
-      c.globalAlpha = 1;
-
-      // 6. Efectos de Distorsión Térmica (ondas de aire caliente ondulante sobre las venas de lava)
-      for (let i = 0; i < 7; i++) {
-        const baseY = 175 + i * 125;
-        const phase = time * 3.4 + i * 1.35;
-        const waveAmp = 14 + (i % 3) * 5;
-        const offset1 = Math.sin(phase) * waveAmp;
-        const offset2 = Math.cos(phase * 1.15) * waveAmp;
-
-        // Halo cálido difuso de refracción térmica
-        c.strokeStyle = 'rgba(255, 130, 30, 0.16)';
-        c.lineWidth = 6;
-        c.beginPath();
-        c.moveTo(80, baseY + offset1);
-        c.bezierCurveTo(width * 0.32, baseY - offset2, width * 0.68, baseY + offset2, width - 80, baseY - offset1);
-        c.stroke();
-
-        // Filamento fino de aire hirviendo
-        c.strokeStyle = 'rgba(255, 235, 150, 0.14)';
-        c.lineWidth = 1.8;
-        c.beginPath();
-        c.moveTo(120, baseY - 8 + offset2 * 0.7);
-        c.bezierCurveTo(width * 0.36, baseY - 8 + offset1, width * 0.64, baseY - 8 - offset1, width - 120, baseY - 8 - offset2 * 0.7);
-        c.stroke();
       }
       c.restore();
     } else {

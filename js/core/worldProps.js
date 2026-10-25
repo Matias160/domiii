@@ -178,17 +178,7 @@ export function drawWorldProps(ctx, map = 'diner', time = 0, world = { width: 19
     if (isVisible(340, 360)) steam(ctx, 340, 360, time, '#00f0ff');
     if (isVisible(w - 340, 660)) steam(ctx, w - 340, 660, time + 1.1, '#ff007f');
   } else if (map === 'lava') {
-    // Caldero de Lava: Pilares de basalto rúnico y calderos de fundición ardientes
-    if (isVisible(220, 190)) basaltPillar(ctx, 220, 190, time);
-    if (isVisible(w - 220, 190)) basaltPillar(ctx, w - 220, 190, time + 1.2);
-    if (isVisible(220, h - 190)) basaltPillar(ctx, 220, h - 190, time + 2.4);
-    if (isVisible(w - 220, h - 190)) basaltPillar(ctx, w - 220, h - 190, time + 3.6);
-    if (isVisible(w / 2 - 280, 160)) lavaCauldron(ctx, w / 2 - 280, 160, time);
-    if (isVisible(w / 2 + 280, 160)) lavaCauldron(ctx, w / 2 + 280, 160, time + 1.5);
-    if (isVisible(w / 2 - 280, h - 160)) lavaCauldron(ctx, w / 2 - 280, h - 160, time + 0.8);
-    if (isVisible(w / 2 + 280, h - 160)) lavaCauldron(ctx, w / 2 + 280, h - 160, time + 2.2);
-    if (isVisible(380, 420)) steam(ctx, 380, 420, time, '#ff5500');
-    if (isVisible(w - 380, 680)) steam(ctx, w - 380, 680, time + 0.9, '#ff7700');
+    // El tablero pixel-art de lava ya contiene sus propios puentes, islotes, gemas, cráneos y espinas de obsidiana
   } else {
     // Diner clásico: mobiliario con sombras de contacto profundas
     ctx.save();
