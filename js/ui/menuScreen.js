@@ -97,9 +97,7 @@ export class MenuScreen {
 
   cycleOption(select) {
     if (!select || !select.options) return;
-    if (select === this.modeInput && this.mapInput.value === 'lava') {
-      this.game.showToast?.('En el Caldero de Lava solo existe el Encuentro Final (???)');
-      this.game.audio?.play?.('hit');
+    if ((select === this.modeInput || select === this.difficultyInput) && this.mapInput.value === 'lava') {
       return;
     }
     const available = [...select.options].filter(opt => !opt.disabled);
@@ -122,15 +120,18 @@ export class MenuScreen {
     };
 
     if (this.cardModeVal) {
-      this.cardModeVal.textContent = isLava ? '??? (Encuentro Final)' : getCleanLabel(this.modeInput);
+      this.cardModeVal.textContent = isLava ? '???' : getCleanLabel(this.modeInput);
     }
     if (this.cardMapVal) this.cardMapVal.textContent = getCleanLabel(this.mapInput);
     if (this.cardCompanionVal) this.cardCompanionVal.textContent = getCleanLabel(this.companionInput);
-    if (this.cardDifficultyVal) this.cardDifficultyVal.textContent = getCleanLabel(this.difficultyInput);
+    if (this.cardDifficultyVal) {
+      this.cardDifficultyVal.textContent = isLava ? '???' : getCleanLabel(this.difficultyInput);
+    }
     if (this.cardAccessoryVal) this.cardAccessoryVal.textContent = getCleanLabel(this.accessoryInput);
 
     if (this.cardMap) this.cardMap.classList.toggle('setup-card--lava', isLava);
     if (this.cardMode) this.cardMode.classList.toggle('setup-card--locked-lava', isLava);
+    if (this.cardDifficulty) this.cardDifficulty.classList.toggle('setup-card--locked-lava', isLava);
 
     refreshIcons();
   }

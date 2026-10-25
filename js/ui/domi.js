@@ -125,7 +125,7 @@ export class DomiScreen {
     const totalRuns = runs.length;
     const totalBosses = runs.reduce((sum, r) => sum + (r.bossesKilled || 0), 0);
 
-    return [
+    const list = [
       {
         id: 'm_level5',
         type: 'mission',
@@ -350,21 +350,22 @@ export class DomiScreen {
     ];
 
     const prevDone = list.filter(m => m.isDone).length;
+    const lavaOwned = isOwned(profile, 'map', 'lava');
     list.push({
       id: 'm_legendary_lava',
       type: 'mission',
       rewardType: 'map',
       rewardId: 'lava',
-      rewardName: 'Caldero de Lava (Legendario)',
-      rewardTooltip: 'MAPA LEGENDARIO: El núcleo volcánico donde aguarda el Coloso Final',
-      name: 'El Despertar del Caldero',
-      iconType: 'god',
-      description: 'Completa todas las misiones anteriores del Señor Domi para romper el sello.',
+      rewardName: lavaOwned ? 'Caldero de Lava' : '???',
+      rewardTooltip: lavaOwned ? 'MAPA LEGENDARIO: El núcleo volcánico donde aguarda el Coloso Final' : '??? ·Completá todas las misiones de Don Domi para revelar este misterio',
+      name: lavaOwned ? 'El Despertar del Caldero' : '??? · El Último Secreto',
+      iconType: 'skull',
+      description: 'Completa todas las 13 misiones anteriores del Señor Domi para romper el sello.',
       current: Math.min(13, prevDone),
       target: 13,
       unit: 'Misiones',
       isDone: prevDone >= 13,
-      isClaimed: isOwned(profile, 'map', 'lava'),
+      isClaimed: lavaOwned,
       claim: () => { grantItem('map', 'lava'); }
     });
 

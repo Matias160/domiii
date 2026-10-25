@@ -77,13 +77,13 @@ export function drawCombatFeedback(ctx, state, reducedMotion = false) {
       ctx.restore();
 
       ctx.strokeStyle=zoneColor;ctx.fillStyle=zoneColor+'22';ctx.lineWidth=3;ctx.setLineDash([8,6]);ctx.beginPath();ctx.arc(x,y,zone.radius,0,Math.PI*2);ctx.fill();ctx.stroke();
+      const maxDelay = zone.maxDelay || 1.2;
+      const progress = Math.max(0, Math.min(1, zone.delay / maxDelay));
       if(warning){
         ctx.save();ctx.beginPath();ctx.arc(x,y,zone.radius-3,0,Math.PI*2);ctx.clip();ctx.globalAlpha=.32;ctx.setLineDash([]);ctx.lineWidth=4;
         for(let line=-zone.radius*2;line<zone.radius*2;line+=14){ctx.beginPath();ctx.moveTo(x-zone.radius,line+y-zone.radius);ctx.lineTo(x+zone.radius,line+y+zone.radius);ctx.stroke();}
         ctx.restore();
         // Anillo de cuenta regresiva decreciente para timing perfecto de evasión
-        const maxDelay = zone.maxDelay || 1.2;
-        const progress = Math.max(0, Math.min(1, zone.delay / maxDelay));
         ctx.save();
         ctx.strokeStyle = '#ffffff';
         ctx.lineWidth = 3;
@@ -147,8 +147,16 @@ export function drawCombatFeedback(ctx, state, reducedMotion = false) {
     }
   }
 
-  // Indicador de cooldown de dash
-  ctx.strokeStyle = p.dashCooldown > 0 ? '#7ba998' : '#cde6a3'; ctx.lineWidth = 2;
+  // Indicador de cooldown de dash (con reflejo cálido en entorno de lava)
+  ctx.save();
+  if (state.mapId === 'lava') {
+    ctx.shadowColor = '#ff5500';
+    ctx.shadowBlur = 8;
+  }
+  ctx.strokeStyle = p.dashCooldown > 0
+    ? (state.mapId === 'lava' ? '#c96b4b' : '#7ba998')
+    : (state.mapId === 'lava' ? '#ffcf66' : '#cde6a3');
+  ctx.lineWidth = 2;
   ctx.beginPath();
   ctx.ellipse(p.x, p.y + 25, 22, 7, 0, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * (1 - p.dashCooldown / 2.8));
   ctx.stroke();
@@ -157,7 +165,10 @@ export function drawCombatFeedback(ctx, state, reducedMotion = false) {
   const target = state.manualAim ? state.aimPoint : state.target;
   if (target && (!target.hp || target.hp > 0)) {
     const size = state.manualAim ? 10 : target.radius + 7;
-    ctx.strokeStyle = state.manualAim ? '#f4e7b1' : '#f8d36d8c'; ctx.lineWidth = 1.5;
+    ctx.strokeStyle = state.mapId === 'lava'
+      ? (state.manualAim ? '#ffdd88' : '#ff7722cc')
+      : (state.manualAim ? '#f4e7b1' : '#f8d36d8c');
+    ctx.lineWidth = 1.5;
     ctx.beginPath();
     for (const [x, y] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) {
       ctx.moveTo(target.x + x * (size - 5), target.y + y * size);
@@ -167,6 +178,7 @@ export function drawCombatFeedback(ctx, state, reducedMotion = false) {
     ctx.stroke();
     if (state.manualAim) { ctx.fillStyle = '#ffe9b7'; ctx.fillRect(target.x - 1, target.y - 1, 2, 2); }
   }
+  ctx.restore();
 
   ctx.restore();
 }
@@ -174,6 +186,26 @@ export function drawCombatFeedback(ctx, state, reducedMotion = false) {
 export function drawScreenCombatOverlays(ctx, state, reducedMotion = false) {
   const p = state.player;
   if (!p) return;
+
+  // Iluminación ambiental cálida reflejada en bordes e interfaz flotante cuando el mapa es Caldero de Lava
+  if (state.mapId === 'lava') {
+    const lavaPulse = reducedMotion ? 0.22 : 0.20 + Math.sin(performance.now() / 420) * 0.06;
+    ctx.save();
+    // Resplandor cálido naranja/rojizo ascendente desde el borde inferior y esquinas hacia los paneles flotantes
+    const bottomGlow = ctx.createLinearGradient(0, 540, 0, 380);
+    bottomGlow.addColorStop(0, `rgba(255, 75, 10, ${lavaPulse * 0.85})`);
+    bottomGlow.addColorStop(0.5, `rgba(255, 40, 0, ${lavaPulse * 0.35})`);
+    bottomGlow.addColorStop(1, 'transparent');
+    ctx.fillStyle = bottomGlow;
+    ctx.fillRect(0, 380, 960, 160);
+
+    const topGlow = ctx.createLinearGradient(0, 0, 0, 95);
+    topGlow.addColorStop(0, `rgba(255, 85, 15, ${lavaPulse * 0.55})`);
+    topGlow.addColorStop(1, 'transparent');
+    ctx.fillStyle = topGlow;
+    ctx.fillRect(0, 0, 960, 95);
+    ctx.restore();
+  }
 
   // Borde de peligro (vida baja) — pulsación animada + vignette ajustada a toda la pantalla del viewport (960x540)
   if (p.hp / p.maxHp < 0.25) {

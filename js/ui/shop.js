@@ -68,14 +68,18 @@ export class Shop{
     const root=document.querySelector('#shopGrid');root.replaceChildren();
     for(const item of items){
       const owned=isOwned(profile,item.type,item.id),equipped=profile.loadout[item.type]===item.id;
+      const isMysteryLava=item.type==='map'&&item.id==='lava'&&!owned;
+      const displayName=isMysteryLava?'???':item.name;
+      const displayDesc=isMysteryLava?'??? · ???':item.description;
+      const statusText=equipped?'Equipado':owned?'Listo para equipar':isMysteryLava?'???':item.domiExclusive?'Misión Don Domi':`${item.cost.toLocaleString('es-AR')} PT`;
       const button=node('button','catalog-item');button.type='button';button.dataset.item=item.id;button.dataset.type=item.type;button.dataset.owned=String(Boolean(owned));
-      button.setAttribute('aria-label',`${item.name}, ${equipped?'equipado':owned?'en tu colección':item.cost+' puntos'}. Ver detalle`);button.setAttribute('aria-pressed',String(this.selected?.id===item.id));button.setAttribute('aria-controls','shopDetail');
+      button.setAttribute('aria-label',`${displayName}, ${statusText}. Ver detalle`);button.setAttribute('aria-pressed',String(this.selected?.id===item.id));button.setAttribute('aria-controls','shopDetail');
       const art=node('div','catalog-art');const canvas=document.createElement('canvas');canvas.width=280;canvas.height=180;canvas.setAttribute('aria-hidden','true');drawItemPreview(canvas,item,profile);
       art.append(canvas);
       if(equipped) art.append(node('span','catalog-badge','✓ EN USO'));
       if(!owned){const lock=node('span','catalog-lock');lock.innerHTML=icon('LockKeyhole');lock.setAttribute('aria-hidden','true');art.append(lock);}
-      const copy=node('div','catalog-copy');copy.append(node('strong','catalog-name',item.name),node('span','catalog-description',item.description));
-      const footer=node('span','catalog-status');footer.innerHTML=icon(equipped?'CircleCheck':owned?'Check':'Coins');footer.append(node('span','',equipped?'Equipado':owned?'Listo para equipar':`${item.cost.toLocaleString('es-AR')} PT`),node('span','catalog-arrow','↗'));
+      const copy=node('div','catalog-copy');copy.append(node('strong','catalog-name',displayName),node('span','catalog-description',displayDesc));
+      const footer=node('span','catalog-status');footer.innerHTML=icon(equipped?'CircleCheck':owned?'Check':item.domiExclusive?'Scroll':'Coins');footer.append(node('span','',statusText),node('span','catalog-arrow','↗'));
       copy.append(footer);button.append(art,copy);
       button.onclick=()=>{
         this.selected=item;root.querySelectorAll('.catalog-item').forEach(card=>card.setAttribute('aria-pressed',String(card===button)));this.renderDetail();this.game.audio.play('navigate');
@@ -94,15 +98,34 @@ export class Shop{
     if(!item){root.append(node('p','detail-placeholder','Elegí un artículo para verlo en el probador.'));return;}
     const profile=this.account.currentAccount();if(!profile)return;
     const owned=isOwned(profile,item.type,item.id),equipped=profile.loadout[item.type]===item.id;
-    const top=node('div','detail-top');top.append(node('span','','EL PROBADOR'),node('span','detail-state',equipped?'EN USO':owned?'EN TU COLECCIÓN':'VISTA PREVIA'));
-    const stage=node('div','detail-stage'),canvas=document.createElement('canvas');canvas.width=480;canvas.height=300;canvas.id='shopPreview';canvas.setAttribute('aria-label',`Vista previa de ${item.name}`);this.previewCanvas=canvas;
-    stage.append(canvas,node('span','preview-caption',item.type==='accessory'?'Así queda en tu personaje':'Probalo. Encontrá tu estilo.'));
-    const body=node('div','detail-body'),heading=node('h3','',item.name);heading.tabIndex=-1;body.append(heading,node('p','shop-description',item.description));
+    const isMysteryLava=item.type==='map'&&item.id==='lava'&&!owned;
+    const displayName=isMysteryLava?'???':item.name;
+    const displayDesc=isMysteryLava?'??? · ???':item.description;
+    const top=node('div','detail-top');top.append(node('span','','EL PROBADOR'),node('span','detail-state',equipped?'EN USO':owned?'EN TU COLECCIÓN':isMysteryLava?'???':'VISTA PREVIA'));
+    const stage=node('div','detail-stage'),canvas=document.createElement('canvas');canvas.width=480;canvas.height=300;canvas.id='shopPreview';canvas.setAttribute('aria-label',`Vista previa de ${displayName}`);this.previewCanvas=canvas;
+    stage.append(canvas,node('span','preview-caption',isMysteryLava?'???':item.type==='accessory'?'Así queda en tu personaje':'Probalo. Encontrá tu estilo.'));
+    const body=node('div','detail-body'),heading=node('h3','',displayName);heading.tabIndex=-1;body.append(heading,node('p','shop-description',displayDesc));
     if(item.type==='skin'){
       const stats=node('div','preview-stats'),skin=skins[item.id];
       for(const [label,value] of [['VIDA',skin.maxHp],['VELOCIDAD',skin.speed],['DEFENSA',skin.defense.toFixed(2)],['DAÑO',`${Math.round(skin.damageMultiplier*100)}%`],['PROYECTILES',`+${skin.extraProjectiles}`]]){const stat=node('span','');stat.append(node('small','',label),node('b','',String(value)));stats.append(stat);}body.append(stats);
     }
     if(item.type==='pet')body.append(node('p','pet-function',`FUNCIÓN · ${companions[item.id].detail}`));
+    if(!owned&&item.domiExclusive){
+      const action=node('div','detail-action');
+      action.append(node('p','purchase-explainer',isMysteryLava?'??? · Completá todas las misiones del Señor Domi para revelar este secreto.':'Reliquia exclusiva del Señor Domi. Completá sus misiones para desbloquearla.'));
+      const domiBtn=node('button','pixel-button purchase-button arcade-action');domiBtn.type='button';
+      domiBtn.innerHTML=icon('Scroll');
+      const copy=node('span','purchase-copy');
+      copy.append(node('span','purchase-label','IR A DON DOMI'),node('small','purchase-price','VER MISIONES'));
+      domiBtn.append(copy);
+      domiBtn.onclick=()=>{
+        this.game.audio?.play?.('navigate');
+        if(this.game.domi)this.game.domi.show('missions');
+        else this.game.showScreen?.('domiScreen');
+      };
+      action.append(domiBtn);
+      root.append(top,stage,body,action);drawItemPreview(canvas,item,profile);return;
+    }
     if(this.ownedOnly&&!owned){
       const locked=node('div','detail-action');locked.append(node('p','purchase-explainer','Todavía no lo tenés. Disponible para comprar en la tienda.'));
       root.append(top,stage,body,locked);drawItemPreview(canvas,item,profile);return;

@@ -214,90 +214,255 @@ function footballFloor(c) {
 }
 
 function lavaFloor(c) {
-  // 1. Base de lecho volcánico oscuro de obsidiana y basalto
-  rect(c, '#0d0406', 0, 0, 1920, 1080);
+  // 1. Base de lecho volcánico profundo (obsidiana y escoria basáltica)
+  rect(c, '#090204', 0, 0, 1920, 1080);
 
-  // 2. Bloques y losas de basalto con textura de piedra volcánica
-  const stoneTones = ['#15080b', '#1c0d12', '#241018', '#1a0b10'];
-  for (let y = 84; y < 1080; y += 40) {
-    for (let x = 0; x < 1920; x += 48) {
-      const idx = Math.floor((x / 48 + y / 40) % 4);
-      rect(c, stoneTones[idx], x + 1, y + 1, 46, 38);
-      rect(c, '#090204', x, y, 48, 1);
-      rect(c, '#090204', x, y, 1, 40);
-      rect(c, '#ffffff06', x + 2, y + 2, 42, 1);
+  // 2. Losas de basalto fracturadas e irregulares con relieve, sombras proyectadas y micro-fisuras de calor
+  const stoneTones = ['#14070a', '#1b0b10', '#230e15', '#17090d', '#1f0c12'];
+  for (let y = 84; y < 1080; y += 44) {
+    const rowShift = ((y / 44) % 2) * 22;
+    for (let x = -24; x < 1920; x += 52) {
+      const hash = Math.abs(Math.sin(x * 12.9898 + y * 78.233) * 43758.5453);
+      const idx = Math.floor(hash * stoneTones.length) % stoneTones.length;
+      const w = 48 + Math.floor((hash * 7) % 5) - 2;
+      const h = 40 + Math.floor((hash * 11) % 5) - 2;
+      const tx = x + rowShift;
+
+      // Sombra proyectada de la losa sobre la grieta inferior
+      rect(c, '#040102', tx + 3, y + 3, w, h);
+      // Cuerpo de la losa basáltica
+      rect(c, stoneTones[idx], tx + 1, y + 1, w - 2, h - 2);
+      // Bisel superior iluminado por reflejo cálido
+      rect(c, '#ff662210', tx + 2, y + 2, w - 6, 1.5);
+      rect(c, '#050103', tx, y + h - 1, w, 1.5);
+
+      // Grietas irregulares de donde se filtra el calor subterráneo en ciertas losas
+      if ((Math.floor(hash * 100) % 4) === 0) {
+        c.save();
+        c.strokeStyle = '#ff330038';
+        c.lineWidth = 3.5;
+        c.beginPath();
+        c.moveTo(tx + 8, y + 10);
+        c.lineTo(tx + w * 0.52, y + h * 0.58);
+        c.lineTo(tx + w - 9, y + h * 0.42);
+        c.stroke();
+        c.strokeStyle = '#ff992288';
+        c.lineWidth = 1.2;
+        c.stroke();
+        c.restore();
+      }
     }
   }
 
-  // 3. Red intrincada de grietas de magma y fisuras volcánicas que recorren la arena
-  const fissurePaths = [
-    // Grieta mayor transversal noroeste a sureste
-    [[60, 220], [240, 280], [450, 260], [680, 340], [920, 390], [1180, 480], [1420, 560], [1680, 680], [1860, 780]],
-    // Grieta diagonal suroeste a noreste
-    [[120, 920], [310, 840], [540, 720], [780, 680], [1020, 590], [1280, 510], [1520, 380], [1760, 260], [1880, 210]],
-    // Fisuras secundarias ramificadas
-    [[920, 390], [860, 520], [820, 680], [780, 860], [840, 990]],
-    [[1180, 480], [1240, 350], [1360, 240], [1500, 160]],
-    [[450, 260], [420, 410], [360, 580], [310, 840]],
-    [[1420, 560], [1460, 720], [1580, 890], [1640, 1020]],
-    // Círculo concéntrico de colapso en el centro
-    [[760, 460], [840, 410], [960, 380], [1080, 410], [1160, 460], [1180, 560], [1120, 640], [960, 680], [800, 640], [740, 560], [760, 460]]
+  // 2b. Elevaciones rocosas volcánicas y mesetas de basalto con sombras proyectadas profundas
+  const volcanicElevations = [
+    { x: 340, y: 210, rx: 58, ry: 28 },
+    { x: 610, y: 175, rx: 46, ry: 22 },
+    { x: 1320, y: 195, rx: 64, ry: 30 },
+    { x: 1560, y: 310, rx: 52, ry: 25 },
+    { x: 260, y: 510, rx: 62, ry: 32 },
+    { x: 520, y: 610, rx: 48, ry: 24 },
+    { x: 1380, y: 650, rx: 56, ry: 28 },
+    { x: 1680, y: 540, rx: 50, ry: 26 },
+    { x: 430, y: 890, rx: 66, ry: 30 },
+    { x: 1180, y: 880, rx: 60, ry: 28 },
+    { x: 740, y: 280, rx: 42, ry: 20 },
+    { x: 1140, y: 290, rx: 45, ry: 22 }
   ];
-
-  for (const path of fissurePaths) {
-    // Capa exterior: resplandor profundo de calor
+  for (const el of volcanicElevations) {
     c.save();
-    c.strokeStyle = '#550000'; c.lineWidth = 14; c.lineCap = 'round'; c.lineJoin = 'round';
+    // Sombra proyectada desplazada hacia abajo-derecha
+    c.fillStyle = 'rgba(3, 0, 2, 0.78)';
     c.beginPath();
-    c.moveTo(path[0][0], path[0][1]);
-    for (let i = 1; i < path.length; i++) c.lineTo(path[i][0], path[i][1]);
-    c.stroke();
+    c.ellipse(el.x + 10, el.y + 12, el.rx * 1.04, el.ry * 1.06, 0.08, 0, Math.PI * 2);
+    c.fill();
 
-    // Capa media: magma rojo-naranja vivo
-    c.strokeStyle = '#e62200'; c.lineWidth = 8;
+    // Pared lateral de la elevación rocosa
+    c.fillStyle = '#120508';
     c.beginPath();
-    c.moveTo(path[0][0], path[0][1]);
-    for (let i = 1; i < path.length; i++) c.lineTo(path[i][0], path[i][1]);
-    c.stroke();
+    c.ellipse(el.x, el.y + 5, el.rx, el.ry, 0, 0, Math.PI * 2);
+    c.fill();
 
-    // Capa ardiente: naranja brillante
-    c.strokeStyle = '#ff7700'; c.lineWidth = 4;
+    // Superficie superior de la meseta basáltica
+    const rockGrad = c.createLinearGradient(el.x - el.rx, el.y - el.ry, el.x + el.rx, el.y + el.ry);
+    rockGrad.addColorStop(0, '#2c1219');
+    rockGrad.addColorStop(0.6, '#1d0a10');
+    rockGrad.addColorStop(1, '#3d1510');
+    c.fillStyle = rockGrad;
     c.beginPath();
-    c.moveTo(path[0][0], path[0][1]);
-    for (let i = 1; i < path.length; i++) c.lineTo(path[i][0], path[i][1]);
-    c.stroke();
+    c.ellipse(el.x, el.y, el.rx * 0.94, el.ry * 0.88, 0, 0, Math.PI * 2);
+    c.fill();
 
-    // Núcleo incandescente: amarillo plasma
-    c.strokeStyle = '#ffea55'; c.lineWidth = 1.5;
+    // Borde iluminado por el magma cercano (rim light naranja/rojizo)
+    c.strokeStyle = '#ff551155';
+    c.lineWidth = 2;
     c.beginPath();
-    c.moveTo(path[0][0], path[0][1]);
-    for (let i = 1; i < path.length; i++) c.lineTo(path[i][0], path[i][1]);
+    c.ellipse(el.x, el.y, el.rx * 0.94, el.ry * 0.88, 0, 0.15, Math.PI - 0.15);
     c.stroke();
     c.restore();
   }
 
-  // 4. Pozas y calderas de lava burbujeante en los bordes
+  // 3. Piscinas de magma hirviendo en los bordes con iluminación sobre las casillas cercanas
   const lavaPools = [
-    { x: 180, y: 190, rx: 75, ry: 40 },
-    { x: 1740, y: 190, rx: 75, ry: 40 },
-    { x: 180, y: 920, rx: 80, ry: 44 },
-    { x: 1740, y: 920, rx: 80, ry: 44 },
-    { x: 960, y: 980, rx: 110, ry: 50 },
-    { x: 960, y: 160, rx: 90, ry: 42 }
+    { x: 180, y: 190, rx: 82, ry: 44 },
+    { x: 1740, y: 190, rx: 82, ry: 44 },
+    { x: 180, y: 920, rx: 88, ry: 48 },
+    { x: 1740, y: 920, rx: 88, ry: 48 },
+    { x: 960, y: 980, rx: 118, ry: 54 },
+    { x: 960, y: 160, rx: 96, ry: 45 }
   ];
   for (const pool of lavaPools) {
-    const pGrad = c.createRadialGradient(pool.x, pool.y, pool.rx * 0.1, pool.x, pool.y, pool.rx);
-    pGrad.addColorStop(0, '#ffee55');
-    pGrad.addColorStop(0.3, '#ff6600');
-    pGrad.addColorStop(0.7, '#cc1100');
-    pGrad.addColorStop(0.9, '#440509');
-    pGrad.addColorStop(1, 'transparent');
+    c.save();
+    // Destello amplio de luz cálida que ilumina las baldosas cercanas alrededor de la piscina
+    const tileLight = c.createRadialGradient(pool.x, pool.y, pool.rx * 0.3, pool.x, pool.y, pool.rx * 2.35);
+    tileLight.addColorStop(0, 'rgba(255, 115, 20, 0.42)');
+    tileLight.addColorStop(0.45, 'rgba(255, 55, 0, 0.18)');
+    tileLight.addColorStop(0.8, 'rgba(180, 20, 0, 0.06)');
+    tileLight.addColorStop(1, 'transparent');
+    c.fillStyle = tileLight;
+    c.beginPath();
+    c.ellipse(pool.x, pool.y, pool.rx * 2.35, pool.ry * 2.35, 0, 0, Math.PI * 2);
+    c.fill();
+
+    // Sombra exterior del cráter de la piscina
+    c.fillStyle = '#050102';
+    c.beginPath();
+    c.ellipse(pool.x + 5, pool.y + 6, pool.rx + 12, pool.ry + 9, 0, 0, Math.PI * 2);
+    c.fill();
+
+    // Borde rocoso elevado de escoria volcánica
+    c.fillStyle = '#24090d';
+    c.beginPath();
+    c.ellipse(pool.x, pool.y, pool.rx + 8, pool.ry + 6, 0, 0, Math.PI * 2);
+    c.fill();
+
+    // Magma hirviendo multicapa en el interior del cráter
+    const pGrad = c.createRadialGradient(pool.x - pool.rx * 0.12, pool.y - pool.ry * 0.1, pool.rx * 0.06, pool.x, pool.y, pool.rx);
+    pGrad.addColorStop(0, '#ffffff');
+    pGrad.addColorStop(0.18, '#fff066');
+    pGrad.addColorStop(0.45, '#ff7700');
+    pGrad.addColorStop(0.75, '#d91b00');
+    pGrad.addColorStop(0.92, '#4a0609');
+    pGrad.addColorStop(1, '#1c0305');
     c.fillStyle = pGrad;
     c.beginPath();
     c.ellipse(pool.x, pool.y, pool.rx, pool.ry, 0, 0, Math.PI * 2);
     c.fill();
-    c.strokeStyle = '#180608'; c.lineWidth = 3;
+
+    // Ondas concéntricas de calor estáticas grabadas en el magma y costras flotantes
+    c.strokeStyle = 'rgba(255, 238, 120, 0.45)';
+    c.lineWidth = 2;
+    c.beginPath();
+    c.ellipse(pool.x, pool.y, pool.rx * 0.68, pool.ry * 0.65, 0, 0, Math.PI * 2);
     c.stroke();
+    c.strokeStyle = 'rgba(255, 140, 20, 0.5)';
+    c.lineWidth = 1.5;
+    c.beginPath();
+    c.ellipse(pool.x, pool.y, pool.rx * 0.42, pool.ry * 0.40, 0, 0, Math.PI * 2);
+    c.stroke();
+
+    // Pequeñas costras de roca volcánica flotando dentro de la piscina
+    c.fillStyle = '#21070a';
+    c.beginPath();
+    c.ellipse(pool.x + pool.rx * 0.35, pool.y + pool.ry * 0.2, 11, 5, 0.2, 0, Math.PI * 2);
+    c.ellipse(pool.x - pool.rx * 0.4, pool.y - pool.ry * 0.18, 9, 4, -0.3, 0, Math.PI * 2);
+    c.fill();
+    c.restore();
+  }
+
+  // 4. Jerarquía de Venas de Magma con grosor variable, bifurcaciones orgánicas y glow intenso
+  // Cada punto es [x, y, factorGrosor]
+  const magmaArteries = [
+    // Arteria principal Noroeste -> Centro -> Sureste (grosor variable orgánico)
+    [[160, 195, 1.35], [290, 255, 1.15], [450, 260, 1.3], [575, 310, 1.0], [680, 340, 1.25], [810, 365, 1.1], [920, 390, 1.45], [1055, 435, 1.2], [1180, 480, 1.4], [1310, 520, 1.1], [1420, 560, 1.3], [1565, 625, 1.05], [1680, 680, 1.2], [1750, 895, 1.35]],
+    // Arteria diagonal Suroeste -> Centro -> Noreste
+    [[175, 910, 1.35], [310, 840, 1.25], [435, 775, 1.05], [540, 720, 1.2], [665, 700, 0.95], [780, 680, 1.3], [905, 635, 1.15], [1020, 590, 1.4], [1155, 550, 1.2], [1280, 510, 1.35], [1410, 445, 1.05], [1520, 380, 1.2], [1645, 295, 1.1], [1740, 195, 1.35]],
+    // Anillo fracturado del Caldero Central (variable y asimétrico)
+    [[755, 455, 1.25], [835, 400, 1.1], [920, 390, 1.45], [960, 372, 1.2], [1085, 405, 1.15], [1180, 480, 1.4], [1190, 565, 1.15], [1115, 645, 1.25], [1020, 590, 1.4], [960, 688, 1.3], [820, 680, 1.25], [735, 565, 1.05], [755, 455, 1.25]],
+    // Bifurcaciones secundarias naturales hacia las piscinas norte y sur
+    [[960, 160, 1.3], [945, 245, 0.95], [910, 315, 0.85], [920, 390, 1.3]],
+    [[960, 688, 1.25], [985, 785, 0.95], [945, 880, 1.1], [960, 980, 1.4]],
+    [[450, 260, 1.2], [410, 385, 0.9], [385, 510, 0.75], [345, 675, 0.85], [310, 840, 1.15]],
+    [[1180, 480, 1.25], [1235, 365, 0.9], [1345, 265, 0.78], [1485, 175, 0.6]],
+    [[1420, 560, 1.2], [1455, 705, 0.92], [1545, 825, 0.8], [1660, 910, 1.0]],
+    // Ramificaciones capilares finas (bifurcaciones orgánicas)
+    [[680, 340, 0.95], [630, 445, 0.65], [565, 515, 0.45]],
+    [[540, 720, 0.95], [610, 825, 0.65], [685, 905, 0.45]],
+    [[1280, 510, 1.0], [1365, 585, 0.68], [1440, 645, 0.45]],
+    [[1520, 380, 0.95], [1615, 435, 0.65], [1710, 465, 0.42]],
+    [[820, 680, 1.05], [765, 815, 0.75], [795, 935, 0.52]]
+  ];
+
+  // Dibujar cada segmento con grosor variable y 5 niveles de energía (halo difuminado -> magma -> núcleo amarillo brillante)
+  for (const path of magmaArteries) {
+    c.save();
+    c.lineCap = 'round';
+    c.lineJoin = 'round';
+    for (let i = 0; i < path.length - 1; i++) {
+      const [x1, y1, w1] = path[i];
+      const [x2, y2, w2] = path[i + 1];
+      const w = (w1 + w2) * 0.5;
+
+      // 1) Halo exterior anaranjado difuminado (Glow sobre el suelo oscuro)
+      c.strokeStyle = 'rgba(255, 65, 0, 0.19)';
+      c.lineWidth = 28 * w;
+      c.beginPath(); c.moveTo(x1, y1); c.lineTo(x2, y2); c.stroke();
+
+      c.strokeStyle = 'rgba(255, 105, 15, 0.32)';
+      c.lineWidth = 17 * w;
+      c.beginPath(); c.moveTo(x1, y1); c.lineTo(x2, y2); c.stroke();
+
+      // 2) Borde de roca fundida al rojo vivo
+      c.strokeStyle = '#5c0804';
+      c.lineWidth = 12 * w;
+      c.beginPath(); c.moveTo(x1, y1); c.lineTo(x2, y2); c.stroke();
+
+      // 3) Flujo de magma carmesí-naranja
+      c.strokeStyle = '#e82c00';
+      c.lineWidth = 8.2 * w;
+      c.beginPath(); c.moveTo(x1, y1); c.lineTo(x2, y2); c.stroke();
+
+      // 4) Manto naranja incandescente
+      c.strokeStyle = '#ff8c00';
+      c.lineWidth = 4.6 * w;
+      c.beginPath(); c.moveTo(x1, y1); c.lineTo(x2, y2); c.stroke();
+
+      // 5) Núcleo central amarillo-blanco brillante (energía pura)
+      c.strokeStyle = '#fff380';
+      c.lineWidth = 2.0 * w;
+      c.beginPath(); c.moveTo(x1, y1); c.lineTo(x2, y2); c.stroke();
+    }
+    c.restore();
+  }
+
+  // 4b. Nodos de intersección de alta energía (Glow concentrado donde se cruzan las venas de lava)
+  const intersectionNodes = [
+    { x: 920, y: 390, r: 58 },
+    { x: 1180, y: 480, r: 62 },
+    { x: 1020, y: 590, r: 58 },
+    { x: 820, y: 680, r: 52 },
+    { x: 450, y: 260, r: 48 },
+    { x: 680, y: 340, r: 44 },
+    { x: 1420, y: 560, r: 50 },
+    { x: 1280, y: 510, r: 48 },
+    { x: 310, y: 840, r: 46 },
+    { x: 540, y: 720, r: 44 },
+    { x: 1520, y: 380, r: 44 },
+    { x: 960, y: 688, r: 52 }
+  ];
+  for (const node of intersectionNodes) {
+    c.save();
+    const nGrad = c.createRadialGradient(node.x, node.y, 2, node.x, node.y, node.r);
+    nGrad.addColorStop(0, '#ffffff');
+    nGrad.addColorStop(0.16, '#fff588');
+    nGrad.addColorStop(0.42, 'rgba(255, 130, 10, 0.65)');
+    nGrad.addColorStop(0.75, 'rgba(255, 45, 0, 0.24)');
+    nGrad.addColorStop(1, 'transparent');
+    c.fillStyle = nGrad;
+    c.beginPath();
+    c.arc(node.x, node.y, node.r, 0, Math.PI * 2);
+    c.fill();
+    c.restore();
   }
 
   // 5. Horizonte superior (cielo ardiente y silueta de caldera volcánica)
@@ -700,49 +865,161 @@ export function drawDiner(c, width, height, time, menu, map = 'diner') {
     } else if (map === 'lava') {
       c.save();
       // 1. Resplandor ambiental de calor magmático pulsante
-      const pulse = 0.12 + Math.sin(time * 2.5) * 0.04;
+      const pulse = 0.14 + Math.sin(time * 2.5) * 0.04;
       const heatGrad = c.createRadialGradient(width / 2, height / 2, 80, width / 2, height / 2, Math.max(width, height) * 0.72);
-      heatGrad.addColorStop(0, `rgba(255, 60, 0, ${pulse * 0.75})`);
-      heatGrad.addColorStop(0.55, `rgba(220, 30, 0, ${pulse})`);
-      heatGrad.addColorStop(1, `rgba(50, 5, 10, ${pulse * 1.6})`);
+      heatGrad.addColorStop(0, `rgba(255, 75, 10, ${pulse * 0.85})`);
+      heatGrad.addColorStop(0.55, `rgba(225, 35, 0, ${pulse})`);
+      heatGrad.addColorStop(1, `rgba(55, 6, 12, ${pulse * 1.65})`);
       c.fillStyle = heatGrad;
       c.fillRect(0, 0, width, height);
 
-      // 2. Brasas y chispas de lava flotantes ascendentes
-      for (let i = 0; i < 54; i++) {
-        const speedY = 55 + (i % 6) * 18;
-        const driftX = Math.sin(time * 2.2 + i * 1.5) * 28;
-        const x = ((i * 127 + driftX) % width + width) % width;
-        const y = height - ((i * 73 + time * speedY) % (height - 80));
-        const sz = (i % 5 === 0) ? 3.5 : (i % 2 === 0) ? 2.5 : 2;
-        const emberColor = (i % 3 === 0) ? '#ffee55' : (i % 2 === 0) ? '#ff6600' : '#ff2200';
-        c.fillStyle = emberColor;
-        c.globalAlpha = 0.45 + Math.sin(time * 4 + i) * 0.35;
-        c.fillRect(Math.round(x), Math.round(y), sz, sz);
+      // 2. Piscinas de magma hirviendo: ondas concéntricas de calor animadas y destellos sobre casillas cercanas
+      const poolCoords = [
+        { x: 180, y: 190, rx: 82, ry: 44 },
+        { x: 1740, y: 190, rx: 82, ry: 44 },
+        { x: 180, y: 920, rx: 88, ry: 48 },
+        { x: 1740, y: 920, rx: 88, ry: 48 },
+        { x: 960, y: 980, rx: 118, ry: 54 },
+        { x: 960, y: 160, rx: 96, ry: 45 }
+      ];
+      for (let pIdx = 0; pIdx < poolCoords.length; pIdx++) {
+        const pool = poolCoords[pIdx];
+        // Destello pulsante de luz que baña las baldosas vecinas
+        const flareAlpha = 0.14 + Math.sin(time * 3.6 + pIdx * 1.3) * 0.07;
+        const flare = c.createRadialGradient(pool.x, pool.y, pool.rx * 0.2, pool.x, pool.y, pool.rx * 1.85);
+        flare.addColorStop(0, `rgba(255, 220, 90, ${flareAlpha})`);
+        flare.addColorStop(0.5, `rgba(255, 90, 10, ${flareAlpha * 0.7})`);
+        flare.addColorStop(1, 'transparent');
+        c.fillStyle = flare;
+        c.beginPath();
+        c.ellipse(pool.x, pool.y, pool.rx * 1.85, pool.ry * 1.85, 0, 0, Math.PI * 2);
+        c.fill();
+
+        // 2 ondas concéntricas de calor expandiéndose desde el centro de la piscina
+        for (let r = 0; r < 2; r++) {
+          const waveProg = ((time * 0.65 + r * 0.5 + pIdx * 0.19) % 1);
+          const wrx = pool.rx * (0.2 + waveProg * 0.75);
+          const wry = pool.ry * (0.2 + waveProg * 0.75);
+          c.strokeStyle = `rgba(255, 240, 130, ${(1 - waveProg) * 0.55})`;
+          c.lineWidth = 2.2 * (1 - waveProg * 0.5);
+          c.beginPath();
+          c.ellipse(pool.x, pool.y, wrx, wry, 0, 0, Math.PI * 2);
+          c.stroke();
+        }
       }
 
-      // 3. Columnas de humo y vapor ardiente saliendo de las fisuras
-      for (let f = 0; f < 6; f++) {
-        const fx = [180, 680, 960, 1280, 1680, 450][f];
-        const fy = [240, 360, 590, 490, 680, 840][f];
-        const smokeH = 40 + Math.sin(time * 3 + f) * 12;
-        const sGrad = c.createRadialGradient(fx, fy - smokeH * 0.5, 5, fx, fy - smokeH * 0.5, 38);
-        sGrad.addColorStop(0, 'rgba(255, 120, 50, 0.22)');
-        sGrad.addColorStop(0.6, 'rgba(100, 30, 20, 0.12)');
-        sGrad.addColorStop(1, 'transparent');
-        c.fillStyle = sGrad;
+      // 3. Burbujas de lava creciendo y estallando a lo largo de las líneas de magma e intersecciones
+      const veinAnchors = [
+        [290, 255], [450, 260], [575, 310], [680, 340], [810, 365], [920, 390],
+        [1055, 435], [1180, 480], [1310, 520], [1420, 560], [1565, 625], [1680, 680],
+        [310, 840], [540, 720], [780, 680], [905, 635], [1020, 590], [1280, 510],
+        [1520, 380], [960, 372], [1115, 645], [960, 688], [755, 455], [820, 680],
+        [180, 190], [1740, 190], [180, 920], [1740, 920], [960, 980], [960, 160]
+      ];
+      for (let b = 0; b < veinAnchors.length; b++) {
+        const [bx, by] = veinAnchors[b];
+        const cycle = (time * (1.1 + (b % 4) * 0.22) + b * 0.37) % 1;
+        const ox = bx + Math.sin(b * 3.1) * 8;
+        const oy = by + Math.cos(b * 2.7) * 6;
+
+        if (cycle < 0.72) {
+          // Burbuja de magma hinchándose al rojo-amarillo vivo
+          const grow = cycle / 0.72;
+          const rad = 2.2 + grow * 5.2;
+          c.fillStyle = grow > 0.5 ? '#ffee66' : '#ff7711';
+          c.globalAlpha = 0.85;
+          c.beginPath();
+          c.arc(ox, oy, rad, 0, Math.PI * 2);
+          c.fill();
+          c.fillStyle = '#ffffff';
+          c.beginPath();
+          c.arc(ox - rad * 0.3, oy - rad * 0.3, rad * 0.32, 0, Math.PI * 2);
+          c.fill();
+        } else {
+          // ¡Burbuja estallando! Anillo expansivo + gotas de lava salpicando
+          const pop = (cycle - 0.72) / 0.28;
+          const burstR = 6 + pop * 14;
+          c.strokeStyle = `rgba(255, 240, 130, ${(1 - pop) * 0.9})`;
+          c.lineWidth = 2 * (1 - pop * 0.6);
+          c.beginPath();
+          c.arc(ox, oy, burstR, 0, Math.PI * 2);
+          c.stroke();
+
+          // Chispas radiales del estallido
+          for (let s = 0; s < 4; s++) {
+            const ang = s * (Math.PI / 2) + b * 0.8;
+            const sx = ox + Math.cos(ang) * (4 + pop * 16);
+            const sy = oy + Math.sin(ang) * (4 + pop * 12) - pop * 6;
+            c.fillStyle = s % 2 === 0 ? '#fff380' : '#ff6600';
+            c.globalAlpha = 1 - pop;
+            c.fillRect(sx - 1.5, sy - 1.5, 3, 3);
+          }
+        }
+      }
+      c.globalAlpha = 1;
+
+      // 4. Pequeñas rocas volcánicas flotando/levitando por el calor con sombra proyectada y brillo inferior
+      const floatingRocks = [
+        [380, 340], [720, 490], [1120, 410], [1360, 460],
+        [620, 640], [1060, 710], [1480, 610], [860, 290]
+      ];
+      for (let r = 0; r < floatingRocks.length; r++) {
+        const [rx, ry] = floatingRocks[r];
+        const bob = Math.sin(time * 2.6 + r * 1.4) * 5;
+        // Sombra proyectada en el suelo
+        c.fillStyle = 'rgba(4, 1, 2, 0.65)';
         c.beginPath();
-        c.ellipse(fx, fy - smokeH * 0.5, 36, smokeH, 0, 0, Math.PI * 2);
+        c.ellipse(rx + 4, ry + 14, 9 - bob * 0.2, 4, 0, 0, Math.PI * 2);
+        c.fill();
+        // Resplandor naranja reflejado en la base de la roca
+        c.fillStyle = '#ff5500';
+        c.beginPath();
+        c.ellipse(rx, ry + bob + 2, 8.5, 5, 0, 0, Math.PI * 2);
+        c.fill();
+        // Cuerpo oscuro de roca volcánica
+        c.fillStyle = '#240b10';
+        c.beginPath();
+        c.ellipse(rx, ry + bob, 8, 4.8, 0, 0, Math.PI * 2);
         c.fill();
       }
 
-      // 4. Ondas de calor distorsionado
-      c.strokeStyle = '#ff770028'; c.lineWidth = 2;
-      for (let i = 0; i < 4; i++) {
-        const y = 220 + i * 180;
-        const offset = Math.sin(time * 2.8 + i * 1.6) * 22;
-        c.beginPath(); c.moveTo(0, y + offset);
-        c.bezierCurveTo(width * 0.3, y - offset, width * 0.7, y + offset, width, y - offset);
+      // 5. Partículas flotantes de fuego, chispas y ceniza volcánica ascendente
+      for (let i = 0; i < 68; i++) {
+        const speedY = 52 + (i % 6) * 19;
+        const driftX = Math.sin(time * 2.4 + i * 1.5) * 30;
+        const x = ((i * 127 + driftX) % width + width) % width;
+        const y = height - ((i * 73 + time * speedY) % (height - 80));
+        const isAsh = i % 5 === 0;
+        const sz = isAsh ? 3 : (i % 3 === 0) ? 3.5 : 2.2;
+        const emberColor = isAsh ? '#5a2e35' : (i % 3 === 0) ? '#fff275' : (i % 2 === 0) ? '#ff7700' : '#ff2200';
+        c.fillStyle = emberColor;
+        c.globalAlpha = isAsh ? 0.55 : (0.48 + Math.sin(time * 4.5 + i) * 0.38);
+        c.fillRect(Math.round(x), Math.round(y), sz, sz);
+      }
+      c.globalAlpha = 1;
+
+      // 6. Efectos de Distorsión Térmica (ondas de aire caliente ondulante sobre las venas de lava)
+      for (let i = 0; i < 7; i++) {
+        const baseY = 175 + i * 125;
+        const phase = time * 3.4 + i * 1.35;
+        const waveAmp = 14 + (i % 3) * 5;
+        const offset1 = Math.sin(phase) * waveAmp;
+        const offset2 = Math.cos(phase * 1.15) * waveAmp;
+
+        // Halo cálido difuso de refracción térmica
+        c.strokeStyle = 'rgba(255, 130, 30, 0.16)';
+        c.lineWidth = 6;
+        c.beginPath();
+        c.moveTo(80, baseY + offset1);
+        c.bezierCurveTo(width * 0.32, baseY - offset2, width * 0.68, baseY + offset2, width - 80, baseY - offset1);
+        c.stroke();
+
+        // Filamento fino de aire hirviendo
+        c.strokeStyle = 'rgba(255, 235, 150, 0.14)';
+        c.lineWidth = 1.8;
+        c.beginPath();
+        c.moveTo(120, baseY - 8 + offset2 * 0.7);
+        c.bezierCurveTo(width * 0.36, baseY - 8 + offset1, width * 0.64, baseY - 8 - offset1, width - 120, baseY - 8 - offset2 * 0.7);
         c.stroke();
       }
       c.restore();

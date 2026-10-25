@@ -22,7 +22,7 @@ export function initializeDirector(state) {
   state.waveRest = 2;
   state.waveBossPending = false;
   state.nextBossAt = state.mapId === 'lava' ? 2 : state.modeId === 'rush' ? 3 : state.modeId === 'waves' ? Infinity : 55;
-  state.nextEventAt = state.modeId === 'rush' ? 25 : 32;
+  state.nextEventAt = state.mapId === 'lava' ? Infinity : state.modeId === 'rush' ? 25 : 32;
   state.activeEvent = null;
   state.eventRemaining = 0;
   state.eventItemTimer = 0;

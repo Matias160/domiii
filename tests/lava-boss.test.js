@@ -31,7 +31,9 @@ test('starting run on map lava initializes boss_legendary mode and spawns Domi C
   assert.equal(state.mapId, 'lava');
   assert.equal(state.modeId, 'boss_legendary');
   assert.equal(modes.boss_legendary.name, '???');
+  assert.equal(state.difficulty.name, '???');
   assert.equal(state.nextBossAt, 2);
+  assert.equal(state.nextEventAt, Infinity);
 
   // Advance time to 2.0s to trigger boss spawn
   state.time = 2.1;
@@ -71,9 +73,13 @@ test('Domi Colosal transitions through progressive phases and triggers victory w
   assert.equal(state.victory, true, 'Defeating Domi Colosal must trigger victory in Caldero de Lava');
 });
 
-test('Caldero de Lava is recognized in shop items and ownership checks', () => {
+test('Caldero de Lava and legendary items are marked domiExclusive and recognized in ownership checks', () => {
   const lavaMap = shopItems.find(item => item.id === 'lava' && item.type === 'map');
   assert.ok(lavaMap, 'Caldero de Lava must be in shopItems');
+  assert.equal(lavaMap.domiExclusive, true);
+  const legItems = shopItems.filter(item => item.id.startsWith('leg_'));
+  assert.ok(legItems.length >= 12);
+  assert.ok(legItems.every(item => item.domiExclusive === true));
   assert.equal(isOwned({ purchases: ['map:lava'] }, 'map', 'lava'), true);
   assert.equal(isOwned({ purchases: [] }, 'map', 'lava'), false);
   assert.equal(isOwned({ unlockedLava: true }, 'map', 'lava'), true);

@@ -97,29 +97,50 @@ export class Player {
   draw(ctx) {
     ctx.save();
     if (this.invulnerable > 0) ctx.globalAlpha = 0.55 + Math.sin(performance.now() / 45) * 0.25;
-    if (this.hasLavaAura) {
-      // Aura de fuego y brasas incandescentes bajo los pies de Pancho
+    if (this.inLavaMap || this.hasLavaAura) {
+      // Luz cálida ambiental reflejada desde el magma y aura de brasas bajo Pancho
       const t = performance.now() / 1000;
-      const auraGrad = ctx.createRadialGradient(this.x, this.y + 16, 4, this.x, this.y + 16, 36);
-      auraGrad.addColorStop(0, 'rgba(255, 68, 0, 0.45)');
-      auraGrad.addColorStop(0.5, 'rgba(255, 170, 0, 0.22)');
+      const pulseR = 42 + Math.sin(t * 4.2) * 4;
+      const auraGrad = ctx.createRadialGradient(this.x, this.y + 14, 4, this.x, this.y + 14, pulseR);
+      auraGrad.addColorStop(0, 'rgba(255, 90, 10, 0.52)');
+      auraGrad.addColorStop(0.5, 'rgba(255, 45, 0, 0.26)');
       auraGrad.addColorStop(1, 'transparent');
       ctx.fillStyle = auraGrad;
-      ctx.beginPath(); ctx.ellipse(this.x, this.y + 16, 36, 14, 0, 0, Math.PI * 2); ctx.fill();
-      for (let i = 0; i < 4; i++) {
-        const ex = this.x + Math.sin(t * 5 + i * 2) * 18;
-        const ey = this.y + 16 - ((t * 28 + i * 14) % 26);
-        ctx.fillStyle = (i % 2 === 0) ? '#ff4400' : '#ffcc00';
-        ctx.fillRect(ex, ey, 2, 2);
+      ctx.beginPath(); ctx.ellipse(this.x, this.y + 16, pulseR, 18, 0, 0, Math.PI * 2); ctx.fill();
+      if (this.hasLavaAura) {
+        for (let i = 0; i < 4; i++) {
+          const ex = this.x + Math.sin(t * 5 + i * 2) * 18;
+          const ey = this.y + 16 - ((t * 28 + i * 14) % 26);
+          ctx.fillStyle = (i % 2 === 0) ? '#ff4400' : '#ffcc00';
+          ctx.fillRect(ex, ey, 2, 2);
+        }
       }
     }
-    ctx.strokeStyle = this.hasLavaAura ? '#ff5500aa' : '#95d6a888';
+    ctx.strokeStyle = (this.inLavaMap || this.hasLavaAura) ? '#ff6611cc' : '#95d6a888';
     ctx.lineWidth = 2;
     ctx.beginPath();ctx.ellipse(this.x,this.y+18,27,10,0,0,7);ctx.stroke();
     const bob = Math.round(Math.sin(this.walkTime * 7 + this.x * .05) * 1.5);
+    ctx.save();
+    if (this.inLavaMap) {
+      ctx.shadowColor = '#ff4500';
+      ctx.shadowBlur = 14;
+    }
     drawAccessory(ctx, this.accessory, this.x, this.y + bob, 0.85, 'back');
     drawFood(ctx, this.skin.id, this.x, this.y, 0.85, this.walkTime);
     drawAccessory(ctx, this.accessory, this.x, this.y + bob, 0.85, 'front');
+    ctx.restore();
+    if (this.inLavaMap) {
+      // Reflejo cálido naranja/rojizo ascendente proyectado sobre el cuerpo de Pancho
+      ctx.save();
+      ctx.globalCompositeOperation = 'lighter';
+      const rimGrad = ctx.createRadialGradient(this.x, this.y + 10, 2, this.x, this.y + 4, 26);
+      rimGrad.addColorStop(0, 'rgba(255, 110, 20, 0.28)');
+      rimGrad.addColorStop(0.6, 'rgba(255, 40, 0, 0.14)');
+      rimGrad.addColorStop(1, 'transparent');
+      ctx.fillStyle = rimGrad;
+      ctx.beginPath(); ctx.arc(this.x, this.y + 4, 24, 0, Math.PI * 2); ctx.fill();
+      ctx.restore();
+    }
     drawWeapon(ctx, this.weapon.id, this.x + Math.cos(this.aimAngle) * 22, this.y + Math.sin(this.aimAngle) * 15, .48, this.aimAngle + Math.PI / 2);
     if(this.muzzleTime>0&&(this.weapon.id==='fork'||this.weapon.id==='skewer')){
       ctx.save();ctx.translate(this.x,this.y);ctx.rotate(this.aimAngle);ctx.globalAlpha=Math.min(1,this.muzzleTime/.06);

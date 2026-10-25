@@ -2,8 +2,74 @@ import {drawFood, drawDiner} from './art.js';
 import {Companion} from '../entities/Companion.js';
 import {drawWorldProps} from './worldProps.js';
 import {drawAccessory, drawAccessoryIcon, resolveAccessory} from './accessories.js';
+import {isOwned} from '../data/shop.js';
 
 export { drawAccessory, drawAccessoryIcon, resolveAccessory };
+
+function drawOrangePixelSkull(c, w, h, time = 0) {
+  // Fondo oscuro misterioso sin imagen del mapa
+  const bg = c.createRadialGradient(w / 2, h / 2, 6, w / 2, h / 2, Math.max(w, h) * 0.65);
+  bg.addColorStop(0, '#260e06');
+  bg.addColorStop(0.55, '#120604');
+  bg.addColorStop(1, '#070303');
+  c.fillStyle = bg;
+  c.fillRect(0, 0, w, h);
+
+  // Halo naranja pulsante detrás de la calavera
+  const pulse = 0.25 + Math.sin(time * 3) * 0.08;
+  const glow = c.createRadialGradient(w / 2, h * 0.46, 4, w / 2, h * 0.46, Math.min(w, h) * 0.38);
+  glow.addColorStop(0, `rgba(255, 115, 0, ${pulse})`);
+  glow.addColorStop(0.6, `rgba(255, 50, 0, ${pulse * 0.4})`);
+  glow.addColorStop(1, 'transparent');
+  c.fillStyle = glow;
+  c.fillRect(0, 0, w, h);
+
+  // Calavera pixel-art naranja centrada
+  const unit = Math.max(2, Math.floor(Math.min(w, h) / 28));
+  const cx = Math.floor(w / 2 - 8 * unit);
+  const cy = Math.floor(h * 0.46 - 8 * unit);
+  const px = (x, y, pw, ph, col) => {
+    c.fillStyle = col;
+    c.fillRect(cx + x * unit, cy + y * unit, pw * unit, ph * unit);
+  };
+
+  // Sombra exterior pixelada
+  px(3, 0, 10, 1, '#5a1800');
+  px(2, 1, 12, 1, '#5a1800');
+  px(1, 2, 14, 8, '#5a1800');
+  px(2, 10, 12, 2, '#5a1800');
+  px(4, 12, 8, 4, '#5a1800');
+
+  // Cráneo naranja brillante
+  px(4, 1, 8, 1, '#ff9900');
+  px(2, 2, 12, 7, '#ff6a00');
+  px(3, 2, 6, 2, '#ffb700'); // brillo superior
+  px(3, 9, 10, 2, '#e65100');
+  px(4, 11, 8, 4, '#ff6a00');
+
+  // Cuencas de los ojos oscuras con pupila ardiente
+  px(3, 5, 3, 3, '#140503');
+  px(10, 5, 3, 3, '#140503');
+  px(4, 6, 1, 1, '#ffdd44');
+  px(11, 6, 1, 1, '#ffdd44');
+
+  // Cavidad nasal
+  px(7, 8, 2, 2, '#140503');
+
+  // Dientes / mandíbula
+  px(5, 13, 1, 2, '#140503');
+  px(7, 13, 2, 2, '#140503');
+  px(10, 13, 1, 2, '#140503');
+
+  if (h >= 80) {
+    c.fillStyle = '#07111688';
+    c.fillRect(0, h - 22, w, 22);
+    c.fillStyle = '#ff8800';
+    c.font = '900 12px monospace';
+    c.textAlign = 'center';
+    c.fillText('???', w / 2, h - 7);
+  }
+}
 
 export function drawPet(ctx,id,x,y,time=0,scale=1){
   ctx.save();ctx.translate(x,y);ctx.scale(scale,scale);
@@ -14,6 +80,10 @@ export function drawItemPreview(canvas,item,profile,time=0){
   const c=canvas.getContext('2d'),w=canvas.width,h=canvas.height;
   c.clearRect(0,0,w,h);c.imageSmoothingEnabled=false;
   if(item.type==='map'){
+    if(item.id==='lava'&&!isOwned(profile,'map','lava')){
+      drawOrangePixelSkull(c,w,h,time);
+      return;
+    }
     const preview=document.createElement('canvas');preview.width=960;preview.height=540;
     const scene=preview.getContext('2d');drawDiner(scene,960,540,time,false,item.id);drawWorldProps(scene,item.id,time);
     c.drawImage(preview,0,82,960,458,0,0,w,h);

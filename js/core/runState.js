@@ -24,7 +24,9 @@ export function createRunState(setup = {}, audio = null) {
     world,
     camera: { x: 480, y: 270 },
     companion: new Companion(setup.companionId, player),
-    difficulty: difficulties[setup.difficultyId] || difficulties.picante,
+    difficulty: setup.mapId === 'lava'
+      ? { id: 'legendary', name: '???', hp: 1.35, speed: 1.15, damage: 1.35, spawn: 1, score: 2.0 }
+      : (difficulties[setup.difficultyId] || difficulties.picante),
     mapId: ['diner','kitchen','parking','snow','desert','football','lava'].includes(setup.mapId) ? setup.mapId : 'diner',
     mapClock: 0, mapObstacles: [], wasFreezing: false, decoy: null, primeCooldowns: {q:0,e:0,r:0},
     modeId: setup.modeId,
@@ -36,6 +38,7 @@ export function createRunState(setup = {}, audio = null) {
     shake: 0, combo: 0, comboTime: 0, pendingLevels: 0, bossesKilled: 0, distance: 0,
   };
   initializeDirector(state);
+  player.inLavaMap = state.mapId === 'lava';
   const resolvedAcc = resolveAccessory(setup.accessoryId);
   player.accessory = resolvedAcc ? resolvedAcc.id : 'none';
   const a = player.accessory;

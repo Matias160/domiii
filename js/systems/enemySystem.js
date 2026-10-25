@@ -34,12 +34,15 @@ export function updateEnemies(state, delta, canvas) {
     }
   }
 
-  const canSpawn = state.modeId === 'waves' ? state.waveRest <= 0 && state.waveRemaining > 0 :
+  const isLavaMode = state.modeId === 'boss_legendary' || state.mapId === 'lava';
+  const nonBossCount = state.enemies.filter(e => !e.isBoss && e.hp > 0).length;
+  const canSpawn = isLavaMode ? (activeBossCount > 0 && nonBossCount < 1 && state.time > 18) :
+    state.modeId === 'waves' ? state.waveRest <= 0 && state.waveRemaining > 0 :
     state.modeId === 'rush' ? activeBossCount > 0 && state.enemies.length < 18 : true;
   if (canSpawn && state.spawnTimer <= 0 && state.enemies.length < 100) {
     spawnEnemy(state, canvas);
     if (state.modeId === 'waves') state.waveRemaining -= 1;
-    state.spawnTimer = state.modeId === 'rush' ? 1.85 : spawnEvery;
+    state.spawnTimer = isLavaMode ? 18.0 : state.modeId === 'rush' ? 1.85 : spawnEvery;
   }
 
   for (const enemy of state.enemies) {
