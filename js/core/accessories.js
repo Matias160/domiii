@@ -10,6 +10,9 @@ if (standardSheet) standardSheet.src = './accesorios.png';
 export const legendarySheet = typeof Image !== 'undefined' ? new Image() : null;
 if (legendarySheet) legendarySheet.src = './accesorios legendarios.png';
 
+export const coronaSheet = typeof Image !== 'undefined' ? new Image() : null;
+if (coronaSheet) coronaSheet.src = './corona_sheet.png';
+
 export const ACCESSORIES = {
   // --- ACCESORIOS ESTÁNDAR (TIENDA Y ARMARIO - 8 ITEMS REALES DE accesorios.png) ---
   crown: {
@@ -305,8 +308,8 @@ export const ACCESSORIES = {
     icon: '🌋',
     desc: 'Corona forjada en el Caldero de Lava: +50 Vida Máxima, +30% Daño Ígneo y Rastro de Magma.',
     stats: { hp: '+50', spd: '+10%', dmg: '+30%', perk: '+50 HP +30% Dmg +Magma' },
-    sheet: 'procedural_lava',
-    dw: 46, dh: 30, ox: -23, oy: -46
+    sheet: 'animated_corona',
+    dw: 52, dh: 63, ox: -26, oy: -55
   }
 };
 
@@ -440,6 +443,25 @@ export function drawAccessory(ctx, id, x, y, scale = 1, layerFilter = null) {
     ctx.restore();
     return;
   }
+  if (acc.sheet === 'animated_corona') {
+    const timeSec = performance.now() / 1000;
+    // 24 frames a ~12.5 fps (80ms por frame como el delay nativo del GIF)
+    const frameIndex = Math.floor(timeSec * 12.5) % 24;
+    const fw = 620;
+    const fh = 756;
+    if (coronaSheet && coronaSheet.complete && coronaSheet.naturalWidth > 0) {
+      ctx.imageSmoothingEnabled = false;
+      ctx.drawImage(
+        coronaSheet,
+        frameIndex * fw, 0, fw, fh,
+        acc.ox, acc.oy, acc.dw, acc.dh
+      );
+    } else {
+      drawProceduralLavaCrown(ctx, acc.ox, acc.oy, acc.dw, acc.dh);
+    }
+    ctx.restore();
+    return;
+  }
 
   const sheet = acc.sheet === 'legendary' ? legendarySheet : standardSheet;
 
@@ -483,6 +505,34 @@ export function drawAccessoryIcon(ctx, id, cx, cy, boxSize = 48) {
     drawProceduralLavaCrown(ctx, -23, -24, 46, 30);
     ctx.restore();
     return;
+  }
+  if (acc.sheet === 'animated_corona') {
+    const timeSec = performance.now() / 1000;
+    const frameIndex = Math.floor(timeSec * 12.5) % 24;
+    const fw = 620;
+    const fh = 756;
+    if (coronaSheet && coronaSheet.complete && coronaSheet.naturalWidth > 0) {
+      const fitScale = Math.min((boxSize * 0.9) / fw, (boxSize * 0.9) / fh);
+      const targetW = fw * fitScale;
+      const targetH = fh * fitScale;
+      ctx.save();
+      ctx.imageSmoothingEnabled = false;
+      ctx.drawImage(
+        coronaSheet,
+        frameIndex * fw, 0, fw, fh,
+        cx - targetW / 2, cy - targetH / 2, targetW, targetH
+      );
+      ctx.restore();
+      return;
+    } else {
+      const s = boxSize / 48;
+      ctx.save();
+      ctx.translate(cx, cy + 12 * s);
+      ctx.scale(s, s);
+      drawProceduralLavaCrown(ctx, -23, -24, 46, 30);
+      ctx.restore();
+      return;
+    }
   }
 
   const sheet = acc.sheet === 'legendary' ? legendarySheet : standardSheet;

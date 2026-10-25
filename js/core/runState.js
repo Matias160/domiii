@@ -7,6 +7,8 @@ import { initializeDirector } from '../systems/directorSystem.js';
 import { SpatialHashGrid } from './SpatialHashGrid.js';
 import { SkillController } from '../skills/SkillSystem.js';
 import { resolveAccessory } from './accessories.js';
+import { abilities, applyAbility } from '../data/abilities.js';
+import { evolveWeapon } from '../data/weaponEvolutions.js';
 
 export function createRunState(setup = {}, audio = null) {
   const world = { width: 1920, height: 1080 };
@@ -39,6 +41,16 @@ export function createRunState(setup = {}, audio = null) {
   };
   initializeDirector(state);
   player.inLavaMap = state.mapId === 'lava';
+
+  // En el Caldero de Lava (Duelo contra el Coloso Final), todas las habilidades pasivas y evoluciones inician desbloqueadas
+  if (state.mapId === 'lava') {
+    player.level = 15;
+    for (const ab of abilities) {
+      applyAbility(player, ab);
+    }
+    evolveWeapon(player);
+  }
+
   const resolvedAcc = resolveAccessory(setup.accessoryId);
   player.accessory = resolvedAcc ? resolvedAcc.id : 'none';
   const a = player.accessory;

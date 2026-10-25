@@ -21,7 +21,8 @@ export function updatePrimes(state,dt){
   }
 }
 export function activatePrime(state,key){const prime=primes.find(p=>p.key===key),player=state.player;
-  if(!prime||player.level<prime.level||state.primeCooldowns[key]>0)return false;
+  const isUnlocked = state.mapId === 'lava' || player.level >= prime.level;
+  if(!prime||!isUnlocked||state.primeCooldowns[key]>0)return false;
   state.primeCooldowns[key]=prime.cooldown;
   if(key==='q')for(let i=0;i<20;i++){
     const a=i*Math.PI/10;state.projectiles.push(new Projectile({x:player.x,y:player.y,vx:Math.cos(a)*560,vy:Math.sin(a)*560,damage:player.weapon.damage*player.damageMultiplier*1.15,size:7,color:'#ffe269',pierce:1,kind:'sauce'}));

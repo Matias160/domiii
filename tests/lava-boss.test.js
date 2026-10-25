@@ -22,11 +22,12 @@ test('legendary accessory Corona Magmática Imperial is defined and resolved', (
   const acc = resolveAccessory('leg_lava_crown');
   assert.ok(acc, 'leg_lava_crown must be resolved');
   assert.equal(acc.tier, 'legendary');
+  assert.equal(acc.sheet, 'animated_corona');
   assert.ok(acc.stats.hp.includes('+50'));
   assert.ok(acc.stats.dmg.includes('+30%'));
 });
 
-test('starting run on map lava initializes boss_legendary mode and spawns Domi Colosal', () => {
+test('starting run on map lava initializes boss_legendary mode, unlocks all abilities, and spawns Domi Colosal', () => {
   const state = createRunState({ mapId: 'lava' });
   assert.equal(state.mapId, 'lava');
   assert.equal(state.modeId, 'boss_legendary');
@@ -34,6 +35,9 @@ test('starting run on map lava initializes boss_legendary mode and spawns Domi C
   assert.equal(state.difficulty.name, '???');
   assert.equal(state.nextBossAt, 2);
   assert.equal(state.nextEventAt, Infinity);
+  assert.equal(state.player.level, 15);
+  assert.ok(state.player.weaponEvolution, 'Weapon should be evolved in lava map');
+  assert.ok(Object.keys(state.player.abilities).length >= 10, 'All abilities should be unlocked');
 
   // Advance time to 2.0s to trigger boss spawn
   state.time = 2.1;

@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Tablero de lava · Pixel art</title>
+<style>
+:root{--bg:#0d0a10;--fg:#f3d9b8;--bt:#2a1a1a;--bb:#ff7a14;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);color-scheme:dark}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:"Courier New",ui-monospace,monospace;text-align:center;padding:14px}
+h1{font-size:1.25rem;margin:6px 0 10px;letter-spacing:2px;color:#ffb52e;text-shadow:0 0 12px #e84a0c}
+.bar{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-bottom:12px}
+button{background:var(--bt);color:var(--fg);border:2px solid var(--bb);padding:8px 12px;font:inherit;cursor:pointer;border-radius:0}
+button:hover{background:#4a2512}
+.wrap{position:relative;display:inline-block;width:100%;max-width:1152px;border:6px solid #2b2228;box-shadow:0 0 0 3px #0b0709,0 0 40px #e84a0c55;line-height:0}
+canvas{width:100%;height:auto;image-rendering:pixelated;display:block}
+#grid{position:absolute;inset:0;pointer-events:none;display:none;background-image:linear-gradient(to right,#ffffff38 1px,transparent 1px),linear-gradient(to bottom,#ffffff38 1px,transparent 1px);background-size:calc(100%/12) calc(100%/8)}
+p{font-size:.8rem;opacity:.7}
+</style>
+</head>
+<body>
+<h1>⚔ CALDERA DE LAS CENIZAS ⚔</h1>
+<div class="bar">
+<button id="b1">Nueva semilla</button>
+<button id="b2">Cuadrícula</button>
+<button id="b3">Pausar lava</button>
+</div>
+<div class="wrap"><canvas id="c" width="192" height="128"></canvas><div id="grid"></div></div>
+<p id="info"></p>
+<script>
+const W=192,H=128,N=W*H,THR=.45;
+const cv=document.getElementById('c'),ctx=cv.getContext('2d'),img=ctx.createImageData(W,H),D=img.data;
+let seed=7,edge,rock,deco,lavaM,parts=[],anim=true,t=0;
+const hx=s=>[parseInt(s.slice(1,3),16),parseInt(s.slice(3,5),16),parseInt(s.slice(5,7),16)];
+const LAVA=['#6a1004','#a82406','#e04008','#ff7a14','#ffb52e','#ffe88a'].map(hx);
+const ROCK=['#0f0c14','#181320','#241d2c','#33293a','#463b49'].map(hx);
+const B=[[0,8,2,10],[12,4,14,6],[3,11,1,9],[15,7,13,5]];
+const bay=(x,y)=>B[y&3][x&3]/16;
+function mulberry(s){return()=>{s|=0;s=s+0x6D2B79F5|0;let t=Math.imul(s^s>>>15,1|s);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+function hash(x,y){let h=(x*374761393+y*668265263+seed*1442695041)|0;h=(h^(h>>>13))*1274126177|0;return((h^(h>>>16))>>>0)/4294967296}
+function vn(x,y){const xi=Math.floor(x),yi=Math.floor(y),xf=x-xi,yf=y-yi,u=xf*xf*(3-2*xf),v=yf*yf*(3-2*yf);
+const a=hash(xi,yi),b=hash(xi+1,yi),c=hash(xi,yi+1),d=hash(xi+1,yi+1);return a+(b-a)*u+(c-a)*v+(a-b-c+d)*u*v}
+function fbm(x,y,o){let s=0,a=.5,f=1;for(let i=0;i<o;i++){s+=a*vn(x*f,y*f);f*=2;a*=.5}return s/(1-Math.pow(.5,o))}
+const cl=(v,a,b)=>v<a?a:v>b?b:v;
+
+function build(){
+ edge=new Float32Array(N);rock=new Uint8Array(N*3);deco=new Array(N).fill(null);lavaM=new Uint8Array(N);parts=[];
+ const cr=hx('#ffe88a'),co=hx('#ff7a14'),cd=hx('#b52a07');
+ for(let y=0;y<H;y++)for(let x=0;x<W;x++){
+  const i=y*W+x,wx=x+(fbm(x/40+9,y/40,2)-.5)*34,wy=y+(fbm(x/40,y/40+9,2)-.5)*34;
+  const h=fbm(wx/36,wy/36,4),e=h-THR;edge[i]=e;lavaM[i]=e<0?1:0;
+  const n=fbm(x/5,y/5,3),big=fbm(x/30+4,y/30,2);
+  let v=n*1.1+big*.35-.3+(bay(x,y)-.5)*.16;
+  let c=ROCK[cl(Math.floor(v*5),0,4)].slice();
+  const k1=Math.abs(fbm(x/20+50,y/20+50,3)-.5),k2=Math.abs(fbm(x/9+80,y/9,2)-.5);
+  let k=k1;if(k1<.13)k=Math.min(k1,k2*1.5);
+  if(k<.006)c=cr.slice();else if(k<.012)c=co.slice();else if(k<.019)c=cd.slice();
+  else if(k<.04){const g=(.04-k)/.04;c[0]=Math.min(255,c[0]+g*70);c[1]+=g*12}
+  if(e>=0){if(e<.012)c=cd.slice();else if(e<.028){c=hx('#4a1c14')}else if(e<.05){c[0]+=24;c[1]+=4}}
+  rock.set(c,i*3);
+ }
+ decorate();
+}
+const set=(x,y,c)=>{x|=0;y|=0;if(x>=0&&y>=0&&x<W&&y<H)deco[y*W+x]=typeof c=='string'?hx(c):c};
+const safe=(x,y,m)=>x>m&&y>m&&x<W-m&&y<H-m&&edge[(y|0)*W+(x|0)]>.06;
+function decorate(){
+ const r=mulberry(seed*7+1),R=(a,b)=>a+r()*(b-a);
+ // islotes en lava
+ let n=0;for(let t=0;t<400&&n<16;t++){const x=R(8,W-8)|0,y=R(8,H-8)|0;
+  if(edge[y*W+x]<-.07){n++;const rx=R(3,6),ry=rx*.7;
+   for(let dy=-ry-1;dy<=ry+1;dy++)for(let dx=-rx-1;dx<=rx+1;dx++){const d=(dx*dx)/(rx*rx)+(dy*dy)/(ry*ry);
+    if(d<=1)set(x+dx,y+dy,d>.65?'#1c1620':(dx+dy<-1?'#4a3f50':'#33293a'));else if(d<1.5&&dy>0)set(x+dx,y+dy,'#8a2a0a');}
+   if(r()<.5){set(x,y-1,'#ffd24a');set(x-1,y,'#ff8a1c');set(x+1,y,'#ff8a1c');set(x,y,'#c4400a')}}}
+ // puentes
+ let br=0;for(let t=0;t<300&&br<4;t++){const y=R(10,H-12)|0;let x=R(10,W-60)|0;
+  if(edge[y*W+x]>0&&edge[y*W+x+1]<0){let x1=x+1;while(x1<W-4&&lavaM[y*W+x1])x1++;
+   if(x1-x>=8&&x1-x<=44&&edge[y*W+x1]>0){br++;
+    for(let px=x-3;px<=x1+3;px++){set(px,y-2,'#2a160a');set(px,y+2,'#2a160a');
+     for(let py=-1;py<=1;py++)set(px,y+py,(px%3==0)?'#4b2c14':(py==0?'#9a6530':'#80501f'));
+     if(px%6==0){set(px,y-3,'#2a160a');set(px,y+3,'#2a160a')}}
+    for(const px of [x-3,x1+3]){for(let q=-3;q<=3;q++)set(px,y+q,'#3a2210')}}}}
+ // rocas
+ for(let t=0,c=0;t<300&&c<45;t++){const x=R(4,W-4)|0,y=R(4,H-4)|0;if(!safe(x,y,4))continue;c++;
+  const rx=R(1.5,4),ry=rx*.75;
+  for(let dy=-ry;dy<=ry;dy++)for(let dx=-rx;dx<=rx;dx++){const d=dx*dx/(rx*rx)+dy*dy/(ry*ry);
+   if(d<=1)set(x+dx,y+dy,d>.7?'#14101a':(dx+dy<-.5?'#5d5264':(dx+dy<1?'#41364a':'#2b2332')));}}
+ // espinas de obsidiana
+ for(let t=0,c=0;t<300&&c<30;t++){const x=R(6,W-6)|0,y=R(14,H-4)|0;if(!safe(x,y,6))continue;c++;
+  const k=1+(r()*3|0);
+  for(let s=0;s<k;s++){const bx=x+s*4-k*2,hh=R(6,13)|0,w=R(3,6)|0;
+   for(let q=0;q<hh;q++){const hw=Math.max(.5,(1-q/hh)*w/2);
+    for(let dx=-hw;dx<=hw;dx++){const left=dx<-hw+1;set(bx+dx,y-q,left?'#5a47a0':(dx>hw-1?'#0b0912':'#241b3c'));}}
+   set(bx,y-hh,'#8a78d0');}
+  for(let dx=-3;dx<=3;dx++)set(x+dx,y+1,'#0b0912');}
+ // gemas
+ for(let t=0,c=0;t<200&&c<22;t++){const x=R(4,W-4)|0,y=R(4,H-4)|0;if(!safe(x,y,3))continue;c++;
+  set(x,y-2,'#fff0a0');set(x-1,y-1,'#ffd24a');set(x,y-1,'#ffb52e');set(x+1,y-1,'#ff8a1c');
+  set(x-1,y,'#ff8a1c');set(x,y,'#e04008');set(x+1,y,'#b52a07');set(x,y+1,'#6a1004');}
+ // cráneos
+ const SK=['.WWWW.','WWWWWW','WKWWKW','WWWWWW','.WKKW.','.W.W.W'];
+ for(let t=0,c=0;t<200&&c<9;t++){const x=R(4,W-8)|0,y=R(4,H-8)|0;if(!safe(x,y,6))continue;c++;
+  SK.forEach((row,j)=>[...row].forEach((ch,i)=>{if(ch=='W')set(x+i,y+j,j>3?'#a89f80':'#ddd4b4');else if(ch=='K')set(x+i,y+j,'#1a1010')}));}
+ // huesos
+ for(let t=0,c=0;t<200&&c<16;t++){const x=R(4,W-10)|0,y=R(4,H-6)|0;if(!safe(x,y,6))continue;c++;
+  const dy=r()<.5?1:0,l=R(4,8)|0;for(let i=0;i<l;i++)set(x+i,y+(dy?i>>1:0),'#cfc6a4');
+  set(x-1,y-1,'#e8dfbe');set(x-1,y+1,'#e8dfbe');set(x+l,y+(dy?l>>1:0)-1,'#e8dfbe');set(x+l,y+(dy?l>>1:0)+1,'#e8dfbe');}
+}
+function frame(){
+ const pal=LAVA;
+ for(let y=0;y<H;y++)for(let x=0;x<W;x++){
+  const i=y*W+x,o=i*4;let c;
+  if(deco[i])c=deco[i];
+  else if(lavaM[i]){
+   const e=edge[i],n=fbm(x/8+t*.5,y/8+t*.2,3),d=cl(-e*7,0,1);
+   const v=n*1.25+d*.55-.35+Math.sin(x*.6+y*.35+t*2+n*8)*.07+(bay(x,y)-.5)*.14;
+   c=pal[cl(Math.floor(v*6),0,5)];
+  }else{c=[rock[i*3],rock[i*3+1],rock[i*3+2]]}
+  D[o]=c[0];D[o+1]=c[1];D[o+2]=c[2];D[o+3]=255;
+ }
+ // brasas
+ if(parts.length<70&&Math.random()<.8){let x=Math.random()*W|0,y=Math.random()*H|0;if(lavaM[y*W+x]&&!deco[y*W+x])parts.push({x,y,vx:(Math.random()-.5)*.3,vy:-(.2+Math.random()*.5),l:1})}
+ parts=parts.filter(p=>{p.x+=p.vx+Math.sin(t*3+p.y)*.1;p.y+=p.vy;p.l-=.012;
+  if(p.l<=0||p.y<0)return false;const px=p.x|0,py=p.y|0;
+  if(px>=0&&px<W){const o=(py*W+px)*4,c=p.l>.65?LAVA[5]:p.l>.35?LAVA[4]:LAVA[2];D[o]=c[0];D[o+1]=c[1];D[o+2]=c[2]}return true});
+ ctx.putImageData(img,0,0);
+}
+let last=0;
+function loop(ts){if(anim&&ts-last>70){t+=.07;last=ts;frame()}requestAnimationFrame(loop)}
+function regen(){build();frame();document.getElementById('info').textContent='Semilla '+seed+' · 192×128 px · cuadrícula 12×8 casillas'}
+document.getElementById('b1').onclick=()=>{seed=(Math.random()*9999|0)+1;regen()};
+document.getElementById('b2').onclick=()=>{const g=document.getElementById('grid');g.style.display=g.style.display=='block'?'none':'block'};
+document.getElementById('b3').onclick=e=>{anim=!anim;e.target.textContent=anim?'Pausar lava':'Animar lava'};
+regen();requestAnimationFrame(loop);
+</script>
+</body>
+</html>

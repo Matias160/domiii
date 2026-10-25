@@ -742,12 +742,14 @@ export class Game {
       }
       if(!entries.length&&!evolution&&!pickups.length)root.textContent='Receta original';
     }
-    const next=primes.find(prime=>prime.level>this.state.player.level);
+    const allUnlocked = this.state.mapId === 'lava';
+    const next = allUnlocked ? null : primes.find(prime=>prime.level>this.state.player.level);
     document.querySelector('#nextPrimeLabel').textContent=next?'ACTIVA EN NIVEL '+next.level:'ACTIVAS COMPLETAS';
   }
 
   renderPrimeBar(){
     const root=document.querySelector('#primeBar');if(root.hidden||!this.state)return;
+    const allUnlocked = this.state.mapId === 'lava';
     for(const [index,prime] of primes.entries()){
       let node=root.querySelector('[data-prime="'+prime.key+'"]');
       if(!node){
@@ -756,7 +758,7 @@ export class Game {
         node.setAttribute('aria-keyshortcuts',prime.key);
         node.onclick=()=>this.triggerPrime(prime.key);root.append(node);
       }
-      const locked=this.state.player.level<prime.level,cool=this.state.primeCooldowns[prime.key],status=locked?'locked':cool>0?'cooldown':'ready';
+      const locked=!allUnlocked && this.state.player.level<prime.level,cool=this.state.primeCooldowns[prime.key],status=locked?'locked':cool>0?'cooldown':'ready';
       node.disabled=locked||cool>0;node.dataset.ready=String(status==='ready');
       if(node.dataset.status!==status){
         const previousStatus=node.dataset.status;
