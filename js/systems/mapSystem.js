@@ -1,5 +1,11 @@
 import { damageEnemy } from './effectSystem.js';
 
+export const cactusGif = typeof Image !== 'undefined' ? new Image() : null;
+if (cactusGif) cactusGif.src = './Cactus.gif';
+
+export const pelotaGif = typeof Image !== 'undefined' ? new Image() : null;
+if (pelotaGif) pelotaGif.src = './Pelota.gif';
+
 export function updateMap(state, dt) {
   const worldW = state.world?.width || 1920;
   const worldH = state.world?.height || 1080;
@@ -97,41 +103,44 @@ export function drawMapObstacles(ctx, state) {
       if (o.kicked) {
         ctx.shadowColor = '#00ffcc'; ctx.shadowBlur = 14;
       }
-      // Pelota de fútbol pixel-art detallada
-      ctx.fillStyle = '#111b20'; ctx.beginPath(); ctx.arc(0, 0, 18, 0, Math.PI * 2); ctx.fill();
-      ctx.fillStyle = '#f8fafc'; ctx.beginPath(); ctx.arc(0, 0, 16, 0, Math.PI * 2); ctx.fill();
-      // Parches negros de pentágono
-      ctx.fillStyle = o.kicked ? '#00e5ff' : '#0f172a';
-      // Pentágono central
-      ctx.beginPath();
-      for (let i = 0; i < 5; i++) {
-        const a = i * Math.PI * 2 / 5 - Math.PI / 2;
-        const px = Math.cos(a) * 6, py = Math.sin(a) * 6;
-        i === 0 ? ctx.moveTo(px, py) : ctx.lineTo(px, py);
+      if (pelotaGif && pelotaGif.complete && pelotaGif.naturalWidth > 0) {
+        ctx.imageSmoothingEnabled = false;
+        ctx.drawImage(pelotaGif, -22, -22, 44, 44);
+      } else {
+        // Fallback procedural si el GIF aún no terminó de cargar
+        ctx.fillStyle = '#111b20'; ctx.beginPath(); ctx.arc(0, 0, 18, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = '#f8fafc'; ctx.beginPath(); ctx.arc(0, 0, 16, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = o.kicked ? '#00e5ff' : '#0f172a';
+        ctx.beginPath();
+        for (let i = 0; i < 5; i++) {
+          const a = i * Math.PI * 2 / 5 - Math.PI / 2;
+          const px = Math.cos(a) * 6, py = Math.sin(a) * 6;
+          i === 0 ? ctx.moveTo(px, py) : ctx.lineTo(px, py);
+        }
+        ctx.closePath(); ctx.fill();
+        for (let i = 0; i < 5; i++) {
+          const a = i * Math.PI * 2 / 5 - Math.PI / 2;
+          const px = Math.cos(a) * 13, py = Math.sin(a) * 13;
+          ctx.beginPath(); ctx.arc(px, py, 3.5, 0, Math.PI * 2); ctx.fill();
+        }
+        ctx.fillStyle = '#ffffff'; ctx.fillRect(-6, -11, 4, 3);
       }
-      ctx.closePath(); ctx.fill();
-      // Parches laterales
-      for (let i = 0; i < 5; i++) {
-        const a = i * Math.PI * 2 / 5 - Math.PI / 2;
-        const px = Math.cos(a) * 13, py = Math.sin(a) * 13;
-        ctx.beginPath(); ctx.arc(px, py, 3.5, 0, Math.PI * 2); ctx.fill();
-      }
-      // Brillo pixel
-      ctx.fillStyle = '#ffffff'; ctx.fillRect(-6, -11, 4, 3);
     } else {
-      // Cactus / Planta desértica pixel art detallada
-      ctx.fillStyle = '#143823'; ctx.fillRect(-10, -18, 20, 36); // contorno
-      ctx.fillStyle = '#15803d'; ctx.fillRect(-8, -16, 16, 32);  // tronco
-      ctx.fillStyle = '#22c55e'; ctx.fillRect(-5, -14, 5, 28);   // highlight
-      // Brazo izquierdo
-      ctx.fillStyle = '#143823'; ctx.fillRect(-22, -6, 14, 11); ctx.fillRect(-22, -15, 8, 12);
-      ctx.fillStyle = '#16a34a'; ctx.fillRect(-20, -4, 12, 7); ctx.fillRect(-20, -13, 6, 11);
-      // Brazo derecho
-      ctx.fillStyle = '#143823'; ctx.fillRect(8, -12, 14, 11); ctx.fillRect(14, -20, 8, 11);
-      ctx.fillStyle = '#16a34a'; ctx.fillRect(8, -10, 12, 7); ctx.fillRect(14, -18, 6, 9);
-      // Espinas pixel
-      ctx.fillStyle = '#fef08a';
-      ctx.fillRect(-2, -9, 2, 2); ctx.fillRect(2, -2, 2, 2); ctx.fillRect(-3, 6, 2, 2);
+      if (cactusGif && cactusGif.complete && cactusGif.naturalWidth > 0) {
+        ctx.imageSmoothingEnabled = false;
+        ctx.drawImage(cactusGif, -24, -28, 48, 56);
+      } else {
+        // Fallback procedural de contingencia
+        ctx.fillStyle = '#143823'; ctx.fillRect(-10, -18, 20, 36);
+        ctx.fillStyle = '#15803d'; ctx.fillRect(-8, -16, 16, 32);
+        ctx.fillStyle = '#22c55e'; ctx.fillRect(-5, -14, 5, 28);
+        ctx.fillStyle = '#143823'; ctx.fillRect(-22, -6, 14, 11); ctx.fillRect(-22, -15, 8, 12);
+        ctx.fillStyle = '#16a34a'; ctx.fillRect(-20, -4, 12, 7); ctx.fillRect(-20, -13, 6, 11);
+        ctx.fillStyle = '#143823'; ctx.fillRect(8, -12, 14, 11); ctx.fillRect(14, -20, 8, 11);
+        ctx.fillStyle = '#16a34a'; ctx.fillRect(8, -10, 12, 7); ctx.fillRect(14, -18, 6, 9);
+        ctx.fillStyle = '#fef08a';
+        ctx.fillRect(-2, -9, 2, 2); ctx.fillRect(2, -2, 2, 2); ctx.fillRect(-3, 6, 2, 2);
+      }
     }
     ctx.restore();
   }

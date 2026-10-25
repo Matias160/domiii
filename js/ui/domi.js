@@ -476,15 +476,19 @@ export class DomiScreen {
       const rewardWrap = document.createElement('div');
       rewardWrap.className = 'domi-reward-wrap';
 
-      const badge = document.createElement('span');
-      badge.className = 'domi-reward-badge';
-      badge.textContent = m.rewardName;
+      // Miniaturita visual pixel-art del objeto / recompensa
+      const rewardCanvas = document.createElement('canvas');
+      rewardCanvas.width = 36;
+      rewardCanvas.height = 36;
+      rewardCanvas.className = 'domi-reward-mini-canvas';
+      rewardCanvas.title = m.rewardName;
+      this.drawSlotIcon(rewardCanvas, { type: m.rewardType, id: m.rewardId, name: m.rewardName, isUnlocked: true, category: 'LEGENDARIO' }, profile);
 
       const tooltip = document.createElement('div');
       tooltip.className = 'domi-pixel-tooltip';
       tooltip.textContent = m.rewardTooltip || m.rewardName;
 
-      rewardWrap.append(badge, tooltip);
+      rewardWrap.append(rewardCanvas, tooltip);
 
       const btn = document.createElement('button');
       btn.type = 'button';
