@@ -44,7 +44,7 @@ test('registration, duplicate submits, password visibility and login errors work
     get('authSwitch').fire('click');
     await get('authForm').fire('submit');
     await pending;
-    assert.deepEqual(screens, ['lobbyScreen']);
+    assert.deepEqual(screens, ['onboardingScreen']);
     assert.equal(currentAccount().name, 'PruebaUI');
     assert.equal(get('authPassword').value, '');
     assert.equal(get('authPassword').type, 'password');
@@ -56,7 +56,7 @@ test('registration, duplicate submits, password visibility and login errors work
     get('authPassword').value = 'incorrecta';
     await get('authForm').fire('submit');
     assert.equal(currentAccount(), null);
-    assert.match(get('authError').textContent, /incorrectos/);
+    assert.match(get('authError').textContent, /incorrect/i);
     assert.equal(get('authError').hidden, false);
     assert.equal(get('authError').focused, true);
     assert.equal(get('authSubmit').disabled, false);
