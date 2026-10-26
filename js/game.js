@@ -30,7 +30,7 @@ import {DomiScreen} from './ui/domi.js';
 import {updateMap,drawMapObstacles} from './systems/mapSystem.js';
 import {primes,updatePrimes,activatePrime,drawPrimeEffects} from './systems/primeSystem.js';
 import {icon,refreshIcons,abilityIcons} from './ui/icons.js';
-import {canvasPoint} from './core/presentation.js';
+import {canvasPoint, canvasPointCover} from './core/presentation.js';
 import {drawCombatFeedback, drawScreenCombatOverlays} from './ui/combatFeedback.js';
 import {drawFloatingText} from './ui/floatingText.js';
 import { evolveWeapon } from './data/weaponEvolutions.js';
@@ -89,7 +89,7 @@ export class Game {
     });
     canvas.addEventListener('pointermove',event=>{
       if(this.running){
-        const point=canvasPoint(canvas.getBoundingClientRect(),960,540,event.clientX,event.clientY);
+        const point=canvasPointCover(canvas.getBoundingClientRect(),960,540,event.clientX,event.clientY);
         if(point){
           const cam = this.state?.camera || { x: 0, y: 0 };
           this.state.aimScreenPoint = { x: point.x, y: point.y };
@@ -661,6 +661,11 @@ export class Game {
       this.audio.setScene('gameScreen');
     }
     addSurvivalScore(state, delta);
+    // La cámara tiembla cada vez que el jugador recibe daño
+    if (state._lastHp !== undefined && state.player.hp < state._lastHp - 0.01) {
+      state.shake = Math.max(state.shake || 0, 0.34);
+    }
+    state._lastHp = state.player.hp;
     this.hud.update(state);
     if (state.player.hp <= 0) {
       this.endRun();

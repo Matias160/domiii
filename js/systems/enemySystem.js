@@ -71,7 +71,11 @@ export function updateEnemies(state, delta, canvas) {
         enemy.lastDashSequence=player.dashSequence;
         const dx=enemy.x-player.x,dy=enemy.y-player.y,length=Math.hypot(dx,dy)||1;
         enemy.x+=dx/length*42;enemy.y+=dy/length*42;
-        damageEnemy(state,enemy,(18+player.level*1.35)*player.damageMultiplier,'dash');
+        // Los tanques (bandejas blindadas) mueren de un solo choque con el dash
+        const dashDamage = enemy.role === 'shield' && !enemy.isBoss
+          ? (enemy.hp + 1) * (enemy.armor || 1) + 1
+          : (18+player.level*1.35)*player.damageMultiplier;
+        damageEnemy(state,enemy,dashDamage,'dash');
         state.score+=15;state.shake=Math.max(state.shake,.12);
         state.floaters?.push({x:enemy.x,y:enemy.y-34,text:'CHOQUE +15',life:.8,color:'#9fffe0',scale:1.1,kind:'dash'});
         impactRing(state,enemy.x,enemy.y,'#9fffe0');burst(state,enemy.x,enemy.y,'#9fffe0',14,145);state.audio?.play('kill');

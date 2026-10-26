@@ -133,6 +133,8 @@ export function damageEnemy(state, enemy, damage, type = 'normal') {
   damage = beforeEvent.damage;
 
   damage /= (enemy.armor || 1);
+  // Las mayonesas médicas (healers) caen de un solo golpe para que no se acumulen
+  if (enemy.role === 'healer' && !enemy.isBoss) damage = Math.max(damage, enemy.hp + 1);
   const critRoll = (state?.player?.critChance > 0) && (Math.random() < state.player.critChance);
   const isCrit = type === 'crit' || damage > 85 || critRoll;
   const finalDamage = isCrit ? damage * 1.35 : damage;

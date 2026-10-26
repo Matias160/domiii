@@ -205,6 +205,16 @@ export class Enemy {
       return;
     }
 
+    // Clon señuelo: los enemigos que lo detectan lo siguen hasta fuera del mapa y ya no vuelven
+    if (!this.isBoss && state) {
+      if (state.decoy) {
+        this.decoyChaser = true;
+        const dv = Math.hypot(state.decoy.vx, state.decoy.vy) || 1;
+        this.decoyExit = { x: state.decoy.vx / dv, y: state.decoy.vy / dv };
+      } else if (this.decoyChaser && this.decoyExit) {
+        player = { x: this.x + this.decoyExit.x * 1000, y: this.y + this.decoyExit.y * 1000 };
+      }
+    }
     const dx = player.x - this.x;
     const dy = player.y - this.y;
     const length = Math.hypot(dx, dy) || 1;
@@ -263,7 +273,7 @@ export class Enemy {
 
     const worldW = state?.world?.width || 1920;
     const worldH = state?.world?.height || 1080;
-    if (state?.decoy) {
+    if (state?.decoy || this.decoyChaser) {
       if (this.x < -80 || this.x > worldW + 80 || this.y < -80 || this.y > worldH + 80) {
         this.hp = 0;
         // resolveDeaths contabiliza la baja en state.kills

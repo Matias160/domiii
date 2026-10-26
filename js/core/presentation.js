@@ -160,6 +160,14 @@ export function canvasPoint(rect,width,height,clientX,clientY){
   return x<0||x>width||y<0||y>height?null:{x,y};
 }
 
+// Igual que canvasPoint pero para un canvas con object-fit: cover (sin franjas negras).
+export function canvasPointCover(rect,width,height,clientX,clientY){
+  const scale=Math.max(rect.width/width,rect.height/height);
+  const x=(clientX-rect.left-(rect.width-width*scale)/2)/scale;
+  const y=(clientY-rect.top-(rect.height-height*scale)/2)/scale;
+  return x<0||x>width||y<0||y>height?null:{x,y};
+}
+
 export function approachPoint(position,target,speed,delta){
   const dx=target.x-position.x,dy=target.y-position.y,distance=Math.hypot(dx,dy);
   const step=Math.min(distance,speed*delta);

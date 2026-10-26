@@ -769,6 +769,113 @@ function dinerFloor(map = 'diner') {
   floors.set(map, canvas); return canvas;
 }
 
+// Partículas dinámicas extra e iluminación profunda para nevado, desierto y cancha.
+function vignette(c, width, height, inner, color) {
+  const g = c.createRadialGradient(width / 2, height / 2, inner, width / 2, height / 2, Math.hypot(width, height) / 2);
+  g.addColorStop(0, 'rgba(0,0,0,0)');
+  g.addColorStop(1, color);
+  c.fillStyle = g;
+  c.fillRect(0, 0, width, height);
+}
+
+function atmosphereBoost(c, map, width, height, time) {
+  if (map !== 'snow' && map !== 'desert' && map !== 'football') return;
+  c.save();
+  if (map === 'snow') {
+    // Capas de nieve con vaivén lateral y copos grandes cercanos
+    for (let i = 0; i < 70; i++) {
+      const depth = 0.4 + (i % 5) * 0.2;
+      const x = ((i * 211 + time * (22 + depth * 38) + Math.sin(time * 0.9 + i) * 28) % (width + 40)) - 20;
+      const y = ((i * 131 + time * (38 + depth * 60)) % (height + 40)) - 20;
+      const size = 2 + Math.floor(depth * 3);
+      c.globalAlpha = 0.35 + depth * 0.4;
+      c.fillStyle = i % 4 === 0 ? '#ffffff' : '#d6efff';
+      c.fillRect(Math.round(x), Math.round(y), size, size);
+    }
+    // Neblina helada baja
+    for (let i = 0; i < 4; i++) {
+      const fx = ((time * 14 + i * 520) % (width + 600)) - 300;
+      const fog = c.createRadialGradient(fx, height - 120 - i * 60, 10, fx, height - 120 - i * 60, 300);
+      fog.addColorStop(0, 'rgba(186, 230, 253, 0.16)');
+      fog.addColorStop(1, 'rgba(186, 230, 253, 0)');
+      c.globalAlpha = 1;
+      c.fillStyle = fog;
+      c.fillRect(fx - 300, height - 420 - i * 60, 600, 600);
+    }
+    // Iluminación fría profunda
+    c.globalAlpha = 1;
+    vignette(c, width, height, 280, 'rgba(4, 18, 46, 0.62)');
+  } else if (map === 'desert') {
+    // Brasas / chispas de polvo flotando en el aire cálido
+    for (let i = 0; i < 46; i++) {
+      const x = ((i * 173 + time * (30 + (i % 4) * 14)) % (width + 40)) - 20;
+      const rise = (time * (10 + (i % 3) * 7) + i * 61) % 260;
+      const y = ((i * 97) % (height - 200)) + 130 - rise * 0.25 + Math.sin(time * 1.6 + i) * 10;
+      c.globalAlpha = 0.25 + Math.max(0, Math.sin(time * 2.4 + i * 1.3)) * 0.5;
+      c.fillStyle = i % 3 === 0 ? '#fff1c1' : '#ffb347';
+      c.fillRect(Math.round(x), Math.round(y), 2 + (i % 2), 2 + (i % 2));
+    }
+    // Remolinos de polvo horizontales
+    c.strokeStyle = 'rgba(255, 214, 140, 0.22)';
+    c.lineWidth = 2;
+    for (let i = 0; i < 7; i++) {
+      const y = 170 + i * 120 + Math.sin(time * 0.7 + i) * 14;
+      const x = ((time * (110 + i * 18) + i * 300) % (width + 500)) - 250;
+      c.globalAlpha = 0.5;
+      c.beginPath();
+      c.moveTo(x, y);
+      c.quadraticCurveTo(x + 60, y - 14, x + 130, y + 4);
+      c.stroke();
+    }
+    // Rayos de sol diagonales y atardecer profundo
+    c.globalAlpha = 0.09 + Math.sin(time * 0.8) * 0.02;
+    c.fillStyle = '#ffd27a';
+    for (let i = 0; i < 4; i++) {
+      c.beginPath();
+      const bx = 240 + i * 520;
+      c.moveTo(bx, 80); c.lineTo(bx + 90, 80); c.lineTo(bx + 380, height); c.lineTo(bx + 200, height);
+      c.closePath(); c.fill();
+    }
+    c.globalAlpha = 1;
+    vignette(c, width, height, 300, 'rgba(70, 24, 4, 0.55)');
+  } else if (map === 'football') {
+    // Confeti girando (sin tonos rojos), con distintos tamaños y rotación
+    const colors = ['#4ade80', '#38bdf8', '#fde047', '#22d3ee', '#ffffff', '#a78bfa'];
+    for (let i = 0; i < 90; i++) {
+      const x = ((i * 157 + time * (18 + (i % 5) * 9) + Math.sin(time * 1.3 + i) * 24) % (width + 40)) - 20;
+      const y = 95 + ((i * 83 + time * (46 + (i % 4) * 22)) % (height - 120));
+      const spin = time * (3 + (i % 4)) + i;
+      const w = 4 + (i % 3) * 2, h = 2 + (i % 2) * 2;
+      c.save();
+      c.translate(Math.round(x), Math.round(y));
+      c.rotate(spin);
+      c.scale(1, Math.abs(Math.cos(spin * 0.7)) * 0.8 + 0.2);
+      c.globalAlpha = 0.55 + Math.sin(time * 2 + i) * 0.25;
+      c.fillStyle = colors[i % colors.length];
+      c.fillRect(-w / 2, -h / 2, w, h);
+      c.restore();
+    }
+    // Destellos de flash de cámaras desde las gradas
+    for (let i = 0; i < 10; i++) {
+      const fl = Math.max(0, Math.sin(time * 5 + i * 2.3));
+      if (fl > 0.93) {
+        const fx = (i * 193 + 60) % width;
+        const fy = 40 + (i * 29) % 40;
+        const g = c.createRadialGradient(fx, fy, 0, fx, fy, 70);
+        g.addColorStop(0, 'rgba(255,255,255,0.7)');
+        g.addColorStop(1, 'rgba(255,255,255,0)');
+        c.globalAlpha = 1;
+        c.fillStyle = g;
+        c.fillRect(fx - 70, fy - 70, 140, 140);
+      }
+    }
+    // Iluminación nocturna de estadio profunda: bordes oscuros y haces de luz
+    c.globalAlpha = 1;
+    vignette(c, width, height, 340, 'rgba(2, 14, 12, 0.58)');
+  }
+  c.restore();
+}
+
 export function drawDiner(c, width, height, time, menu, map = 'diner') {
   c.imageSmoothingEnabled = false;
   if (!menu) {
@@ -1063,6 +1170,7 @@ export function drawDiner(c, width, height, time, menu, map = 'diner') {
       }
       c.restore();
     }
+    atmosphereBoost(c, map, width, height, time);
     return;
   }
   rect(c, '#15191c', 0, 0, width, height);
