@@ -96,8 +96,13 @@ export class Hud {
     const boss = state.enemies.find(e=>e.isBoss&&e.hp>0);
     this.bossMeter.hidden = !boss;
     if (boss) {
+      const isColossus = boss.type.bossStyle === 'colossus';
+      this.bossMeter.classList.toggle('boss-meter--colossus', isColossus);
       this.nodes.bossFill.style.width = `${Math.max(0,boss.hp/boss.maxHp)*100}%`;
-      const bossTitle = boss.bossRank ? `#${boss.bossRank} ${boss.type.name.toUpperCase()}` : boss.type.name.toUpperCase();
+      const phaseSuffix = isColossus ? (boss.bossPhase === 'stunned' ? ' [¡ATURDIDO! x2 DAÑO]' : boss.phaseThree ? ' [FASE 3: FURIA TOTAL]' : boss.phaseTwo ? ' [FASE 2: FURIA FUNDIDA]' : '') : '';
+      const bossTitle = isColossus
+        ? `★ DOMI COLOSAL — EL SEÑOR DE LA PLANCHA NEGRA ★${phaseSuffix}`
+        : (boss.bossRank ? `#${boss.bossRank} ${boss.type.name.toUpperCase()}` : boss.type.name.toUpperCase());
       this.set('bossName', bossTitle);
     }
     const event=state.activeEvent,snowAlert=state.mapId==='snow'&&(state.mapWarning||state.wasFreezing);

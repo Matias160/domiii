@@ -153,3 +153,22 @@ test('GameOverScreen hides victory celebration on defeat and shows only on lava 
     globalThis.document = prevDoc;
   }
 });
+
+test('Domi Colosal charge wall hit triggers stunned state with double damage and item drop', () => {
+  const state = createRunState({ mapId: 'lava' });
+  const colossusType = enemyTypes.find(t => t.id === 'lava_boss');
+  const boss = new Enemy({ x: 100, y: 300, type: colossusType, difficulty: state.difficulty });
+  boss.spawnTime = 0;
+  boss.bossPhase = 'charge';
+  boss.chargeVelocity = { x: -1, y: 0 };
+  state.enemies = [boss];
+  state.items = [];
+
+  // Boss collides with left boundary
+  boss.x = boss.radius + 10;
+  boss.update(0.016, state.player, state);
+
+  assert.equal(boss.bossPhase, 'stunned');
+  assert.equal(boss.armor, 0.5, 'Stunned boss should receive double damage (armor 0.5)');
+  assert.ok(state.items.length >= 1, 'Stunned boss should drop tactical recovery item');
+});

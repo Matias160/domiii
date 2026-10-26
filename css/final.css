@@ -46,3 +46,47 @@ button:focus-visible, .pixel-button:focus-visible { outline-color: #00e5ff; }
 ::-webkit-scrollbar-track { background: #141c20; }
 ::-webkit-scrollbar-thumb { background: #ffcc00; border: 2px solid #141c20; }
 ::-webkit-scrollbar-thumb:hover { background: #00ff88; }
+
+/* 4. Barra de Jefe Colosal (Domi Colosal - Game Feel Cinematográfico) */
+.boss-meter--colossus {
+  width: 480px !important;
+  max-width: 95vw !important;
+  border: 3px solid #ff4400 !important;
+  border-bottom: 5px solid #000 !important;
+  box-shadow: 0 0 26px rgba(255, 68, 0, 0.65), 5px 5px 0 #000 !important;
+  background: linear-gradient(180deg, #220606f0 0%, #0c0202fa 100%) !important;
+  padding: 10px 16px !important;
+}
+.boss-meter--colossus #bossName {
+  color: #ffb700 !important;
+  font-size: 11px !important;
+  font-weight: bold !important;
+  text-shadow: 0 0 10px rgba(255, 120, 0, 0.8), 2px 2px 0 #000 !important;
+  letter-spacing: 1.5px !important;
+}
+.boss-meter--colossus .meter {
+  height: 16px !important;
+  border: 2px solid #ff3300 !important;
+  position: relative !important;
+}
+.boss-meter--colossus .meter::before,
+.boss-meter--colossus .meter::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: rgba(255, 255, 255, 0.7);
+  z-index: 5;
+  box-shadow: 0 0 5px #fff;
+}
+.boss-meter--colossus .meter::before {
+  left: 35%; /* Marca de Fase 2 (65% HP) */
+}
+.boss-meter--colossus .meter::after {
+  left: 70%; /* Marca de Fase 3 (30% HP) */
+}
+.boss-meter--colossus .meter__fill {
+  background: linear-gradient(90deg, #ff0033 0%, #ff5500 50%, #ffd700 100%) !important;
+  box-shadow: 0 0 18px rgba(255, 85, 0, 0.95), inset 0 2px 0 rgba(255, 255, 255, 0.6) !important;
+}

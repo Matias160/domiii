@@ -117,6 +117,34 @@ function updateBossZones(state,delta){
     }
   }
   state.bossZones=state.bossZones.filter(zone=>zone.life>0);
+
+  if (state.bossFireRings && state.bossFireRings.length > 0) {
+    const remainingRings = [];
+    for (const ring of state.bossFireRings) {
+      ring.radius += ring.speed * delta;
+      const dist = Math.hypot(state.player.x - ring.x, state.player.y - ring.y);
+      if (!ring.hitPlayer && Math.abs(dist - ring.radius) < 26) {
+        if (state.player.dashTime > 0 || state.player.invulnerableTime > 0) {
+          ring.hitPlayer = true;
+          state.floaters?.push({
+            x: state.player.x, y: state.player.y - 30,
+            text: '¡DASH PERFECTO!', color: '#00ffcc', life: 1.0, scale: 1.25
+          });
+          state.rings?.push({ x: state.player.x, y: state.player.y, radius: 48, life: 0.35, maxLife: 0.35, color: '#00ffcc' });
+        } else {
+          ring.hitPlayer = true;
+          if (state.player.takeDamage(ring.damage)) {
+            state.audio?.play('damage');
+            state.shake = Math.max(state.shake, 0.35);
+          }
+        }
+      }
+      if (ring.radius < ring.maxRadius) {
+        remainingRings.push(ring);
+      }
+    }
+    state.bossFireRings = remainingRings;
+  }
 }
 
 function spawnEnemy(state, canvas, boss = false) {

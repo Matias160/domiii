@@ -1,6 +1,8 @@
 import { drawFood } from "../core/art.js";
 import { createBossBehaviorTree } from "../ai/trees/enemyBehavior.js";
 import { SkillController } from "../skills/SkillSystem.js";
+import { Item } from "./Item.js";
+import { items, rarities } from "../data/items.js";
 
 // Reusable static buffer for boid separation queries
 const boidBuffer = [];
@@ -62,10 +64,17 @@ export class Enemy {
         this.armor = (this.armor || 1) * (this.type.bossStyle === 'colossus' ? 1.35 : 1);
         this.volleyTimer = Math.min(this.volleyTimer, 1.0);
         if (state) {
-          state.directorNotice = `${this.type.name.toUpperCase()} / FASE 2`;
-          state.shake = Math.max(state.shake, 0.35);
+          state.directorNotice = this.type.bossStyle === 'colossus'
+            ? '¡DOMI COLOSAL ENTRA EN FASE 2: FURIA FUNDIDA!'
+            : `${this.type.name.toUpperCase()} / FASE 2`;
+          state.shake = Math.max(state.shake, 0.42);
           state.rings?.push({ x: this.x, y: this.y, radius: this.radius + 75, life: 0.7, maxLife: 0.7, color: '#ff4f9a' });
           state.audio?.play('bossPhase');
+          if (this.type.bossStyle === 'colossus' && state.items) {
+            state.items.push(new Item({ type: items.mayo, rarity: rarities[3], x: Math.max(80, this.x - 75), y: Math.max(140, this.y + 45) }));
+            state.items.push(new Item({ type: items.mayo, rarity: rarities[3], x: Math.min(880, this.x + 75), y: Math.max(140, this.y - 45) }));
+            state.floaters?.push({ x: this.x, y: this.y - 55, text: '¡SUMINISTRO TÁCTICO!', color: '#ffd700', life: 1.6, scale: 1.3 });
+          }
         }
       }
       // Fase 3 (FURIA MAXIMA) al 30% de vida
@@ -76,11 +85,19 @@ export class Enemy {
         this.volleyTimer = 0.45;
         this.specialTimer = 0.5;
         if (state) {
-          state.directorNotice = `¡${this.type.name.toUpperCase()} EN FURIA TOTAL!`;
-          state.shake = Math.max(state.shake, 0.48);
+          state.directorNotice = this.type.bossStyle === 'colossus'
+            ? '¡DOMI COLOSAL EN FASE 3: SOBRECARGA MAGMÁTICA Y FURIA TOTAL!'
+            : `¡${this.type.name.toUpperCase()} EN FURIA TOTAL!`;
+          state.shake = Math.max(state.shake, 0.55);
           state.rings?.push({ x: this.x, y: this.y, radius: this.radius + 110, life: 0.85, maxLife: 0.85, color: '#ff0044' });
           state.rings?.push({ x: this.x, y: this.y, radius: this.radius + 65, life: 0.6, maxLife: 0.6, color: '#ffd700' });
           state.audio?.play('bossPhase');
+          if (this.type.bossStyle === 'colossus' && state.items) {
+            state.items.push(new Item({ type: items.mayo, rarity: rarities[4] || rarities[3], x: Math.max(90, this.x - 90), y: this.y }));
+            state.items.push(new Item({ type: items.mayo, rarity: rarities[4] || rarities[3], x: Math.min(870, this.x + 90), y: this.y }));
+            state.items.push(new Item({ type: items.mayo, rarity: rarities[3], x: this.x, y: Math.min(480, this.y + 70) }));
+            state.floaters?.push({ x: this.x, y: this.y - 65, text: '¡SOBRECARGA TÁCTICA!', color: '#ff4400', life: 1.8, scale: 1.4 });
+          }
         }
       }
 
@@ -89,7 +106,7 @@ export class Enemy {
         const approach = length < 185 ? -0.5 : length > 280 ? 1 : 0;
         this.x += (dx / length * approach - dy / length * 0.5) * this.speed * delta;
         this.y += (dy / length * approach + dx / length * 0.5) * this.speed * delta;
-      } else this.updateBoss(delta, player);
+      } else this.updateBoss(delta, player, state);
 
       const worldW = state?.world?.width || 960;
       const worldH = state?.world?.height || 540;
@@ -100,14 +117,29 @@ export class Enemy {
       this.specialTimer -= delta * (this.phaseThree ? 1.3 : 1);
       this.summonTimer -= delta;
 
-      // Pisotón tectónico y ráfagas ígneas dirigidas para Domi Colosal
+      // Pisotón tectónico y Anillos de Fuego expansivos para Domi Colosal
       if (this.type.bossStyle === 'colossus') {
         this.stompTimer = (this.stompTimer ?? 1.6) - delta;
         if (this.stompTimer <= 0 && state) {
-          this.stompTimer = this.phaseThree ? 0.85 : this.phaseTwo ? 1.25 : 1.75;
-          state.shake = Math.max(state.shake, 0.28);
+          this.stompTimer = this.phaseThree ? 0.95 : this.phaseTwo ? 1.35 : 1.85;
+          state.shake = Math.max(state.shake, 0.32);
           state.rings?.push({ x: this.x, y: this.y, radius: this.radius + 80, life: 0.55, maxLife: 0.55, color: '#ff3300' });
           state.audio?.play('telegraph');
+
+          // Generar Anillo de Fuego Expansivo que obliga a esquivar con Dash en Fase 2+
+          if (this.phaseTwo) {
+            state.bossFireRings = state.bossFireRings || [];
+            state.bossFireRings.push({
+              x: this.x,
+              y: this.y,
+              radius: this.radius + 15,
+              maxRadius: 460,
+              speed: this.phaseThree ? 260 : 210,
+              damage: this.damage * 0.85,
+              hitPlayer: false,
+              color: this.phaseThree ? '#ff1100' : '#ff6600'
+            });
+          }
           // Lanza abanico denso de proyectiles de roca magmática de alto daño directo al jugador
           const dx = player.x - this.x, dy = player.y - this.y;
           const baseAngle = Math.atan2(dy, dx);
@@ -328,21 +360,62 @@ export class Enemy {
     }
   }
 
-  updateBoss(delta, player) {
+  updateBoss(delta, player, state) {
     this.bossTimer -= delta;
+
+    // Estado ATURDIDO si chocó contra los bordes de la arena
+    if (this.bossPhase === 'stunned') {
+      if (this.bossTimer <= 0) {
+        this.bossPhase = 'stalk';
+        this.bossTimer = this.phaseThree ? 2.0 : 3.0;
+        this.armor = this._originalArmor || (this.type.armor || 1);
+      }
+      return;
+    }
+
     if (this.bossPhase === 'telegraph') {
       if (this.bossTimer <= 0) {
         const angle = Math.atan2(this.chargeTarget.y - this.y, this.chargeTarget.x - this.x);
         this.chargeVelocity = { x: Math.cos(angle), y: Math.sin(angle) };
         this.bossPhase = 'charge';
-        this.bossTimer = this.phaseThree ? 0.95 : 0.82;
+        this.bossTimer = this.type.bossStyle === 'colossus' ? (this.phaseThree ? 1.25 : 1.1) : (this.phaseThree ? 0.95 : 0.82);
       }
       return;
     }
     if (this.bossPhase === 'charge') {
-      const chargeMult = this.phaseThree ? 3.55 : 3.15;
+      const isColossus = this.type.bossStyle === 'colossus';
+      const chargeMult = isColossus ? (this.phaseThree ? 4.1 : 3.65) : (this.phaseThree ? 3.55 : 3.15);
       this.x += this.chargeVelocity.x * this.speed * chargeMult * delta;
       this.y += this.chargeVelocity.y * this.speed * chargeMult * delta;
+
+      // Colisión con bordes del mapa para aturdir al coloso
+      const worldW = state?.world?.width || 960;
+      const worldH = state?.world?.height || 540;
+      const hitWall = isColossus && (
+        this.x <= this.radius + 16 ||
+        this.x >= worldW - 16 - this.radius ||
+        this.y <= 122 + this.radius ||
+        this.y >= worldH - 30 - this.radius
+      );
+
+      if (hitWall) {
+        this.bossPhase = 'stunned';
+        this.bossTimer = 2.4; // 2.4s de aturdimiento
+        this._originalArmor = this.armor;
+        this.armor = 0.5; // Doble de daño recibido durante aturdimiento
+        if (state) {
+          state.shake = 0.68;
+          state.audio?.play('boss');
+          state.rings?.push({ x: this.x, y: this.y, radius: 170, life: 0.85, maxLife: 0.85, color: '#ffd700' });
+          state.rings?.push({ x: this.x, y: this.y, radius: 100, life: 0.55, maxLife: 0.55, color: '#ffffff' });
+          state.floaters?.push({ x: this.x, y: this.y - 48, text: '¡ESTRELLADO! ¡ATURDIDO! (DAÑO x2)', color: '#ffd700', life: 2.2, scale: 1.35 });
+          if (state.items) {
+            state.items.push(new Item({ type: items.mayo, rarity: rarities[3], x: this.x, y: this.y }));
+          }
+        }
+        return;
+      }
+
       if (this.bossTimer <= 0) {
         this.bossPhase = 'recover';
         this.bossTimer = this.phaseThree ? 0.9 : 1.35;
@@ -351,7 +424,7 @@ export class Enemy {
     }
     if (this.bossPhase === 'recover' && this.bossTimer <= 0) {
       this.bossPhase = 'stalk';
-      this.bossTimer = this.phaseThree ? 2.4 : 3.5;
+      this.bossTimer = this.phaseThree ? 2.2 : 3.4;
     }
     const dx = player.x - this.x;
     const dy = player.y - this.y;
@@ -361,8 +434,9 @@ export class Enemy {
     this.y += (dy / length) * speed * delta;
     if (this.bossPhase === 'stalk' && this.bossTimer <= 0) {
       this.bossPhase = 'telegraph';
-      this.bossTimer = this.type.bossStyle === 'fast' ? .6 : .85;
+      this.bossTimer = this.type.bossStyle === 'colossus' ? 1.05 : this.type.bossStyle === 'fast' ? .6 : .85;
       this.chargeTarget = { x: player.x, y: player.y };
+      if (state) state.audio?.play('telegraph');
     }
   }
 
@@ -453,6 +527,24 @@ export class Enemy {
       ctx.strokeText(bossLabel, this.x, this.y - this.radius * 1.48);
       ctx.fillText(bossLabel, this.x, this.y - this.radius * 1.48);
       ctx.restore();
+
+      if (this.bossPhase === 'stunned') {
+        ctx.save();
+        const stars = 5;
+        const t = performance.now() / 180;
+        for (let s = 0; s < stars; s++) {
+          const a = t + s * Math.PI * 2 / stars;
+          const sx = this.x + Math.cos(a) * (this.radius * 0.75);
+          const sy = this.y - this.radius - 12 + Math.sin(a) * 12;
+          ctx.fillStyle = '#ffd700';
+          ctx.shadowColor = '#ffff00';
+          ctx.shadowBlur = 6;
+          ctx.beginPath();
+          ctx.arc(sx, sy, 4.5, 0, Math.PI * 2);
+          ctx.fill();
+        }
+        ctx.restore();
+      }
     }
 
     const isStrong = this.maxHp >= 40 || this.isBoss;

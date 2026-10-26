@@ -131,20 +131,46 @@ export function drawCombatFeedback(ctx, state, reducedMotion = false) {
       }
     }
     if(boss.bossPhase==='telegraph'&&boss.chargeTarget) {
+      const isColossus = boss.type.bossStyle === 'colossus';
       const angle=Math.atan2(boss.chargeTarget.y-boss.y,boss.chargeTarget.x-boss.x);
-      const length=boss.speed*3.15*.82;
+      const length=boss.speed*(isColossus ? 4.1 * 1.25 : 3.15 * .82);
       ctx.save();ctx.translate(boss.x,boss.y);ctx.rotate(angle);
-      ctx.fillStyle='#ff657326';ctx.fillRect(0,-boss.radius,length,boss.radius*2);
-      ctx.strokeStyle='#ff8991';ctx.lineWidth=2;ctx.strokeRect(0,-boss.radius,length,boss.radius*2);
+      ctx.fillStyle=isColossus ? 'rgba(255, 60, 0, 0.28)' : '#ff657326';
+      ctx.fillRect(0,-boss.radius,length,boss.radius*2);
+      ctx.strokeStyle=isColossus ? '#ff3700' : '#ff8991';
+      ctx.lineWidth=isColossus ? 4 : 2;
+      ctx.strokeRect(0,-boss.radius,length,boss.radius*2);
       for(let x=45;x<length;x+=38){ctx.beginPath();ctx.moveTo(x-9,-8);ctx.lineTo(x,0);ctx.lineTo(x-9,8);ctx.stroke();}
       ctx.restore();
     }
-    const label=volley?'SALVA RADIAL':boss.bossPhase==='telegraph'?'EMBESTIDA':boss.bossPhase==='recover'?'RECUPERANDO':null;
+    const label=boss.bossPhase==='stunned'?'¡ATURDIDO! (DAÑO x2)':volley?'SALVA RADIAL':boss.bossPhase==='telegraph'?(boss.type.bossStyle==='colossus'?'EMBESTIDA COLOSAL':'EMBESTIDA'):boss.bossPhase==='recover'?'RECUPERANDO':null;
     if(label) {
       const x=Math.max(90,Math.min(870,boss.x)),y=Math.min(492,boss.y+boss.radius+27);
-      ctx.fillStyle='#151b25';ctx.fillRect(x-76,y-13,152,20);ctx.textAlign='center';ctx.font='bold 11px monospace';
-      ctx.fillStyle=boss.bossPhase==='recover'&&!volley?'#a4ffe1':'#ffbdc4';ctx.fillText(label,x,y+1);
+      ctx.fillStyle='#151b25';ctx.fillRect(x-90,y-13,180,20);ctx.textAlign='center';ctx.font='bold 11px monospace';
+      ctx.fillStyle=boss.bossPhase==='stunned'?'#ffd700':boss.bossPhase==='recover'&&!volley?'#a4ffe1':'#ffbdc4';ctx.fillText(label,x,y+1);
     }
+  }
+
+  // Anillos de Fuego expansivos lanzados por el Jefe Colosal
+  for (const ring of state.bossFireRings || []) {
+    ctx.save();
+    ctx.strokeStyle = ring.color || '#ff4400';
+    ctx.lineWidth = 4;
+    ctx.shadowColor = '#ff2200';
+    ctx.shadowBlur = 12;
+    ctx.beginPath();
+    ctx.arc(ring.x, ring.y, ring.radius, 0, Math.PI * 2);
+    ctx.stroke();
+    // Chispas de fuego perimetrales
+    const sparkCount = 10;
+    for (let i = 0; i < sparkCount; i++) {
+      const a = i * Math.PI * 2 / sparkCount + state.time * 2.5;
+      ctx.fillStyle = '#ffe066';
+      ctx.beginPath();
+      ctx.arc(ring.x + Math.cos(a) * ring.radius, ring.y + Math.sin(a) * ring.radius, 3.5, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    ctx.restore();
   }
 
   // Indicador de cooldown de dash (con reflejo cálido en entorno de lava)

@@ -152,10 +152,25 @@ export class Game {
     window.unlockLavaMap = triggerLavaCheat;
     window.unlockLava = triggerLavaCheat;
 
+    // Comando secreto para matar de una al jefe activo:
+    // 1) Presionar Ctrl + Shift + K durante la partida
+    // 2) Escribir 'killboss' o 'matar' durante la partida
+    // 3) Función global window.killBoss() o window.killFinalBoss() desde la consola
+    const triggerKillBoss = () => {
+      this.triggerKillBossCheat();
+    };
+    window.killBoss = triggerKillBoss;
+    window.killFinalBoss = triggerKillBoss;
+
     window.addEventListener('keydown', event => {
       if (!this.running && event.ctrlKey && event.shiftKey && event.key.toLowerCase() === 'l') {
         event.preventDefault();
         triggerLavaCheat();
+        return;
+      }
+      if (this.running && event.ctrlKey && event.shiftKey && event.key.toLowerCase() === 'k') {
+        event.preventDefault();
+        triggerKillBoss();
         return;
       }
       if (event.target.closest?.('input, select, textarea')) return;
@@ -163,6 +178,11 @@ export class Game {
       if (!this.running && secretBuffer.endsWith('domilava')) {
         secretBuffer = '';
         triggerLavaCheat();
+        return;
+      }
+      if (this.running && (secretBuffer.endsWith('killboss') || secretBuffer.endsWith('matar'))) {
+        secretBuffer = '';
+        triggerKillBoss();
         return;
       }
       if (this.screenId === 'onboardingScreen' && (event.key.toLowerCase() === 'e' || event.key === 'Enter' || event.key === ' ')) {
@@ -748,6 +768,28 @@ export class Game {
   triggerPrime(key){
     if(!this.running||!activatePrime(this.state,key))return false;
     this.audio.play('level');this.showToast(primes.find(prime=>prime.key===key).name.toUpperCase());return true;
+  }
+
+  triggerKillBossCheat() {
+    if (!this.running || !this.state) {
+      this.showToast('⚠️ Debes estar en una partida para aniquilar al jefe.');
+      return false;
+    }
+    const boss = this.state.enemies.find(e => e.isBoss && e.hp > 0);
+    if (!boss) {
+      this.showToast('⚠️ No hay ningún jefe activo en pantalla.');
+      return false;
+    }
+    this.audio?.play('boss');
+    this.state.shake = 0.95;
+    burst(this.state, boss.x, boss.y, '#ffffff', 45, 340);
+    burst(this.state, boss.x, boss.y, '#ffd700', 55, 300);
+    burst(this.state, boss.x, boss.y, '#ff0033', 60, 320);
+    this.showToast('💀 ¡COMANDO SECRETO! Jefe aniquilado al instante.');
+    damageEnemy(this.state, boss, boss.hp + 999999, 'crit');
+    resolveDeaths(this.state, () => {});
+    console.log('%c💀 ¡COMANDO SECRETO ACTIVADO! Jefe aniquilado al instante.', 'color: #ff0055; font-size: 16px; font-weight: bold;');
+    return true;
   }
 
   updateAimButton(){
