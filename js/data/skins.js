@@ -60,4 +60,16 @@ export const skins = {
     color:'#ad4937',maxHp:110,speed:220,damageMultiplier:1.12,defense:1,extraProjectiles:0,
     bossDamageMultiplier:1.4,locked:true,
   },
+  domi: {
+    id: 'domi',
+    name: 'Señor Domi',
+    description: 'El maestro fundador animado. Sabiduría gastronómica y carisma legendario.',
+    color: '#f59e0b',
+    maxHp: 125,
+    speed: 230,
+    damageMultiplier: 1.22,
+    defense: 1.15,
+    extraProjectiles: 1,
+    gif: 'don domi.gif'
+  },
 };

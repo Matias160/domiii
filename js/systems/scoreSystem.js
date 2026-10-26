@@ -121,8 +121,21 @@ export function resolveDeaths(state, onLevelUp) {
     state.peakCombo = Math.max(state.peakCombo || 0, state.combo);
     state.kills += 1;
     if (enemy.isBoss) {
-      state.bossesKilled = (state.bossesKilled || 0) + 1;
-      state.bossDefeated = true;
+      if (state.mapId === 'lava' || enemy.type?.id === 'lava_boss') {
+        state.bossDying = {
+          x: enemy.x,
+          y: enemy.y,
+          radius: enemy.radius,
+          type: enemy.type,
+          timer: 3.0,
+          duration: 3.0,
+          explosionTimer: 0
+        };
+        state.shake = 0.85;
+      } else {
+        state.bossesKilled = (state.bossesKilled || 0) + 1;
+        state.bossDefeated = true;
+      }
       state.shake = Math.max(state.shake || 0, 0.55);
       state.hitFreeze = 0.22; // Micro cámara lenta / freeze al derrotar un Gran Jefe
       // Onda dorada purificadora que desintegra proyectiles enemigos cercanos

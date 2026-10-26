@@ -509,18 +509,80 @@ export class Game {
     updateDirector(state, delta, state.world || this.canvas);
 
     // Temblor de suspenso tectónico antes de la llegada del Jefe en Caldero de Lava
-    if (state.mapId === 'lava' && state.time < (state.nextBossAt || 2)) {
-      const suspenseRatio = Math.min(1, state.time / (state.nextBossAt || 2));
-      state.shake = Math.max(state.shake || 0, 0.25 + suspenseRatio * 0.35);
-      if (Math.random() < 0.18) {
+    if (state.mapId === 'lava' && state.time < (state.nextBossAt || 3.5)) {
+      const suspenseRatio = Math.min(1, state.time / (state.nextBossAt || 3.5));
+      state.shake = Math.max(state.shake || 0, 0.45 + suspenseRatio * 0.35);
+      if (Math.random() < 0.25) {
         state.rings?.push({
-          x: state.player.x + (Math.random() - 0.5) * 180,
-          y: state.player.y + (Math.random() - 0.5) * 180,
-          radius: 35 + Math.random() * 55,
-          life: 0.55,
-          maxLife: 0.55,
+          x: state.player.x + (Math.random() - 0.5) * 220,
+          y: state.player.y + (Math.random() - 0.5) * 220,
+          radius: 40 + Math.random() * 65,
+          life: 0.6,
+          maxLife: 0.6,
           color: '#ff3300'
         });
+      }
+    }
+
+    // Secuencia de explosión al ser derrotado el Coloso Final antes de terminar la partida
+    if (state.bossDying) {
+      state.bossDying.timer -= delta;
+      state.bossDying.explosionTimer = (state.bossDying.explosionTimer || 0) - delta;
+      state.shake = Math.max(state.shake || 0, 0.75);
+
+      if (state.bossDying.explosionTimer <= 0) {
+        state.bossDying.explosionTimer = Math.max(0.04, (state.bossDying.timer / state.bossDying.duration) * 0.15);
+        const r = state.bossDying.radius;
+        const ox = (Math.random() - 0.5) * r * 1.5;
+        const oy = (Math.random() - 0.5) * r * 1.5;
+        burst(state, state.bossDying.x + ox, state.bossDying.y + oy, Math.random() < 0.5 ? '#ff2200' : '#ffd700', 32, 240);
+        state.rings?.push({
+          x: state.bossDying.x + ox,
+          y: state.bossDying.y + oy,
+          radius: 50 + Math.random() * 45,
+          life: 0.45,
+          maxLife: 0.45,
+          color: '#ff3700'
+        });
+        this.audio?.play('damage');
+      }
+
+      if (state.bossDying.timer <= 0) {
+        burst(state, state.bossDying.x, state.bossDying.y, '#ffffff', 100, 560);
+        burst(state, state.bossDying.x, state.bossDying.y, '#ff0033', 110, 480);
+        burst(state, state.bossDying.x, state.bossDying.y, '#ffd700', 90, 380);
+        state.rings?.push({ x: state.bossDying.x, y: state.bossDying.y, radius: 520, life: 1.6, maxLife: 1.6, color: '#ffffff' });
+        state.shake = 1.0;
+        this.audio?.play('victory');
+        state.bossesKilled = (state.bossesKilled || 0) + 1;
+        state.victory = true;
+        state.bossDying = null;
+      }
+    }
+
+    // Pisadas y partículas temáticas de accesorios legendarios
+    const pl = state.player;
+    if (pl && pl.accessory && pl.accessory.startsWith('leg_') && (this.input.getAxis().x !== 0 || this.input.getAxis().y !== 0)) {
+      pl.legendaryStepTimer = (pl.legendaryStepTimer || 0) - delta;
+      if (pl.legendaryStepTimer <= 0) {
+        pl.legendaryStepTimer = 0.12;
+        state.legendaryFootsteps = state.legendaryFootsteps || [];
+        state.legendaryFootsteps.push({
+          x: pl.x + (Math.random() - 0.5) * 8,
+          y: pl.y + 16 + (Math.random() - 0.5) * 4,
+          type: pl.accessory,
+          life: 1.2,
+          maxLife: 1.2
+        });
+        if (state.legendaryFootsteps.length > 50) state.legendaryFootsteps.shift();
+      }
+    }
+    if (state.legendaryFootsteps) {
+      for (let i = state.legendaryFootsteps.length - 1; i >= 0; i--) {
+        state.legendaryFootsteps[i].life -= delta;
+        if (state.legendaryFootsteps[i].life <= 0) {
+          state.legendaryFootsteps.splice(i, 1);
+        }
       }
     }
     updatePrimes(state,delta);updateMap(state,delta);
@@ -1206,39 +1268,42 @@ export class Game {
 
   drawLavaBossSuspense(time, nextBossAt) {
     const ctx = this.ctx;
+    // Varios ciclos y pulsos de fade a negro para suspenso tectónico prolongado
     let alpha = 0;
-    if (time < 0.3) {
-      alpha = (time / 0.3) * 0.55;
-    } else if (time < 0.9) {
-      alpha = 0.55 + ((time - 0.3) / 0.6) * 0.40;
+    if (time < 1.0) {
+      alpha = (time / 1.0) * 0.94;
+    } else if (time < 1.8) {
+      // Destello ígneo intermedio y recaída en oscuridad más profunda
+      const sub = (time - 1.0) / 0.8;
+      alpha = 0.80 + Math.sin(sub * Math.PI) * 0.18;
     } else {
-      alpha = 0.95; // Penumbra casi total para máximo suspenso
+      alpha = 0.97; // Penumbra casi absoluta antes de emerger
     }
 
     ctx.save();
     ctx.fillStyle = `rgba(0, 0, 0, ${alpha})`;
     ctx.fillRect(0, 0, 960, 540);
 
-    // Texto de suspenso volcánico
-    if (alpha >= 0.5) {
-      const pulse = 0.75 + Math.sin(time * 9) * 0.25;
+    // Mensajes y partículas de suspenso en la penumbra
+    if (alpha >= 0.6) {
+      const pulse = 0.75 + Math.sin(time * 8) * 0.25;
       ctx.globalAlpha = pulse;
       ctx.textAlign = 'center';
 
-      ctx.font = '900 12px "Press Start 2P", monospace';
-      ctx.fillStyle = '#ff3300';
-      ctx.fillText('EL SUELO RETUMBA...', 480, 240);
-
       ctx.font = '900 13px "Press Start 2P", monospace';
+      ctx.fillStyle = '#ff3300';
+      ctx.fillText('EL SUELO RETUMBA...', 480, 235);
+
+      ctx.font = '900 15px "Press Start 2P", monospace';
       ctx.fillStyle = '#ffd700';
       ctx.fillText('¡UNA AMENAZA COLOSAL EMERGE DEL MAGMA!', 480, 275);
 
-      // Chispas ígneas en la penumbra
+      // Chispas ígneas flotantes
       ctx.fillStyle = '#ff6600';
-      const tick = Math.floor(time * 24);
-      for (let i = 0; i < 9; i++) {
-        const px = (tick * 61 + i * 107) % 960;
-        const py = 540 - ((tick * 37 + i * 83) % 250);
+      const tick = Math.floor(time * 26);
+      for (let i = 0; i < 14; i++) {
+        const px = (tick * 67 + i * 97) % 960;
+        const py = 540 - ((tick * 41 + i * 79) % 270);
         ctx.fillRect(px, py, 3, 3);
       }
     }
@@ -1321,6 +1386,68 @@ export class Game {
     this.state.rings.push({ x: boss.x, y: boss.y, radius: isColossus ? 220 : 150, life: 1.1, maxLife: 1.1, color: '#ffcc00' });
     burst(this.state, boss.x, boss.y, '#ff3344', isColossus ? 60 : 40, isColossus ? 340 : 260);
     burst(this.state, boss.x, boss.y, '#ffcc00', isColossus ? 50 : 35, isColossus ? 260 : 200);
+  }
+
+  drawLegendaryFootsteps(footsteps) {
+    if (!footsteps || !footsteps.length) return;
+    const ctx = this.ctx;
+    ctx.save();
+    for (const f of footsteps) {
+      const alpha = Math.max(0, f.life / f.maxLife);
+      ctx.globalAlpha = alpha;
+      const acc = f.type;
+      if (acc === 'leg_lava_crown') {
+        ctx.fillStyle = '#ff3300';
+        ctx.beginPath(); ctx.ellipse(f.x, f.y, 11, 6, 0, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = '#ffdd33';
+        ctx.beginPath(); ctx.ellipse(f.x, f.y, 6, 3, 0, 0, Math.PI * 2); ctx.fill();
+      } else if (acc === 'leg_fire_wings') {
+        ctx.fillStyle = '#ff2200';
+        ctx.fillRect(f.x - 4, f.y - 2, 8, 4);
+        ctx.fillStyle = '#ffaa00';
+        ctx.fillRect(f.x - 2, f.y - 1, 4, 2);
+      } else if (acc === 'leg_angel_wings') {
+        ctx.fillStyle = '#ffd700';
+        ctx.beginPath(); ctx.arc(f.x, f.y, 6, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = '#ffffff';
+        ctx.beginPath(); ctx.arc(f.x, f.y, 3, 0, Math.PI * 2); ctx.fill();
+      } else if (acc === 'leg_halo') {
+        ctx.strokeStyle = '#ffd700';
+        ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.arc(f.x, f.y, 8, 0, Math.PI * 2); ctx.stroke();
+      } else if (acc === 'leg_viking') {
+        ctx.fillStyle = '#38bdf8';
+        ctx.fillRect(f.x - 3, f.y - 4, 6, 2);
+        ctx.fillRect(f.x - 1, f.y - 4, 2, 8);
+      } else if (acc === 'leg_horns') {
+        ctx.fillStyle = '#dc2626';
+        ctx.fillRect(f.x - 5, f.y - 3, 4, 6);
+        ctx.fillRect(f.x + 1, f.y - 3, 4, 6);
+      } else if (acc === 'leg_visor') {
+        ctx.fillStyle = '#06b6d4';
+        ctx.fillRect(f.x - 6, f.y - 2, 12, 3);
+        ctx.fillStyle = '#22d3ee';
+        ctx.fillRect(f.x - 2, f.y - 4, 4, 7);
+      } else if (acc === 'leg_archmage') {
+        ctx.fillStyle = '#a855f7';
+        ctx.beginPath(); ctx.arc(f.x, f.y, 5, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = '#c084fc';
+        ctx.fillRect(f.x - 1, f.y - 1, 2, 2);
+      } else if (acc === 'leg_crown' || acc === 'leg_cape') {
+        ctx.fillStyle = '#f59e0b';
+        ctx.fillRect(f.x - 3, f.y - 3, 6, 6);
+        ctx.fillStyle = '#e11d48';
+        ctx.fillRect(f.x - 1, f.y - 1, 2, 2);
+      } else if (acc === 'leg_excalibur') {
+        ctx.fillStyle = '#fef08a';
+        ctx.fillRect(f.x - 5, f.y - 1, 10, 2);
+        ctx.fillRect(f.x - 1, f.y - 5, 2, 10);
+      } else {
+        ctx.fillStyle = '#f43f5e';
+        ctx.beginPath(); ctx.arc(f.x, f.y, 4, 0, Math.PI * 2); ctx.fill();
+      }
+    }
+    ctx.restore();
   }
 
   formatTime(seconds) {

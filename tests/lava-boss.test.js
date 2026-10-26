@@ -30,20 +30,20 @@ test('legendary accessory Corona Magmática Imperial is defined and resolved', (
   assert.ok(acc.stats.dmg.includes('+30%'));
 });
 
-test('starting run on map lava initializes boss_legendary mode, unlocks all abilities, and spawns Domi Colosal', () => {
+test('starting run on map lava initializes boss_legendary mode, with normal stats and no recipe, and spawns Domi Colosal', () => {
   const state = createRunState({ mapId: 'lava' });
   assert.equal(state.mapId, 'lava');
   assert.equal(state.modeId, 'boss_legendary');
   assert.equal(modes.boss_legendary.name, '???');
   assert.equal(state.difficulty.name, '???');
-  assert.equal(state.nextBossAt, 2);
+  assert.equal(state.nextBossAt, 3.5);
   assert.equal(state.nextEventAt, Infinity);
-  assert.equal(state.player.level, 15);
-  assert.ok(state.player.weaponEvolution, 'Weapon should be evolved in lava map');
-  assert.ok(Object.keys(state.player.abilities).length >= 10, 'All abilities should be unlocked');
+  assert.equal(state.player.level, 1, 'Player must have normal level 1');
+  assert.equal(state.player.weaponEvolution, null, 'Weapon must be base without evolution');
+  assert.equal(Object.keys(state.player.abilities).length, 0, 'No recipe abilities allowed');
 
-  // Advance time to 2.0s to trigger boss spawn
-  state.time = 2.1;
+  // Advance time to 3.5s to trigger boss spawn after suspense
+  state.time = 3.6;
   const spawned = updateEnemies(state, 0.016, bounds);
   assert.equal(spawned, true);
 

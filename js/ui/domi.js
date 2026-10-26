@@ -1,3 +1,5 @@
+const domiGifImage = typeof Image !== 'undefined' ? new Image() : null;
+if (domiGifImage) domiGifImage.src = './don domi.gif';
 import {currentAccount, grantItem, equip} from '../systems/accountSystem.js';
 import {shopItems, isOwned} from '../data/shop.js';
 import {drawItemPreview, drawAccessoryIcon} from '../core/presentation.js';
@@ -639,11 +641,11 @@ export class DomiScreen {
      3. COLECCIÓN: Grilla 4x3 de ranuras oscuras + Pedestal de exhibición
      ========================================================================= */
   renderCollectibles(container, profile) {
+    container.replaceChildren();
     const slots = this.getCollectionSlots(profile);
     if (!this.selectedSlot || !slots.some(s => s.id === this.selectedSlot.id)) {
       this.selectedSlot = slots[0];
     }
-    const current = this.selectedSlot;
 
     const layout = document.createElement('div');
     layout.className = 'domi-collection-layout';
@@ -651,12 +653,15 @@ export class DomiScreen {
     const grid = document.createElement('div');
     grid.className = 'domi-grid-4x3';
 
+    const panel = document.createElement('aside');
+    panel.className = 'domi-pedestal-panel';
+
     for (const slot of slots) {
       const slotBtn = document.createElement('button');
       slotBtn.type = 'button';
-      slotBtn.className = `domi-slot ${slot.isUnlocked ? 'is-unlocked' : 'is-locked'} ${current.id === slot.id ? 'is-selected' : ''}`;
+      slotBtn.className = `domi-slot ${slot.isUnlocked ? 'is-unlocked' : 'is-locked'} ${this.selectedSlot.id === slot.id ? 'is-selected' : ''}`;
       slotBtn.dataset.category = slot.category;
-      slotBtn.setAttribute('aria-pressed', String(current.id === slot.id));
+      slotBtn.setAttribute('aria-pressed', String(this.selectedSlot.id === slot.id));
       slotBtn.title = `${slot.name} (${slot.category})`;
 
       const canvas = document.createElement('canvas');
@@ -664,7 +669,6 @@ export class DomiScreen {
       canvas.height = 64;
       canvas.className = 'domi-slot-canvas';
       this.drawSlotIcon(canvas, slot, profile);
-
       slotBtn.append(canvas);
 
       if (!slot.isUnlocked) {
@@ -683,15 +687,26 @@ export class DomiScreen {
 
       slotBtn.onclick = () => {
         this.selectedSlot = slot;
-        this.renderCollectibles(container, profile);
+        grid.querySelectorAll('.domi-slot').forEach(b => {
+          b.classList.remove('is-selected');
+          b.setAttribute('aria-pressed', 'false');
+        });
+        slotBtn.classList.add('is-selected');
+        slotBtn.setAttribute('aria-pressed', 'true');
+        this.renderPedestalPanel(panel, slot, profile);
         this.game.audio.play('navigate');
       };
 
       grid.append(slotBtn);
     }
 
-    const panel = document.createElement('aside');
-    panel.className = 'domi-pedestal-panel';
+    layout.append(grid, panel);
+    container.append(layout);
+    this.renderPedestalPanel(panel, this.selectedSlot, profile);
+  }
+
+  renderPedestalPanel(panel, current, profile) {
+    panel.replaceChildren();
 
     const stage = document.createElement('div');
     stage.className = 'domi-pedestal-stage';
@@ -753,7 +768,6 @@ export class DomiScreen {
           this.game.showScreen('setupScreen');
           const modeSelect = document.querySelector('#modeSelect');
           if (modeSelect) { modeSelect.value = 'rush'; this.game.menu?.syncCards?.(); }
-          if (modeSelect) modeSelect.value = 'rush';
         };
       } else {
         actionBtn.textContent = 'INICIAR PARTIDA';
@@ -769,9 +783,6 @@ export class DomiScreen {
     action.append(actionBtn);
 
     panel.append(stage, body, action);
-    layout.append(grid, panel);
-    container.append(layout);
-
     this.drawPedestalPreview(previewCanvas, current, profile);
   }
 
@@ -887,6 +898,15 @@ export class DomiScreen {
   }
 
   drawDomiCharacter(c, cx, cy, scale = 2, time = 0) {
+    if (domiGifImage && domiGifImage.complete && domiGifImage.naturalWidth > 0) {
+      c.save();
+      const bob = Math.sin(time * 3) * 3;
+      const w = 48 * scale;
+      const h = 50 * scale;
+      c.drawImage(domiGifImage, cx - w / 2, cy - h / 2 + bob, w, h);
+      c.restore();
+      return;
+    }
     c.save();
     c.translate(cx, cy + Math.sin(time * 3) * 3);
     c.scale(scale, scale);

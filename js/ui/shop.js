@@ -17,7 +17,7 @@ const basics=[
 export const catalog=[...basics,...shopItems];
 const normalize=value=>value.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLocaleLowerCase('es');
 export function filterCatalog(profile,{type='skin',ownedOnly=false,query='',affordable=false,sort='featured'}={}){
-  const result=catalog.filter(item=>item.type===type&&(!ownedOnly||isOwned(profile,item.type,item.id))&&(!affordable||isOwned(profile,item.type,item.id)||item.cost<=profile.bank)&&normalize(item.name+' '+item.description).includes(normalize(query.trim())));
+  const result=catalog.filter(item=>item.type===type&&(!ownedOnly||isOwned(profile,item.type,item.id))&&(!affordable||isOwned(profile,item.type,item.id)||(!item.domiExclusive&&item.cost<=profile.bank))&&normalize(item.name+' '+item.description).includes(normalize(query.trim())));
   if(sort==='price')result.sort((a,b)=>a.cost-b.cost);
   if(sort==='name')result.sort((a,b)=>a.name.localeCompare(b.name,'es'));
   return result;

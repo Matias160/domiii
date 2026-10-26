@@ -4,6 +4,7 @@ export const shopItems = [
   {id:'pizza',type:'skin',name:'Pizza',cost:850,icon:'Z',description:'Resistente y contundente.'},
   {id:'empanada',type:'skin',name:'Empanada',cost:950,icon:'E',description:'Defensa superior.'},
   {id:'choripan',type:'skin',name:'Choripan',cost:1600,icon:'C',description:'Especialista en jefes.'},
+  {id:'domi',type:'skin',name:'Señor Domi',cost:0,domiExclusive:true,icon:'👨‍🍳',description:'Skin animada legendaria del fundador Señor Domi.'},
   {id:'snow',type:'map',name:'Nevado',cost:800,icon:'❄',description:'Ventiscas que congelan el tablero.'},
   {id:'desert',type:'map',name:'Desierto',cost:1000,icon:'✳',description:'Cactus rodantes que hacen daño.'},
   {id:'football',type:'map',name:'Cancha de futbol',cost:1200,icon:'⚽',description:'Pelotas peligrosas en juego.'},

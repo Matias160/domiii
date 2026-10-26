@@ -21,7 +21,7 @@ export function initializeDirector(state) {
   state.waveRemaining = 10;
   state.waveRest = 2;
   state.waveBossPending = false;
-  state.nextBossAt = state.mapId === 'lava' ? 2 : state.modeId === 'rush' ? 3 : state.modeId === 'waves' ? Infinity : 55;
+  state.nextBossAt = state.mapId === 'lava' ? 3.5 : state.modeId === 'rush' ? 3 : state.modeId === 'waves' ? Infinity : 55;
   state.nextEventAt = state.mapId === 'lava' ? Infinity : state.modeId === 'rush' ? 25 : 32;
   state.activeEvent = null;
   state.eventRemaining = 0;
@@ -31,7 +31,7 @@ export function initializeDirector(state) {
 
 export function updateDirector(state, delta, bounds, random = Math.random) {
   state.peakCombo = Math.max(state.peakCombo, state.combo || 0);
-  if (state.mapId === 'lava' && state.bossesKilled >= 1) state.victory = true;
+  if (state.mapId === 'lava' && state.bossesKilled >= 1 && !state.bossDying) state.victory = true;
   if (state.modeId === 'rush' && state.bossesKilled >= RUSH_BOSS_GOAL) state.victory = true;
   if (state.modeId === 'waves') {
     state.waveRest = Math.max(0, state.waveRest - delta);

@@ -1,3 +1,5 @@
+export const domiGifImage = typeof Image !== 'undefined' ? new Image() : null;
+if (domiGifImage) domiGifImage.src = './don domi.gif';
 const INK = '#161c20';
 const sprites = new Map();
 const floors = new Map();
@@ -150,6 +152,18 @@ export function drawFood(c, kind, x, y, scale = 1, time = 0, enemy = false, flas
   groundGlow.addColorStop(0.45, isColossus ? 'rgba(255, 120, 0, 0.28)' : '#080d1360');
   groundGlow.addColorStop(1, 'transparent');
   c.fillStyle = groundGlow; c.beginPath(); c.ellipse(x, y + 23 * scale, (isColossus ? 48 : 28) * scale, (isColossus ? 16 : 8) * scale, 0, 0, Math.PI * 2); c.fill();
+
+  if (kind === 'domi') {
+    if (domiGifImage && domiGifImage.complete && domiGifImage.naturalWidth > 0) {
+      if (flash) c.filter = 'brightness(2.5)';
+      const w = 52 * scale;
+      const h = 54 * scale;
+      c.drawImage(domiGifImage, Math.round(x - w / 2), Math.round(y - h / 2 - 4 + bob), w, h);
+      c.restore();
+      return;
+    }
+  }
+
   c.drawImage(foodSprite(kind, enemy, flash), Math.round(x - 32 * scale), Math.round(y - 36 * scale + bob), 64 * scale, 72 * scale);
   c.restore();
 }
@@ -172,45 +186,177 @@ export function drawWeapon(c, kind, x, y, scale = 1, angle = -.65) {
 }
 
 function footballFloor(c) {
-  const colors=['#11725a','#168966','#1b9c70','#107d67'];
-  rect(c,'#081a26',0,0,1920,1080);
-  for(let x=0;x<1920;x+=64){rect(c,colors[(x/64)%4],x,84,64,996);rect(c,'#0a5a4e55',x,84,3,996);rect(c,'#4ad69418',x+4,84,3,996);}
-  for(let y=96;y<1080;y+=24)rect(c,'#d7ffe908',0,y,1920,2);
-  for(let i=0;i<180;i++){const x=(i*173+37)%1880+20,y=103+(i*89)%920;rect(c,i%3?'#075c4a66':'#82c76b55',x,y,4+(i%4)*3,2+(i%2));}
+  // 1. Gradas synthwave y marco de estadio
+  rect(c,'#050b17',0,0,1920,84);
+  rect(c,'#1a1030',0,55,1920,29);
+  rect(c,'#ff3f8b',0,78,1920,6);
+  rect(c,'#38bdf8',0,84,1920,4);
 
-  // Synthwave stands and pitch frame
-  rect(c,'#050b17',0,0,1920,84);rect(c,'#20133c',0,55,1920,29);rect(c,'#ff3f8b',0,78,1920,6);rect(c,'#6dfbe7',0,84,1920,3);
-  for(let x=18;x<1900;x+=36){rect(c,x%72?'#ffcf62':'#4df8dc',x,65,18,5);rect(c,'#4e2e75',x+3,53,12,5);rect(c,x%72?'#5f397f':'#382456',x,12+(x/36%3)*9,29,7);}
-  for(const x of [150,750,1350]){block(c,'#142c3c',x,12,120,34,3);rect(c,'#ffe272',x+12,22,34,4);rect(c,'#61f6df',x+60,22,46,4);}
-
-  // Main Grass Pitch
-  rect(c,'#020c1690',37,101,1846,950);rect(c,'#03151c',40,104,1840,944);rect(c,'#62ffb8',44,108,1832,936);rect(c,'#eaffdb',48,112,1824,928);
-  for(let x=52;x<1868;x+=64)rect(c,colors[Math.floor(x/64)%4],x,116,Math.min(64,1868-x),920);
-  for(let y=126;y<1036;y+=24)rect(c,'#d7ffe908',52,y,1816,2);
-
-  // Pitch markings
-  c.strokeStyle='#082d35aa';c.lineWidth=9;c.strokeRect(55,119,1810,920);
-  c.strokeStyle='#eaffdc';c.lineWidth=4;c.strokeRect(52,116,1816,926);
-  // Halfway line & center circle
-  c.beginPath();c.moveTo(960,116);c.lineTo(960,1042);
-  c.arc(960,579,110,0,Math.PI*2);c.stroke();
-  c.fillStyle='#f4ffe8';c.beginPath();c.arc(960,579,6,0,Math.PI*2);c.fill();
-
-  // Left Goal & Box
-  c.strokeRect(52,380,240,400);
-  c.strokeRect(52,480,110,200);
-  // Right Goal & Box
-  c.strokeRect(1628,380,240,400);
-  c.strokeRect(1758,480,110,200);
-
-  // Goal nets
-  for(const side of [-1,1]){
-    const gx=side<0?46:1874;
-    c.fillStyle='#03101888';c.fillRect(gx+(side<0?5:-43),485,38,190);
-    c.strokeStyle='#f8ffe8';c.lineWidth=4;c.strokeRect(gx+(side<0?0:-34),480,34,200);
-    c.strokeStyle='#82ffe655';c.lineWidth=1;
-    for(let y=490;y<675;y+=14){c.beginPath();c.moveTo(gx+(side<0?2:-32),y);c.lineTo(gx+(side<0?32:0),y);c.stroke();}
+  // Butacas y tableros electrónicos lejanos
+  for(let x=18;x<1900;x+=36){
+    rect(c,x%72?'#ffcf62':'#4df8dc',x,65,18,5);
+    rect(c,'#4e2e75',x+3,53,12,5);
+    rect(c,x%72?'#5f397f':'#382456',x,12+(x/36%3)*9,29,7);
   }
+  for(const x of [180, 780, 1380]){
+    block(c,'#142c3c',x,12,120,34,3);
+    rect(c,'#ffe272',x+12,22,34,4);
+    rect(c,'#61f6df',x+60,22,46,4);
+  }
+
+  // 2. Campo de Juego (Césped profesional con franjas verticales simétricas de corte)
+  const pitchX = 64, pitchY = 112, pitchW = 1792, pitchH = 936;
+  const stripeW = 64;
+  const grassLight = '#1e753f';
+  const grassDark = '#176033';
+
+  // Borde exterior / pista de respeto
+  rect(c, '#0c2419', 0, 88, 1920, 992);
+  rect(c, '#091c13', pitchX - 8, pitchY - 8, pitchW + 16, pitchH + 16);
+
+  // Franjas de corte de césped
+  for (let x = pitchX; x < pitchX + pitchW; x += stripeW) {
+    const isEven = Math.floor((x - pitchX) / stripeW) % 2 === 0;
+    const w = Math.min(stripeW, (pitchX + pitchW) - x);
+    rect(c, isEven ? grassLight : grassDark, x, pitchY, w, pitchH);
+    // Microtextura de corte
+    rect(c, isEven ? '#24874933' : '#10492633', x + 2, pitchY, 2, pitchH);
+  }
+
+  // Textura suave de briznas
+  c.fillStyle = 'rgba(255, 255, 255, 0.025)';
+  for (let y = pitchY + 16; y < pitchY + pitchH; y += 32) {
+    c.fillRect(pitchX, y, pitchW, 2);
+  }
+
+  // 3. Líneas de cal reglamentarias nítidas (Blanco tiza con sutil relieve)
+  c.save();
+  c.strokeStyle = '#f8ffea';
+  c.lineWidth = 4;
+  c.lineCap = 'square';
+  c.lineJoin = 'miter';
+
+  // Perímetro del terreno de juego
+  c.strokeRect(pitchX, pitchY, pitchW, pitchH);
+
+  // Línea de medio campo
+  const midX = pitchX + pitchW / 2;
+  const midY = pitchY + pitchH / 2;
+  c.beginPath();
+  c.moveTo(midX, pitchY);
+  c.lineTo(midX, pitchY + pitchH);
+  c.stroke();
+
+  // Círculo central y punto de saque inicial
+  c.beginPath();
+  c.arc(midX, midY, 116, 0, Math.PI * 2);
+  c.stroke();
+  c.fillStyle = '#f8ffea';
+  c.beginPath();
+  c.arc(midX, midY, 6, 0, Math.PI * 2);
+  c.fill();
+
+  // Áreas Grandes (Penal) - 270 x 480 px
+  const boxW = 270, boxH = 480, boxY = midY - boxH / 2;
+  // Área Penal Izquierda
+  c.strokeRect(pitchX, boxY, boxW, boxH);
+  // Área Penal Derecha
+  c.strokeRect(pitchX + pitchW - boxW, boxY, boxW, boxH);
+
+  // Áreas Chicas (Meta) - 100 x 240 px
+  const goalBoxW = 100, goalBoxH = 240, goalBoxY = midY - goalBoxH / 2;
+  // Área Chica Izquierda
+  c.strokeRect(pitchX, goalBoxY, goalBoxW, goalBoxH);
+  // Área Chica Derecha
+  c.strokeRect(pitchX + pitchW - goalBoxW, goalBoxY, goalBoxW, goalBoxH);
+
+  // Puntos de Penal
+  const penDist = 200;
+  const penLeftX = pitchX + penDist;
+  const penRightX = pitchX + pitchW - penDist;
+  c.fillStyle = '#f8ffea';
+  c.beginPath(); c.arc(penLeftX, midY, 5, 0, Math.PI * 2); c.fill();
+  c.beginPath(); c.arc(penRightX, midY, 5, 0, Math.PI * 2); c.fill();
+
+  // Medialunas del área penal (Arcos fuera del área grande)
+  c.beginPath();
+  c.arc(penLeftX, midY, 96, -0.92, 0.92, false);
+  c.stroke();
+  c.beginPath();
+  c.arc(penRightX, midY, 96, Math.PI - 0.92, Math.PI + 0.92, false);
+  c.stroke();
+
+  // Arcos de Tiro de Esquina (Córner) en las 4 esquinas
+  const cornerR = 26;
+  // Superior Izquierda
+  c.beginPath(); c.arc(pitchX, pitchY, cornerR, 0, Math.PI / 2); c.stroke();
+  // Inferior Izquierda
+  c.beginPath(); c.arc(pitchX, pitchY + pitchH, cornerR, -Math.PI / 2, 0); c.stroke();
+  // Superior Derecha
+  c.beginPath(); c.arc(pitchX + pitchW, pitchY, cornerR, Math.PI / 2, Math.PI); c.stroke();
+  // Inferior Derecha
+  c.beginPath(); c.arc(pitchX + pitchW, pitchY + pitchH, cornerR, Math.PI, Math.PI * 1.5); c.stroke();
+
+  // 4. Banderines de esquina pixel art
+  const corners = [
+    [pitchX, pitchY], [pitchX, pitchY + pitchH],
+    [pitchX + pitchW, pitchY], [pitchX + pitchW, pitchY + pitchH]
+  ];
+  for (const [bx, by] of corners) {
+    // Poste blanco
+    c.fillStyle = '#ffffff';
+    c.fillRect(bx - 1, by - 14, 2, 14);
+    // Banderín rojo ondeante
+    c.fillStyle = '#ef4444';
+    c.beginPath();
+    c.moveTo(bx, by - 14);
+    c.lineTo(bx + (bx < midX ? 8 : -8), by - 10);
+    c.lineTo(bx, by - 6);
+    c.closePath();
+    c.fill();
+  }
+
+  // 5. Porterías (Arcos) 3D Pixel Art
+  const netH = 190, netDepth = 36;
+  const netY = midY - netH / 2;
+
+  // Portería Izquierda
+  c.fillStyle = '#061a1299';
+  c.fillRect(pitchX - netDepth, netY + 4, netDepth, netH);
+  // Red cuadriculada
+  c.strokeStyle = '#cbd5e166';
+  c.lineWidth = 1;
+  for (let gy = netY; gy <= netY + netH; gy += 12) {
+    c.beginPath(); c.moveTo(pitchX - netDepth, gy); c.lineTo(pitchX, gy); c.stroke();
+  }
+  for (let gx = pitchX - netDepth; gx <= pitchX; gx += 10) {
+    c.beginPath(); c.moveTo(gx, netY); c.lineTo(gx, netY + netH); c.stroke();
+  }
+  // Postes y Travesaño blancos
+  c.strokeStyle = '#ffffff';
+  c.lineWidth = 5;
+  c.strokeRect(pitchX - netDepth, netY, netDepth, netH);
+  c.beginPath();
+  c.moveTo(pitchX, netY); c.lineTo(pitchX, netY + netH); c.stroke();
+
+  // Portería Derecha
+  c.fillStyle = '#061a1299';
+  c.fillRect(pitchX + pitchW, netY + 4, netDepth, netH);
+  c.strokeStyle = '#cbd5e166';
+  c.lineWidth = 1;
+  for (let gy = netY; gy <= netY + netH; gy += 12) {
+    c.beginPath(); c.moveTo(pitchX + pitchW, gy); c.lineTo(pitchX + pitchW + netDepth, gy); c.stroke();
+  }
+  for (let gx = pitchX + pitchW; gx <= pitchX + pitchW + netDepth; gx += 10) {
+    c.beginPath(); c.moveTo(gx, netY); c.lineTo(gx, netY + netH); c.stroke();
+  }
+  c.strokeStyle = '#ffffff';
+  c.lineWidth = 5;
+  c.strokeRect(pitchX + pitchW, netY, netDepth, netH);
+  c.beginPath();
+  c.moveTo(pitchX + pitchW, netY); c.lineTo(pitchX + pitchW, netY + netH); c.stroke();
+
+  c.restore();
 }
 
 // ============================================================================

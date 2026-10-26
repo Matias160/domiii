@@ -42,14 +42,11 @@ export function createRunState(setup = {}, audio = null) {
   initializeDirector(state);
   player.inLavaMap = state.mapId === 'lava';
 
-  // En el Caldero de Lava (Duelo contra el Coloso Final), todas las habilidades pasivas y evoluciones inician desbloqueadas
+  // En el Caldero de Lava (Duelo contra el Coloso Final): estadísticas normales, sin receta, sólo activas desbloqueadas
   if (state.mapId === 'lava') {
-    player.level = 15;
-    for (let lvl = 1; lvl < 15; lvl++) player.xpToNext = Math.round(player.xpToNext * 1.35 + 10);
-    for (const ab of abilities) {
-      applyAbility(player, ab);
-    }
-    evolveWeapon(player);
+    player.level = 1;
+    player.abilities = {};
+    player.weaponEvolution = null;
   }
 
   const resolvedAcc = resolveAccessory(setup.accessoryId);
