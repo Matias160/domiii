@@ -1,11 +1,10 @@
 import {drawFood, domiGifImage} from '../core/art.js';
 import {drawPet} from '../core/presentation.js';
 
-export const portalGifImage = typeof Image !== 'undefined' ? new Image() : null;
-if (portalGifImage) portalGifImage.src = './portal.gif';
+import {createAnimatedGif} from '../core/animatedGif.js';
 
-export const copaGifImage = typeof Image !== 'undefined' ? new Image() : null;
-if (copaGifImage) copaGifImage.src = './copa rankin.gif';
+export const portalGifImage = createAnimatedGif('./portal.gif');
+export const copaGifImage = createAnimatedGif('./copa rankin.gif');
 
 function box(c,x,y,w,h,color,shadow=true){
   if(shadow){

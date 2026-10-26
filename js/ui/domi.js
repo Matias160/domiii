@@ -1,5 +1,4 @@
-const domiGifImage = typeof Image !== 'undefined' ? new Image() : null;
-if (domiGifImage) domiGifImage.src = './don domi.gif';
+import {domiGifImage} from '../core/art.js';
 import {currentAccount, grantItem, equip} from '../systems/accountSystem.js';
 import {shopItems, isOwned} from '../data/shop.js';
 import {drawItemPreview, drawAccessoryIcon} from '../core/presentation.js';

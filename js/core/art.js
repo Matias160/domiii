@@ -1,5 +1,5 @@
-export const domiGifImage = typeof Image !== 'undefined' ? new Image() : null;
-if (domiGifImage) domiGifImage.src = './don domi.gif';
+import { createAnimatedGif } from './animatedGif.js';
+export const domiGifImage = createAnimatedGif('./don domi.gif');
 const INK = '#161c20';
 const sprites = new Map();
 const floors = new Map();
