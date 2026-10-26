@@ -170,12 +170,26 @@ export function grantItem(type,id){
 export function awardRun(result){return mutate(p=>{
   if(p.runs.some(x=>x.id===result.id))return p;
   const points=Math.max(0,Math.floor(result.score));p.bank+=points;p.totalEarned+=points;
+  const runTime = result.time ?? (() => { const [m, s] = String(result.timeText || '0:0').split(':').map(Number); return (m || 0) * 60 + (s || 0); })();
+  const runCombo = result.peakCombo || result.combo || 0;
+  const runBosses = result.bossesKilled || 0;
+  p.stats = p.stats || { maxLevel: 0, maxKills: 0, maxCombo: 0, maxTime: 0, totalKills: 0, totalRuns: 0, totalBosses: 0 };
+  p.stats.maxLevel = Math.max(p.stats.maxLevel || 0, result.level || 0);
+  p.stats.maxKills = Math.max(p.stats.maxKills || 0, result.kills || 0);
+  p.stats.maxCombo = Math.max(p.stats.maxCombo || 0, runCombo);
+  p.stats.maxTime = Math.max(p.stats.maxTime || 0, runTime);
+  p.stats.totalKills = (p.stats.totalKills || 0) + (result.kills || 0);
+  p.stats.totalRuns = (p.stats.totalRuns || 0) + 1;
+  p.stats.totalBosses = (p.stats.totalBosses || 0) + runBosses;
   p.runs.unshift({
     id: result.id,
     name: result.name || p.name,
     score: points,
     kills: result.kills,
     level: result.level,
+    time: runTime,
+    combo: runCombo,
+    bossesKilled: runBosses,
     timeText: result.timeText,
     date: new Date().toLocaleDateString('es-AR'),
     map: result.map,
@@ -186,3 +200,4 @@ export function awardRun(result){return mutate(p=>{
   });
   p.runs=p.runs.slice(0,40);return p;
 });}
+export function clearAccountRuns(){try{return mutate(p=>{p.runs=[];return p;});}catch{return null;}}

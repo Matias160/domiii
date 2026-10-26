@@ -48,11 +48,11 @@ export function updateEnemies(state, delta, canvas) {
   for (const enemy of state.enemies) {
     if (enemy.hp <= 0) continue;
     enemy.slowFactor = state.player.auraLevel > 0 && Math.hypot(enemy.x-state.player.x,enemy.y-state.player.y)<105 ? Math.pow(.75,state.player.auraLevel) : 1;
-    enemy.update(delta, state.decoy||state.player, state);
+    enemy.update(delta, (!enemy.isBoss && state.decoy) ? state.decoy : state.player, state);
     if (enemy.spawnTime > 0) continue;
     if (enemy.shotReady) {
       enemy.shotReady = false;
-      const target=state.decoy||state.player;const dx = target.x - enemy.x, dy = target.y - enemy.y;
+      const target=(!enemy.isBoss && state.decoy)?state.decoy:state.player;const dx = target.x - enemy.x, dy = target.y - enemy.y;
       const length = Math.hypot(dx, dy) || 1;
       state.enemyProjectiles.push({ x: enemy.x, y: enemy.y, vx: dx / length * 245, vy: dy / length * 245, radius: 7, damage: enemy.damage * 0.65, life: 3 });
     }

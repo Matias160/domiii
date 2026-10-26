@@ -20,6 +20,11 @@ test('game controls respect menus, keyboard buttons, movement and focus loss', (
     assert.equal(input.getAxis().y, -1);
     listeners.get('blur')();
     assert.deepEqual(input.getAxis(), { x: 0, y: 0 });
+    press('d');
+    assert.equal(input.getAxis().x, 1);
+    listeners.get('contextmenu')();
+    assert.deepEqual(input.getAxis(), { x: 0, y: 0 });
+    assert.deepEqual(input.getAxis(), { x: 0, y: 0 });
     const button = { closest: selector => selector === 'button, a, summary' ? {} : null };
     assert.equal(press(' ', button).prevented, false);
     assert.equal(input.consume(' '), false);

@@ -8,7 +8,7 @@ import { items } from '../js/data/items.js';
 import { updateProjectiles } from '../js/systems/projectileSystem.js';
 import { updateEnemies } from '../js/systems/enemySystem.js';
 import { resolveDeaths } from '../js/systems/scoreSystem.js';
-import { updateDirector, scoreMultiplier } from '../js/systems/directorSystem.js';
+import { updateDirector, scoreMultiplier, RUSH_BOSS_GOAL } from '../js/systems/directorSystem.js';
 import { updateEffects } from '../js/systems/effectSystem.js';
 import { updateItems } from '../js/systems/itemSystem.js';
 import { abilities, applyAbility, getAbilityChoices } from '../js/data/abilities.js';
@@ -131,12 +131,12 @@ test('waves respect rest, track spawn budget and end after the eighth clear',()=
 
 test('boss rush rotates through three bosses and has a victory condition',()=>{
   const state=createRunState({modeId:'rush'});const names=new Set();
-  for(let i=0;i<3;i++){
+  for(let i=0;i<RUSH_BOSS_GOAL;i++){
     state.time=state.nextBossAt;updateEnemies(state,.016,bounds);
     const boss=state.enemies.find(e=>e.isBoss);assert.ok(boss);names.add(boss.type.name);
     boss.hp=0;state.enemies=[boss];resolveDeaths(state,()=>{});
   }
-  updateDirector(state,.016,bounds);assert.equal(names.size,3);assert.equal(state.victory,true);
+  updateDirector(state,.016,bounds);assert.ok(names.size>=3);assert.equal(state.victory,true);
 });
 
 test('event multipliers expire, and item shower respects the item cap',()=>{
@@ -171,4 +171,37 @@ test('three simulated minutes keep combat state finite with all special abilitie
   assert.ok(state.kills>20);assert.ok(Number.isFinite(state.score));assert.ok(p.hp>0);
   assert.ok(state.particles.length<700);
   for(const entity of [...state.enemies,...state.projectiles,state.player])assert.ok(Number.isFinite(entity.x)&&Number.isFinite(entity.y));
+});
+
+test('resolveDeaths grants ability level-up flag strictly on multiples of 5 even across multi-level jumps',()=>{
+  const state=createRunState();
+  const target=enemy(state);
+  target.hp=0;
+  target.xp=500;
+  state.enemies=[target];
+  const flags=[];
+  resolveDeaths(state,(isAbility)=>flags.push(isAbility));
+  assert.ok(flags.length>=5);
+  assert.deepEqual(flags.slice(0,5),[false,false,false,true,false]);
+});
+
+test('returningSkewer clears hitEnemies on return and cadence accessories reduce fireCooldown',()=>{
+  const state=createRunState({weaponId:'skewer',accessoryId:'leg_archmage'});
+  assert.ok(state.player.fireRateMultiplier < 1, 'leg_archmage must reduce fireRateMultiplier below 1');
+  const bowtieState=createRunState({weaponId:'fork',accessoryId:'bowtie'});
+  bowtieState.manualAim=true;bowtieState.aimPoint={x:bowtieState.player.x+200,y:bowtieState.player.y};
+  updateProjectiles(bowtieState,0,bounds);
+  assert.ok(Math.hypot(bowtieState.projectiles[0].vx,bowtieState.projectiles[0].vy) > bowtieState.player.weapon.projectileSpeed);
+
+  const target=enemy(state,state.player.x+80);target.y=state.player.y;target.maxHp=500;target.hp=500;
+  state.enemies=[target];
+  const skewerProj=new Projectile({x:state.player.x,y:state.player.y,vx:500,vy:0,damage:20,size:5,color:'#fff',pierce:3,kind:'skewer',boomerang:true});
+  state.projectiles=[skewerProj];
+  state.player.fireCooldown=99;
+  updateProjectiles(state,0.2,bounds);
+  const hpAfterOut=target.hp;
+  assert.ok(hpAfterOut<500,'skewer hits on outbound path');
+  updateProjectiles(state,0.35,bounds);
+  assert.equal(skewerProj.returning,true);
+  assert.ok(target.hp < hpAfterOut,'returning skewer hits enemy a second time on return');
 });

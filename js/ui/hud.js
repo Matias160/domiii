@@ -50,7 +50,7 @@ export class Hud {
     this.set('weaponEvolutionStatus',p.weaponEvolution?'EVOLUCION ACTIVA':`EVOLUCION ${Math.min(p.level,15)} / 15`);
     this.nodes.weaponEvolutionStatus.dataset.ready=String(Boolean(p.weaponEvolution));
     const nextAbilities = [5, 10, 15].filter(lvl => lvl > p.level);
-    const nextAbilityLvl = nextAbilities.length > 0 ? nextAbilities[0] : null;
+    const nextAbilityLvl = p.level < 45 ? (Math.floor(p.level / 5) + 1) * 5 : null;
     const abilityProgress = nextAbilityLvl ? `ACTIVA EN NV ${nextAbilityLvl}` : 'ACTIVAS MAX';
     this.nodes.weaponEvolutionStatus.textContent = p.weaponEvolution ? `${p.weaponEvolution.name.toUpperCase()} · ${abilityProgress}` : `${abilityProgress} (NV ${p.level})`;
     this.set('scoreValue',String(Math.floor(state.score)).padStart(6,'0'));

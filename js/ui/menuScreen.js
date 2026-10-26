@@ -2,7 +2,7 @@ import { skins } from "../data/skins.js";
 import { weapons } from "../data/weapons.js";
 import { drawFood, drawWeapon } from "../core/art.js";
 import { unlockedAchievements, readAchievementStats, achievements } from "../systems/achievementSystem.js";
-import {currentAccount} from '../systems/accountSystem.js';
+import {currentAccount, clearAccountRuns} from '../systems/accountSystem.js';
 import {isOwned} from '../data/shop.js';
 import {refreshIcons} from './icons.js';
 
@@ -321,12 +321,13 @@ export class MenuScreen {
     document.querySelector('#volumeSlider').addEventListener('input',event=>audio.setVolume(event.target.value));
     document.querySelector('#clearRankingButton').addEventListener('click',()=>{
       if(confirm('Se borraran las 10 mejores partidas guardadas en este navegador. Continuar?')){
-        localStorage.removeItem('domi2pancho.ranking');this.game.showToast('Ranking borrado.');
+        localStorage.removeItem('domi2pancho.ranking');clearAccountRuns();this.game.showToast('Ranking borrado.');
       }
     });
     document.querySelector('#clearAchievementsButton').addEventListener('click',()=>{
       if(confirm('Se borrara todo el progreso de logros. Continuar?')){
-        localStorage.removeItem(`domi2pancho.achievements.${currentAccount()?.name.toLocaleLowerCase('es')}`);this.game.showToast('Progreso de logros borrado.');
+        const sessionKey = sessionStorage.getItem('domi2pancho.session.v1') || currentAccount()?.name.trim().toLocaleLowerCase('es');
+        localStorage.removeItem(sessionKey ? `domi2pancho.achievements.${sessionKey}` : 'domi2pancho.achievements');this.game.showToast('Progreso de logros borrado.');
         this.renderOptions();
       }
     });

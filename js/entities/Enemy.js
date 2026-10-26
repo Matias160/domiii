@@ -265,7 +265,7 @@ export class Enemy {
     if (state?.decoy) {
       if (this.x < -80 || this.x > worldW + 80 || this.y < -80 || this.y > worldH + 80) {
         this.hp = 0;
-        if (state.player) state.player.kills = (state.player.kills || 0) + 1;
+        // resolveDeaths contabiliza la baja en state.kills
         state.floaters?.push({ x: this.x, y: this.y, text: '¡BURLADO!', life: 0.8, color: '#38bdf8', scale: 1 });
       }
     } else {

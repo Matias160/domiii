@@ -62,14 +62,18 @@ export function updateProjectiles(state, delta, canvas) {
   const projLen = state.projectiles.length;
   for (let i = 0; i < projLen; i++) {
     const projectile = state.projectiles[i];
-    if (projectile.boomerang && projectile.age > 0.48) {
-      projectile.returning = true;
+    if (projectile.boomerang && projectile.age + delta > 0.48) {
+      if (!projectile.returning) {
+        projectile.returning = true;
+        projectile.hitEnemies.clear();
+        projectile.pierce = Math.max(projectile.pierce, 2);
+      }
       const dx = state.player.x - projectile.x;
       const dy = state.player.y - projectile.y;
       const length = Math.hypot(dx, dy) || 1;
       projectile.vx = (dx / length) * 690;
       projectile.vy = (dy / length) * 690;
-      if (projectile.age > 1.45) projectile.dead = true;
+      if (projectile.age > 1.45 || length < state.player.radius + 14) projectile.dead = true;
     }
     projectile.update(delta);
 
@@ -226,8 +230,8 @@ export function autoFire(state) {
       new Projectile({
         x: player.x,
         y: player.y,
-        vx: Math.cos(finalAngle) * weapon.projectileSpeed,
-        vy: Math.sin(finalAngle) * weapon.projectileSpeed,
+        vx: Math.cos(finalAngle) * weapon.projectileSpeed * (player.projectileSpeedMultiplier || 1),
+        vy: Math.sin(finalAngle) * weapon.projectileSpeed * (player.projectileSpeedMultiplier || 1),
         damage: weapon.damage * player.damageMultiplier * player.buffs.damageMultiplier * (evolution?.damageMultiplier || 1) * (empowered ? 2.1 : 1),
         size: weapon.projectileSize * player.projectileScale * (empowered ? 1.75 : 1),
         color: empowered ? '#fff27a' : weapon.color,

@@ -133,7 +133,8 @@ export function damageEnemy(state, enemy, damage, type = 'normal') {
   damage = beforeEvent.damage;
 
   damage /= (enemy.armor || 1);
-  const isCrit = type === 'crit' || damage > 85;
+  const critRoll = (state?.player?.critChance > 0) && (Math.random() < state.player.critChance);
+  const isCrit = type === 'crit' || damage > 85 || critRoll;
   const finalDamage = isCrit ? damage * 1.35 : damage;
   enemy.hp -= finalDamage;
   enemy.hitFlash = isCrit ? 0.20 : 0.10;

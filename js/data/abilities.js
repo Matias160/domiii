@@ -7,14 +7,14 @@ export const rarities = {
 
 export const abilities = [
   { id:'extraShot',name:'Pedido doble',category:'Ataque',rarity:'legendary',description:'Dispara +2 proyectiles adicionales en abanico.',maxStacks:3,apply:player=>{player.extraProjectiles+=2;} },
-  { id:'mustardRain',name:'Lluvia de mostaza',category:'Especial',rarity:'legendary',description:'Cada 3.5 segundos, bombardea a 5 enemigos con 55 de daño.',maxStacks:3,apply:player=>{player.mustardLevel+=1;} },
+  { id:'mustardRain',name:'Lluvia de mostaza',category:'Especial',rarity:'legendary',description:'Cada 5 segundos, bombardea de 3 a 5 enemigos con 28 a 84 de daño.',maxStacks:3,apply:player=>{player.mustardLevel+=1;} },
   { id:'hotSauce',name:'Salsa picante',category:'Ataque',rarity:'epic',description:'Multiplica el daño de proyectiles un +50%.',maxStacks:5,apply:player=>{player.damageMultiplier*=1.5;} },
   { id:'deathBlast',name:'Salchicha explosiva',category:'Especial',rarity:'epic',description:'Los enemigos derrotados estallan: 40 de daño en área.',maxStacks:3,apply:player=>{player.explosionDamage+=40;} },
   { id:'armor',name:'Pan más duro',category:'Defensa',rarity:'epic',description:'Reduce todo el daño recibido un 35%.',maxStacks:3,apply:player=>{player.defense*=1.35;} },
   { id:'bigShot',name:'Combo agrandado',category:'Ataque',rarity:'rare',description:'Proyectiles 50% más gigantescos y +30% de daño.',maxStacks:3,apply:player=>{player.projectileScale*=1.5;player.damageMultiplier*=1.3;} },
   { id:'rapidFire',name:'Manos veloces',category:'Ataque',rarity:'rare',description:'Aumenta tu cadencia de disparo un 35%.',maxStacks:4,apply:player=>{player.fireRateMultiplier*=0.65;} },
   { id:'piercing',name:'Tenedor afilado',category:'Ataque',rarity:'rare',description:'Tus proyectiles perforan a +2 enemigos adicionales.',maxStacks:2,apply:player=>{player.pierceBonus+=2;} },
-  { id:'grease',name:'Grasa resbalosa',category:'Control',rarity:'rare',description:'Aura que frena 45% a todos los enemigos cercanos.',maxStacks:2,apply:player=>{player.auraLevel+=1;} },
+  { id:'grease',name:'Grasa resbalosa',category:'Control',rarity:'rare',description:'Aura que frena un 25% (hasta 44%) a los enemigos cercanos.',maxStacks:2,apply:player=>{player.auraLevel+=1;} },
   { id:'regen',name:'Receta de la casa',category:'Defensa',rarity:'common',description:'Regenera 4.5 de vida por segundo.',maxStacks:3,apply:player=>{player.regen+=4.5;} },
   { id:'sneakers',name:'Zapatillas express',category:'Movimiento',rarity:'common',description:'Velocidad de movimiento +30%.',maxStacks:4,apply:player=>{player.speed*=1.30;} },
   { id:'extraPortion',name:'Porción extra',category:'Defensa',rarity:'common',description:'+50 de vida máxima y te cura 60 de vida al instante.',maxStacks:4,apply:player=>{player.maxHp+=50;player.hp=Math.min(player.maxHp,player.hp+60);} },

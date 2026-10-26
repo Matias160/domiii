@@ -16,6 +16,7 @@ export class Input {
     });
     window.addEventListener("keyup", (event) => this.keys.delete(event.key.toLowerCase()));
     window.addEventListener('blur', () => this.clear());
+    window.addEventListener('contextmenu', () => this.clear());
   }
 
   clear() { this.keys.clear(); this.pressed.clear(); }

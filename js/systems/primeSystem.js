@@ -12,6 +12,11 @@ export function updatePrimes(state,dt){
     state.decoy.life -= dt;
     state.decoy.x += state.decoy.vx * dt;
     state.decoy.y += state.decoy.vy * dt;
+    state.decoy.ringTimer = (state.decoy.ringTimer || 0) - dt;
+    if (state.decoy.ringTimer <= 0 && state.rings) {
+      state.decoy.ringTimer = 0.28;
+      state.rings.push({ x: state.decoy.x, y: state.decoy.y, radius: 26, life: 0.35, color: '#38bdf8' });
+    }
     const worldW = state.world?.width || 1920;
     const worldH = state.world?.height || 1080;
     // El clon señuelo viaja atrayendo enemigos hasta salir completamente fuera del mapa
@@ -31,8 +36,8 @@ export function activatePrime(state,key){const prime=primes.find(p=>p.key===key)
     const worldW = state.world?.width || 1920;
     const worldH = state.world?.height || 1080;
     // El clon corre hacia el borde exterior del mapa para llevarse a toda la horda
-    const toRight = player.x < worldW * 0.5 ? -1 : 1;
-    const toBottom = player.y < worldH * 0.5 ? -0.4 : 0.4;
+    const toRight = player.x < worldW * 0.5 ? 1 : -1;
+    const toBottom = player.y < worldH * 0.5 ? 0.4 : -0.4;
     const speed = 210;
     state.decoy = {
       x: player.x,
@@ -57,7 +62,7 @@ export function drawPrimeEffects(ctx,state){
     ctx.shadowBlur = 12;
     drawFood(ctx, state.decoy.skin, state.decoy.x, state.decoy.y, 0.95, state.time);
     ctx.restore();
-    if(state.rings && (Math.sin(state.time * 6) > 0.85)){
+    if(false && state.rings && (Math.sin(state.time * 6) > 0.85)){
       state.rings.push({x: state.decoy.x, y: state.decoy.y, radius: 26, life: 0.35, color: '#38bdf8'});
     }
   }

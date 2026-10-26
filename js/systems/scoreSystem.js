@@ -164,9 +164,10 @@ export function resolveDeaths(state, onLevelUp) {
     // Efecto de muerte temático según tipo de enemigo
     spawnThematicEnemyDeath(state, enemy);
 
+    const prevLevel = state.player.level;
     const levels = state.player.gainXp(enemy.xp);
     for (let level = 0; level < levels; level += 1) {
-      onLevelUp(true);
+      onLevelUp((prevLevel + level + 1) % 5 === 0);
     }
   }
 

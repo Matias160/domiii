@@ -45,6 +45,7 @@ export function createRunState(setup = {}, audio = null) {
   // En el Caldero de Lava (Duelo contra el Coloso Final), todas las habilidades pasivas y evoluciones inician desbloqueadas
   if (state.mapId === 'lava') {
     player.level = 15;
+    for (let lvl = 1; lvl < 15; lvl++) player.xpToNext = Math.round(player.xpToNext * 1.35 + 10);
     for (const ab of abilities) {
       applyAbility(player, ab);
     }
@@ -63,7 +64,7 @@ export function createRunState(setup = {}, audio = null) {
   if (a === 'headphones') player.speed *= 1.08;
   if (a === 'crown') { player.maxHp += 15; player.hp += 15; }
   if (a === 'top_hat') player.critChance = (player.critChance || 0) + 0.12;
-  if (a === 'wizard_hat') player.fireRateMultiplier = (player.fireRateMultiplier || 1) * 1.12;
+  if (a === 'wizard_hat') player.fireRateMultiplier = (player.fireRateMultiplier || 1) * 0.88;
 
   // --- Accesorio Especial ---
   if (a === 'chef_hat') player.damageMultiplier *= 1.12;
@@ -74,7 +75,7 @@ export function createRunState(setup = {}, audio = null) {
   if (a === 'leg_viking') { player.maxHp += 20; player.hp += 20; player.damageMultiplier *= 1.20; }
   if (a === 'leg_horns') { player.speed *= 1.08; player.damageMultiplier *= 1.28; }
   if (a === 'leg_visor') { player.critChance = (player.critChance || 0) + 0.20; player.magnetRadius = (player.magnetRadius || 80) * 1.6; }
-  if (a === 'leg_archmage') { player.damageMultiplier *= 1.22; player.fireRateMultiplier = (player.fireRateMultiplier || 1) * 1.15; }
+  if (a === 'leg_archmage') { player.damageMultiplier *= 1.22; player.fireRateMultiplier = (player.fireRateMultiplier || 1) * 0.85; }
   if (a === 'leg_cape') { player.maxHp += 30; player.hp += 30; player.damageMultiplier *= 1.12; }
   if (a === 'leg_angel_wings') { player.speed *= 1.22; player.dashCooldownMultiplier = 0.78; }
   if (a === 'leg_fire_wings') { player.speed *= 1.12; player.damageMultiplier *= 1.25; }
@@ -98,11 +99,11 @@ export function createRunState(setup = {}, audio = null) {
     activeSynergy = 'REALEZA CRIOLLA (Corona/Capa + Choripán)';
     player.maxHp += 25; player.hp += 25;
     player.damageMultiplier *= 1.10;
-  } else if (a === 'chef_hat' && (pet === 'papas' || pet === 'parrilla')) {
+  } else if (a === 'chef_hat' && (skin === 'papas' || pet === 'parrilla' || pet === 'ketchup')) {
     activeSynergy = 'COCINA MAESTRA (Gorro Chef + Mascota Culinaria)';
-    player.fireRateMultiplier = (player.fireRateMultiplier || 1) * 1.15;
+    player.fireRateMultiplier = (player.fireRateMultiplier || 1) * 0.85;
     player.regen = (player.regen || 0) + 0.8;
-  } else if (a === 'leg_visor' && (skin === 'double' || skin === 'burger')) {
+  } else if (a === 'leg_visor' && (skin === 'pizza' || skin === 'pancho' || pet === 'drone')) {
     activeSynergy = 'CYBER BURGER (Visor Láser + Hamburguesa)';
     player.critChance = (player.critChance || 0) + 0.15;
     player.speed *= 1.10;

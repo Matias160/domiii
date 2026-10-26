@@ -60,7 +60,7 @@ export class Shop{
   }
   renderCatalog(){
     const profile=this.account.currentAccount();if(!profile)return;this.profile=profile;
-    const items=filterCatalog(profile,{...this,ownedOnly:false});
+    const items=filterCatalog(profile,this);
     if(!items.some(item=>item.id===this.selected?.id&&item.type===this.selected?.type))this.selected=items.find(item=>profile.loadout[item.type]===item.id)||items[0]||null;
     document.querySelector('#shopCategory').textContent=tabs.find(tab=>tab[0]===this.type)[1];
     const ownedCount=items.filter(item=>isOwned(profile,item.type,item.id)).length;

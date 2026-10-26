@@ -69,6 +69,7 @@ export function updateMap(state, dt) {
       o.vx = fx * 680;
       o.vy = fy * 680;
       o.kicked = true;
+      o.hitEnemies = new Set();
       state.shake = 0.24;
       state.audio?.play('hit');
       state.floaters?.push({ x: o.x, y: o.y - 30, text: '¡BOMBAZO! ⚽', life: 1.1, color: '#00ffcc', scale: 1.35 });
@@ -77,7 +78,9 @@ export function updateMap(state, dt) {
     if (o.kicked) {
       // Pelota pateada revienta enemigos a su paso
       for (const enemy of state.enemies) {
-        if (enemy.hp > 0 && Math.hypot(enemy.x - o.x, enemy.y - o.y) < enemy.radius + o.radius + 6) {
+        o.hitEnemies ||= new Set();
+        if (enemy.hp > 0 && !o.hitEnemies.has(enemy) && Math.hypot(enemy.x - o.x, enemy.y - o.y) < enemy.radius + o.radius + 6) {
+          o.hitEnemies.add(enemy);
           damageEnemy(state, enemy, 130 + state.player.level * 8, 'crit');
           state.shake = Math.max(state.shake || 0, 0.15);
           state.audio?.play('kill');

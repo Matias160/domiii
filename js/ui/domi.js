@@ -117,13 +117,15 @@ export class DomiScreen {
 
   getMissions(profile) {
     const runs = profile.runs || [];
-    const maxLevel = runs.reduce((m, r) => Math.max(m, r.level || 0), 0);
-    const maxKills = runs.reduce((m, r) => Math.max(m, r.kills || 0), 0);
-    const maxCombo = runs.reduce((m, r) => Math.max(m, r.combo || 0), 0);
-    const maxTime = runs.reduce((m, r) => Math.max(m, r.time || 0), 0);
-    const totalKills = runs.reduce((sum, r) => sum + (r.kills || 0), 0);
-    const totalRuns = runs.length;
-    const totalBosses = runs.reduce((sum, r) => sum + (r.bossesKilled || 0), 0);
+    const parseTime = t => { const [m, s] = String(t || '0:0').split(':').map(Number); return (m || 0) * 60 + (s || 0); };
+    const st = profile.stats || {};
+    const maxLevel = Math.max(st.maxLevel || 0, runs.reduce((m, r) => Math.max(m, r.level || 0), 0));
+    const maxKills = Math.max(st.maxKills || 0, runs.reduce((m, r) => Math.max(m, r.kills || 0), 0));
+    const maxCombo = Math.max(st.maxCombo || 0, runs.reduce((m, r) => Math.max(m, r.combo || r.peakCombo || 0), 0));
+    const maxTime = Math.max(st.maxTime || 0, runs.reduce((m, r) => Math.max(m, r.time ?? parseTime(r.timeText)), 0));
+    const totalKills = Math.max(profile.stats?.totalKills || 0, runs.reduce((sum, r) => sum + (r.kills || 0), 0));
+    const totalRuns = Math.max(st.totalRuns || 0, runs.length);
+    const totalBosses = Math.max(profile.stats?.totalBosses || 0, runs.reduce((sum, r) => sum + (r.bossesKilled || 0), 0));
 
     const list = [
       {
@@ -374,8 +376,8 @@ export class DomiScreen {
 
   getCollectionSlots(profile) {
     const runs = profile.runs || [];
-    const totalBosses = runs.reduce((sum, r) => sum + (r.bossesKilled || 0), 0);
-    const totalKills = runs.reduce((sum, r) => sum + (r.kills || 0), 0);
+    const totalBosses = Math.max(profile.stats?.totalBosses || 0, runs.reduce((sum, r) => sum + (r.bossesKilled || 0), 0));
+    const totalKills = Math.max(profile.stats?.totalKills || 0, runs.reduce((sum, r) => sum + (r.kills || 0), 0));
 
     return [
       // --- PERSONAJES JUGABLES ---
@@ -393,7 +395,7 @@ export class DomiScreen {
       { id: 'ketchup_enemy', type: 'enemy', enemyId: 'ketchup', name: 'Ketchup Francotirador', category: 'ENEMIGO', stats: { hp: '30', spd: '48', dmg: '13', perk: 'Disparo a Distancia' }, desc: 'Se mantiene a distancia prudencial disparando chorros de salsa ácida.', lockText: '50 KOs Totales', isUnlocked: totalKills >= 50 },
       { id: 'onion', type: 'enemy', name: 'Cebolla Sorpresa', category: 'ENEMIGO', stats: { hp: '23', spd: '168', dmg: '17', perk: 'Teletransporte' }, desc: 'Surge de la nada detrás de tu campo de visión buscando emboscadas.', lockText: '75 KOs Totales', isUnlocked: totalKills >= 75 },
       { id: 'tray', type: 'enemy', name: 'Bandeja Blindada', category: 'ENEMIGO', stats: { hp: '105', spd: '48', dmg: '16', perk: 'Blindaje Pesado (x2)' }, desc: 'Cuerpo metálico que reduce el daño recibido un 50%. Bloquea pasajes.', lockText: '100 KOs Totales', isUnlocked: totalKills >= 100 },
-      { id: 'mayo', type: 'enemy', name: 'Mayonesa Médica', category: 'ENEMIGO', stats: { hp: '52', speed: '57', dmg: '9', perk: 'Aura Sanadora' }, desc: 'Unidad de apoyo. Regenera la salud de los clientes molestos cercanos.', lockText: '150 KOs Totales', isUnlocked: totalKills >= 150 },
+      { id: 'mayo', type: 'enemy', name: 'Mayonesa Médica', category: 'ENEMIGO', stats: { hp: '52', spd: '57', dmg: '9', perk: 'Aura Sanadora' }, desc: 'Unidad de apoyo. Regenera la salud de los clientes molestos cercanos.', lockText: '150 KOs Totales', isUnlocked: totalKills >= 150 },
       { id: 'chef', type: 'enemy', name: 'Chef Invocador', category: 'ENEMIGO', stats: { hp: '78', spd: '44', dmg: '12', perk: 'Invoca Refuerzos' }, desc: 'Cocina nuevos pedidos sobre la marcha atrayendo hordas sin cesar.', lockText: '200 KOs Totales', isUnlocked: totalKills >= 200 },
 
       // --- GRANDES JEFES DE LA COCINA ---
@@ -736,7 +738,8 @@ export class DomiScreen {
         actionBtn.onclick = () => {
           this.game.menu.prepareAccount();
           this.game.showScreen('setupScreen');
-          const modeSelect = document.querySelector('#setupMode');
+          const modeSelect = document.querySelector('#modeSelect');
+          if (modeSelect) { modeSelect.value = 'rush'; this.game.menu?.syncCards?.(); }
           if (modeSelect) modeSelect.value = 'rush';
         };
       } else {

@@ -18,7 +18,8 @@ import { AudioSystem } from "./systems/audioSystem.js";
 import { recordRun, unlockedAchievements } from "./systems/achievementSystem.js";
 import { updateEffects } from './systems/effectSystem.js';
 import { createRunState } from './core/runState.js';
-import { updateDirector, modes } from './systems/directorSystem.js';
+import { updateDirector, modes, RUSH_BOSS_GOAL } from './systems/directorSystem.js';
+import { weapons } from './data/weapons.js';
 import { companions } from './entities/Companion.js';
 import {currentAccount,logout,awardRun,grantItem,guestLogin} from './systems/accountSystem.js';
 import {bindAuth} from './ui/authScreen.js';
@@ -33,7 +34,7 @@ import {canvasPoint} from './core/presentation.js';
 import {drawCombatFeedback, drawScreenCombatOverlays} from './ui/combatFeedback.js';
 import {drawFloatingText} from './ui/floatingText.js';
 import { evolveWeapon } from './data/weaponEvolutions.js';
-import { burst } from './systems/effectSystem.js';
+import { burst, damageEnemy } from './systems/effectSystem.js';
 import { modLoader } from './mods/ModLoader.js';
 import { FrostbiteMod } from './mods/sampleFrostMod.js';
 
@@ -82,6 +83,7 @@ export class Game {
         const point=canvasPoint(canvas.getBoundingClientRect(),960,540,event.clientX,event.clientY);
         if(point){
           const cam = this.state?.camera || { x: 0, y: 0 };
+          this.state.aimScreenPoint = { x: point.x, y: point.y };
           this.state.aimPoint = { x: point.x + cam.x, y: point.y + cam.y };
         }
       }
@@ -142,14 +144,14 @@ export class Game {
     window.unlockLava = triggerLavaCheat;
 
     window.addEventListener('keydown', event => {
-      if (event.ctrlKey && event.shiftKey && event.key.toLowerCase() === 'l') {
+      if (!this.running && event.ctrlKey && event.shiftKey && event.key.toLowerCase() === 'l') {
         event.preventDefault();
         triggerLavaCheat();
         return;
       }
       if (event.target.closest?.('input, select, textarea')) return;
       secretBuffer = (secretBuffer + event.key.toLowerCase()).slice(-8);
-      if (secretBuffer.endsWith('domilava') || secretBuffer.endsWith('lava')) {
+      if (!this.running && secretBuffer.endsWith('domilava')) {
         secretBuffer = '';
         triggerLavaCheat();
         return;
@@ -301,7 +303,9 @@ export class Game {
   }
 
   showRanking() {
-    const ranking = currentAccount()?.runs || getRanking();
+    const accountRuns = currentAccount()?.runs;
+    const rawRanking = (accountRuns && accountRuns.length > 0) ? accountRuns : getRanking();
+    const ranking = [...rawRanking].sort((a, b) => (b.score || 0) - (a.score || 0));
     const list = document.querySelector("#rankingList");
     list.replaceChildren();
 
@@ -401,7 +405,7 @@ export class Game {
       const outcome = document.createElement('span');
       const isVictory = run.outcome === 'victory';
       outcome.className = `ranking-badge ${isVictory ? 'ranking-badge--victory' : 'ranking-badge--defeat'}`;
-      outcome.textContent = isVictory ? 'VICTORIA' : 'CAÍDO';
+      outcome.textContent = isVictory ? 'VICTORIA' : run.outcome === 'abandoned' ? 'ABANDONO' : 'CAÍDO';
       head.append(name, outcome);
 
       const stats = document.createElement('div');
@@ -427,7 +431,7 @@ export class Game {
 
   startRun(setup) {
     const account=currentAccount();if(!account){this.showScreen('authScreen');return;}
-    setup={...setup,name:account.name,skinId:isOwned(account,'skin',setup.skinId)?setup.skinId:'pancho',mapId:isOwned(account,'map',setup.mapId)?setup.mapId:'diner',companionId:isOwned(account,'pet',setup.companionId)?setup.companionId:'none',accessoryId:isOwned(account,'accessory',setup.accessoryId)?setup.accessoryId:'none'};
+    setup={...setup,name:account.name,weaponId:weapons[setup.weaponId]?setup.weaponId:'fork',skinId:isOwned(account,'skin',setup.skinId)?setup.skinId:'pancho',mapId:isOwned(account,'map',setup.mapId)?setup.mapId:'diner',companionId:isOwned(account,'pet',setup.companionId)?setup.companionId:'none',accessoryId:isOwned(account,'accessory',setup.accessoryId)?setup.accessoryId:'none'};
     this.canvas.width = 960;
     this.canvas.height = 540;
     this.lastSetup = setup;
@@ -492,7 +496,7 @@ export class Game {
     // Update Player modular skills
     state.player.skills?.update(delta, state);
 
-    updateDirector(state, delta, this.canvas);
+    updateDirector(state, delta, state.world || this.canvas);
     updatePrimes(state,delta);updateMap(state,delta);
     if (state.bossIntro) {
       state.bossIntro.timer -= delta;
@@ -530,20 +534,26 @@ export class Game {
       const targetCamY = Math.max(0, Math.min(state.world.height - 540, state.player.y - 270));
       state.camera.x += (targetCamX - state.camera.x) * Math.min(1, delta * 8.5);
       state.camera.y += (targetCamY - state.camera.y) * Math.min(1, delta * 8.5);
+      if (state.manualAim && state.aimScreenPoint) state.aimPoint = { x: state.aimScreenPoint.x + state.camera.x, y: state.aimScreenPoint.y + state.camera.y };
     }
 
     updateEffects(state, delta);
     for (const hazard of state.hazards) hazard.life -= delta;
     state.hazards = state.hazards.filter(hazard => hazard.life > 0);
+    for (const enemy of state.enemies) { if (enemy.hp > 0) enemy.speedMultiplier = 1; }
     for (const hazard of state.hazards) {
       if (Math.hypot(hazard.x - state.player.x, hazard.y - state.player.y) < hazard.radius + state.player.radius) {
         state.player.buffs.slowTime = Math.max(state.player.buffs.slowTime, 0.35);
       }
-      if (hazard.isKetchupPuddle) {
+      if (hazard.isKetchupPuddle || hazard.isOil) {
         for (const enemy of state.enemies) {
           if (enemy.hp > 0 && Math.hypot(hazard.x - enemy.x, hazard.y - enemy.y) < hazard.radius + enemy.radius) {
             enemy.speedMultiplier = Math.min(enemy.speedMultiplier || 1, 0.55);
-            if (Math.random() < 0.15) {
+            enemy.puddleTick = (enemy.puddleTick || 0) - delta;
+            if (enemy.puddleTick <= 0) {
+              enemy.puddleTick = 0.35;
+              damageEnemy(state, enemy, 2.5 * 0.35 * state.player.damageMultiplier * (state.player.buffs.damageMultiplier || 1), 'fire');
+            } else if (false) {
               enemy.hp -= 2.5 * delta * (state.player.buffs.damageMultiplier || 1);
             }
           }
@@ -566,12 +576,12 @@ export class Game {
     this.hud.update(state);
     if (state.player.hp <= 0) {
       this.endRun();
-    } else if (state.victory || (state.modeId === 'rush' && state.bossesKilled >= 3)) {
+    } else if (state.victory || (state.modeId === 'rush' && state.bossesKilled >= RUSH_BOSS_GOAL)) {
       this.endRun('victory');
     } else if (state.pendingLevels > 0&&!this.choice) {
       this.showAbilityChoices();
     }
-    if(this.choice){this.choice.remaining-=delta;document.querySelector('#abilityTimerFill').style.width=`${Math.max(0,this.choice.remaining/this.choice.duration*100)}%`;if(this.choice.remaining<=0)this.dismissAbility();}
+    if(this.choice){this.choice.remaining-=delta;document.querySelector('#abilityTimerFill').style.width=`${Math.max(0,this.choice.remaining/this.choice.duration*100)}%`;if(this.choice.remaining<=0){if(this.choice.options?.[0])this.chooseAbility(this.choice.options[0]);else this.dismissAbility();}}
     this.renderPrimeBar();
     this.renderLiveBuild();
   }
@@ -625,7 +635,7 @@ export class Game {
       button.addEventListener("click", () => this.chooseAbility(ability), { once: true });
       options.append(button);
     });
-    this.choice={remaining:9,duration:9};
+    this.choice={remaining:9,duration:9,options:choices};
     document.querySelector('#abilityScreen').classList.add('screen--active');
     document.querySelector('#app').dataset.choosing='true';
   }
@@ -782,6 +792,9 @@ export class Game {
 
   endRun(outcome = 'defeat') {
     if (!this.state || this.screenId === 'gameOverScreen') return;
+    if (outcome === 'abandoned') {
+      this.state.score = this.state.kills > 0 ? Math.floor(this.state.score * 0.5) : 0;
+    }
     const previousBest = getBestScore();
     const result = {
       id:crypto.randomUUID(),
@@ -811,6 +824,7 @@ export class Game {
     };
     const previousUnlocks = new Set(unlockedAchievements().map(item=>item.id));
     result.newAchievements = recordRun(result).filter(item=>!previousUnlocks.has(item.id)).map(item=>item.name);
+    if (unlockedAchievements().some(item => item.id === 'comboKing')) { try { grantItem('skin', 'choripan'); } catch {} }
     if (outcome === 'victory' && this.state.mapId === 'lava') {
       grantItem('accessory', 'leg_lava_crown');
       result.newAchievements = result.newAchievements || [];
@@ -819,8 +833,8 @@ export class Game {
       }
     }
     this.audio.play(outcome === 'victory' ? 'victory' : 'death');
-    saveRun(result);
-    awardRun(result);
+    if (outcome !== 'abandoned' || result.kills > 0) saveRun(result);
+    if (outcome !== 'abandoned' || result.kills > 0) awardRun(result);
     this.running = false;
     this.hud.hide();
     this.gameOver.render(result, previousBest);
@@ -858,7 +872,8 @@ export class Game {
 
     for (const hazard of state.hazards) {
       this.ctx.save();
-      if (hazard.isKetchupPuddle) {
+      if (hazard.isKetchupPuddle || hazard.isOil) {
+        if (hazard.isOil) { this.ctx.restore(); continue; }
         this.ctx.globalAlpha = Math.min(0.7, hazard.life * 0.18);
         this.ctx.fillStyle = '#b31818';
         this.ctx.beginPath();
