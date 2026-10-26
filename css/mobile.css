@@ -416,68 +416,490 @@
    ADAPTACIONES DE MENÚS Y PANTALLAS EN DISPOSITIVOS MÓVILES
    ========================================================================== */
 
-@media (max-width: 768px) {
-  /* Diálogo de Cartas de Habilidad (Level Up) */
-  .ability-screen {
-    padding: 10px !important;
-    align-items: center !important;
-    justify-content: center !important;
+/* ==========================================================================
+   ADAPTACIONES RESPONSIVE COMPLETAS PARA MODO HORIZONTAL (LANDSCAPE)
+   (Dispositivos móviles y tablets en horizontal: altura reducida, ancho extendido)
+   ========================================================================== */
+
+@media screen and (max-height: 540px), screen and (orientation: landscape) and (max-height: 600px) {
+  /* Contenedor principal y pantallas */
+  .app {
+    width: 100vw !important;
+    height: 100dvh !important;
+    min-height: 0 !important;
+    max-height: 100dvh !important;
+    overflow: hidden !important;
   }
 
-  .ability-panel {
-    width: min(95vw, 420px) !important;
-    max-height: 85vh !important;
+  .screen {
+    padding: 10px 18px 12px !important;
     overflow-y: auto !important;
-    padding: 14px !important;
+    -webkit-overflow-scrolling: touch !important;
   }
 
-  .ability-grid {
-    grid-template-columns: 1fr !important;
+  .screen__panel {
+    padding: 6px 0 !important;
+    margin: 0 auto !important;
+    width: min(100%, 920px) !important;
+  }
+
+  /* Tipografía compacta y adaptable */
+  h1 {
+    font-size: clamp(28px, 6vw, 48px) !important;
+    line-height: 1 !important;
+  }
+  h1 span {
+    font-size: clamp(34px, 7vw, 56px) !important;
+  }
+  h2 {
+    font-size: 18px !important;
+    margin-bottom: 8px !important;
+    line-height: 1.2 !important;
+  }
+  .eyebrow {
+    font-size: 8px !important;
+    margin-bottom: 6px !important;
+  }
+
+  /* Botones arcade compactos */
+  .pixel-button {
+    min-height: 38px !important;
+    padding: 8px 14px !important;
+    font-size: 10px !important;
     gap: 8px !important;
+    box-shadow: 0 3px 0 #0d171a !important;
+  }
+  .menu-actions {
+    margin-top: 10px !important;
+    gap: 10px !important;
+  }
+  .icon-button {
+    width: 34px !important;
+    height: 34px !important;
   }
 
-  .ability-card {
-    min-height: 64px !important;
-    padding: 10px 14px !important;
-    cursor: pointer !important;
+  /* 1. PANTALLA DE ACCESO / SOCIO (authScreen) */
+  #authScreen.auth-screen {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) minmax(280px, 360px) !important;
+    gap: 20px !important;
+    align-items: center !important;
+    padding: 12px 24px !important;
+    min-height: 100% !important;
+  }
+  #authScreen .auth-brand {
+    align-self: center !important;
+  }
+  #authScreen .auth-brand > span {
+    font-size: clamp(36px, 7vw, 58px) !important;
+  }
+  #authScreen .auth-brand > strong {
+    font-size: clamp(44px, 8vw, 68px) !important;
+  }
+  #authScreen .auth-brand small {
+    margin-top: 8px !important;
+    font-size: 9px !important;
+  }
+  #authScreen .auth-intro {
+    font-size: 11px !important;
+    margin-top: 4px !important;
+  }
+  #authScreen .auth-panel {
+    padding: 14px 18px !important;
+    gap: 8px !important;
+    max-height: 94vh !important;
+    overflow-y: auto !important;
+  }
+  #authScreen .auth-panel h2 {
+    font-size: 14px !important;
+    margin-bottom: 4px !important;
+  }
+  #authScreen .auth-panel .field {
+    gap: 3px !important;
+    font-size: 9px !important;
+  }
+  #authScreen .auth-panel input {
+    min-height: 34px !important;
+    padding: 6px 8px !important;
+    font-size: 13px !important;
+  }
+  #authScreen .auth-panel .pixel-button {
+    min-height: 36px !important;
+  }
+  #authScreen .auth-links {
+    margin-top: 4px !important;
+    gap: 12px !important;
+  }
+  #authScreen .save-note {
+    font-size: 8px !important;
+    margin-top: 2px !important;
+    padding-top: 6px !important;
   }
 
-  /* Lobby Stage en móvil */
+  /* 2. PANTALLA DE BIENVENIDA / ONBOARDING (onboardingScreen) */
+  .onboarding-screen .onboarding-panel {
+    padding: 10px 0 !important;
+    max-width: 96% !important;
+  }
+  .onboarding-panel h2 {
+    font-size: 18px !important;
+    margin-bottom: 2px !important;
+  }
+  .onboarding-subtitle {
+    font-size: 11px !important;
+    margin-bottom: 8px !important;
+  }
+  .onboarding-cards {
+    display: grid !important;
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 10px !important;
+    max-height: none !important;
+    overflow: visible !important;
+    margin-bottom: 8px !important;
+  }
+  .onboarding-card {
+    padding: 8px 10px !important;
+    min-height: auto !important;
+  }
+  .onboarding-art {
+    height: 72px !important;
+    margin-bottom: 6px !important;
+  }
+  .onboarding-card-title {
+    font-size: 10px !important;
+    margin-bottom: 3px !important;
+  }
+  .onboarding-card-desc {
+    font-size: 8.5px !important;
+    line-height: 1.25 !important;
+  }
+  .onboarding-actions {
+    margin-top: 6px !important;
+  }
+  .onboarding-enter-btn {
+    min-height: 36px !important;
+    padding: 6px 18px !important;
+    font-size: 11px !important;
+  }
+
+  /* 3. LOCAL DOMI / LOBBY (lobbyScreen) */
+  .lobby-screen {
+    grid-template-rows: 40px minmax(0, 1fr) !important;
+  }
+  .lobby-header {
+    height: 40px !important;
+    min-height: 40px !important;
+    padding: 4px 14px !important;
+    gap: 10px !important;
+  }
+  .lobby-header .brand-mark {
+    font-size: 18px !important;
+  }
+  .lobby-header strong {
+    font-size: 11px !important;
+  }
+  .lobby-header small {
+    display: none !important;
+  }
+  .wallet {
+    padding: 3px 8px !important;
+    font-size: 8px !important;
+    gap: 4px !important;
+  }
+  .wallet b {
+    font-size: 12px !important;
+  }
+  .lobby-achievements {
+    padding: 4px 8px !important;
+    font-size: 8px !important;
+  }
+  .lobby-achievements span {
+    font-size: 8px !important;
+  }
   .lobby-stage {
     min-height: 0 !important;
+    height: calc(100dvh - 40px) !important;
   }
-
   .lobby-stage canvas {
     width: 100% !important;
     height: 100% !important;
     object-fit: contain !important;
   }
+  .lobby-controls {
+    bottom: 6px !important;
+    font-size: 8px !important;
+    padding: 3px 8px !important;
+  }
+  .lobby-tip {
+    bottom: 32px !important;
+    font-size: 8px !important;
+  }
 
-  /* Tienda en móvil */
-  :is(#shopScreen, #domiScreen) .shop-grid {
-    grid-template-columns: 1fr 1fr !important;
+  /* 4. ELECCIÓN DE PARTIDA (setupScreen) */
+  .setup-panel {
+    padding: 8px 0 !important;
+  }
+  .setup-header {
+    margin-bottom: 8px !important;
+  }
+  .setup-header h2 {
+    font-size: 16px !important;
+  }
+  .setup-steps-nav {
+    margin-bottom: 8px !important;
     gap: 8px !important;
   }
-
-  /* Pantalla de Fin de Partida (Game Over) */
-  #gameOverScreen .screen__panel {
-    padding: 14px 0 !important;
+  .setup-step-tab {
+    padding: 6px 12px !important;
+    font-size: 8.5px !important;
   }
-
-  #gameOverStats {
-    grid-template-columns: 1fr 1fr !important;
+  .setup-cards-grid {
+    display: grid !important;
+    grid-template-columns: repeat(4, 1fr) !important;
+    gap: 8px !important;
   }
-
-  /* Pantalla de Pausa en Móvil */
-  .pause-panel {
-    max-height: 90vh !important;
-    overflow-y: auto !important;
-    padding: 16px !important;
-  }
-
-  .pause-summary {
-    grid-template-columns: repeat(3, 1fr) !important;
+  .setup-card {
+    min-height: 78px !important;
+    padding: 6px 8px !important;
     gap: 6px !important;
+  }
+  .setup-card__icon-box {
+    width: 24px !important;
+    height: 24px !important;
+  }
+  .setup-card__label {
+    font-size: 8px !important;
+  }
+  .setup-card__value {
+    font-size: 9.5px !important;
+  }
+  .setup-card__hint {
+    display: none !important;
+  }
+  .setup-step-actions {
+    margin-top: 10px !important;
+  }
+
+  /* 5. TIENDA Y DON DOMI (shopScreen / domiScreen) */
+  :is(#shopScreen, #domiScreen) .shop-panel {
+    padding: 6px 0 !important;
+  }
+  :is(#shopScreen, #domiScreen) .shop-heading {
+    margin-bottom: 8px !important;
+    gap: 12px !important;
+  }
+  :is(#shopScreen, #domiScreen) .shop-heading h2 {
+    font-size: 16px !important;
+  }
+  :is(#shopScreen, #domiScreen) .shop-heading p:not(.eyebrow) {
+    display: none !important;
+  }
+  :is(#shopScreen, #domiScreen) .shop-tabs {
+    margin-bottom: 8px !important;
+    gap: 2px !important;
+  }
+  :is(#shopScreen, #domiScreen) .shop-tabs button {
+    padding: 6px 10px !important;
+    font-size: 8px !important;
+  }
+  :is(#shopScreen, #domiScreen) .shop-layout {
+    display: grid !important;
+    grid-template-columns: 1fr 220px !important;
+    gap: 12px !important;
+    align-items: start !important;
+  }
+  :is(#shopScreen, #domiScreen) .shop-grid {
+    display: grid !important;
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 8px !important;
+    max-height: 52vh !important;
+    overflow-y: auto !important;
+    padding-right: 4px !important;
+  }
+  .shop-item {
+    min-height: 120px !important;
+    padding: 8px !important;
+  }
+  .shop-art {
+    height: 60px !important;
+    margin-bottom: 6px !important;
+  }
+  .shop-art canvas {
+    width: 60px !important;
+    height: 60px !important;
+  }
+  .shop-item strong {
+    font-size: 11px !important;
+  }
+  .shop-item p {
+    font-size: 8.5px !important;
+    margin: 3px 0 6px !important;
+    line-height: 1.2 !important;
+  }
+  .shop-cost {
+    font-size: 8.5px !important;
+  }
+  :is(#shopScreen, #domiScreen) .detail-stage canvas {
+    max-height: 140px !important;
+  }
+
+  /* 6. SUBIDA DE NIVEL / HABILIDADES (abilityScreen) */
+  .ability-screen {
+    padding: 8px 14px !important;
+    align-items: center !important;
+    justify-content: center !important;
+    background: rgba(6, 15, 18, 0.88) !important;
+  }
+  .ability-panel {
+    width: min(94vw, 760px) !important;
+    max-height: 94vh !important;
+    padding: 10px 14px !important;
+  }
+  .ability-panel h2 {
+    font-size: 13px !important;
+    margin-bottom: 4px !important;
+  }
+  .ability-help {
+    font-size: 8px !important;
+    margin-bottom: 6px !important;
+  }
+  .ability-timer {
+    height: 3px !important;
+    margin-bottom: 8px !important;
+  }
+  .ability-grid {
+    display: grid !important;
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 8px !important;
+  }
+  .ability-card {
+    min-height: 105px !important;
+    padding: 8px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: space-between !important;
+  }
+  .ability-icon {
+    font-size: 18px !important;
+  }
+  .ability-card strong {
+    font-size: 10.5px !important;
+    line-height: 1.2 !important;
+    margin: 4px 0 !important;
+  }
+  .ability-card__description {
+    font-size: 8px !important;
+    line-height: 1.25 !important;
+  }
+
+  /* 7. PANTALLA DE PAUSA (pauseScreen) */
+  .pause-panel {
+    max-height: 94vh !important;
+    overflow-y: auto !important;
+    padding: 12px 18px !important;
+    width: min(94vw, 720px) !important;
+  }
+  .pause-header h2 {
+    font-size: 16px !important;
+    margin-bottom: 6px !important;
+  }
+  .pause-summary {
+    display: grid !important;
+    grid-template-columns: repeat(5, 1fr) !important;
+    gap: 4px !important;
+    margin-bottom: 8px !important;
+  }
+  .pause-stat {
+    padding: 4px 6px !important;
+  }
+  .pause-stat span {
+    font-size: 7.5px !important;
+  }
+  .pause-stat strong {
+    font-size: 11px !important;
+  }
+  .pause-goal {
+    font-size: 11px !important;
+    margin-bottom: 8px !important;
+  }
+  .pause-columns {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 10px !important;
+    margin-bottom: 8px !important;
+  }
+  .pause-section h3 {
+    font-size: 9px !important;
+    margin-bottom: 4px !important;
+  }
+  .build-list {
+    max-height: 80px !important;
+    overflow-y: auto !important;
+    gap: 4px !important;
+  }
+
+  /* 8. FIN DE PARTIDA / GAME OVER (gameOverScreen) */
+  .gameover-pixel-banner {
+    font-size: 20px !important;
+    padding: 6px 18px !important;
+    margin: 4px 0 8px 0 !important;
+    letter-spacing: 2px !important;
+  }
+  #gameOverScreen h2 {
+    font-size: 16px !important;
+    margin-bottom: 4px !important;
+  }
+  .phrase {
+    font-size: 11px !important;
+    margin-bottom: 8px !important;
+  }
+  #gameOverStats {
+    display: grid !important;
+    grid-template-columns: repeat(4, 1fr) !important;
+    gap: 6px !important;
+    margin-bottom: 8px !important;
+  }
+  .stats p {
+    padding: 6px 0 !important;
+    font-size: 11px !important;
+  }
+  .stats strong {
+    font-size: 8.5px !important;
+    margin-bottom: 3px !important;
+  }
+
+  /* 9. CONTROLES TÁCTILES DURANTE COMBATE (In-Game) */
+  .mobile-joystick-base {
+    bottom: 22px !important;
+    left: 28px !important;
+    width: 100px !important;
+    height: 100px !important;
+  }
+  .mobile-joystick-knob {
+    width: 44px !important;
+    height: 44px !important;
+    margin: -22px 0 0 -22px !important;
+  }
+  .mobile-actions-zone {
+    bottom: 18px !important;
+    right: 18px !important;
+    gap: 10px !important;
+  }
+  .mobile-dash-btn {
+    width: 66px !important;
+    height: 66px !important;
+  }
+  .mobile-prime-btn {
+    width: 42px !important;
+    height: 42px !important;
+  }
+  .mobile-top-actions {
+    top: 6px !important;
+    right: 10px !important;
+  }
+  .mobile-icon-btn {
+    width: 36px !important;
+    height: 36px !important;
   }
 }
 
