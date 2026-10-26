@@ -9,7 +9,7 @@ Durante la partida, usa Espacio para esquivar. Las mejoras de nivel aparecen a u
 Las cuentas y contraseñas se guardan exclusivamente en el navegador de este dispositivo. La contraseña se deriva con PBKDF2 y no se almacena en texto plano, pero no hay servidor, sincronizacion ni recuperacion de cuenta. Borrar los datos del navegador elimina el progreso.
 
 Es un juego de supervivencia pixel art hecho con HTML, CSS, JavaScript y Canvas. Hay tres modos de partida, jefes, armas, mascotas, logros e historial por usuario. El mapa nevado tiene ventiscas periodicas; desierto y cancha agregan peligros moviles. Ejecuta `npm test` para revisar las pruebas automatizadas.
-
+hola bahhahah
 ## Mejoras de acceso y usabilidad
 
 El acceso permite mostrar u ocultar la contraseña, avisa si está activo Bloq Mayús y muestra los requisitos al crear una cuenta. Durante el ingreso se bloquean los envíos repetidos y los cambios de formulario. Los errores de almacenamiento se explican sin reemplazar datos dañados.
