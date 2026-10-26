@@ -2,7 +2,9 @@
 <html lang="es">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <title>DOMI 2: PANCHO</title>
     <meta name="theme-color" content="#0c1013" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -13,6 +15,7 @@
     <link rel="stylesheet" href="./css/shop.css" />
     <link rel="stylesheet" href="./css/gameplay.css" />
     <link rel="stylesheet" href="./css/interface.css" />
+    <link rel="stylesheet" href="./css/mobile.css" />
   </head>
   <body>
     <main id="app" class="app">
@@ -414,7 +417,7 @@
       </section>
 
       <section id="achievementsScreen" class="screen"><div class="screen__panel"><h2>Logros</h2><div id="achievementsList" class="achievement-list"></div><div class="menu-actions"><button id="achievementsBackButton" class="pixel-button">Volver</button></div></div></section>
-      <section id="optionsScreen" class="screen"><div class="screen__panel options-panel"><h2>Opciones</h2><label class="toggle-field">Musica<input id="musicToggle" type="checkbox"></label><label class="toggle-field">Efectos de sonido<input id="sfxToggle" type="checkbox"></label><label class="volume-field">Volumen<input id="volumeSlider" type="range" min="0" max="1" step="0.05" value="0.35"></label><div class="menu-actions"><button id="clearRankingButton" class="pixel-button pixel-button--secondary">Borrar ranking</button><button id="clearAchievementsButton" class="pixel-button pixel-button--secondary">Borrar logros</button><button id="optionsBackButton" class="pixel-button">Volver</button></div></div></section>
+      <section id="optionsScreen" class="screen"><div class="screen__panel options-panel"><h2>Opciones</h2><label class="toggle-field">Musica<input id="musicToggle" type="checkbox"></label><label class="toggle-field">Efectos de sonido<input id="sfxToggle" type="checkbox"></label><label class="volume-field">Volumen<input id="volumeSlider" type="range" min="0" max="1" step="0.05" value="0.35"></label><label class="toggle-field">Controles táctiles en pantalla<input id="touchToggle" type="checkbox"></label><div class="menu-actions"><button id="clearRankingButton" class="pixel-button pixel-button--secondary">Borrar ranking</button><button id="clearAchievementsButton" class="pixel-button pixel-button--secondary">Borrar logros</button><button id="optionsBackButton" class="pixel-button">Volver</button></div></div></section>
       <section id="skinsScreen" class="screen"><div class="screen__panel"><p class="eyebrow">EL EQUIPO DEL MOSTRADOR</p><h2>Fuera de carta.</h2><div id="skinsPreview" class="skins-preview"></div><div class="menu-actions"><button id="skinsBackButton" class="pixel-button">Volver</button></div></div></section>
 
       <section id="pauseScreen" class="screen pause-screen" aria-labelledby="pauseTitle">

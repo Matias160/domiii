@@ -37,6 +37,7 @@ import { evolveWeapon } from './data/weaponEvolutions.js';
 import { burst, damageEnemy } from './systems/effectSystem.js';
 import { modLoader } from './mods/ModLoader.js';
 import { FrostbiteMod } from './mods/sampleFrostMod.js';
+import { TouchControls } from './core/touchControls.js';
 
 const PAUSE_THEMES = [
   { border: '#00f0ff', glow: 'rgba(0, 240, 255, 0.65)' },
@@ -57,6 +58,14 @@ export class Game {
     this.menu = new MenuScreen(this);
     this.gameOver = new GameOverScreen(this);
     this.lobby=new Lobby(this);this.shop=new Shop(this);this.domi=new DomiScreen(this);this.choice=null;
+    this.touchControls = new TouchControls(this);
+    const touchToggle = document.querySelector('#touchToggle');
+    if (touchToggle) {
+      touchToggle.checked = this.touchControls.isTouch;
+      touchToggle.addEventListener('change', () => {
+        this.touchControls.setForced(touchToggle.checked);
+      });
+    }
     this.renderSortBuffer = [];
     bindAuth(this);
     modLoader.loadMod(FrostbiteMod);
@@ -218,6 +227,7 @@ export class Game {
     if (id !== 'gameScreen' && id !== 'abilityScreen') {
       document.querySelector('#'+id)?.querySelector('button:not(:disabled),input')?.focus({preventScroll:true});
     } else if (id === 'gameScreen') document.activeElement?.blur();
+    this.touchControls?.onScreenChange(id);
   }
 
   pause() {
@@ -451,7 +461,7 @@ export class Game {
     const delta = Math.min(0.033, (time - this.lastTime) / 1000 || 0);
     this.lastTime = time;
     this.drawBackground();
-    if(this.screenId==='lobbyScreen')this.lobby.update(delta,this.input);
+    if(this.screenId==='lobbyScreen'){this.lobby.update(delta,this.input);this.touchControls?.update(null);}
     if(this.screenId==='shopScreen')this.shop.update(time/1000);
     if(this.screenId==='domiScreen')this.domi.update(time/1000);
     if (this.state && ['gameScreen','abilityScreen','pauseScreen'].includes(this.screenId)) {
@@ -583,6 +593,7 @@ export class Game {
     }
     if(this.choice){this.choice.remaining-=delta;document.querySelector('#abilityTimerFill').style.width=`${Math.max(0,this.choice.remaining/this.choice.duration*100)}%`;if(this.choice.remaining<=0){if(this.choice.options?.[0])this.chooseAbility(this.choice.options[0]);else this.dismissAbility();}}
     this.renderPrimeBar();
+    this.touchControls?.update(state);
     this.renderLiveBuild();
   }
 
