@@ -41,15 +41,16 @@ export class GameOverScreen {
     // SI ES LA VICTORIA DEL JEFE FINAL EN EL ÚLTIMO MAPA:
     // SOLO el GIF, NADA de información adicional.
     if (isLavaBossVictory) {
-      if (bannerElem) bannerElem.hidden = true;
-      if (eyebrowElem) eyebrowElem.hidden = true;
-      if (titleElem) titleElem.hidden = true;
-      if (this.phrase) this.phrase.hidden = true;
-      if (this.stats) { this.stats.hidden = true; this.stats.innerHTML = ''; }
-      if (achievementsElem) { achievementsElem.hidden = true; achievementsElem.replaceChildren(); }
+      if (bannerElem) { bannerElem.hidden = true; bannerElem.style.display = 'none'; }
+      if (eyebrowElem) { eyebrowElem.hidden = true; eyebrowElem.style.display = 'none'; }
+      if (titleElem) { titleElem.hidden = true; titleElem.style.display = 'none'; }
+      if (this.phrase) { this.phrase.hidden = true; this.phrase.style.display = 'none'; }
+      if (this.stats) { this.stats.hidden = true; this.stats.style.display = 'none'; this.stats.innerHTML = ''; }
+      if (achievementsElem) { achievementsElem.hidden = true; achievementsElem.style.display = 'none'; achievementsElem.replaceChildren(); }
 
       if (this.victorySection) {
         this.victorySection.hidden = false;
+        this.victorySection.style.display = 'flex';
         if (this.victoryGif) {
           this.victoryGif.src = './final.gif?v=' + Date.now();
         }
@@ -60,10 +61,12 @@ export class GameOverScreen {
     // MODO NORMAL (Derrota o victoria en cualquier otro mapa)
     if (this.victorySection) {
       this.victorySection.hidden = true;
+      this.victorySection.style.display = 'none';
     }
 
     if (bannerElem) {
       bannerElem.hidden = false;
+      bannerElem.style.display = '';
       const bannerText = isVictory ? '¡GANASTE!' : isAbandoned ? 'TURNO ABANDONADO' : 'GAME OVER';
       const bannerColor = isVictory ? '#00ff88' : isAbandoned ? '#ffcc00' : '#ff2244';
       bannerElem.textContent = bannerText;
@@ -73,20 +76,24 @@ export class GameOverScreen {
 
     if (eyebrowElem) {
       eyebrowElem.hidden = false;
+      eyebrowElem.style.display = '';
       eyebrowElem.textContent = isVictory ? '★ VICTORIA TOTAL ★' : 'FIN DE LA PARTIDA';
     }
     if (titleElem) {
       titleElem.hidden = false;
+      titleElem.style.display = '';
       titleElem.textContent = isVictory ? '¡COMBO COMPLETO!' : isAbandoned ? 'TURNO CERRADO' : '¡TE HICIERON COMPLETO!';
     }
     if (this.phrase) {
       this.phrase.hidden = false;
+      this.phrase.style.display = '';
       const phrase = phrases.gameOver[Math.floor(Math.random() * phrases.gameOver.length)];
       this.phrase.textContent = isVictory ? '¡La cocina tiene un nuevo rey indiscutido!' : isAbandoned ? 'El mostrador siempre estará listo para tu regreso.' : phrase;
     }
 
     if (this.stats) {
       this.stats.hidden = false;
+      this.stats.style.display = '';
       const isRecord = result.score > previousBest;
       this.stats.innerHTML = `
         <div class="result-summary"><span>${isRecord?'¡NUEVO RÉCORD!':'PUNTOS GANADOS'}</span><div class="result-points"><b>+${Math.max(0,Math.floor(result.score))} PT</b><i class="result-coin" aria-hidden="true"><em></em></i></div><span>Tu mejor marca: ${Math.max(previousBest,result.score)}</span></div>

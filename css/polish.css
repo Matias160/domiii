@@ -3050,7 +3050,19 @@ kbd { display: inline-block; border: 1px solid #556771; border-bottom-width: 3px
    ============================================================================ */
 
 /* 1. SECCIÓN GANASTE (VICTORY CELEBRATION) - PIXEL ART PURO SIN LEDS */
+[hidden],
+#victoryCelebration[hidden],
+.victory-celebration[hidden] {
+  display: none !important;
+}
+
+#victoryCelebration,
 .victory-celebration {
+  display: none !important;
+}
+
+.gameOver-panel-enhanced.is-legendary-lava-victory #victoryCelebration,
+.gameOver-panel-enhanced.is-legendary-lava-victory .victory-celebration {
   display: flex !important;
   flex-direction: column !important;
   align-items: center !important;
@@ -3062,6 +3074,20 @@ kbd { display: inline-block; border: 1px solid #556771; border-bottom-width: 3px
   background: transparent !important;
   border: none !important;
   box-shadow: none !important;
+}
+
+.gameOver-panel-enhanced:not(.is-legendary-lava-victory) #victoryCelebration,
+.gameOver-panel-enhanced:not(.is-legendary-lava-victory) .victory-celebration {
+  display: none !important;
+}
+
+.gameOver-panel-enhanced.is-legendary-lava-victory #gameOverPixelBanner,
+.gameOver-panel-enhanced.is-legendary-lava-victory #resultEyebrow,
+.gameOver-panel-enhanced.is-legendary-lava-victory #resultTitle,
+.gameOver-panel-enhanced.is-legendary-lava-victory #gameOverPhrase,
+.gameOver-panel-enhanced.is-legendary-lava-victory #gameOverStats,
+.gameOver-panel-enhanced.is-legendary-lava-victory #newAchievements {
+  display: none !important;
 }
 
 .victory-gif-container {

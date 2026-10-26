@@ -98,4 +98,58 @@ test('victory celebration section is present in index.html with final.gif', () =
   assert.match(html, /id="victoryCelebration"/);
   assert.match(html, /id="victoryGif"/);
   assert.match(html, /src="\.\/final\.gif"/);
+  assert.match(html, /style="display: none;"/);
+});
+
+test('GameOverScreen hides victory celebration on defeat and shows only on lava victory', async () => {
+  const { GameOverScreen } = await import('../js/ui/gameOverScreen.js');
+
+  const elements = {
+    '#gameOverPhrase': { hidden: false, style: {} },
+    '#gameOverStats': { hidden: false, style: {}, innerHTML: '', append() {} },
+    '#victoryCelebration': { hidden: true, style: { display: 'none' } },
+    '#victoryGif': { src: '' },
+    '#retryButton': { addEventListener() {} },
+    '#gameOverMenuButton': { addEventListener() {} },
+    '#gameOverPixelBanner': { hidden: false, style: {}, textContent: '', className: '' },
+    '#resultEyebrow': { hidden: false, style: {}, textContent: '' },
+    '#resultTitle': { hidden: false, style: {}, textContent: '' },
+    '#newAchievements': { hidden: false, style: {}, replaceChildren() {} },
+    '.gameOver-panel-enhanced': {
+      classes: new Set(),
+      classList: {
+        toggle(cls, val) {
+          if (val) elements['.gameOver-panel-enhanced'].classes.add(cls);
+          else elements['.gameOver-panel-enhanced'].classes.delete(cls);
+        }
+      }
+    }
+  };
+
+  const prevDoc = globalThis.document;
+  globalThis.document = {
+    querySelector: (sel) => elements[sel] || null
+  };
+
+  try {
+    const screen = new GameOverScreen({ restartLastRun() {}, showScreen() {} });
+
+    // 1. Defeat in lava map after 9 seconds (the exact case the user hit)
+    screen.render({ outcome: 'defeat', map: 'lava', time: 9, score: 0, kills: 0, difficulty: '???' }, 100);
+    assert.equal(elements['#victoryCelebration'].hidden, true);
+    assert.equal(elements['#victoryCelebration'].style.display, 'none');
+    assert.equal(elements['.gameOver-panel-enhanced'].classes.has('is-legendary-lava-victory'), false);
+    assert.equal(elements['#gameOverStats'].hidden, false);
+    assert.notEqual(elements['#gameOverStats'].style.display, 'none');
+
+    // 2. Victory in lava map
+    screen.render({ outcome: 'victory', map: 'lava', time: 120, score: 5000, kills: 1, difficulty: '???' }, 100);
+    assert.equal(elements['#victoryCelebration'].hidden, false);
+    assert.equal(elements['#victoryCelebration'].style.display, 'flex');
+    assert.equal(elements['.gameOver-panel-enhanced'].classes.has('is-legendary-lava-victory'), true);
+    assert.equal(elements['#gameOverStats'].hidden, true);
+    assert.equal(elements['#gameOverStats'].style.display, 'none');
+  } finally {
+    globalThis.document = prevDoc;
+  }
 });
