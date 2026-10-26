@@ -437,6 +437,10 @@
     -webkit-overflow-scrolling: touch !important;
   }
 
+  .screen:not(.screen--active) {
+    display: none !important;
+  }
+
   .screen__panel {
     padding: 6px 0 !important;
     margin: 0 auto !important;
@@ -479,7 +483,7 @@
   }
 
   /* 1. PANTALLA DE ACCESO / SOCIO (authScreen) */
-  #authScreen.auth-screen {
+  #authScreen.screen--active {
     display: grid !important;
     grid-template-columns: minmax(0, 1fr) minmax(280px, 360px) !important;
     gap: 20px !important;
@@ -583,7 +587,8 @@
   }
 
   /* 3. LOCAL DOMI / LOBBY (lobbyScreen) */
-  .lobby-screen {
+  .lobby-screen.screen--active {
+    display: grid !important;
     grid-template-rows: 40px minmax(0, 1fr) !important;
   }
   .lobby-header {
@@ -744,7 +749,8 @@
   }
 
   /* 6. SUBIDA DE NIVEL / HABILIDADES (abilityScreen) */
-  .ability-screen {
+  .ability-screen.screen--active {
+    display: flex !important;
     padding: 8px 14px !important;
     align-items: center !important;
     justify-content: center !important;
