@@ -521,10 +521,14 @@
         </div>
         <span class="dash-meter"><span class="meter"><i id="dashFill"></i></span></span>
       </button>
-      <aside id="comboMilestones" class="combo-milestones" hidden aria-label="Progresión del combo">
+      <aside id="comboMilestones" class="combo-milestones" hidden style="display: none !important;" aria-label="Progresión del combo">
         <div class="combo-current"><i data-lucide="biceps-flexed" aria-hidden="true"></i><strong id="comboMultiplier">x1.00</strong><span id="comboChain">0 KOs</span></div>
         <div class="combo-steps"><span data-combo-step="10">x10</span><span data-combo-step="20">x20</span><span data-combo-step="30">x30</span></div>
       </aside>
+      <div id="lobbyGifPreloads" style="display: none;" aria-hidden="true">
+        <img id="portalGifAsset" src="./portal.gif" alt="" />
+        <img id="copaGifAsset" src="./copa rankin.gif" alt="" />
+      </div>
       <div id="primeBar" class="prime-bar" hidden></div>
       <div id="bossMeter" class="boss-meter" hidden><span id="bossName">EL REY DEL MOSTRADOR</span><div class="meter"><div id="bossFill" class="meter__fill"></div></div></div>
       <div id="eventBanner" class="event-banner" hidden><span id="eventName"></span><b id="eventTime"></b></div>

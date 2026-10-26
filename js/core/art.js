@@ -189,8 +189,8 @@ function footballFloor(c) {
   // 1. Gradas synthwave y marco de estadio
   rect(c,'#050b17',0,0,1920,84);
   rect(c,'#1a1030',0,55,1920,29);
-  rect(c,'#ff3f8b',0,78,1920,6);
-  rect(c,'#38bdf8',0,84,1920,4);
+  rect(c,'#38bdf8',0,78,1920,6);
+  rect(c,'#0284c7',0,84,1920,4);
 
   // Butacas y tableros electrónicos lejanos
   for(let x=18;x<1900;x+=36){
@@ -306,8 +306,8 @@ function footballFloor(c) {
     // Poste blanco
     c.fillStyle = '#ffffff';
     c.fillRect(bx - 1, by - 14, 2, 14);
-    // Banderín rojo ondeante
-    c.fillStyle = '#ef4444';
+    // Banderín dorado ondeante
+    c.fillStyle = '#fde047';
     c.beginPath();
     c.moveTo(bx, by - 14);
     c.lineTo(bx + (bx < midX ? 8 : -8), by - 10);
@@ -886,11 +886,11 @@ export function drawDiner(c, width, height, time, menu, map = 'diner') {
         c.closePath();
         c.fill();
       }
-      // Confeti optimizado
+      // Confeti festivo (sin puntos rojos, tonos verdes, dorados y cian)
       for (let i = 0; i < 22; i++) {
         const fx = ((i * 149 + time * 28) % width);
         const fy = 100 + ((i * 93 + time * 38) % (height - 180));
-        c.fillStyle = ['#4ade80', '#38bdf8', '#ffbe3b', '#f43f5e', '#ffffff'][i % 5];
+        c.fillStyle = ['#4ade80', '#38bdf8', '#ffbe3b', '#22d3ee', '#ffffff'][i % 5];
         c.globalAlpha = 0.5 + Math.sin(time * 3 + i) * 0.25;
         c.fillRect(Math.round(fx), Math.round(fy), 3, 3);
       }

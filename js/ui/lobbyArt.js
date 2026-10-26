@@ -1,5 +1,11 @@
-import {drawFood} from '../core/art.js';
+import {drawFood, domiGifImage} from '../core/art.js';
 import {drawPet} from '../core/presentation.js';
+
+export const portalGifImage = typeof Image !== 'undefined' ? new Image() : null;
+if (portalGifImage) portalGifImage.src = './portal.gif';
+
+export const copaGifImage = typeof Image !== 'undefined' ? new Image() : null;
+if (copaGifImage) copaGifImage.src = './copa rankin.gif';
 
 function box(c,x,y,w,h,color,shadow=true){
   if(shadow){
@@ -138,7 +144,7 @@ export function makeRoom(){
   drawArrow(620,470,'left','ARMARIO');
   drawArrow(1300,470,'right','MASCOTAS');
   drawArrow(960,370,'up','A LA COCINA');
-  drawArrow(620,670,'left','DON DOMI');
+  drawArrow(620,670,'left','SEÑOR DOMI');
   drawArrow(1300,670,'right','TIENDA');
 
   // Back Wall (y: 0 to 150)
@@ -275,37 +281,39 @@ export function drawStation(c,s,t,active){
 
   // --- 1. STATION BODY ---
   if(id==='portal'){
-    // Massive portal gate
-    box(c,-65,-105,130,140,'#1a2a30');
-    box(c,-54,-95,108,124,'#09161a');
-    
-    // Portal ring
+    // Sombra de vórtice en el piso
     c.save();
-    c.shadowColor='#ffe066';c.shadowBlur=18+Math.sin(t*3)*8;
-    c.strokeStyle='#ffe066';c.lineWidth=5;
-    c.beginPath();c.ellipse(0,-32,34+Math.sin(t*2.5)*3,48,0,0,7);c.stroke();
-    
-    c.strokeStyle='#00e5ff';c.lineWidth=3;
-    c.beginPath();c.ellipse(0,-32,24,38,Math.sin(t)*0.15,0,7);c.stroke();
+    c.fillStyle='rgba(0,0,0,0.45)';
+    c.beginPath();c.ellipse(0,34,74,20,0,0,7);c.fill();
     c.restore();
 
-    // Portal rift core
-    const riftGrad=c.createRadialGradient(0,-32,4,0,-32,32);
-    riftGrad.addColorStop(0,'#ffffff');
-    riftGrad.addColorStop(0.35,'#ffe066');
-    riftGrad.addColorStop(0.7,'#00e5ff');
-    riftGrad.addColorStop(1,'#04121a');
-    c.fillStyle=riftGrad;
-    c.beginPath();c.ellipse(0,-32,20,34,0,0,7);c.fill();
-
-    // Orbiting portal particles
-    for(let i=0;i<8;i++){
-      const ang=t*1.2+i*0.78;
-      c.fillStyle=i%2?'#ffffff':'#ffe066';
-      c.fillRect(Math.sin(ang)*34-2,-32+Math.cos(ang)*46-2,4,4);
+    if (portalGifImage && portalGifImage.complete && portalGifImage.naturalWidth > 0) {
+      c.save();
+      c.imageSmoothingEnabled = false;
+      const pw = 160, ph = 160;
+      const bob = Math.sin(t * 2.8) * 4;
+      c.drawImage(portalGifImage, -pw / 2, -pw / 2 - 28 + bob, pw, ph);
+      c.restore();
+    } else {
+      // Massive portal gate fallback
+      box(c,-65,-105,130,140,'#1a2a30');
+      box(c,-54,-95,108,124,'#09161a');
+      c.save();
+      c.shadowColor='#ffe066';c.shadowBlur=18+Math.sin(t*3)*8;
+      c.strokeStyle='#ffe066';c.lineWidth=5;
+      c.beginPath();c.ellipse(0,-32,34+Math.sin(t*2.5)*3,48,0,0,7);c.stroke();
+      c.strokeStyle='#00e5ff';c.lineWidth=3;
+      c.beginPath();c.ellipse(0,-32,24,38,Math.sin(t)*0.15,0,7);c.stroke();
+      c.restore();
+      const riftGrad=c.createRadialGradient(0,-32,4,0,-32,32);
+      riftGrad.addColorStop(0,'#ffffff');riftGrad.addColorStop(0.35,'#ffe066');riftGrad.addColorStop(0.7,'#00e5ff');riftGrad.addColorStop(1,'#04121a');
+      c.fillStyle=riftGrad;c.beginPath();c.ellipse(0,-32,20,34,0,0,7);c.fill();
+      for(let i=0;i<8;i++){
+        const ang=t*1.2+i*0.78;c.fillStyle=i%2?'#ffffff':'#ffe066';c.fillRect(Math.sin(ang)*34-2,-32+Math.cos(ang)*46-2,4,4);
+      }
+      box(c,-75,32,150,14,'#b2ba99');
+      c.fillStyle='#ff2a44';for(let i=0;i<7;i++)c.fillRect(-70+i*22,34,10,10);
     }
-    box(c,-75,32,150,14,'#b2ba99');
-    c.fillStyle='#ff2a44';for(let i=0;i<7;i++)c.fillRect(-70+i*22,34,10,10); // Warning stripes
   }
   else if(id==='wardrobe'){
     box(c,-60,-82,120,118,'#b94b63');
@@ -355,14 +363,17 @@ export function drawStation(c,s,t,active){
     box(c,-48,18,96,16,'#1a2928');
   }
   else if(id==='npc'){
-    // Don Domi Chef booth
-    drawFood(c,'empanada',0,-18,1.1,t);
-    // Chef hat
-    c.fillStyle='#ffffff';
-    c.fillRect(-22,-62,44,14);c.fillRect(-16,-72,32,14);c.fillRect(-8,-80,16,10);
-    // Hot dog counter
+    // Señor Domi Chef booth
+    if (domiGifImage && domiGifImage.complete && domiGifImage.naturalWidth > 0) {
+      const bob = Math.sin(t * 5) * 3;
+      const dw = 64, dh = 66;
+      c.drawImage(domiGifImage, -dw / 2, -38 - dh / 2 + bob, dw, dh);
+    } else {
+      drawFood(c,'domi',0,-24,1.3,t);
+    }
+    // Mostrador de cocina arcade
     box(c,-68,8,136,28,'#aa5438');
-    text(c,'DON DOMI',0,27,11,'#fff0a8');
+    text(c,'SEÑOR DOMI',0,27,11,'#fff0a8');
     if(!active){
       const float=Math.sin(t*3+1.2)*3;
       c.save();c.translate(36,-78+float);
@@ -375,14 +386,23 @@ export function drawStation(c,s,t,active){
     // Hall of Fame arcade podium
     box(c,-58,-84,116,120,'#4a5482');
     box(c,-48,-74,96,68,'#151c2e');
-    // Trophy
-    c.fillStyle='#ffe066';
-    c.fillRect(-14,-62,28,16);c.fillRect(-8,-46,16,12);c.fillRect(-16,-34,32,6);
-    c.strokeStyle='#b38600';c.lineWidth=2;c.strokeRect(-14,-62,28,16);
-    // Trophy ears
-    c.strokeStyle='#ffe066';c.lineWidth=3;
-    c.beginPath();c.arc(-14,-54,8,1.5,4.7);c.stroke();
-    c.beginPath();c.arc(14,-54,8,4.7,1.5);c.stroke();
+    
+    // Copa animada dorada (copa rankin.gif)
+    if (copaGifImage && copaGifImage.complete && copaGifImage.naturalWidth > 0) {
+      c.save();
+      c.imageSmoothingEnabled = false;
+      const cw = 74, ch = 74;
+      const float = Math.sin(t * 3.2) * 3;
+      c.drawImage(copaGifImage, -cw / 2, -42 - ch / 2 + float, cw, ch);
+      c.restore();
+    } else {
+      c.fillStyle='#ffe066';
+      c.fillRect(-14,-62,28,16);c.fillRect(-8,-46,16,12);c.fillRect(-16,-34,32,6);
+      c.strokeStyle='#b38600';c.lineWidth=2;c.strokeRect(-14,-62,28,16);
+      c.strokeStyle='#ffe066';c.lineWidth=3;
+      c.beginPath();c.arc(-14,-54,8,1.5,4.7);c.stroke();
+      c.beginPath();c.arc(14,-54,8,4.7,1.5);c.stroke();
+    }
     // Marquee scrolling text
     box(c,-64,8,128,20,'#c73e6a');
     text(c,'HALL OF FAME',0,23,9,'#fff0a8');

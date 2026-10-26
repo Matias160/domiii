@@ -8,7 +8,7 @@ const stations=[
   {id:'portal',   x:960,  y:240, label:'ENTRAR AL TURNO', action:'PARTIDA',   color:'#ffe068'},
   {id:'wardrobe', x:400,  y:290, label:'ARMARIO / SKINS', action:'ARMARIO',   color:'#ff5c8a'},
   {id:'pets',     x:1520, y:290, label:'MASCOTAS',        action:'MASCOTAS',  color:'#38ef7d'},
-  {id:'npc',      x:400,  y:760, label:'DON DOMI',        action:'CONSEJOS',  color:'#5ce1e6'},
+  {id:'npc',      x:400,  y:760, label:'SEÑOR DOMI',      action:'CONSEJOS',  color:'#5ce1e6'},
   {id:'ranking',  x:960,  y:820, label:'HISTORIAL',       action:'RECORDS',   color:'#c084fc'},
   {id:'shop',     x:1520, y:760, label:'TIENDA ARCADE',   action:'TIENDA',    color:'#ffd000'},
 ];

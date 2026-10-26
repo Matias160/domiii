@@ -21,7 +21,7 @@ export class Hud {
     this.root.hidden = false;
     this.runBar.hidden = isPaused;
     this.dashControl.hidden = isPaused;
-    this.comboMilestones.hidden = isPaused;
+    this.comboMilestones.hidden = true;
     if (isPaused) {
       this.bossMeter.hidden = true;
       this.eventBanner.hidden = true;

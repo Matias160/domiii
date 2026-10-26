@@ -3049,6 +3049,13 @@ kbd { display: inline-block; border: 1px solid #556771; border-bottom-width: 3px
    SECCIÓN GANASTE CON FINAL.GIF Y RETRO TOASTS CON MINIATURA DE ITEM
    ============================================================================ */
 
+/* Eliminación del elemento de combo en el HUD para despejar el espacio del minimapa */
+#comboMilestones,
+.combo-milestones,
+#comboCount {
+  display: none !important;
+}
+
 /* 1. SECCIÓN GANASTE (VICTORY CELEBRATION) - PIXEL ART PURO SIN LEDS */
 [hidden],
 #victoryCelebration[hidden],

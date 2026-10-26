@@ -1081,10 +1081,10 @@ export class Game {
     const p = state.player;
 
     // Dimensiones y posición del minimapa (ubicado a la izquierda, debajo del contador de combo)
-    const mapW = 124;
-    const mapH = 68;
-    const mapX = 26;
-    const mapY = 82;
+    const mapW = 118;
+    const mapH = 64;
+    const mapX = 14;
+    const mapY = 90;
 
     ctx.save();
     // 1. Marco exterior con estética arcade/pixel
