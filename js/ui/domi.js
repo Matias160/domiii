@@ -531,9 +531,22 @@ export class DomiScreen {
           m.claim();
           this.game.audio.play('levelUp');
           this.game.menu?.prepareAccount?.();
-          this.game.showToast?.(`¡RECOMPENSA OBTENIDA: ${m.rewardName}!`);
+          this.game.showToast?.(`¡RECOMPENSA OBTENIDA: ${m.rewardName}!`, { type: m.rewardType, id: m.rewardId, name: m.rewardName });
           const fb = document.querySelector('#domiFeedback');
-          if (fb) fb.textContent = `¡Excelente trabajo! Desbloqueaste: ${m.rewardName}.`;
+          if (fb) {
+            fb.innerHTML = '';
+            const fbThumb = document.createElement('canvas');
+            fbThumb.width = 24;
+            fbThumb.height = 24;
+            fbThumb.className = 'feedback-item-thumb';
+            try {
+              drawItemPreview(fbThumb, { type: m.rewardType, id: m.rewardId, name: m.rewardName }, profile, 0);
+              fb.append(fbThumb);
+            } catch {}
+            const fbText = document.createElement('span');
+            fbText.textContent = ` ¡Excelente trabajo! Desbloqueaste: ${m.rewardName}.`;
+            fb.append(fbText);
+          }
           this.render();
         };
       } else {

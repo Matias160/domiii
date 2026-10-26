@@ -3043,3 +3043,154 @@ kbd { display: inline-block; border: 1px solid #556771; border-bottom-width: 3px
     grid-template-columns: repeat(3, 1fr) !important;
   }
 }
+
+
+/* ============================================================================
+   SECCIÓN GANASTE CON FINAL.GIF Y RETRO TOASTS CON MINIATURA DE ITEM
+   ============================================================================ */
+
+/* 1. SECCIÓN GANASTE (VICTORY CELEBRATION) */
+.victory-celebration {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  margin: 14px auto 18px !important;
+  width: 100% !important;
+  max-width: 660px !important;
+  padding: 16px 14px !important;
+  background: radial-gradient(circle at center, rgba(38, 26, 12, 0.95) 0%, rgba(12, 16, 20, 0.98) 100%) !important;
+  border: 4px solid #ffd700 !important;
+  box-shadow: 0 0 26px rgba(255, 215, 0, 0.45), inset 0 0 18px rgba(255, 170, 0, 0.25), 6px 6px 0 #000 !important;
+  animation: victoryCelebrationPulse 2.6s ease-in-out infinite alternate !important;
+}
+
+@keyframes victoryCelebrationPulse {
+  0% {
+    border-color: #ffd700;
+    box-shadow: 0 0 20px rgba(255, 215, 0, 0.4), inset 0 0 12px rgba(255, 170, 0, 0.2), 6px 6px 0 #000;
+  }
+  100% {
+    border-color: #ff9900;
+    box-shadow: 0 0 34px rgba(255, 153, 0, 0.65), inset 0 0 22px rgba(255, 100, 0, 0.35), 6px 6px 0 #000;
+  }
+}
+
+.victory-ribbon {
+  font-family: 'Press Start 2P', monospace !important;
+  font-size: 14px !important;
+  color: #ffd700 !important;
+  text-shadow: 2px 2px 0 #000, 0 0 14px #ff8800 !important;
+  letter-spacing: 2px !important;
+  margin-bottom: 12px !important;
+  text-transform: uppercase !important;
+  text-align: center !important;
+}
+
+.victory-gif-container {
+  width: 100% !important;
+  max-width: 600px !important;
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  overflow: hidden !important;
+  border: 3px solid #ffcc00 !important;
+  background: #000 !important;
+  box-shadow: 0 0 18px rgba(255, 204, 0, 0.45), inset 0 0 12px #000 !important;
+  border-radius: 4px !important;
+}
+
+.victory-gif {
+  width: 100% !important;
+  max-width: 580px !important;
+  height: auto !important;
+  max-height: 380px !important;
+  object-fit: contain !important;
+  image-rendering: pixelated !important;
+  display: block !important;
+}
+
+.victory-quote {
+  font-family: 'Press Start 2P', monospace !important;
+  font-size: 9px !important;
+  color: #86e3bf !important;
+  letter-spacing: 1px !important;
+  margin-top: 12px !important;
+  text-shadow: 1px 1px 0 #000 !important;
+  text-align: center !important;
+  line-height: 1.5 !important;
+}
+
+/* 2. TOAST CON MINIATURA DE ITEM */
+.toast.toast--with-item {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 8px 16px !important;
+  border-left: 6px solid #ffd700 !important;
+  border-color: #ffd700 #332200 #332200 #ffd700 !important;
+  background: linear-gradient(180deg, #182329 0%, #0d1519 100%) !important;
+  box-shadow: 0 0 16px rgba(255, 215, 0, 0.35), 4px 4px 0 #000 !important;
+}
+
+.toast-inner-row {
+  display: flex !important;
+  align-items: center !important;
+  gap: 12px !important;
+}
+
+.toast-item-thumb {
+  width: 32px !important;
+  height: 32px !important;
+  border: 2px solid #ffd700 !important;
+  border-radius: 3px !important;
+  background: #081115 !important;
+  image-rendering: pixelated !important;
+  flex-shrink: 0 !important;
+  box-shadow: 0 0 8px rgba(255, 215, 0, 0.3) !important;
+}
+
+.toast-message-text {
+  font-family: 'Press Start 2P', monospace !important;
+  font-size: 9px !important;
+  color: #fff4bd !important;
+  line-height: 1.4 !important;
+  text-shadow: 1px 1px 0 #000 !important;
+}
+
+/* 3. MINIATURA DE ITEM EN GAME OVER (RESULT UNLOCK) */
+.result-unlock-wrapper {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 12px !important;
+  background: rgba(18, 30, 36, 0.92) !important;
+  border: 2px solid #ffd700 !important;
+  box-shadow: 0 0 14px rgba(255, 215, 0, 0.3), 3px 3px 0 #000 !important;
+  padding: 8px 16px !important;
+  margin: 12px auto !important;
+  border-radius: 4px !important;
+  max-width: 540px !important;
+}
+
+.result-unlock-thumb {
+  width: 36px !important;
+  height: 36px !important;
+  border: 2px solid #38bdf8 !important;
+  border-radius: 3px !important;
+  background: #091316 !important;
+  image-rendering: pixelated !important;
+  flex-shrink: 0 !important;
+  box-shadow: 0 0 8px rgba(56, 189, 248, 0.4) !important;
+}
+
+.feedback-item-thumb {
+  width: 24px !important;
+  height: 24px !important;
+  border: 1px solid #ffd700 !important;
+  border-radius: 2px !important;
+  background: #091316 !important;
+  image-rendering: pixelated !important;
+  vertical-align: middle !important;
+  display: inline-block !important;
+  margin-right: 6px !important;
+}

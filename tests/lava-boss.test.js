@@ -1,3 +1,4 @@
+import fs from 'node:fs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { createRunState } from '../js/core/runState.js';
@@ -15,7 +16,9 @@ test('lava boss is registered with colossal stats and bossStyle colossus', () =>
   assert.equal(colossus.boss, true);
   assert.equal(colossus.bossStyle, 'colossus');
   assert.equal(colossus.radius, 80);
-  assert.ok(colossus.hp >= 4000);
+  assert.ok(colossus.hp >= 8000, "Domi Colosal must have reinforced HP >= 8000");
+  assert.ok(colossus.damage >= 30, "Domi Colosal must have increased damage >= 30");
+  assert.ok(colossus.armor >= 1.8, "Domi Colosal must have hardened armor >= 1.8");
 });
 
 test('legendary accessory Corona Magmática Imperial is defined and resolved', () => {
@@ -87,4 +90,12 @@ test('Caldero de Lava and legendary items are marked domiExclusive and recognize
   assert.equal(isOwned({ purchases: ['map:lava'] }, 'map', 'lava'), true);
   assert.equal(isOwned({ purchases: [] }, 'map', 'lava'), false);
   assert.equal(isOwned({ unlockedLava: true }, 'map', 'lava'), true);
+});
+
+
+test('victory celebration section is present in index.html with final.gif', () => {
+  const html = fs.readFileSync('index.html', 'utf8');
+  assert.match(html, /id="victoryCelebration"/);
+  assert.match(html, /id="victoryGif"/);
+  assert.match(html, /src="\.\/final\.gif"/);
 });

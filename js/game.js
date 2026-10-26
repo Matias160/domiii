@@ -1,6 +1,6 @@
 import { Input } from "./core/input.js";
 import { drawDiner, drawFood, drawWeapon } from "./core/art.js";
-import { drawPet } from "./core/presentation.js";
+import { drawPet, drawItemPreview, drawAccessoryIcon } from "./core/presentation.js";
 import { drawWorldProps } from "./core/worldProps.js";
 import { skins } from "./data/skins.js";
 import { phrases } from "./data/phrases.js";
@@ -23,7 +23,7 @@ import { weapons } from './data/weapons.js';
 import { companions } from './entities/Companion.js';
 import {currentAccount,logout,awardRun,grantItem,guestLogin} from './systems/accountSystem.js';
 import {bindAuth} from './ui/authScreen.js';
-import {isOwned} from './data/shop.js';
+import {isOwned, shopItems} from './data/shop.js';
 import {Lobby} from './ui/lobby.js';
 import {Shop} from './ui/shop.js';
 import {DomiScreen} from './ui/domi.js';
@@ -507,6 +507,22 @@ export class Game {
     state.player.skills?.update(delta, state);
 
     updateDirector(state, delta, state.world || this.canvas);
+
+    // Temblor de suspenso tectónico antes de la llegada del Jefe en Caldero de Lava
+    if (state.mapId === 'lava' && state.time < (state.nextBossAt || 2)) {
+      const suspenseRatio = Math.min(1, state.time / (state.nextBossAt || 2));
+      state.shake = Math.max(state.shake || 0, 0.25 + suspenseRatio * 0.35);
+      if (Math.random() < 0.18) {
+        state.rings?.push({
+          x: state.player.x + (Math.random() - 0.5) * 180,
+          y: state.player.y + (Math.random() - 0.5) * 180,
+          radius: 35 + Math.random() * 55,
+          life: 0.55,
+          maxLife: 0.55,
+          color: '#ff3300'
+        });
+      }
+    }
     updatePrimes(state,delta);updateMap(state,delta);
     if (state.bossIntro) {
       state.bossIntro.timer -= delta;
@@ -1188,13 +1204,98 @@ export class Game {
     if (!menu) drawWorldProps(this.ctx, this.state?.mapId || 'diner', time);
   }
 
-  showToast(message) {
-    this.toast.textContent = message;
+  drawLavaBossSuspense(time, nextBossAt) {
+    const ctx = this.ctx;
+    let alpha = 0;
+    if (time < 0.3) {
+      alpha = (time / 0.3) * 0.55;
+    } else if (time < 0.9) {
+      alpha = 0.55 + ((time - 0.3) / 0.6) * 0.40;
+    } else {
+      alpha = 0.95; // Penumbra casi total para máximo suspenso
+    }
+
+    ctx.save();
+    ctx.fillStyle = `rgba(0, 0, 0, ${alpha})`;
+    ctx.fillRect(0, 0, 960, 540);
+
+    // Texto de suspenso volcánico
+    if (alpha >= 0.5) {
+      const pulse = 0.75 + Math.sin(time * 9) * 0.25;
+      ctx.globalAlpha = pulse;
+      ctx.textAlign = 'center';
+
+      ctx.font = '900 12px "Press Start 2P", monospace';
+      ctx.fillStyle = '#ff3300';
+      ctx.fillText('EL SUELO RETUMBA...', 480, 240);
+
+      ctx.font = '900 13px "Press Start 2P", monospace';
+      ctx.fillStyle = '#ffd700';
+      ctx.fillText('¡UNA AMENAZA COLOSAL EMERGE DEL MAGMA!', 480, 275);
+
+      // Chispas ígneas en la penumbra
+      ctx.fillStyle = '#ff6600';
+      const tick = Math.floor(time * 24);
+      for (let i = 0; i < 9; i++) {
+        const px = (tick * 61 + i * 107) % 960;
+        const py = 540 - ((tick * 37 + i * 83) % 250);
+        ctx.fillRect(px, py, 3, 3);
+      }
+    }
+    ctx.restore();
+  }
+
+  showToast(message, itemData = null) {
+    if (!this.toast) return;
+    this.toast.innerHTML = '';
     this.toast.hidden = false;
+
+    // Buscar ítem por coincidencia en shopItems si no fue pasado explícitamente
+    let targetItem = itemData;
+    if (!targetItem && typeof message === 'string') {
+      const match = shopItems.find(it => it.name && message.toLowerCase().includes(it.name.toLowerCase()));
+      if (match) targetItem = match;
+    }
+
+    if (targetItem) {
+      this.toast.classList.add('toast--with-item');
+      const row = document.createElement('div');
+      row.className = 'toast-inner-row';
+
+      const thumb = document.createElement('canvas');
+      thumb.width = 30;
+      thumb.height = 30;
+      thumb.className = 'toast-item-thumb';
+
+      try {
+        const profile = currentAccount() || {};
+        if (targetItem.boss || targetItem.bossStyle || targetItem.radius) {
+          const c = thumb.getContext('2d');
+          c.imageSmoothingEnabled = false;
+          drawFood(c, targetItem.id, 15, 15, 0.55, 0);
+        } else {
+          drawItemPreview(thumb, targetItem, profile, 0);
+        }
+        row.append(thumb);
+      } catch (e) {
+        console.warn('Toast item thumb draw warning:', e);
+      }
+
+      const txt = document.createElement('span');
+      txt.className = 'toast-message-text';
+      txt.textContent = message;
+      row.append(txt);
+
+      this.toast.append(row);
+    } else {
+      this.toast.classList.remove('toast--with-item');
+      this.toast.textContent = message;
+    }
+
     clearTimeout(this.toastTimer);
     this.toastTimer = setTimeout(() => {
       this.toast.hidden = true;
-    }, 1800);
+    }, targetItem ? 2800 : 1800);
   }
 
   announceBoss() {
@@ -1202,22 +1303,24 @@ export class Game {
     const boss = this.state.enemies.find(enemy=>enemy.isBoss);
     if (!boss) return;
     const bossName = boss.type.name.toUpperCase();
-    this.showToast('JEFE: ' + bossName);
+    this.showToast('JEFE: ' + bossName, boss.type);
+
+    const isColossus = boss.type.bossStyle === 'colossus';
 
     // Activamos la animación de aparición cinemática
     this.state.bossIntro = {
       bossName,
       bossType: boss.type.id,
-      timer: 3.2,
-      duration: 3.2
+      timer: isColossus ? 3.8 : 3.2,
+      duration: isColossus ? 3.8 : 3.2
     };
 
     // Temblor de pantalla y ondas de impacto al aparecer el jefe
-    this.state.shake = 0.55;
-    this.state.rings.push({ x: boss.x, y: boss.y, radius: 240, life: 1.2, maxLife: 1.2, color: '#ff3344' });
-    this.state.rings.push({ x: boss.x, y: boss.y, radius: 150, life: 0.9, maxLife: 0.9, color: '#ffcc00' });
-    burst(this.state, boss.x, boss.y, '#ff3344', 40, 260);
-    burst(this.state, boss.x, boss.y, '#ffcc00', 35, 200);
+    this.state.shake = isColossus ? 0.85 : 0.55;
+    this.state.rings.push({ x: boss.x, y: boss.y, radius: isColossus ? 340 : 240, life: 1.4, maxLife: 1.4, color: '#ff2200' });
+    this.state.rings.push({ x: boss.x, y: boss.y, radius: isColossus ? 220 : 150, life: 1.1, maxLife: 1.1, color: '#ffcc00' });
+    burst(this.state, boss.x, boss.y, '#ff3344', isColossus ? 60 : 40, isColossus ? 340 : 260);
+    burst(this.state, boss.x, boss.y, '#ffcc00', isColossus ? 50 : 35, isColossus ? 260 : 200);
   }
 
   formatTime(seconds) {

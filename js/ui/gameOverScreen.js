@@ -2,6 +2,7 @@ import { phrases } from "../data/phrases.js";
 import { formatTime } from "./hud.js";
 import {currentAccount} from '../systems/accountSystem.js';
 import {shopItems,isOwned} from '../data/shop.js';
+import {drawItemPreview} from '../core/presentation.js';
 
 export function nextUnlock(profile){
   if(!profile)return '';
@@ -16,6 +17,8 @@ export class GameOverScreen {
     this.game = game;
     this.phrase = document.querySelector("#gameOverPhrase");
     this.stats = document.querySelector("#gameOverStats");
+    this.victorySection = document.querySelector("#victoryCelebration");
+    this.victoryGif = document.querySelector("#victoryGif");
     document.querySelector("#retryButton").addEventListener("click", () => game.restartLastRun());
     document.querySelector("#gameOverMenuButton").addEventListener("click", () => game.showScreen("lobbyScreen"));
   }
@@ -31,6 +34,13 @@ export class GameOverScreen {
       bannerElem.textContent = bannerText;
       bannerElem.style.color = bannerColor;
       bannerElem.className = `gameover-pixel-banner ${isVictory ? 'gameover-pixel-banner--win' : 'gameover-pixel-banner--loss'}`;
+    }
+
+    if (this.victorySection) {
+      this.victorySection.hidden = !isVictory;
+      if (isVictory && this.victoryGif) {
+        this.victoryGif.src = './final.gif?v=' + Date.now();
+      }
     }
 
     document.querySelector('#resultTitle').textContent = isVictory ? '¡COMBO COMPLETO!' : isAbandoned ? 'TURNO CERRADO' : '¡TE HICIERON COMPLETO!';
@@ -56,7 +66,32 @@ export class GameOverScreen {
       <p><strong>Modo:</strong> ${result.mode}</p>
       <p><strong>Compañero:</strong> ${result.companion}</p>
     `;
-    const unlock=document.createElement('p');unlock.className='result-unlock';unlock.textContent=nextUnlock(currentAccount());this.stats.append(unlock);
+
+    const profile = currentAccount();
+    const unlockText = nextUnlock(profile);
+    if (unlockText) {
+      const nextItem = profile ? shopItems.filter(item => item.cost > 0 && !isOwned(profile, item.type, item.id)).sort((a, b) => a.cost - b.cost)[0] : null;
+      const unlockWrapper = document.createElement('div');
+      unlockWrapper.className = 'result-unlock-wrapper';
+
+      if (nextItem) {
+        const thumb = document.createElement('canvas');
+        thumb.width = 36;
+        thumb.height = 36;
+        thumb.className = 'result-unlock-thumb';
+        try {
+          drawItemPreview(thumb, nextItem, profile, 0);
+          unlockWrapper.append(thumb);
+        } catch {}
+      }
+
+      const unlock = document.createElement('p');
+      unlock.className = 'result-unlock';
+      unlock.textContent = unlockText;
+      unlockWrapper.append(unlock);
+      this.stats.append(unlockWrapper);
+    }
+
     const unlocked = document.querySelector('#newAchievements');unlocked.replaceChildren();
     for (const name of result.newAchievements || []) {
       const item = document.createElement('p');item.textContent='NUEVO LOGRO / '+name;unlocked.append(item);

@@ -58,7 +58,8 @@ export class Enemy {
       // Fase 2 al 65% de vida
       if (!this.phaseTwo && this.hp <= this.maxHp * 0.65) {
         this.phaseTwo = true;
-        this.speed *= 1.14;
+        this.speed *= this.type.bossStyle === 'colossus' ? 1.25 : 1.14;
+        this.armor = (this.armor || 1) * (this.type.bossStyle === 'colossus' ? 1.35 : 1);
         this.volleyTimer = Math.min(this.volleyTimer, 1.0);
         if (state) {
           state.directorNotice = `${this.type.name.toUpperCase()} / FASE 2`;
@@ -70,10 +71,10 @@ export class Enemy {
       // Fase 3 (FURIA MAXIMA) al 30% de vida
       if (!this.phaseThree && this.hp <= this.maxHp * 0.30) {
         this.phaseThree = true;
-        this.speed *= 1.18;
-        this.armor = (this.armor || 1) * 1.25;
-        this.volleyTimer = 0.5;
-        this.specialTimer = 0.6;
+        this.speed *= this.type.bossStyle === 'colossus' ? 1.28 : 1.18;
+        this.armor = (this.armor || 1) * (this.type.bossStyle === 'colossus' ? 1.45 : 1.25);
+        this.volleyTimer = 0.45;
+        this.specialTimer = 0.5;
         if (state) {
           state.directorNotice = `¡${this.type.name.toUpperCase()} EN FURIA TOTAL!`;
           state.shake = Math.max(state.shake, 0.48);
@@ -121,7 +122,7 @@ export class Enemy {
               x: this.x, y: this.y,
               vx: Math.cos(a) * 285, vy: Math.sin(a) * 285,
               radius: 10,
-              damage: this.damage * 0.55,
+              damage: this.damage * 0.75,
               life: 3.8,
               color: '#ff5500'
             });
@@ -150,7 +151,7 @@ export class Enemy {
             x: this.x, y: this.y,
             vx: Math.cos(angle) * bulletSpeed, vy: Math.sin(angle) * bulletSpeed,
             radius: isColossus ? 8 : (this.phaseThree ? 7 : 6),
-            damage: this.damage * (isColossus ? 0.45 : 0.45),
+            damage: this.damage * (isColossus ? 0.65 : 0.45),
             life: 4.2,
             color: bulletColor
           });
@@ -178,7 +179,7 @@ export class Enemy {
             radius: kind === 'shockwave' ? 145 : kind === 'meteor' ? 88 : kind === 'freeze' ? 120 : 44,
             delay: kind === 'laser_sweep' ? 0.85 : kind === 'snipe' ? 0.75 : kind === 'meteor' ? 1.0 : 0.85,
             life: kind === 'shockwave' ? 1.15 : 1.25,
-            damage: this.damage * (kind === 'laser_sweep' ? 1.05 : kind === 'snipe' ? 0.65 : kind === 'meteor' ? 1.35 : 0.75),
+            damage: this.damage * (kind === 'laser_sweep' ? 1.25 : kind === 'snipe' ? 0.65 : kind === 'meteor' ? 1.6 : 0.75),
             triggered: false
           });
         }
@@ -483,5 +484,5 @@ export const enemyTypes = [
   { id: "fries", name: "La Papota Suprema", hp: 1120, speed: 80, damage: 28, score: 1050, xp: 75, radius: 46, color: "#ffdd61", boss: true, bossStyle: 'fast' },
   { id: "pizza", name: "Don Muzza el Padrino", hp: 1350, speed: 60, damage: 32, score: 1350, xp: 90, radius: 52, color: "#e63946", boss: true, bossStyle: 'heavy' },
   { id: "icecream", name: "Emperador Subcero", hp: 1080, speed: 66, damage: 24, score: 1200, xp: 82, radius: 44, color: "#a855f7", boss: true, bossStyle: 'frost' },
-  { id: "lava_boss", name: "Domi Colosal", hp: 5200, speed: 60, damage: 14, score: 8000, xp: 300, radius: 80, color: "#ff2200", boss: true, bossStyle: 'colossus' },
+  { id: "lava_boss", name: "Domi Colosal", hp: 8800, speed: 64, damage: 32, score: 10000, xp: 500, radius: 80, color: "#ff2200", boss: true, bossStyle: 'colossus', armor: 1.85 },
 ];
