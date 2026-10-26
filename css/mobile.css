@@ -480,3 +480,126 @@
     gap: 6px !important;
   }
 }
+
+/* ==========================================================================
+   BLOQUEADOR DE ORIENTACIÓN: OBLIGATORIO HORIZONTAL EN MÓVILES
+   ========================================================================== */
+
+.rotate-device-overlay {
+  display: none;
+}
+
+@media screen and (orientation: portrait) and (max-width: 950px) {
+  .rotate-device-overlay {
+    display: flex !important;
+    position: fixed !important;
+    inset: 0 !important;
+    width: 100vw !important;
+    height: 100dvh !important;
+    background: radial-gradient(circle at center, #102126 0%, #070e10 100%) !important;
+    z-index: 999999 !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 24px !important;
+    box-sizing: border-box !important;
+    text-align: center !important;
+  }
+}
+
+.rotate-card {
+  max-width: 360px;
+  width: 100%;
+  background: #0f1d21;
+  border: 3px solid #38bdf8;
+  border-bottom: 5px solid #0369a1;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8), 0 0 24px rgba(56, 189, 248, 0.35);
+  border-radius: 6px;
+  padding: 30px 22px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  color: #f1f5f9;
+}
+
+.rotate-icon-box {
+  width: 96px;
+  height: 96px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #16363f 0%, #09171b 100%);
+  border: 2px dashed #22d3ee;
+  display: grid;
+  place-items: center;
+  box-shadow: 0 0 20px rgba(34, 211, 238, 0.3);
+}
+
+.animated-phone {
+  transform-origin: 32px 32px;
+  animation: rotate-phone-cycle 2.8s infinite ease-in-out;
+}
+
+@keyframes rotate-phone-cycle {
+  0%, 15% {
+    transform: rotate(0deg);
+  }
+  45%, 75% {
+    transform: rotate(90deg);
+  }
+  100% {
+    transform: rotate(0deg);
+  }
+}
+
+.animated-arrow {
+  animation: pulse-arrow 1.4s infinite alternate ease-in-out;
+}
+
+@keyframes pulse-arrow {
+  from { opacity: 0.4; }
+  to { opacity: 1; }
+}
+
+.rotate-tag {
+  font: 900 10px monospace;
+  letter-spacing: 1px;
+  color: #ffe066;
+  background: #34280f;
+  border: 1px solid #eab308;
+  padding: 4px 10px;
+  border-radius: 3px;
+}
+
+.rotate-card h2 {
+  font-size: 24px !important;
+  font-weight: 900 !important;
+  color: #fff !important;
+  margin: 0 !important;
+  text-shadow: 0 0 12px rgba(56, 189, 248, 0.5);
+}
+
+.rotate-card p {
+  font-size: 13px;
+  line-height: 1.5;
+  color: #94a3b8;
+  margin: 0;
+}
+
+.rotate-card p b {
+  color: #38bdf8;
+}
+
+.rotate-hint {
+  background: rgba(14, 30, 36, 0.7);
+  border-left: 3px solid #ffe066;
+  padding: 8px 12px;
+  font-size: 11px;
+  color: #cbd5e1;
+  text-align: left;
+  border-radius: 2px;
+}
+
+.rotate-fullscreen-btn {
+  width: 100%;
+  margin-top: 6px;
+  min-height: 44px;
+}

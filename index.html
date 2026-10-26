@@ -525,6 +525,33 @@
       <div id="eventBanner" class="event-banner" hidden><span id="eventName"></span><b id="eventTime"></b></div>
 
       <div id="toast" class="toast" role="status" hidden></div>
+
+      <!-- Bloqueador de orientación obligatorio para móviles (solo horizontal) -->
+      <div id="rotateDeviceOverlay" class="rotate-device-overlay" aria-live="assertive">
+        <div class="rotate-card">
+          <div class="rotate-icon-box">
+            <svg class="rotate-phone-svg" viewBox="0 0 64 64" width="72" height="72">
+              <g class="animated-phone">
+                <rect x="20" y="8" width="24" height="48" rx="4" fill="#0d1f23" stroke="#38bdf8" stroke-width="2.5" />
+                <rect x="23" y="14" width="18" height="34" rx="2" fill="#ffe066" />
+                <circle cx="32" cy="51" r="2" fill="#38bdf8" />
+                <line x1="28" y1="11" x2="36" y2="11" stroke="#38bdf8" stroke-width="2" stroke-linecap="round" />
+              </g>
+              <path class="animated-arrow" d="M 12 36 A 22 22 0 0 1 50 18" fill="none" stroke="#22d3ee" stroke-width="3" stroke-linecap="round" stroke-dasharray="6 3" />
+              <polygon class="animated-arrowhead" points="52,14 50,23 43,17" fill="#22d3ee" />
+            </svg>
+          </div>
+          <span class="rotate-tag">MODO HORIZONTAL REQUERIDO</span>
+          <h2>GIRÁ TU TELÉFONO</h2>
+          <p>Para jugar a <b>DOMI 2: PANCHO</b> debes poner el dispositivo en posición horizontal.</p>
+          <div class="rotate-hint">
+            <small>Activá el giro automático en los ajustes de tu celular si la pantalla no gira sola.</small>
+          </div>
+          <button type="button" id="rotateFullscreenBtn" class="pixel-button pixel-button--green rotate-fullscreen-btn">
+            <span>PANTALLA COMPLETA</span>
+          </button>
+        </div>
+      </div>
     </main>
 
     <script src="./node_modules/lucide/dist/umd/lucide.min.js"></script>

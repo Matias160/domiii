@@ -300,8 +300,33 @@ export class TouchControls {
     });
 
     // Resize / orientación
-    window.addEventListener('resize', () => this.updateVisibility());
-    window.addEventListener('orientationchange', () => setTimeout(() => this.updateVisibility(), 150));
+    const handleOrientation = () => {
+      const isPortrait = (window.innerHeight > window.innerWidth) && (window.innerWidth <= 950);
+      if (isPortrait && this.game.running) {
+        this.game.pause();
+      }
+      this.updateVisibility();
+    };
+
+    window.addEventListener('resize', handleOrientation);
+    window.addEventListener('orientationchange', () => setTimeout(handleOrientation, 150));
+
+    // Botón de pantalla completa / bloqueo horizontal
+    const fsBtn = document.querySelector('#rotateFullscreenBtn');
+    if (fsBtn) {
+      fsBtn.addEventListener('click', async () => {
+        try {
+          if (!document.fullscreenElement && document.documentElement.requestFullscreen) {
+            await document.documentElement.requestFullscreen();
+          }
+          if (screen.orientation?.lock) {
+            await screen.orientation.lock('landscape');
+          }
+        } catch {
+          // Ignorar restricciones del navegador si no se permite bloqueo programático
+        }
+      });
+    }
   }
 
   onScreenChange(screenId) {
