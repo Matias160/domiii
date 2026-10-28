@@ -354,6 +354,14 @@ export function drawStation(c,s,t,active){
     box(c,-48,18,96,16,'#1a2928');
   }
   else if(id==='desk'){
+    // Si el jugador está cerca o pasa el mouse por encima, resaltar el puesto con borde neón
+    if(active){
+      c.save();
+      c.strokeStyle='#7dd3fc';
+      c.lineWidth=2;
+      c.strokeRect(-78,-108,156,146);
+      c.restore();
+    }
     // Mostrador de registro de socios: recepcionista tecleando, monitor vivo, timbre y carnets
     box(c,-64,-104,128,24,'#14223a');
     const neonOn=Math.sin(t*3)>-0.6;

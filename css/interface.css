@@ -1305,10 +1305,47 @@
   .run-tutorial, .run-tutorial__keys kbd, .prime-intro__card, .prime-intro__key, .prime-intro__eyebrow { animation: none !important; }
 }
 
-/* Botón de registro en la cabecera del local (solo invitados) */
-.lobby-register { border-color: #3aa8d8 !important; background: #10283a !important; color: #7dd3fc !important; min-width: 0 !important; }
+/* Botón de registro y cuenta en la cabecera del local */
+.lobby-register {
+  border: 2px solid #3aa8d8 !important;
+  background: #10283a !important;
+  color: #7dd3fc !important;
+  min-width: 0 !important;
+  cursor: pointer !important;
+  transition: transform 0.18s cubic-bezier(0.2, 0.8, 0.2, 1), border-color 0.18s, background 0.18s, box-shadow 0.18s !important;
+}
 .lobby-register[hidden] { display: none !important; }
 .lobby-register > span { font: bold 8px monospace; }
+.lobby-register:hover {
+  border-color: #38bdf8 !important;
+  background: #173b5c !important;
+  color: #f0f9ff !important;
+  box-shadow: 0 0 14px rgba(56, 189, 248, 0.65), 0 2px 0 #000 !important;
+  transform: translateY(-2px) !important;
+}
+.lobby-register:active {
+  transform: translateY(1px) !important;
+  box-shadow: 0 0 6px rgba(56, 189, 248, 0.35) !important;
+}
+
+.lobby-achievements {
+  border: 2px solid #8b7d48 !important;
+  background: #28281d !important;
+  color: #ffe078 !important;
+  cursor: pointer !important;
+  transition: transform 0.18s cubic-bezier(0.2, 0.8, 0.2, 1), border-color 0.18s, background 0.18s, box-shadow 0.18s !important;
+}
+.lobby-achievements:hover {
+  border-color: #ffd000 !important;
+  background: #3c3822 !important;
+  color: #fffde6 !important;
+  box-shadow: 0 0 14px rgba(255, 208, 0, 0.55), 0 2px 0 #000 !important;
+  transform: translateY(-2px) !important;
+}
+.lobby-achievements:active {
+  transform: translateY(1px) !important;
+  box-shadow: 0 0 6px rgba(255, 208, 0, 0.25) !important;
+}
 
 /* Tutorial más visible: tarjeta grande arriba al centro, con título, teclas grandes y barra de progreso */
 .run-tutorial {

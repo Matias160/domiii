@@ -116,7 +116,10 @@ export class Game {
     });
     document.querySelector('#resumeButton').addEventListener('click', () => this.resume());
     document.querySelector('#primeIntroButton')?.addEventListener('click', () => this.closePrimeIntro(true));
-    document.querySelector('#lobbyRegister')?.addEventListener('click', () => this.openRegistration());
+    document.querySelector('#lobbyRegister')?.addEventListener('click', () => {
+      this.audio?.play('confirm');
+      this.openRegistration();
+    });
     document.querySelector('#lobbyHelp')?.addEventListener('click', () => {
       this.audio?.play('navigate');
       this.showScreen('onboardingScreen');
@@ -125,8 +128,7 @@ export class Game {
       this.audio?.play('door_bell');
       this.showScreen('lobbyScreen');
     });
-    // Abrir la guía de controles agranda el selector: se vuelve a ajustar para que siga sin scroll
-    document.querySelector('#setupScreen details')?.addEventListener('toggle', () => this.menu?.fitSetup?.());
+    // No alterar zoom ni dimensiones al abrir o cerrar la guía de controles
     document.querySelector('#abandonButton').addEventListener('click', () => this.endRun('abandoned'));
     // Trucos secretos: escribir "domilava" fuera de partida (o Ctrl+Shift+L) desbloquea el Caldero de Lava;
     // escribir "killboss" o "matar" en partida (o Ctrl+Shift+K) liquida al jefe. También desde la consola.

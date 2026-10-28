@@ -314,14 +314,21 @@ export class MenuScreen {
     const screen = document.querySelector('#setupScreen');
     const panel = screen?.querySelector('.setup-panel');
     if (!panel || !screen.classList.contains('screen--active')) return;
+    const details = panel.querySelector('.controls-guide');
+    const wasOpen = details?.open;
+    if (wasOpen) details.open = false;
     panel.style.zoom = '1';
     const style = getComputedStyle(screen);
     const availableH = screen.clientHeight - parseFloat(style.paddingTop) - parseFloat(style.paddingBottom);
     const availableW = screen.clientWidth - parseFloat(style.paddingLeft) - parseFloat(style.paddingRight);
     const neededH = panel.scrollHeight, neededW = panel.scrollWidth;
-    if (!neededH || !neededW || availableH <= 0) return;
+    if (!neededH || !neededW || availableH <= 0) {
+      if (wasOpen) details.open = true;
+      return;
+    }
     const zoom = Math.max(0.45, Math.min(1.5, availableH / neededH, availableW / neededW));
     panel.style.zoom = String(Math.floor(zoom * 100) / 100);
+    if (wasOpen) details.open = true;
   }
 
   restoreSetup() {

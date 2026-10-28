@@ -1,4 +1,4 @@
-import { login, register, guestLogin, currentAccount, logout } from '../systems/accountSystem.js';
+import { login, register, guestLogin, currentAccount, logout, isGuest } from '../systems/accountSystem.js';
 
 export function bindAuth(game) {
   const form = document.querySelector('#authForm');

@@ -39,6 +39,10 @@ export class Lobby {
     this.canvas.addEventListener('click',event=>{
       const point=this.point(event);if(!point)return;
       const station=stations.find(s=>Math.abs(s.x-point.x)<85&&point.y>s.y-90&&point.y<s.y+90);
+      if(station && Math.hypot(station.x-this.x,(station.y+40)-this.y)<140){
+        this.activate(station.id);
+        return;
+      }
       this.destination=station?{x:station.x,y:Math.min(990,station.y+80),station:station.id}:{x:Math.max(90,Math.min(1830,point.x)),y:Math.max(180,Math.min(1010,point.y))};
       this.game.audio.play('navigate');
     });
