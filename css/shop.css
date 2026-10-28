@@ -243,7 +243,7 @@
   object-fit: cover;
   object-position: center;
   display: block;
-  image-rendering: auto;
+  image-rendering: pixelated;
   transition: transform 0.3s ease;
 }
 .onboarding-card:hover .onboarding-img {

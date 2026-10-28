@@ -1416,8 +1416,18 @@
   .splash-burgos__border { stroke-dashoffset: 0; }
 }
 
-/* Selector "Arma tu combo": nunca scrollea; el panel se escala para entrar entero (menuScreen.fitSetup) */
-#setupScreen.screen--active { overflow: hidden !important; display: grid !important; place-items: center !important; }
+/* Selector "Arma tu combo": scrollable en móviles y centrado en pantallas grandes */
+#setupScreen {
+  overflow-y: auto !important;
+  -webkit-overflow-scrolling: touch;
+}
+#setupScreen.screen--active {
+  overflow-y: auto !important;
+  -webkit-overflow-scrolling: touch;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+}
 #setupScreen .setup-panel { max-height: none !important; overflow: visible !important; }
 /* El rótulo "ORDEN / NUEVA PARTIDA" tenía margen negativo y se encimaba con el título */
 #setupScreen .setup-header .eyebrow { margin-bottom: 8px !important; }

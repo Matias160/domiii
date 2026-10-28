@@ -124,7 +124,7 @@ export class GameOverScreen {
       const bannerColor = isVictory ? '#00ff88' : isAbandoned ? '#ffcc00' : '#ff2244';
       bannerElem.textContent = bannerText;
       bannerElem.style.color = bannerColor;
-      bannerElem.className = `gameover-pixel-banner ${isVictory ? 'gameover-pixel-banner--win' : 'gameover-pixel-banner--loss'}`;
+      bannerElem.className = `gameover-pixel-banner ${isVictory ? 'gameover-pixel-banner--win' : isAbandoned ? 'gameover-pixel-banner--abandoned' : 'gameover-pixel-banner--loss'}`;
     }
 
     if (eyebrowElem) {
@@ -153,7 +153,7 @@ export class GameOverScreen {
           <span class="result-summary-label">${isRecord ? '¡NUEVO RÉCORD!' : 'PUNTOS GANADOS'}</span>
           <div class="result-points">
             <b>+${Math.max(0, Math.floor(result.score))} PT</b>
-            <i class="result-coin" aria-hidden="true"><em></em></i>
+            <i class="result-coin" aria-hidden="true"><span class="result-coin-glyph">$</span></i>
           </div>
           <span class="result-summary-best">Tu mejor marca: ${Math.max(previousBest, result.score)}</span>
         </div>
