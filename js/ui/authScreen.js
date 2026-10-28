@@ -35,9 +35,6 @@ export function bindAuth(game) {
         statusDesc.textContent = `¡Bienvenido al club, ${account?.name}! Tu cuenta está activa y tu progreso se guardará en este navegador.`;
       }
     }
-    if (eyebrow) {
-      eyebrow.innerHTML = `<i data-lucide="sparkles"></i> BIENVENIDO AL TURNO`;
-    }
   }
 
   function setMode(newMode, clearError = true) {
@@ -46,9 +43,9 @@ export function bindAuth(game) {
     const isSwitching = mode === 'switch';
     const curr = currentAccount();
 
-    if (isSwitching && curr) {
-      document.querySelector('#authTitle').textContent = `Cambiar cuenta (Actual: ${curr.name})`;
-      submit.textContent = 'CAMBIAR A ESTA CUENTA';
+    if (isSwitching && curr && !isGuest()) {
+      document.querySelector('#authTitle').textContent = `Registro de Socios`;
+      submit.textContent = 'ENTRAR / CAMBIAR';
       switchMode.textContent = 'Crear cuenta nueva';
     } else {
       document.querySelector('#authTitle').textContent = signingUp ? 'Creá tu cuenta' : 'Entrá al club';
@@ -64,11 +61,15 @@ export function bindAuth(game) {
   // El escritorio de registro del local abre esta pantalla
   game.openAuth = (startMode = 'register') => {
     setMode(startMode);
+    const curr = currentAccount();
     if (name) {
-      name.value = '';
+      name.value = (curr && !isGuest()) ? curr.name : '';
     }
     game.showScreen('authScreen');
-    setTimeout(() => name?.focus(), 50);
+    setTimeout(() => {
+      name?.focus();
+      if (name?.value) name.select();
+    }, 50);
   };
 
   switchMode?.addEventListener('click', () => {

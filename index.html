@@ -68,13 +68,11 @@
       <!-- Pantalla de Introducción / Bienvenida -->
       <section id="onboardingScreen" class="screen onboarding-screen" aria-labelledby="onboardingTitle">
         <div class="screen__panel onboarding-panel">
-          <p class="eyebrow"><i data-lucide="sparkles"></i> BIENVENIDO AL TURNO</p>
           <h2 id="onboardingTitle">HOLA, <span id="onboardingUserName">PANCHO</span></h2>
           <div id="onboardingStatusBox" class="onboarding-status-box">
             <span id="onboardingStatusBadge" class="onboarding-status-badge">✓ SOCIO REGISTRADO CON ÉXITO</span>
             <span id="onboardingStatusDesc" class="onboarding-status-desc">Tu tarjeta de socio está lista. Tu progreso y monedas quedan guardados en este navegador.</span>
           </div>
-          <p class="onboarding-subtitle">Guía rápida para sobrevivir y dominar el mostrador.</p>
 
           <div class="onboarding-cards">
             <!-- Tarjeta 1 -->
@@ -130,6 +128,7 @@
             <div class="shop-balance"><small>TUS PUNTOS</small><span class="wallet"><i data-lucide="coins"></i><b id="shopBank">0</b><small>PT</small></span></div>
           </header>
           <div id="shopTabs" class="shop-tabs" role="group" aria-label="Categorías de artículos"></div>
+          <div id="shopLockedNotice" class="domi-guest-locked-notice" style="text-align:center;padding:48px 24px;background:#111a20;border:3px solid #284452;border-radius:4px;margin:24px auto;max-width:580px;box-shadow:0 0 35px rgba(0,0,0,0.85);" hidden></div>
           <div class="shop-layout"><div class="shop-catalog"><div class="shop-catalog-heading"><h3 id="shopCategory">Personajes</h3><span id="shopCount" role="status"></span></div><div id="shopGrid" class="shop-grid"></div></div><aside id="shopDetail" class="shop-detail" aria-label="Probador del artículo"></aside></div>
           <p id="shopFeedback" class="shop-feedback" role="status" aria-live="polite"></p>
         </div>

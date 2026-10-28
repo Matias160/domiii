@@ -47,7 +47,33 @@ export class Shop{
     document.querySelector('#shopSubtitle').textContent=this.mode==='pets'?'Conocé qué hace cada compañero y seleccioná el tuyo.':this.ownedOnly?'Tus personajes, sus características y tus accesorios.':'Cuatro categorías. Lo que ya tenés y lo que te falta descubrir.';
     document.querySelector('.shop-balance').hidden=this.ownedOnly;
     document.querySelector('#shopBank').textContent=profile.bank.toLocaleString('es-AR');
-    const tabsRoot=document.querySelector('#shopTabs');tabsRoot.replaceChildren();
+
+    const lockedBox = document.querySelector('#shopLockedNotice');
+    const layout = document.querySelector('.shop-layout');
+    const tabsRoot = document.querySelector('#shopTabs');
+
+    if (isGuest()) {
+      if (tabsRoot) tabsRoot.hidden = true;
+      if (layout) layout.hidden = true;
+      if (lockedBox) {
+        lockedBox.hidden = false;
+        lockedBox.innerHTML = `
+          <div style="font-size:38px;margin-bottom:16px;">📜🔒</div>
+          <h3 style="font-family:'Press Start 2P',monospace;font-size:13px;color:#facc15;margin:0 0 16px;line-height:1.5;">EXCLUSIVO PARA SOCIOS REGISTRADOS</h3>
+          <p style="font-family:'Trebuchet MS',Arial,sans-serif;font-size:14px;color:#cbd5e1;line-height:1.6;margin:0 0 24px;">La tienda, los accesorios y las mascotas de combate solo están disponibles para socios del club. ¡Creá tu carnet en el mostrador para desbloquearlos y guardar tus compras y equipo!</p>
+          <button id="shopGuestDeskBtn" type="button" class="pixel-button pixel-button--green" style="padding:14px 28px;font-size:12px;">IR A LA CABINA DE REGISTRO</button>
+        `;
+        lockedBox.querySelector('#shopGuestDeskBtn')?.addEventListener('click', () => {
+          this.game.openRegistration();
+        });
+      }
+      return;
+    } else {
+      if (lockedBox) lockedBox.hidden = true;
+      if (layout) layout.hidden = false;
+    }
+
+    tabsRoot.replaceChildren();
     const visibleTabs=tabs.filter(([id])=>this.mode==='store'||(this.mode==='pets'?id==='pet':['skin','accessory'].includes(id)));
     tabsRoot.hidden=this.mode==='pets';
     for(const [id,label,symbol] of visibleTabs){

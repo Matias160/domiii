@@ -149,20 +149,28 @@ export class GameOverScreen {
       this.stats.style.display = '';
       const isRecord = result.score > previousBest;
       this.stats.innerHTML = `
-        <div class="result-summary"><span>${isRecord?'¡NUEVO RÉCORD!':'PUNTOS GANADOS'}</span><div class="result-points"><b>+${Math.max(0,Math.floor(result.score))} PT</b><i class="result-coin" aria-hidden="true"><em></em></i></div><span>Tu mejor marca: ${Math.max(previousBest,result.score)}</span></div>
-        <p><strong>Tiempo:</strong> ${formatTime(result.time)}</p>
-        <p><strong>Enemigos derrotados:</strong> ${result.kills}</p>
-        <p><strong>Jefes derrotados:</strong> ${result.bossesKilled || 0}</p>
-        <p><strong>Objetos recogidos:</strong> ${Object.values(result.pickups || {}).reduce((sum, count) => sum + count, 0)}</p>
-        <p><strong>Recorrido:</strong> ${Math.floor((result.distance || 0) / 100)} m</p>
-        <p><strong>Dificultad:</strong> ${result.difficulty}</p>
-        <p><strong>Nivel alcanzado:</strong> ${result.level}</p>
-        <p><strong>Skin:</strong> ${result.skin}</p>
-        <p><strong>Arma:</strong> ${result.weapon}</p>
-        <p><strong>Récord anterior:</strong> ${previousBest}</p>
-        <p><strong>Mejor combo:</strong> ${result.peakCombo || 0} KOs</p>
-        <p><strong>Modo:</strong> ${result.mode}</p>
-        <p><strong>Compañero:</strong> ${result.companion}</p>
+        <div class="result-summary">
+          <span class="result-summary-label">${isRecord ? '¡NUEVO RÉCORD!' : 'PUNTOS GANADOS'}</span>
+          <div class="result-points">
+            <b>+${Math.max(0, Math.floor(result.score))} PT</b>
+            <i class="result-coin" aria-hidden="true"><em></em></i>
+          </div>
+          <span class="result-summary-best">Tu mejor marca: ${Math.max(previousBest, result.score)}</span>
+        </div>
+        <div class="result-stats-grid">
+          <div class="result-stat-box"><strong>Tiempo</strong><b>${formatTime(result.time)}</b></div>
+          <div class="result-stat-box"><strong>Enemigos</strong><b>${result.kills} KOs</b></div>
+          <div class="result-stat-box"><strong>Jefes K.O.</strong><b>${result.bossesKilled || 0}</b></div>
+          <div class="result-stat-box"><strong>Objetos</strong><b>${Object.values(result.pickups || {}).reduce((sum, count) => sum + count, 0)}</b></div>
+          <div class="result-stat-box"><strong>Recorrido</strong><b>${Math.floor((result.distance || 0) / 100)} m</b></div>
+          <div class="result-stat-box"><strong>Dificultad</strong><b>${result.difficulty}</b></div>
+          <div class="result-stat-box"><strong>Nivel</strong><b>Nv. ${result.level}</b></div>
+          <div class="result-stat-box"><strong>Combo Max</strong><b>${result.peakCombo || 0} KOs</b></div>
+          <div class="result-stat-box"><strong>Skin</strong><b>${result.skin}</b></div>
+          <div class="result-stat-box"><strong>Arma</strong><b>${result.weapon}</b></div>
+          <div class="result-stat-box"><strong>Modo</strong><b>${result.mode}</b></div>
+          <div class="result-stat-box"><strong>Mascota</strong><b>${result.companion}</b></div>
+        </div>
       `;
 
       const profile = currentAccount();
@@ -174,8 +182,8 @@ export class GameOverScreen {
 
         if (nextItem) {
           const thumb = document.createElement('canvas');
-          thumb.width = 36;
-          thumb.height = 36;
+          thumb.width = 44;
+          thumb.height = 44;
           thumb.className = 'result-unlock-thumb';
           try {
             drawItemPreview(thumb, nextItem, profile, 0);

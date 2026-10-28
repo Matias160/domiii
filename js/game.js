@@ -81,7 +81,11 @@ export class Game {
     window.addEventListener('resize', () => { if (this.state && ['gameScreen','pauseScreen'].includes(this.screenId)) this.resizeView(); if (this.screenId === 'setupScreen') this.menu?.fitSetup?.(); });
     bindAuth(this);
     modLoader.loadMod(FrostbiteMod);
-    document.querySelector('#logoutButton').addEventListener('click',()=>{logout();this.enterAsGuest();this.showToast('Cerraste sesión. Seguís en el local como invitado.');});
+    document.querySelector('#logoutButton').addEventListener('click',()=>{
+      logout();
+      this.openAuth?.('login');
+      this.showToast('Cerraste sesión.');
+    });
     this.lastSetup = null;
     this.state = null;
     this.lastTime = 0;
@@ -278,7 +282,14 @@ export class Game {
       this.setTutorialProgress(t.moved / 0.7);
       if (t.moved > 0.7) { t.step = 'dash'; this.renderTutorial(); this.audio?.play('confirm'); }
     } else if (t.step === 'dash') {
-      if (this.state.player.dashTime > 0) { t.step = 'done'; t.doneTimer = 2.2; this.state.holdSpawns = false; this.renderTutorial(); this.audio?.play('level'); }
+      if (this.state.player.dashTime > 0) {
+        t.step = 'done';
+        t.doneTimer = 2.2;
+        this.state.holdSpawns = false;
+        try { localStorage.setItem('domi2pancho.tutorialDone', 'true'); } catch {}
+        this.renderTutorial();
+        this.audio?.play('level');
+      }
     } else {
       t.doneTimer -= delta;
       if (t.doneTimer <= 0) { this.tutorial = null; this.renderTutorial(); }
@@ -499,7 +510,16 @@ export class Game {
     this.lastSetup = setup;
     this.state = createRunState(setup, this.audio);
     this.lobby.centerNext = true; // al terminar la partida se vuelve al centro del local
-    this.startTutorial();
+    let tutorialDone = false;
+    try { tutorialDone = localStorage.getItem('domi2pancho.tutorialDone') === 'true'; } catch {}
+    if (!tutorialDone) {
+      this.startTutorial();
+    } else {
+      this.tutorial = null;
+      if (this.state) this.state.holdSpawns = false;
+      const box = document.querySelector('#runTutorial');
+      if (box) box.hidden = true;
+    }
     this.resizeView();
     resetQuality();
     this.warmUpRun();
