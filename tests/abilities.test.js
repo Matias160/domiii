@@ -66,7 +66,7 @@ test('piercing projectile hits each enemy only once', () => {
   } finally { Math.random=originalRandom; }
 });
 
-test('queued level choices stay beside active play and advance after selection', () => {
+test('earned cards are banked one at a time, freeze the run on the game screen and advance after selection', () => {
   const options = {
     dataset: {},
     buttons: [],
@@ -78,7 +78,7 @@ test('queued level choices stay beside active play and advance after selection',
   const overlay={classList:{add(){},remove(){}}};
   globalThis.document = {
     querySelector: selector => selector==='#abilityScreen'?overlay:options,
-    createElement: () => ({ attributes:{},setAttribute(key,value){this.attributes[key]=value;},addEventListener() {}, focus() {} }),
+    createElement: () => ({ attributes:{},dataset:{},style:{setProperty(){}},children:[],setAttribute(key,value){this.attributes[key]=value;},addEventListener() {}, focus() {}, append(...n){this.children.push(...n);}, prepend(...n){this.children.unshift(...n);} }),
   };
   try {
     const game = Object.create(Game.prototype);
@@ -90,6 +90,7 @@ test('queued level choices stay beside active play and advance after selection',
     game.showToast = () => {};
     game.onLevelUp();
     game.onLevelUp();
+    assert.equal(game.state.pendingLevels, 1, 'only one earned card waits its turn (no back-to-back cards)');
     game.showAbilityChoices();
     assert.equal(game.screenId, 'gameScreen');
     assert.equal(game.running, true);
@@ -97,7 +98,7 @@ test('queued level choices stay beside active play and advance after selection',
     options.buttons.forEach((button,index)=>{assert.equal(button.attributes['aria-keyshortcuts'],String(index+1));assert.match(button.innerHTML,/pixel-key choice-key/);});
     const first = abilities.find(ability => options.buttons[0].innerHTML.includes(ability.name));
     game.chooseAbility(first);
-    assert.equal(game.state.pendingLevels, 1);
+    assert.equal(game.state.pendingLevels, 0);
     assert.equal(game.screenId, 'gameScreen');
     game.showAbilityChoices();
     const second = abilities.find(ability => options.buttons[0].innerHTML.includes(ability.name));
@@ -106,6 +107,46 @@ test('queued level choices stay beside active play and advance after selection',
     assert.equal(buildUpdates,2);
     assert.equal(game.screenId, 'gameScreen');
     assert.equal(game.running, true);
+  } finally {
+    globalThis.document = previousDocument;
+  }
+});
+
+test('boss cutscenes move the camera to the boss even when the player is far away', () => {
+  const game = Object.create(Game.prototype);
+  game.view = { w: 960, h: 540 };
+  game.state = { camera: { x: 0, y: 0 }, world: { width: 1920, height: 1080 } };
+  const boss = { x: 1700, y: 900 };
+  for (let i = 0; i < 90; i++) game.focusCameraOn(boss, 1 / 60);
+  const cam = game.state.camera;
+  assert.ok(boss.x > cam.x && boss.x < cam.x + 960 && boss.y > cam.y && boss.y < cam.y + 540, 'boss inside the view');
+  assert.ok(Math.abs(cam.x - (1920 - 960)) < 2 && Math.abs(cam.y - (1080 - 540)) < 2, 'clamped to the world edge');
+});
+
+test('reaching a power level pauses once with an explanation, and pressing its key uses it', async () => {
+  const { createRunState } = await import('../js/core/runState.js');
+  const nodes = new Map();
+  const previousDocument = globalThis.document;
+  globalThis.document = { querySelector: selector => { if (!nodes.has(selector)) nodes.set(selector, { hidden: true, textContent: '' }); return nodes.get(selector); } };
+  try {
+    const game = Object.create(Game.prototype);
+    game.state = createRunState();
+    game.running = true; game.screenId = 'gameScreen';
+    game.showToast = () => {};
+    game.audio = { play() {} };
+    game.checkPrimeUnlocks();
+    assert.equal(game.primeIntro, undefined, 'nothing before level 5');
+    game.state.player.level = 5;
+    game.checkPrimeUnlocks();
+    assert.equal(game.primeIntro?.key, 'q');
+    assert.equal(nodes.get('#primeIntro').hidden, false);
+    assert.match(nodes.get('#primeIntroHint').textContent, /Q/);
+    assert.equal(game.triggerPrime('e'), false, 'other keys do nothing while the intro is open');
+    assert.equal(game.triggerPrime('q'), true, 'its own key closes the intro and fires the power');
+    assert.equal(game.primeIntro, null);
+    assert.ok(game.state.primeCooldowns.q > 0);
+    game.checkPrimeUnlocks();
+    assert.equal(game.primeIntro, null, 'each power is announced only once per run');
   } finally {
     globalThis.document = previousDocument;
   }

@@ -39,10 +39,14 @@ export class Enemy {
     this.phaseTwo = false;
     this.phaseThree = false;
     this.specialTimer = 3.2;
-    this.summonTimer = 7.5;
+    this.summonTimer = BOSS_SUMMON.firstDelay;
     this.roleTimer = type.role === 'healer' ? 2.2 : type.role === 'summoner' ? 4 : 0;
     this.flockAngle = Math.random() * Math.PI * 2;
     this.flockTimer = Math.random() * 2;
+    // Kamikaze: busca -> se arma (tiembla y marca la línea) -> embiste y explota
+    this.kamikazeState = 'seek';
+    this.kamikazeTimer = 0;
+    this.chargeDir = null;
 
     // AI & Skills architecture
     this.skills = new SkillController(this);
@@ -56,6 +60,7 @@ export class Enemy {
     this.hitFlash = Math.max(0, this.hitFlash - delta);
     this.spawnTime = Math.max(0, this.spawnTime - delta);
     if (this.spawnTime > 0 || this.hp <= 0) return;
+    if (this.type.kamikaze) { this.updateKamikaze(delta, player, state); return; }
     if (this.isBoss) {
       // Fase 2 al 65% de vida
       if (!this.phaseTwo && this.hp <= this.maxHp * 0.65) {
@@ -64,15 +69,13 @@ export class Enemy {
         this.armor = (this.armor || 1) * (this.type.bossStyle === 'colossus' ? 1.35 : 1);
         this.volleyTimer = Math.min(this.volleyTimer, 1.0);
         if (state) {
-          state.directorNotice = this.type.bossStyle === 'colossus'
-            ? '¡DOMI COLOSAL ENTRA EN FASE 2: FURIA FUNDIDA!'
-            : `${this.type.name.toUpperCase()} / FASE 2`;
-          state.shake = Math.max(state.shake, 0.42);
+          state.directorNotice = this.type.bossStyle === 'colossus' ? '¡DOMI COLOSAL / FASE 2: FURIA FUNDIDA!' : `${this.type.name.toUpperCase()} / ¡SE PONE SERIO!`;
+          state.shake = Math.max(state.shake, 0.35);
           state.rings?.push({ x: this.x, y: this.y, radius: this.radius + 75, life: 0.7, maxLife: 0.7, color: '#ff4f9a' });
           state.audio?.play('bossPhase');
           if (this.type.bossStyle === 'colossus' && state.items) {
             state.items.push(new Item({ type: items.mayo, rarity: rarities[3], x: Math.max(80, this.x - 75), y: Math.max(140, this.y + 45) }));
-            state.items.push(new Item({ type: items.mayo, rarity: rarities[3], x: Math.min(880, this.x + 75), y: Math.max(140, this.y - 45) }));
+            state.items.push(new Item({ type: items.mayo, rarity: rarities[3], x: Math.min((state.world?.width || 1920) - 80, this.x + 75), y: Math.max(140, this.y - 45) }));
             state.floaters?.push({ x: this.x, y: this.y - 55, text: '¡SUMINISTRO TÁCTICO!', color: '#ffd700', life: 1.6, scale: 1.3 });
           }
         }
@@ -85,37 +88,38 @@ export class Enemy {
         this.volleyTimer = 0.45;
         this.specialTimer = 0.5;
         if (state) {
-          state.directorNotice = this.type.bossStyle === 'colossus'
-            ? '¡DOMI COLOSAL EN FASE 3: SOBRECARGA MAGMÁTICA Y FURIA TOTAL!'
-            : `¡${this.type.name.toUpperCase()} EN FURIA TOTAL!`;
-          state.shake = Math.max(state.shake, 0.55);
+          state.directorNotice = this.type.bossStyle === 'colossus' ? '¡DOMI COLOSAL / FASE 3: FURIA TOTAL!' : `¡${this.type.name.toUpperCase()} AL LÍMITE!`;
+          state.shake = Math.max(state.shake, 0.48);
           state.rings?.push({ x: this.x, y: this.y, radius: this.radius + 110, life: 0.85, maxLife: 0.85, color: '#ff0044' });
           state.rings?.push({ x: this.x, y: this.y, radius: this.radius + 65, life: 0.6, maxLife: 0.6, color: '#ffd700' });
           state.audio?.play('bossPhase');
           if (this.type.bossStyle === 'colossus' && state.items) {
             state.items.push(new Item({ type: items.mayo, rarity: rarities[4] || rarities[3], x: Math.max(90, this.x - 90), y: this.y }));
-            state.items.push(new Item({ type: items.mayo, rarity: rarities[4] || rarities[3], x: Math.min(870, this.x + 90), y: this.y }));
-            state.items.push(new Item({ type: items.mayo, rarity: rarities[3], x: this.x, y: Math.min(480, this.y + 70) }));
+            state.items.push(new Item({ type: items.mayo, rarity: rarities[4] || rarities[3], x: Math.min((state.world?.width || 1920) - 90, this.x + 90), y: this.y }));
+            state.items.push(new Item({ type: items.mayo, rarity: rarities[3], x: this.x, y: Math.min((state.world?.height || 1080) - 60, this.y + 70) }));
             state.floaters?.push({ x: this.x, y: this.y - 65, text: '¡SOBRECARGA TÁCTICA!', color: '#ff4400', life: 1.8, scale: 1.4 });
           }
         }
       }
 
+      const moveDelta = delta * (this.rageAttack?.move ?? 1);
       if (this.type.bossStyle === 'ranged') {
         const dx = player.x - this.x, dy = player.y - this.y, length = Math.hypot(dx, dy) || 1;
         const approach = length < 185 ? -0.5 : length > 280 ? 1 : 0;
-        this.x += (dx / length * approach - dy / length * 0.5) * this.speed * delta;
-        this.y += (dy / length * approach + dx / length * 0.5) * this.speed * delta;
-      } else this.updateBoss(delta, player, state);
+        this.x += (dx / length * approach - dy / length * 0.5) * this.speed * moveDelta;
+        this.y += (dy / length * approach + dx / length * 0.5) * this.speed * moveDelta;
+      } else this.updateBoss(moveDelta, player, state);
 
-      const worldW = state?.world?.width || 960;
-      const worldH = state?.world?.height || 540;
+      const worldW = state?.world?.width || 1920;
+      const worldH = state?.world?.height || 1080;
       this.x = Math.max(this.radius + 8, Math.min(worldW - 8 - this.radius, this.x));
       this.y = Math.max(115 + this.radius, Math.min(worldH - 25 - this.radius, this.y));
 
       this.volleyTimer -= delta * (this.phaseThree ? 1.35 : 1);
       this.specialTimer -= delta * (this.phaseThree ? 1.3 : 1);
       this.summonTimer -= delta;
+
+      if (this.enraged && state) this.updateRageAttack(delta, player, state);
 
       // Pisotón tectónico y Anillos de Fuego expansivos para Domi Colosal
       if (this.type.bossStyle === 'colossus') {
@@ -162,21 +166,19 @@ export class Enemy {
         }
       }
 
-      if (this.volleyTimer <= 0 && state) {
+      if (this.volleyTimer <= 0 && state && !this.rageAttack) {
         state.rings?.push({ x: this.x, y: this.y, radius: this.radius + 38, life: 0.45, maxLife: 0.45, color: this.phaseThree ? '#ff0055' : '#ff879e' });
-        this.volleyTimer = this.type.bossStyle === 'colossus' ? (this.phaseThree ? 0.75 : this.phaseTwo ? 1.15 : 1.55) :
-                           this.type.bossStyle === 'ranged' ? (this.phaseTwo ? 1.95 : 2.6) :
+        this.volleyTimer = this.type.bossStyle === 'colossus' ? (this.phaseThree ? 0.75 : this.phaseTwo ? 1.15 : 1.55) : (this.enraged ? BOSS_RAGE.volleyInterval : 1) * (this.type.bossStyle === 'ranged' ? (this.phaseTwo ? 1.95 : 2.6) :
                            this.type.bossStyle === 'heavy' ? (this.phaseTwo ? 2.6 : 3.5) :
                            this.type.bossStyle === 'frost' ? (this.phaseTwo ? 2.2 : 3.0) :
-                           this.phaseTwo ? 3.1 : 4.4;
-        const baseCount = this.type.bossStyle === 'colossus' ? 24 :
-                          this.type.bossStyle === 'ranged' ? 14 :
+                           this.phaseTwo ? 3.1 : 4.4);
+        const isColossus = this.type.bossStyle === 'colossus';
+        const baseCount = isColossus ? 24 : this.type.bossStyle === 'ranged' ? 14 :
                           this.type.bossStyle === 'heavy' ? 18 :
                           this.type.bossStyle === 'frost' ? 12 : 10;
-        const count = this.phaseThree ? baseCount + 8 : baseCount;
-        const bulletSpeed = (this.type.bossStyle === 'colossus' ? 175 : this.type.bossStyle === 'heavy' ? 115 : this.type.bossStyle === 'frost' ? 135 : 150) * (this.phaseThree ? 1.25 : 1);
-        const bulletColor = this.type.bossStyle === 'colossus' ? (this.phaseThree ? '#ff1100' : '#ff6600') : this.phaseThree ? '#ff2255' : this.type.bossStyle === 'frost' ? '#a855f7' : this.type.bossStyle === 'heavy' ? '#ffaa00' : undefined;
-        const isColossus = this.type.bossStyle === 'colossus';
+        const count = (this.phaseThree ? baseCount + (isColossus ? 8 : 6) : baseCount) + (this.enraged ? 6 : 0);
+        const bulletSpeed = (isColossus ? 175 : this.type.bossStyle === 'heavy' ? 115 : this.type.bossStyle === 'frost' ? 135 : 150) * (this.phaseThree ? 1.2 : 1);
+        const bulletColor = isColossus ? (this.phaseThree ? '#ff1100' : '#ff6600') : this.phaseThree ? '#ff2255' : this.type.bossStyle === 'frost' ? '#a855f7' : this.type.bossStyle === 'heavy' ? '#ffaa00' : undefined;
         for (let i = 0; i < count; i++) {
           const angle = i * Math.PI * 2 / count + state.time * (isColossus ? 0.85 : 0.45);
           state.enemyProjectiles.push({
@@ -190,15 +192,13 @@ export class Enemy {
         }
       }
 
-      if (this.phaseTwo && state && this.specialTimer <= 0) {
-        const kind = (this.type.bossStyle === 'colossus')
-          ? (this.phaseThree ? 'laser_sweep' : 'meteor')
-          : this.type.bossStyle === 'ranged' ? 'snipe' :
-            this.type.bossStyle === 'fast' ? 'rain' :
-            this.type.bossStyle === 'frost' ? 'freeze' :
-            this.type.bossStyle === 'heavy' ? 'meteor' : 'shockwave';
-        this.specialTimer = this.type.bossStyle === 'colossus' ? (this.phaseThree ? 1.5 : 2.2) :
-                            kind === 'laser_sweep' ? 3.4 : kind === 'snipe' ? 3.2 : kind === 'rain' ? 2.8 : kind === 'freeze' ? 3.0 : 4.2;
+      if (this.phaseTwo && state && this.specialTimer <= 0 && !this.enraged) {
+        const kind = this.type.bossStyle === 'colossus' ? (this.phaseThree ? 'laser_sweep' : 'meteor') :
+                     this.type.bossStyle === 'ranged' ? 'snipe' :
+                     this.type.bossStyle === 'fast' ? 'rain' :
+                     this.type.bossStyle === 'frost' ? 'freeze' :
+                     this.type.bossStyle === 'heavy' ? 'meteor' : 'shockwave';
+        this.specialTimer = this.type.bossStyle === 'colossus' ? (this.phaseThree ? 1.5 : 2.2) : kind === 'snipe' ? 3.2 : kind === 'rain' ? 2.8 : kind === 'freeze' ? 3.0 : 4.2;
         const zonesCount = this.phaseThree ? 2 : 1;
         state.audio?.play('telegraph');
         for (let z = 0; z < zonesCount; z++) {
@@ -217,22 +217,28 @@ export class Enemy {
         }
       }
 
-      // Invocación de escoltas de élite durante Duelo de Jefes o en Fase 2+ (desactivado para el duelo solitario contra Domi Colosal)
-      if (this.type.bossStyle !== 'colossus' && state && this.summonTimer <= 0 && (state.modeId === 'rush' || this.phaseTwo) && state.enemies.length < 35) {
-        this.summonTimer = this.phaseThree ? 5.5 : 8.0;
-        const escortPool = enemyTypes.filter(t => !t.boss && (t.id === 'fries' || t.id === 'soda' || t.id === 'ketchup'));
-        const escortType = escortPool[Math.floor(Math.random() * escortPool.length)];
-        for (const side of [-1, 1]) {
+      // Invoca ayudantes de a poco: camadas más seguidas y numerosas a medida que pierde vida
+      if (state && this.summonTimer <= 0 && this.type.bossStyle !== 'colossus') {
+        const phase = this.phaseThree ? 2 : this.phaseTwo ? 1 : 0;
+        this.summonTimer = BOSS_SUMMON.interval[phase] * (this.enraged ? BOSS_RAGE.summonInterval : 1);
+        const helpers = state.enemies.reduce((n, e) => n + (!e.isBoss && e.hp > 0 ? 1 : 0), 0);
+        const cap = BOSS_SUMMON.maxHelpers[phase] + (this.enraged ? BOSS_RAGE.extraHelpers : 0);
+        const count = Math.min(BOSS_SUMMON.batch[phase] + (this.enraged ? 1 : 0), cap - helpers);
+        const ids = BOSS_SUMMON.pools[phase];
+        for (let i = 0; i < count; i++) {
+          const angle = Math.random() * Math.PI * 2;
+          const id = ids[Math.floor(Math.random() * ids.length)];
+          const type = enemyTypes.find(t => !t.boss && t.id === id);
           const escort = new Enemy({
-            x: Math.max(60, Math.min(worldW - 60, this.x + side * 62)),
-            y: Math.max(130, Math.min(worldH - 40, this.y + 24)),
-            type: escortType,
+            x: Math.max(60, Math.min(worldW - 60, this.x + Math.cos(angle) * (this.radius + 40))),
+            y: Math.max(130, Math.min(worldH - 40, this.y + Math.sin(angle) * (this.radius + 40))),
+            type,
             difficulty: state.difficulty
           });
-          escort.spawnTime = 0.6;
+          escort.spawnTime = 0.6 + i * 0.12;
           state.enemies.push(escort);
         }
-        state.rings?.push({ x: this.x, y: this.y, radius: 75, life: 0.5, maxLife: 0.5, color: '#ffae00' });
+        if (count > 0) state.rings?.push({ x: this.x, y: this.y, radius: this.radius + 34, life: 0.5, maxLife: 0.5, color: '#ffae00' });
       }
       return;
     }
@@ -360,6 +366,57 @@ export class Enemy {
     }
   }
 
+  // Segunda fase: al quedarse sin vida por primera vez el jefe se levanta furioso (no muere)
+  enrage(state) {
+    this.enraged = true;
+    this.hp = Math.round(this.maxHp * BOSS_RAGE.hpRestore);
+    this.phaseTwo = true; this.phaseThree = true;
+    this.speed *= BOSS_RAGE.speed;
+    this.rageSpecialTimer = 2.4; this.rageAttack = null;
+    this.damage *= BOSS_RAGE.damage;
+    this.radius = Math.round(this.radius * BOSS_RAGE.size);
+    this.hitFlash = 0;
+    this.bossPhase = 'recover'; this.bossTimer = 1.2;
+    this.volleyTimer = 1.4; this.specialTimer = 1.8; this.summonTimer = 1.2;
+    if (state) {
+      state.enemyProjectiles.length = 0;
+      state.bossZones = [];
+      state.bossRage = this;
+    }
+  }
+
+  updateKamikaze(delta, player, state) {
+    const worldW = state?.world?.width || 1920, worldH = state?.world?.height || 1080;
+    const dx = player.x - this.x, dy = player.y - this.y, length = Math.hypot(dx, dy) || 1;
+    if (this.kamikazeState === 'seek') {
+      const speed = this.speed * (this.speedMultiplier || 1) * this.slowFactor;
+      this.x += dx / length * speed * delta;
+      this.y += dy / length * speed * delta;
+      if (length < KAMIKAZE.armRange) {
+        // Se frena y apunta: la línea roja avisa hacia dónde va a salir disparado
+        this.kamikazeState = 'arm';
+        this.kamikazeTimer = KAMIKAZE.armTime;
+        this.chargeDir = { x: dx / length, y: dy / length };
+        state?.audio?.play('telegraph');
+      }
+    } else if (this.kamikazeState === 'arm') {
+      this.kamikazeTimer -= delta;
+      if (this.kamikazeTimer <= 0) { this.kamikazeState = 'charge'; this.kamikazeTimer = KAMIKAZE.chargeTime; }
+    } else if (this.kamikazeState === 'charge') {
+      this.kamikazeTimer -= delta;
+      const speed = this.speed * KAMIKAZE.chargeMultiplier * this.slowFactor;
+      this.x += this.chargeDir.x * speed * delta;
+      this.y += this.chargeDir.y * speed * delta;
+      const target = state?.decoy || player;
+      const hit = Math.hypot(target.x - this.x, target.y - this.y) < this.radius + (target.radius || 18) + 4;
+      const wall = this.x < this.radius + 6 || this.x > worldW - this.radius - 6 || this.y < 120 + this.radius || this.y > worldH - this.radius - 20;
+      // Explota al chocar, contra la pared o al terminar la embestida (enemySystem resuelve la explosión)
+      if (hit || wall || this.kamikazeTimer <= 0) this.fuse = 0;
+    }
+    this.x = Math.max(this.radius + 6, Math.min(worldW - this.radius - 6, this.x));
+    this.y = Math.max(120 + this.radius, Math.min(worldH - this.radius - 20, this.y));
+  }
+
   updateBoss(delta, player, state) {
     this.bossTimer -= delta;
 
@@ -378,19 +435,19 @@ export class Enemy {
         const angle = Math.atan2(this.chargeTarget.y - this.y, this.chargeTarget.x - this.x);
         this.chargeVelocity = { x: Math.cos(angle), y: Math.sin(angle) };
         this.bossPhase = 'charge';
-        this.bossTimer = this.type.bossStyle === 'colossus' ? (this.phaseThree ? 1.25 : 1.1) : (this.phaseThree ? 0.95 : 0.82);
+        this.bossTimer = this.enraged ? 0.7 : this.type.bossStyle === 'colossus' ? (this.phaseThree ? 1.25 : 1.1) : this.phaseThree ? 0.95 : 0.82;
       }
       return;
     }
     if (this.bossPhase === 'charge') {
       const isColossus = this.type.bossStyle === 'colossus';
-      const chargeMult = isColossus ? (this.phaseThree ? 4.1 : 3.65) : (this.phaseThree ? 3.55 : 3.15);
+      const chargeMult = this.enraged ? BOSS_RAGE.chargeMultiplier : this.type.bossStyle === 'colossus' ? (this.phaseThree ? 4.1 : 3.65) : this.phaseThree ? 3.55 : 3.15;
       this.x += this.chargeVelocity.x * this.speed * chargeMult * delta;
       this.y += this.chargeVelocity.y * this.speed * chargeMult * delta;
 
       // Colisión con bordes del mapa para aturdir al coloso
-      const worldW = state?.world?.width || 960;
-      const worldH = state?.world?.height || 540;
+      const worldW = state?.world?.width || 1920;
+      const worldH = state?.world?.height || 1080;
       const hitWall = isColossus && (
         this.x <= this.radius + 16 ||
         this.x >= worldW - 16 - this.radius ||
@@ -417,14 +474,27 @@ export class Enemy {
       }
 
       if (this.bossTimer <= 0) {
+        if (this.enraged && state) {
+          // Al frenar en seco suelta un anillo de balas
+          for (let i = 0; i < 10; i++) shootBossBullet(state, this, i / 10 * Math.PI * 2 + state.time, 170, '#ffd33d', 6);
+          state.rings?.push({ x: this.x, y: this.y, radius: this.radius + 30, life: 0.4, maxLife: 0.4, color: '#ffd33d' });
+        }
+        if (this.enraged && this.chainLeft > 0) {
+          // Embestida encadenada: vuelve a apuntar enseguida
+          this.chainLeft -= 1;
+          this.bossPhase = 'telegraph';
+          this.bossTimer = 0.42;
+          this.chargeTarget = { x: player.x, y: player.y };
+          return;
+        }
         this.bossPhase = 'recover';
-        this.bossTimer = this.phaseThree ? 0.9 : 1.35;
+        this.bossTimer = this.enraged ? 1.0 : this.phaseThree ? 0.9 : 1.35;
       }
       return;
     }
     if (this.bossPhase === 'recover' && this.bossTimer <= 0) {
       this.bossPhase = 'stalk';
-      this.bossTimer = this.phaseThree ? 2.2 : 3.4;
+      this.bossTimer = this.enraged ? 1.9 : this.phaseThree ? 2.4 : 3.5;
     }
     const dx = player.x - this.x;
     const dy = player.y - this.y;
@@ -434,9 +504,89 @@ export class Enemy {
     this.y += (dy / length) * speed * delta;
     if (this.bossPhase === 'stalk' && this.bossTimer <= 0) {
       this.bossPhase = 'telegraph';
-      this.bossTimer = this.type.bossStyle === 'colossus' ? 1.05 : this.type.bossStyle === 'fast' ? .6 : .85;
+      this.bossTimer = this.enraged ? 0.5 : this.type.bossStyle === 'colossus' ? 1.05 : this.type.bossStyle === 'fast' ? .6 : .85;
       this.chargeTarget = { x: player.x, y: player.y };
-      if (state) state.audio?.play('telegraph');
+      // Segunda fase: el Rey encadena 3 embestidas, el resto 2
+      this.chainLeft = this.enraged ? (this.type.bossStyle ? 1 : 2) : 0;
+      if (this.enraged && !this.type.bossStyle && state) announceRageAttack(state, this, '¡TRIPLE EMBESTIDA!');
+    }
+  }
+
+  // Ataque exclusivo de segunda fase: se anuncia, tiene aviso y reemplaza al especial de la fase 1
+  updateRageAttack(delta, player, state) {
+    const attack = RAGE_ATTACKS[this.type.bossStyle || 'default'];
+    if (!attack) return;
+    if (this.rageAttack) {
+      this.rageAttack.t += delta;
+      attack.tick?.(this, this.rageAttack, delta, player, state);
+      if (this.rageAttack.t >= attack.duration) this.rageAttack = null;
+      return;
+    }
+    this.rageSpecialTimer = (this.rageSpecialTimer ?? 2.4) - delta;
+    if (this.rageSpecialTimer > 0) return;
+    this.rageSpecialTimer = attack.cooldown;
+    this.rageAttack = { t: 0, emit: 0, angle: Math.random() * Math.PI * 2, move: attack.move ?? 1 };
+    attack.start?.(this, this.rageAttack, player, state);
+    announceRageAttack(state, this, attack.name);
+  }
+
+  // Venita de enojo (estilo historieta) que late sobre la cabeza del jefe mordido
+  drawAngerMark(ctx) {
+    const now = performance.now() / 1000;
+    const p = Math.max(2, Math.round(this.radius / 12)) + (Math.sin(now * 9) > 0 ? 1 : 0); // píxel que late
+    const x = Math.round(this.x + this.radius * 0.72), y = Math.round(this.y - this.radius * 0.7);
+    // Cuatro esquinas en L (el clásico símbolo de enojo), con borde oscuro
+    const corners = [[-1, -1], [1, -1], [-1, 1], [1, 1]];
+    for (const [color, grow] of [['#1a0006', 1], ['#ff2a44', 0]]) {
+      ctx.fillStyle = color;
+      for (const [dx, dy] of corners) {
+        const cx = x + dx * p * 1.5, cy = y + dy * p * 1.5;
+        ctx.fillRect(cx - (dx < 0 ? p * 2 : 0) - grow, cy - p / 2 - grow, p * 2 + grow * 2, p + grow * 2);
+        ctx.fillRect(cx - p / 2 - grow, cy - (dy < 0 ? p * 2 : 0) - grow, p + grow * 2, p * 2 + grow * 2);
+      }
+    }
+  }
+
+  drawRageAura(ctx) {
+    const now = performance.now() / 1000;
+    ctx.save();
+    ctx.globalAlpha = 0.28 + Math.sin(now * 8) * 0.08;
+    ctx.fillStyle = '#ff2a44';
+    ctx.beginPath(); ctx.ellipse(this.x, this.y + this.radius * 0.8, this.radius * 1.35, this.radius * 0.45, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.globalAlpha = 0.85;
+    for (let i = 0; i < 10; i++) {
+      const a = i / 10 * Math.PI * 2 + now * 1.4;
+      const rise = (now * 2.2 + i * 0.37) % 1;
+      const size = 6 - rise * 4;
+      ctx.fillStyle = rise < 0.4 ? '#ffd34f' : rise < 0.75 ? '#ff6b35' : '#ff2a44';
+      ctx.fillRect(Math.round(this.x + Math.cos(a) * this.radius * 1.05 - size / 2), Math.round(this.y + Math.sin(a) * this.radius * 0.5 - rise * this.radius * 0.9), size, size);
+    }
+    ctx.restore();
+  }
+
+  drawKamikazeTelegraph(ctx) {
+    if (this.kamikazeState === 'arm' && this.chargeDir) {
+      const progress = 1 - this.kamikazeTimer / KAMIKAZE.armTime;
+      const reach = this.speed * KAMIKAZE.chargeMultiplier * KAMIKAZE.chargeTime;
+      ctx.save();
+      ctx.globalAlpha = 0.35 + progress * 0.5;
+      ctx.strokeStyle = '#ff3b1f'; ctx.lineWidth = 3; ctx.setLineDash([10, 7]);
+      ctx.beginPath(); ctx.moveTo(this.x, this.y); ctx.lineTo(this.x + this.chargeDir.x * reach, this.y + this.chargeDir.y * reach); ctx.stroke();
+      ctx.setLineDash([]);
+      // Anillo que se cierra: cuando llega al ají, sale disparado
+      ctx.strokeStyle = '#ffd34f'; ctx.lineWidth = 3;
+      ctx.beginPath(); ctx.arc(this.x, this.y, this.radius + 6 + (1 - progress) * 26, 0, Math.PI * 2); ctx.stroke();
+      ctx.restore();
+    } else if (this.kamikazeState === 'charge' && this.chargeDir) {
+      // Estela de fuego pixelada detrás del ají
+      ctx.save();
+      for (let i = 1; i <= 4; i++) {
+        const s = 12 - i * 2;
+        ctx.globalAlpha = 0.5 - i * 0.1;
+        ctx.fillStyle = i % 2 ? '#ffb02e' : '#ff4b2b';
+        ctx.fillRect(this.x - this.chargeDir.x * i * 11 - s / 2, this.y - this.chargeDir.y * i * 11 - s / 2, s, s);
+      }
+      ctx.restore();
     }
   }
 
@@ -461,7 +611,9 @@ export class Enemy {
       ctx.restore();
     }
 
-    if (this.fuse !== undefined && !this.exploded) {
+    if (this.type.kamikaze) this.drawKamikazeTelegraph(ctx);
+
+    if (this.fuse !== undefined && !this.exploded && !this.type.kamikaze) {
       const fuseRatio = Math.max(0, this.fuse / 0.72);
       const pulse = 0.12 + Math.sin(performance.now() / 65) * 0.09;
       ctx.fillStyle = `rgba(245,75,70,${pulse + (1 - fuseRatio) * 0.18})`;
@@ -498,7 +650,16 @@ export class Enemy {
       }
       ctx.restore();
     }
-    drawFood(ctx, this.type.id, this.x, this.y, this.radius / 23, performance.now() / 1000, true, this.hitFlash > 0);
+    // Segunda fase: aura de llamas rojas pixeladas alrededor del jefe furioso
+    if (this.enraged) this.drawRageAura(ctx);
+
+    // Mientras se arma, el ají tiembla y parpadea como una mecha a punto de estallar
+    const arming = this.type.kamikaze && this.kamikazeState === 'arm';
+    const wobble = arming ? Math.sin(performance.now() / 22) * 2.5 : 0;
+    // Fase 2 (o fase 3 del Coloso): el jefe aparece mordido. hideBite lo mantiene entero hasta el mordisco de la animación
+    const bitten = this.isBoss && !this.hideBite && (this.enraged || (this.type.bossStyle === 'colossus' && this.phaseThree));
+    drawFood(ctx, this.type.id, this.x + wobble, this.y, this.radius / 23, performance.now() / 1000, true, this.hitFlash > 0 || (arming && Math.sin(performance.now() / 45) > 0.4), bitten);
+    if (bitten) this.drawAngerMark(ctx);
 
     if (this.role) {
       ctx.save(); ctx.textAlign = 'center'; ctx.font = 'bold 13px monospace'; ctx.lineWidth = 3; ctx.strokeStyle = '#102126';
@@ -570,6 +731,91 @@ export class Enemy {
   }
 }
 
+// Invocaciones del jefe por fase (1 / 2 / 3): cada cuánto, cuántos por camada y tope de ayudantes vivos
+export const BOSS_SUMMON = {
+  firstDelay: 3,
+  interval: [5.2, 3.8, 2.8],
+  batch: [3, 3, 4],
+  maxHelpers: [10, 16, 24],
+  pools: [['fries', 'burger'], ['fries', 'burger', 'soda', 'ketchup'], ['fries', 'burger', 'soda', 'ketchup', 'chili']],
+};
+
+// Segunda fase del jefe (al "morir" la primera vez): cuánta vida recupera y cuánto más peligroso se vuelve
+export const BOSS_RAGE = { hpRestore: 0.7, chargeMultiplier: 3.9, speed: 1.35, damage: 1.2, size: 1.12, summonInterval: 0.75, extraHelpers: 6, volleyInterval: 0.8 };
+
+function shootBossBullet(state, boss, angle, speed, color, radius = 6, life = 3) {
+  state.enemyProjectiles.push({ x: boss.x, y: boss.y, vx: Math.cos(angle) * speed, vy: Math.sin(angle) * speed, radius, damage: boss.damage * 0.42, life, color });
+}
+
+function announceRageAttack(state, boss, name) {
+  state.floaters?.push({ x: boss.x, y: boss.y - boss.radius - 34, text: name, life: 1.2, kind: 'fire', scale: 1.15 });
+  state.rings?.push({ x: boss.x, y: boss.y, radius: boss.radius + 50, life: 0.55, maxLife: 0.55, color: '#ff2a44' });
+  state.audio?.play('telegraph');
+}
+
+function bossZone(state, boss, kind, x, y, radius, delay, damageFactor) {
+  state.bossZones.push({ kind, x: boss.x, y: boss.y, targetX: x, targetY: y, radius, delay, maxDelay: delay, life: delay + 0.45, damage: boss.damage * damageFactor, triggered: false });
+}
+
+// Ataques exclusivos de la segunda fase de cada jefe (bossStyle -> ataque)
+export const RAGE_ATTACKS = {
+  // Rey del mostrador: además de la triple embestida, tres anillos de balas con huecos para esquivar
+  default: { name: '¡ONDA REAL!', cooldown: 6.5, duration: 1.1, move: 0.2,
+    tick(boss, a, delta, player, state) {
+      a.emit -= delta;
+      if (a.emit > 0) return;
+      a.emit = 0.35;
+      const gap = Math.atan2(player.y - boss.y, player.x - boss.x) + (Math.random() - 0.5) * 1.2;
+      for (let i = 0; i < 22; i++) {
+        const angle = i / 22 * Math.PI * 2;
+        const diff = Math.abs(Math.atan2(Math.sin(angle - gap), Math.cos(angle - gap)));
+        if (diff > 0.42) shootBossBullet(state, boss, angle, 175, '#ffd33d', 7);
+      }
+    } },
+  // Señor Ketchup: se planta y dispara una espiral giratoria de dos brazos
+  ranged: { name: '¡ESPIRAL DE SALSA!', cooldown: 6.5, duration: 2.8, move: 0,
+    tick(boss, a, delta, player, state) {
+      a.emit -= delta;
+      while (a.emit <= 0) {
+        a.emit += 0.07;
+        a.angle += 0.34;
+        shootBossBullet(state, boss, a.angle, 190, '#ff4f6d', 6);
+        shootBossBullet(state, boss, a.angle + Math.PI, 190, '#ff4f6d', 6);
+      }
+    } },
+  // La Papota: una línea de impactos de papas que avanza hacia el jugador
+  fast: { name: '¡ESTAMPIDA DE PAPAS!', cooldown: 5.5, duration: 1.2, move: 0.3,
+    start(boss, a, player, state) {
+      const angle = Math.atan2(player.y - boss.y, player.x - boss.x);
+      for (let i = 1; i <= 8; i++) {
+        const d = i * 72;
+        bossZone(state, boss, 'rain', boss.x + Math.cos(angle) * d, boss.y + Math.sin(angle) * d, 50, 0.55 + i * 0.12, 0.7);
+      }
+    } },
+  // Don Muzza: cruz de balas que gira mientras avanza lento
+  heavy: { name: '¡PIZZA GIRATORIA!', cooldown: 7, duration: 3, move: 0.35,
+    tick(boss, a, delta, player, state) {
+      a.emit -= delta;
+      while (a.emit <= 0) {
+        a.emit += 0.11;
+        a.angle += 0.1;
+        for (let k = 0; k < 4; k++) shootBossBullet(state, boss, a.angle + k * Math.PI / 2, 170, '#ffb347', 7);
+      }
+    } },
+  // Emperador Subcero: círculo de zonas heladas que se cierra alrededor del jugador
+  frost: { name: '¡PRISIÓN DE HIELO!', cooldown: 6.5, duration: 1, move: 0.5,
+    start(boss, a, player, state) {
+      for (let i = 0; i < 6; i++) {
+        const angle = i / 6 * Math.PI * 2;
+        bossZone(state, boss, 'freeze', player.x + Math.cos(angle) * 140, player.y + Math.sin(angle) * 140, 62, 1.05, 0.6);
+      }
+      bossZone(state, boss, 'freeze', player.x, player.y, 58, 1.35, 0.75);
+    } },
+};
+
+// Ajustes del Ají kamikaze (alcance de aviso, tiempo de armado y embestida)
+export const KAMIKAZE = { armRange: 250, armTime: 0.6, chargeTime: 0.8, chargeMultiplier: 3.6, blastRadius: 64 };
+
 export const enemyTypes = [
   { id: "burger", name: "Hamburguesa basica", hp: 28, speed: 92, damage: 11, score: 20, xp: 6, radius: 16, color: "#b96f2d" },
   { id: "double", name: "Hamburguesa doble", hp: 58, speed: 62, damage: 18, score: 45, xp: 12, radius: 21, color: "#8f4d22" },
@@ -581,6 +827,7 @@ export const enemyTypes = [
   { id: "tray", name: "Bandeja blindada", hp: 105, speed: 48, damage: 16, score: 72, xp: 18, radius: 23, color: "#74cbe3", role: "shield", armor: 2 },
   { id: "mayo", name: "Mayonesa medica", hp: 52, speed: 57, damage: 9, score: 68, xp: 17, radius: 18, color: "#76e8a4", role: "healer" },
   { id: "chef", name: "Chef invocador", hp: 78, speed: 44, damage: 12, score: 92, xp: 22, radius: 22, color: "#be82ec", role: "summoner" },
+  { id: "chili", name: "Aji kamikaze", hp: 18, speed: 118, damage: 24, score: 40, xp: 9, radius: 15, color: "#ff4b2b", kamikaze: true },
   { id: "double", name: "Rey del mostrador", hp: 820, speed: 58, damage: 24, score: 650, xp: 48, radius: 48, color: "#ffd33d", boss: true },
   { id: "ketchup", name: "Senor Ketchup", hp: 960, speed: 78, damage: 25, score: 850, xp: 60, radius: 42, color: "#ff6e76", boss: true, bossStyle: 'ranged' },
   { id: "fries", name: "La Papota Suprema", hp: 1120, speed: 80, damage: 28, score: 1050, xp: 75, radius: 46, color: "#ffdd61", boss: true, bossStyle: 'fast' },

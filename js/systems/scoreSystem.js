@@ -1,6 +1,7 @@
-import { damageEnemy, burst, impactRing } from './effectSystem.js';
-import { scoreMultiplier, RUSH_BOSS_GOAL } from './directorSystem.js';
+import { damageEnemy, burst, impactRing, particlePool, particleRoom, scaledCount } from './effectSystem.js';
+import { scoreMultiplier, RUSH_BOSS_GOAL, BOSS_GAP } from './directorSystem.js';
 import { gameEvents } from '../core/EventBus.js';
+import { spawnBossMinions } from './enemySystem.js';
 
 const explosionCandidates = [];
 
@@ -13,18 +14,12 @@ export function spawnThematicEnemyDeath(state, enemy) {
     state.shake = Math.max(state.shake || 0, 0.4);
     state.rings?.push({ x: enemy.x, y: enemy.y, radius: 120, life: 0.8, maxLife: 0.8, color: '#ffd700' });
     state.rings?.push({ x: enemy.x, y: enemy.y, radius: 70, life: 0.5, maxLife: 0.5, color: '#ff3366' });
+    // El final del jefe siempre se festeja completo, sin recorte por calidad
     for (let i = 0; i < 45; i++) {
       const angle = (i / 45) * Math.PI * 2;
       const speed = 120 + Math.random() * 220;
       const life = 0.8 + Math.random() * 0.6;
-      state.particles.push({
-        x: enemy.x, y: enemy.y,
-        vx: Math.cos(angle) * speed, vy: Math.sin(angle) * speed,
-        life, maxLife: life,
-        color: '#ffd700', size: 3 + Math.random() * 5,
-        palette: ['#ffffff', '#ffd700', '#ff8800', '#ff0055', '#222222'],
-        drag: 0.93, gravity: 35
-      });
+      emitParticle(state, enemy.x, enemy.y, Math.cos(angle) * speed, Math.sin(angle) * speed, life, '#ffd700', 3 + Math.random() * 5, BOSS_PALETTE, 0.93, 35);
     }
     return;
   }
@@ -59,28 +54,63 @@ export function spawnThematicEnemyDeath(state, enemy) {
     count = 24;
     colors = ['#e69a47', '#ffcf40', '#d62828', '#40916c'];
     size = 4;
+  } else if (id.includes('chili')) {
+    count = 26;
+    colors = ['#ff4b2b', '#ffb02e', '#ffe066', '#4f9a3c'];
+    size = 4;
+    gravity = 30;
   } else if (id.includes('onion')) {
     count = 20;
     colors = ['#ffffff', '#e2e8f0', '#cbd5e1', '#a7f3d0'];
   }
 
-  for (let i = 0; i < count && state.particles.length < 800; i++) {
+  const palettes = deathPalettes(colors);
+  const total = scaledCount(count);
+  for (let i = 0; i < total && state.particles.length < particleRoom(); i++) {
     const angle = Math.random() * Math.PI * 2;
     const speed = 90 + Math.random() * 140;
     const life = 0.45 + Math.random() * 0.4;
-    const color = colors[i % colors.length];
-    state.particles.push({
-      x: enemy.x, y: enemy.y,
-      vx: Math.cos(angle) * speed,
-      vy: Math.sin(angle) * speed,
-      life, maxLife: life,
-      color,
-      size: size + (Math.random() - 0.5) * 2,
-      palette: [color, colors[(i + 1) % colors.length], '#111827'],
-      drag: 0.91,
-      gravity
-    });
+    emitParticle(state, enemy.x, enemy.y, Math.cos(angle) * speed, Math.sin(angle) * speed, life, colors[i % colors.length], size + (Math.random() - 0.5) * 2, palettes[i % colors.length], 0.91, gravity);
   }
+}
+
+const BOSS_PALETTE = ['#ffffff', '#ffd700', '#ff8800', '#ff0055', '#222222'];
+// Paletas de muerte cacheadas por juego de colores (evita crear arreglos por partícula)
+const paletteCache = new Map();
+function deathPalettes(colors) {
+  const key = colors.join();
+  let list = paletteCache.get(key);
+  if (!list) {
+    list = colors.map((color, i) => [color, colors[(i + 1) % colors.length], '#111827']);
+    paletteCache.set(key, list);
+  }
+  return list;
+}
+
+function emitParticle(state, x, y, vx, vy, life, color, size, palette, drag, gravity) {
+  const p = particlePool.acquire();
+  p.x = x; p.y = y; p.vx = vx; p.vy = vy;
+  p.life = life; p.maxLife = life;
+  p.color = color; p.size = size; p.palette = palette;
+  p.drag = drag; p.gravity = gravity;
+  state.particles.push(p);
+}
+
+// Las cartas de mejora tienen su propia barra de progreso con umbral lineal (no siguen la curva de niveles,
+// que crece mucho): así salen a un ritmo parejo, unas cada 20-30 s, toda la partida.
+// Los niveles siguen dando +12 HP y +50 puntos, y desbloquean poderes y la evolución del arma.
+export const CARD_METER = { start: 140, step: 45 };
+
+export function gainCardProgress(player, amount) {
+  player.cardXp = (player.cardXp || 0) + amount;
+  player.cardXpToNext ??= CARD_METER.start;
+  let cards = 0;
+  while (player.cardXp >= player.cardXpToNext) {
+    player.cardXp -= player.cardXpToNext;
+    player.cardXpToNext += CARD_METER.step;
+    cards += 1;
+  }
+  return cards;
 }
 
 export function resolveDeaths(state, onLevelUp) {
@@ -88,6 +118,9 @@ export function resolveDeaths(state, onLevelUp) {
   const queue = state.enemies.filter(enemy => enemy.hp <= 0);
   for (let index = 0; index < queue.length; index++) {
     const enemy = queue[index];
+    // Primera vez que un jefe se queda sin vida: pasa a su segunda fase en vez de morir
+    // El Coloso de lava tiene sus propias tres fases: no usa la segunda vida de los jefes comunes
+    if (enemy.isBoss && !enemy.enraged && enemy.type?.bossStyle !== 'colossus' && enemy.hp <= 0) { enemy.enrage(state); continue; }
     if (resolved.has(enemy)) continue;
     resolved.add(enemy);
     state.combo = (state.combo || 0) + 1; state.comboTime = 3.5;
@@ -122,6 +155,7 @@ export function resolveDeaths(state, onLevelUp) {
     state.kills += 1;
     if (enemy.isBoss) {
       if (state.mapId === 'lava' || enemy.type?.id === 'lava_boss') {
+        // El Coloso Final: la victoria se cuenta al terminar su animación de muerte (game.js)
         state.bossDying = {
           x: enemy.x,
           y: enemy.y,
@@ -135,6 +169,10 @@ export function resolveDeaths(state, onLevelUp) {
       } else {
         state.bossesKilled = (state.bossesKilled || 0) + 1;
         state.bossDefeated = true;
+        const finalRushBoss = state.modeId === 'rush' && state.bossesKilled >= RUSH_BOSS_GOAL;
+        if (!finalRushBoss) spawnBossMinions(state, enemy);
+        // Respiro antes del próximo jefe (en Oleadas los jefes los decide cada cuarta oleada)
+        if (state.modeId !== 'waves') state.nextBossAt = state.time + BOSS_GAP;
       }
       state.shake = Math.max(state.shake || 0, 0.55);
       state.hitFreeze = 0.22; // Micro cámara lenta / freeze al derrotar un Gran Jefe
@@ -145,7 +183,6 @@ export function resolveDeaths(state, onLevelUp) {
         state.enemyProjectiles = state.enemyProjectiles.filter(p => Math.hypot(p.x - enemy.x, p.y - enemy.y) > 260);
       }
       if (state.modeId === 'rush') {
-        state.nextBossAt = state.time + 5.5;
         if (state.bossesKilled < RUSH_BOSS_GOAL) {
           state.directorNotice = `¡JEFE ${state.bossesKilled} / ${RUSH_BOSS_GOAL} ABATIDO!`;
         }
@@ -170,6 +207,21 @@ export function resolveDeaths(state, onLevelUp) {
         }
       }
     }
+    // Ají kamikaze derribado a tiempo: revienta sin lastimar al jugador pero sí a los enemigos de al lado
+    if (enemy.type?.kamikaze && !enemy.exploded) {
+      enemy.exploded = true;
+      state.rings?.push({ x: enemy.x, y: enemy.y, radius: 64, life: .5, maxLife: .5, color: '#ffb02e' });
+      const near = (state.spatialGrid && state.spatialGrid.totalEntities > 0)
+        ? state.spatialGrid.queryRadius(enemy.x, enemy.y, 64, explosionCandidates)
+        : state.enemies;
+      for (let n = 0; n < near.length; n++) {
+        const other = near[n];
+        if (other !== enemy && other.hp > 0 && !other.isBoss && Math.hypot(other.x - enemy.x, other.y - enemy.y) < 64) {
+          damageEnemy(state, other, 22, 'fire');
+          if (other.hp <= 0) queue.push(other);
+        }
+      }
+    }
     if (enemy.isBoss && state.player.hp > 0) {
       state.player.hp = Math.min(state.player.maxHp, state.player.hp + 25);
     }
@@ -179,9 +231,10 @@ export function resolveDeaths(state, onLevelUp) {
 
     const prevLevel = state.player.level;
     const levels = state.player.gainXp(enemy.xp);
-    for (let level = 0; level < levels; level += 1) {
-      onLevelUp((prevLevel + level + 1) % 5 === 0);
-    }
+    // onLevelUp(false) = subió de nivel (cura y puntos); onLevelUp(true) = ganó una carta de mejora
+    for (let level = 0; level < levels; level += 1) onLevelUp(false);
+    const cards = gainCardProgress(state.player, enemy.xp);
+    for (let card = 0; card < cards; card += 1) onLevelUp(true);
   }
 
   // In-place enemy array compaction (zero GC)

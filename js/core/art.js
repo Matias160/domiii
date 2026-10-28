@@ -3,6 +3,45 @@ export const domiGifImage = createAnimatedGif('./don domi.gif');
 const INK = '#161c20';
 const sprites = new Map();
 const floors = new Map();
+// Guarda el sprite y, cuando el navegador lo permite, lo reemplaza por un ImageBitmap:
+// queda listo en la placa de video y dibujar cientos por cuadro (enemigos, destellos de golpe) es mucho más barato
+function cacheSprite(map, key, canvas) {
+  map.set(key, canvas);
+  if (typeof createImageBitmap === 'function') {
+    createImageBitmap(canvas).then(bitmap => { if (map.get(key) === canvas) map.set(key, bitmap); }, () => {});
+  }
+  return canvas;
+}
+// Guiño a BurgosCorp: el escudo "BC" en miniatura pixel art (negro, borde rojo, letras blancas),
+// igual de forma que el isologo del proyecto RN3. Se usa chiquito y en lugares discretos.
+const BC_SHIELD = [
+  '..rrrrrrrrr..',
+  '.rkkkkkkkkkr.',
+  'rkkkkkkkkkkkr',
+  'rkwwkkkwwwkkr',
+  'rkwkwkkwkkkkr',
+  'rkwwkkkwkkkkr',
+  'rkwkwkkwkkkkr',
+  'rkwwkkkwwwkkr',
+  'rkkkkkkkkkkkr',
+  '.rkkkkkkkkkr.',
+  '..rkkkkkkkr..',
+  '...rkkkkkr...',
+  '....rrrrr....',
+];
+const BC_COLORS = { r: '#e11d2e', k: '#18181b', w: '#f4f4f5' };
+export function drawBurgosMark(c, x, y, s = 1, alpha = 1) {
+  c.save();
+  c.globalAlpha *= alpha;
+  BC_SHIELD.forEach((row, r) => {
+    for (let col = 0; col < row.length; col++) {
+      const color = BC_COLORS[row[col]];
+      if (color) { c.fillStyle = color; c.fillRect(Math.round(x + col * s), Math.round(y + r * s), s, s); }
+    }
+  });
+  c.restore();
+}
+
 function rect(c, color, x, y, w, h) { c.fillStyle = color; c.fillRect(Math.round(x), Math.round(y), w, h); }
 function block(c, color, x, y, w, h, edge = 2) {
   rect(c, INK, x + edge, y, w - edge * 2, h); rect(c, INK, x, y + edge, w, h - edge * 2);
@@ -10,6 +49,21 @@ function block(c, color, x, y, w, h, edge = 2) {
 }
 
 // Cache native-resolution pixel sprites; enlarge only with nearest-neighbor filtering.
+// Elipse de brillo bajo los personajes: se dibuja una sola vez a 2x y luego solo se copia
+const groundGlows = new Map();
+function groundGlowSprite(enemy) {
+  if (groundGlows.has(enemy)) return groundGlows.get(enemy);
+  const k = 2, canvas = document.createElement('canvas');
+  canvas.width = 56 * k; canvas.height = 16 * k;
+  const g = canvas.getContext('2d'), cx = 28 * k, cy = 8 * k;
+  const glow = g.createRadialGradient(cx, cy, 3 * k, cx, cy, 28 * k);
+  glow.addColorStop(0, enemy ? 'rgba(239, 68, 68, 0.25)' : 'rgba(34, 211, 238, 0.2)');
+  glow.addColorStop(0.45, '#080d1360');
+  glow.addColorStop(1, 'transparent');
+  g.fillStyle = glow; g.beginPath(); g.ellipse(cx, cy, 28 * k, 8 * k, 0, 0, Math.PI * 2); g.fill();
+  return cacheSprite(groundGlows, enemy, canvas);
+}
+
 function foodSprite(kind, enemy, flash = false) {
   const key = `${kind}:${enemy}:${flash}`;
   if (sprites.has(key)) return sprites.get(key);
@@ -21,8 +75,7 @@ function foodSprite(kind, enemy, flash = false) {
     fc.globalCompositeOperation = 'source-atop';
     fc.fillStyle = 'rgba(255, 255, 255, 0.72)';
     fc.fillRect(0, 0, 64, 72);
-    sprites.set(key, flashCanvas);
-    return flashCanvas;
+    return cacheSprite(sprites, key, flashCanvas);
   }
   const sprite = document.createElement('canvas'); sprite.width = 64; sprite.height = 72;
   const c = sprite.getContext('2d');
@@ -45,6 +98,35 @@ function foodSprite(kind, enemy, flash = false) {
     rect(c, '#ffcb4b', 10, 38, 44, 4); rect(c, '#ffe472', 16, 42, 11, 3);
     if (kind === 'double') { rect(c, '#d95b51', 10, 49, 44, 3); rect(c, '#e8ad61', 11, 55, 42, 4); }
     else rect(c, '#e8ad61', 11, 51, 42, 5);
+  } else if (kind === 'double_rage') {
+    // Jefe hamburguesa en segunda fase: el hueco entre el pan y la carne es una boca llena de colmillos
+    const tall = 4;
+    // Pan de abajo y carne a la parrilla (con marcas)
+    block(c, '#a8612a', 7, 50 + tall, 50, 8, 3); rect(c, '#c9803d', 10, 51 + tall, 44, 2);
+    block(c, '#4a2416', 6, 42, 52, 10 + tall, 3); rect(c, '#6b3722', 9, 43, 46, 2);
+    for (let i = 0; i < 5; i++) rect(c, '#2a120b', 12 + i * 9, 46, 5, 2);
+    rect(c, '#ffcb4b', 7, 48, 50, 2); rect(c, '#2a120b', 8, 51, 48, 2);
+    // Boca: interior oscuro con lengua
+    block(c, '#1c0507', 9, 30, 46, 13, 3);
+    rect(c, '#7a1020', 22, 37, 20, 4); rect(c, '#a8213a', 25, 37, 8, 2);
+    // Colmillos de arriba y de abajo (queso fundido como dientes de abajo)
+    for (let i = 0; i < 7; i++) { const x = 11 + i * 6; rect(c, '#fff8e6', x, 30, 4, 4); rect(c, '#fff8e6', x + 1, 34, 2, 2); }
+    for (let i = 0; i < 6; i++) { const x = 14 + i * 6; rect(c, '#ffcb4b', x, 39, 4, 4); rect(c, '#ffcb4b', x + 1, 37, 2, 2); }
+    rect(c, '#ffcb4b', 7, 41, 50, 3); rect(c, '#ffcb4b', 12, 44, 3, 4); rect(c, '#ffcb4b', 44, 44, 3, 5); // queso chorreando
+    // Lechuga rota colgando sobre la boca
+    for (let i = 0; i < 9; i++) rect(c, i % 2 ? '#5fa344' : '#7cc45a', 6 + i * 6, 28 + (i % 2) * 2, 6, 3);
+    // Ketchup que gotea de la comisura
+    rect(c, '#d61f2c', 52, 33, 4, 8); rect(c, '#d61f2c', 53, 41, 2, 4); rect(c, '#ff5a64', 53, 34, 1, 3);
+    // Pan de arriba tostado con semillas
+    block(c, '#b4642a', 5, 6, 54, 25, 6); block(c, '#d98a3f', 8, 5, 48, 12, 5);
+    rect(c, '#f2b465', 15, 7, 22, 3);
+    for (const [x, y] of [[14, 12], [24, 9], [34, 13], [44, 9], [50, 15], [20, 16]]) { rect(c, '#fff3cf', x, y, 3, 2); rect(c, '#d9c08a', x, y + 2, 3, 1); }
+    // Ojos furiosos: cejas en V, ojo amarillo con pupila roja que brilla
+    block(c, '#fff3b0', 16, 18, 11, 8, 1); block(c, '#fff3b0', 37, 18, 11, 8, 1);
+    rect(c, '#d61f2c', 21, 20, 5, 5); rect(c, '#d61f2c', 38, 20, 5, 5);
+    rect(c, '#ffffff', 23, 21, 2, 2); rect(c, '#ffffff', 39, 21, 2, 2);
+    rect(c, '#2a0e04', 15, 13, 4, 2); rect(c, '#2a0e04', 18, 15, 4, 2); rect(c, '#2a0e04', 21, 16, 4, 2); rect(c, '#2a0e04', 24, 17, 4, 2);
+    rect(c, '#2a0e04', 45, 13, 4, 2); rect(c, '#2a0e04', 42, 15, 4, 2); rect(c, '#2a0e04', 39, 16, 4, 2); rect(c, '#2a0e04', 36, 17, 4, 2);
   } else if (kind === 'papas' || kind === 'fries') {
     for (let i = 0; i < 5; i++) { block(c, '#f3b846', 10 + i * 8, 7 + i % 3 * 4, 9, 32); rect(c, '#ffe895', 12 + i * 8, 10 + i % 3 * 4, 3, 23); }
     block(c, '#d84b50', 7, 29, 50, 31, 4); rect(c, '#ff7770', 11, 32, 4, 19);
@@ -68,6 +150,14 @@ function foodSprite(kind, enemy, flash = false) {
     for (let i = 0; i < 7; i++) block(c, '#dba26a', 18 + i * 2, 35 + i * 4, 30 - i * 4, 5, 1);
     block(c, '#ed9fb9', 8, 21, 29, 25, 5); block(c, '#b79aca', 30, 23, 27, 22, 5);
     block(c, '#f1e3c4', 21, 8, 27, 25, 5); rect(c, '#fff8da', 26, 12, 9, 5);
+  } else if (kind === 'chili') {
+    // Ají kamikaze: cuerpo rojo curvado que se afina hacia abajo, tallo verde y mecha encendida
+    block(c, '#e2362b', 12, 16, 40, 22, 6); block(c, '#e2362b', 16, 32, 32, 16, 6);
+    block(c, '#c42a24', 24, 44, 20, 10, 4); block(c, '#a8211d', 32, 50, 10, 7, 3);
+    rect(c, '#ff7a5c', 17, 20, 5, 15); rect(c, '#ffb39b', 18, 21, 2, 6); rect(c, '#8f1c18', 44, 22, 4, 18);
+    block(c, '#4f9a3c', 24, 9, 18, 9, 3); rect(c, '#86c95e', 27, 10, 9, 2); block(c, '#3b7a2c', 30, 3, 6, 9, 2);
+    rect(c, '#5b4630', 41, 4, 3, 7); rect(c, '#5b4630', 43, 2, 3, 3);
+    rect(c, '#ffe066', 45, 0, 4, 3); rect(c, '#ff8a3d', 46, 1, 2, 1); rect(c, '#fff6c2', 48, 2, 2, 2);
   } else if (kind === 'onion') {
     block(c, '#aa83b8', 10, 20, 45, 38, 7); rect(c, '#d9b7d8', 15, 28, 5, 20);
     rect(c, '#c9a1cc', 24, 23, 7, 30); block(c, '#8db26c', 27, 9, 10, 16, 2);
@@ -112,7 +202,8 @@ function foodSprite(kind, enemy, flash = false) {
     for (let i = 0; i < 7; i++) rect(c, '#a6693c', 17 + (i * 11) % 32, 27 + (i * 7) % 25, 3, 3);
     if (kind === 'empanada') for (let i = 0; i < 7; i++) rect(c, '#a87144', 11 + i * 6, 51, 3, 4);
   }
-  if (kind !== 'lava_boss') {
+  // El Coloso y la hamburguesa furiosa traen su propia cara
+  if (kind !== 'lava_boss' && kind !== 'double_rage') {
     block(c, '#fff8dc', 22, 30, 9, 12, 1); block(c, '#fff8dc', 38, 30, 9, 12, 1);
     rect(c, INK, 27, 33, 4, 6); rect(c, INK, 42, 33, 4, 6);
     if (enemy) { rect(c, INK, 21, 28, 7, 3); rect(c, INK, 26, 30, 6, 3); rect(c, INK, 38, 30, 6, 3); rect(c, INK, 43, 28, 7, 3); }
@@ -140,32 +231,93 @@ function foodSprite(kind, enemy, flash = false) {
   c.fillRect(0, 0, 64, 72);
   c.restore();
 
-  sprites.set(key, sprite); return sprite;
+  return cacheSprite(sprites, key, sprite);
 }
 
-export function drawFood(c, kind, x, y, scale = 1, time = 0, enemy = false, flash = false) {
+// Jefes en segunda fase: el mismo sprite pero mordido (o "comido" en la hamburguesa).
+// Cada mordida son 3 discos en fila (forma de dientes) que se recortan píxel a píxel,
+// y el borde del mordisco se pinta con el color de "adentro" de cada comida.
+const BITES = {
+  double:    { inner: '#f6d38b', crumbs: '#c98a3d', bites: [[58, 13, 12, 0.8]] },
+  burger:    { inner: '#f6d38b', crumbs: '#c98a3d', bites: [[55, 20, 11, 0.6]] },
+  fries:     { inner: '#fff1b8', crumbs: '#f2c14e', bites: [[44, 6, 10, 1.4], [16, 8, 7, 1.9]] },
+  papas:     { inner: '#fff1b8', crumbs: '#f2c14e', bites: [[44, 6, 10, 1.4]] },
+  ketchup:   { inner: '#ff9aa2', crumbs: '#b3001e', bites: [[52, 32, 12, 0], [14, 52, 7, 3.1]] },
+  pizza:     { inner: '#ffe6a0', crumbs: '#e0a33a', bites: [[50, 30, 13, -0.3], [14, 24, 8, 2.8]] },
+  icecream:  { inner: '#fdf4ff', crumbs: '#d8b4fe', bites: [[40, 8, 11, 1.2]] },
+  lava_boss: { inner: '#ff7a14', crumbs: '#ffd166', bites: [[55, 18, 12, 0.6], [8, 46, 8, 2.6]] },
+};
+const DEFAULT_BITE = { inner: '#f6d38b', crumbs: '#c98a3d', bites: [[54, 18, 11, 0.6]] };
+
+function bittenSprite(kind, flash = false) {
+  const key = `${kind}:bitten:${flash}`;
+  if (sprites.has(key)) return sprites.get(key);
+  const canvas = document.createElement('canvas'); canvas.width = 64; canvas.height = 72;
+  const c = canvas.getContext('2d');
+  // La hamburguesa jefe cambia de cara en la segunda fase (la versión furiosa con colmillos)
+  c.drawImage(foodSprite(kind === 'double' ? 'double_rage' : kind, true, flash), 0, 0);
+  const spec = BITES[kind] || DEFAULT_BITE;
+  // Cada mordida: 3 dientes en arco (ángulo = hacia dónde mira el mordisco)
+  const discs = [];
+  for (const [x, y, r, angle] of spec.bites) {
+    const tx = -Math.sin(angle), ty = Math.cos(angle);
+    for (const k of [-1, 0, 1]) discs.push([x + tx * k * r * 0.62, y + ty * k * r * 0.62, r * (k ? 0.72 : 0.8)]);
+  }
+  const image = c.getImageData(0, 0, 64, 72), data = image.data;
+  const inner = [parseInt(spec.inner.slice(1, 3), 16), parseInt(spec.inner.slice(3, 5), 16), parseInt(spec.inner.slice(5, 7), 16)];
+  for (let py = 0; py < 72; py++) {
+    for (let px = 0; px < 64; px++) {
+      const i = (py * 64 + px) * 4;
+      if (!data[i + 3]) continue;
+      let edge = Infinity;
+      for (const [dx, dy, r] of discs) edge = Math.min(edge, Math.hypot(px + 0.5 - dx, py + 0.5 - dy) - r);
+      if (edge < 0) data[i + 3] = 0;                                      // recorte del mordisco
+      else if (edge < 2.2 && !flash) { data[i] = inner[0]; data[i + 1] = inner[1]; data[i + 2] = inner[2]; } // borde con relleno
+    }
+  }
+  c.putImageData(image, 0, 0);
+  // Migas sueltas y una marquita de dientes pegada al mordisco
+  if (!flash) {
+    c.fillStyle = spec.crumbs;
+    const [bx, by, br, angle] = spec.bites[0];
+    for (let k = 0; k < 4; k++) {
+      const a = angle + Math.PI + (k - 1.5) * 0.5, d = br + 4 + (k % 2) * 3;
+      c.fillRect(Math.round(bx + Math.cos(a) * d), Math.round(by + Math.sin(a) * d), 2, 2);
+    }
+  }
+  return cacheSprite(sprites, key, canvas);
+}
+
+// bitten: jefe en segunda fase (sprite mordido)
+export function drawFood(c, kind, x, y, scale = 1, time = 0, enemy = false, flash = false, bitten = false) {
   const bob = Math.round(Math.sin(time * 7 + x * .05) * 1.5);
-  c.save(); c.imageSmoothingEnabled = false;
-  const isColossus = kind === 'lava_boss';
-  const groundGlow = c.createRadialGradient(x, y + 23 * scale, 3 * scale, x, y + 23 * scale, (isColossus ? 48 : 28) * scale);
-  groundGlow.addColorStop(0, isColossus ? 'rgba(255, 34, 0, 0.55)' : enemy ? 'rgba(239, 68, 68, 0.25)' : 'rgba(34, 211, 238, 0.2)');
-  groundGlow.addColorStop(0.45, isColossus ? 'rgba(255, 120, 0, 0.28)' : '#080d1360');
-  groundGlow.addColorStop(1, 'transparent');
-  c.fillStyle = groundGlow; c.beginPath(); c.ellipse(x, y + 23 * scale, (isColossus ? 48 : 28) * scale, (isColossus ? 16 : 8) * scale, 0, 0, Math.PI * 2); c.fill();
+  // Sin save/restore por personaje (se dibujan cientos por cuadro): solo se toca y se repone el suavizado
+  const smoothing = c.imageSmoothingEnabled;
+  // Brillo de suelo pre-dibujado (mismo degradado y forma), escalado suave según el tamaño del personaje
+  c.imageSmoothingEnabled = true;
+  c.drawImage(groundGlowSprite(enemy), x - 28 * scale, y + 15 * scale, 56 * scale, 16 * scale);
+  c.imageSmoothingEnabled = false;
+  if (kind === 'lava_boss') {
+    // Halo de magma bajo el Coloso (un solo enemigo: el degradado en vivo no pesa)
+    const glow = c.createRadialGradient(x, y + 23 * scale, 3 * scale, x, y + 23 * scale, 48 * scale);
+    glow.addColorStop(0, 'rgba(255, 34, 0, 0.55)'); glow.addColorStop(0.45, 'rgba(255, 120, 0, 0.28)'); glow.addColorStop(1, 'transparent');
+    c.fillStyle = glow; c.beginPath(); c.ellipse(x, y + 23 * scale, 48 * scale, 16 * scale, 0, 0, Math.PI * 2); c.fill();
+  }
 
   if (kind === 'domi') {
     if (domiGifImage && domiGifImage.complete && domiGifImage.naturalWidth > 0) {
-      if (flash) c.filter = 'brightness(2.5)';
       const w = 52 * scale;
       const h = 54 * scale;
+      if (flash) { c.save(); c.filter = 'brightness(2.5)'; }
       c.drawImage(domiGifImage, Math.round(x - w / 2), Math.round(y - h / 2 - 4 + bob), w, h);
-      c.restore();
+      if (flash) c.restore();
+      c.imageSmoothingEnabled = smoothing;
       return;
     }
   }
 
-  c.drawImage(foodSprite(kind, enemy, flash), Math.round(x - 32 * scale), Math.round(y - 36 * scale + bob), 64 * scale, 72 * scale);
-  c.restore();
+  c.drawImage(bitten ? bittenSprite(kind, flash) : foodSprite(kind, enemy, flash), Math.round(x - 32 * scale), Math.round(y - 36 * scale + bob), 64 * scale, 72 * scale);
+  c.imageSmoothingEnabled = smoothing;
 }
 
 export function drawWeapon(c, kind, x, y, scale = 1, angle = -.65) {
@@ -185,178 +337,123 @@ export function drawWeapon(c, kind, x, y, scale = 1, angle = -.65) {
   c.restore();
 }
 
+// Estadio en pixel art: tribuna con hinchada, carteles LED y césped cortado en franjas.
+// Todo con rectángulos de 2-4 px (líneas de cal incluidas) para que se vea nítido al escalar.
 function footballFloor(c) {
-  // 1. Gradas synthwave y marco de estadio
-  rect(c,'#050b17',0,0,1920,84);
-  rect(c,'#1a1030',0,55,1920,29);
-  rect(c,'#38bdf8',0,78,1920,6);
-  rect(c,'#0284c7',0,84,1920,4);
+  const hash = (x, y) => { let h = (x * 374761393 + y * 668265263) | 0; h = (h ^ (h >>> 13)) * 1274126177; return ((h ^ (h >>> 16)) >>> 0) / 4294967295; };
+  const PX = 4; // tamaño del "píxel" del césped y las líneas
+  const pitch = { x: 64, y: 120, w: 1792, h: 920 };
+  const midX = pitch.x + pitch.w / 2, midY = pitch.y + pitch.h / 2;
 
-  // Butacas y tableros electrónicos lejanos
-  for(let x=18;x<1900;x+=36){
-    rect(c,x%72?'#ffcf62':'#4df8dc',x,65,18,5);
-    rect(c,'#4e2e75',x+3,53,12,5);
-    rect(c,x%72?'#5f397f':'#382456',x,12+(x/36%3)*9,29,7);
+  // --- Tribuna: escalones de cemento con hinchas de dos colores ---
+  rect(c, '#0b1020', 0, 0, 1920, 120);
+  for (let row = 0; row < 5; row++) {
+    const y = 6 + row * 13;
+    rect(c, row % 2 ? '#1a2238' : '#202a44', 0, y + 9, 1920, 4);
+    for (let x = 4 + (row % 2) * 6; x < 1916; x += 12) {
+      const n = hash(x, row);
+      if (n < 0.12) continue; // asientos vacíos
+      const shirt = n < 0.5 ? '#6ec6ff' : n < 0.78 ? '#f8fafc' : n < 0.92 ? '#ffd23f' : '#ff4d6d';
+      rect(c, '#f1c27d', x + 2, y, 4, 3);          // cabeza
+      rect(c, shirt, x, y + 3, 8, 6);              // camiseta
+      if (n > 0.86) rect(c, shirt, x + (n > 0.93 ? 8 : -2), y - 3, 2, 6); // brazo levantado
+    }
   }
-  for(const x of [180, 780, 1380]){
-    block(c,'#142c3c',x,12,120,34,3);
-    rect(c,'#ffe272',x+12,22,34,4);
-    rect(c,'#61f6df',x+60,22,46,4);
+  // Banderas gigantes en la tribuna
+  for (const [fx, a, b] of [[300, '#6ec6ff', '#f8fafc'], [960, '#ffd23f', '#1d4ed8'], [1620, '#ff4d6d', '#f8fafc']]) {
+    for (let i = 0; i < 6; i++) rect(c, i % 2 ? a : b, fx - 60 + i * 20, 8, 20, 44);
+    rect(c, '#0b1020', fx - 60, 52, 120, 2);
   }
-
-  // 2. Campo de Juego (Césped profesional con franjas verticales simétricas de corte)
-  const pitchX = 64, pitchY = 112, pitchW = 1792, pitchH = 936;
-  const stripeW = 64;
-  const grassLight = '#1e753f';
-  const grassDark = '#176033';
-
-  // Borde exterior / pista de respeto
-  rect(c, '#0c2419', 0, 88, 1920, 992);
-  rect(c, '#091c13', pitchX - 8, pitchY - 8, pitchW + 16, pitchH + 16);
-
-  // Franjas de corte de césped
-  for (let x = pitchX; x < pitchX + pitchW; x += stripeW) {
-    const isEven = Math.floor((x - pitchX) / stripeW) % 2 === 0;
-    const w = Math.min(stripeW, (pitchX + pitchW) - x);
-    rect(c, isEven ? grassLight : grassDark, x, pitchY, w, pitchH);
-    // Microtextura de corte
-    rect(c, isEven ? '#24874933' : '#10492633', x + 2, pitchY, 2, pitchH);
+  // Carteles LED de publicidad
+  rect(c, '#05070d', 0, 70, 1920, 34);
+  const ads = [['DOMI COLA', '#ff3f8b'], ['PANCHO PRO', '#4df8dc'], ['24/7 ARCADE', '#ffe272'], ['MOSTAZA FC', '#a3e635']];
+  for (let i = 0; i < 8; i++) {
+    // El sexto cartel es un auspicio discreto de BurgosCorp
+    const [label, tone] = i === 5 ? ['BURGOSCORP', '#ef3b4f'] : ads[i % ads.length], ax = 8 + i * 240;
+    rect(c, '#111827', ax, 74, 228, 26);
+    for (let d = 0; d < 228; d += 4) rect(c, '#1f2937', ax + d, 74, 1, 26); // grilla de LEDs
+    c.save(); c.fillStyle = tone; c.font = '900 14px monospace'; c.textAlign = 'center'; c.fillText(label, ax + 114, 93); c.restore();
+    if (i === 5) drawBurgosMark(c, ax + 20, 80, 1);
   }
+  rect(c, '#0f3b26', 0, 104, 1920, 16); // pista perimetral
 
-  // Textura suave de briznas
-  c.fillStyle = 'rgba(255, 255, 255, 0.025)';
-  for (let y = pitchY + 16; y < pitchY + pitchH; y += 32) {
-    c.fillRect(pitchX, y, pitchW, 2);
+  // --- Césped: franjas de corte + damero sutil + pasto con textura ---
+  const stripes = ['#2f8f46', '#277b3c'];
+  const stripeW = 128;
+  for (let x = pitch.x - 64; x < pitch.x + pitch.w + 64; x += stripeW) {
+    const i = Math.floor((x - pitch.x + 64) / stripeW);
+    rect(c, stripes[i % 2], x, 104 + 16, stripeW, 1080 - 120);
   }
-
-  // 3. Líneas de cal reglamentarias nítidas (Blanco tiza con sutil relieve)
-  c.save();
-  c.strokeStyle = '#f8ffea';
-  c.lineWidth = 4;
-  c.lineCap = 'square';
-  c.lineJoin = 'miter';
-
-  // Perímetro del terreno de juego
-  c.strokeRect(pitchX, pitchY, pitchW, pitchH);
-
-  // Línea de medio campo
-  const midX = pitchX + pitchW / 2;
-  const midY = pitchY + pitchH / 2;
-  c.beginPath();
-  c.moveTo(midX, pitchY);
-  c.lineTo(midX, pitchY + pitchH);
-  c.stroke();
-
-  // Círculo central y punto de saque inicial
-  c.beginPath();
-  c.arc(midX, midY, 116, 0, Math.PI * 2);
-  c.stroke();
-  c.fillStyle = '#f8ffea';
-  c.beginPath();
-  c.arc(midX, midY, 6, 0, Math.PI * 2);
-  c.fill();
-
-  // Áreas Grandes (Penal) - 270 x 480 px
-  const boxW = 270, boxH = 480, boxY = midY - boxH / 2;
-  // Área Penal Izquierda
-  c.strokeRect(pitchX, boxY, boxW, boxH);
-  // Área Penal Derecha
-  c.strokeRect(pitchX + pitchW - boxW, boxY, boxW, boxH);
-
-  // Áreas Chicas (Meta) - 100 x 240 px
-  const goalBoxW = 100, goalBoxH = 240, goalBoxY = midY - goalBoxH / 2;
-  // Área Chica Izquierda
-  c.strokeRect(pitchX, goalBoxY, goalBoxW, goalBoxH);
-  // Área Chica Derecha
-  c.strokeRect(pitchX + pitchW - goalBoxW, goalBoxY, goalBoxW, goalBoxH);
-
-  // Puntos de Penal
-  const penDist = 200;
-  const penLeftX = pitchX + penDist;
-  const penRightX = pitchX + pitchW - penDist;
-  c.fillStyle = '#f8ffea';
-  c.beginPath(); c.arc(penLeftX, midY, 5, 0, Math.PI * 2); c.fill();
-  c.beginPath(); c.arc(penRightX, midY, 5, 0, Math.PI * 2); c.fill();
-
-  // Medialunas del área penal (Arcos fuera del área grande)
-  c.beginPath();
-  c.arc(penLeftX, midY, 96, -0.92, 0.92, false);
-  c.stroke();
-  c.beginPath();
-  c.arc(penRightX, midY, 96, Math.PI - 0.92, Math.PI + 0.92, false);
-  c.stroke();
-
-  // Arcos de Tiro de Esquina (Córner) en las 4 esquinas
-  const cornerR = 26;
-  // Superior Izquierda
-  c.beginPath(); c.arc(pitchX, pitchY, cornerR, 0, Math.PI / 2); c.stroke();
-  // Inferior Izquierda
-  c.beginPath(); c.arc(pitchX, pitchY + pitchH, cornerR, -Math.PI / 2, 0); c.stroke();
-  // Superior Derecha
-  c.beginPath(); c.arc(pitchX + pitchW, pitchY, cornerR, Math.PI / 2, Math.PI); c.stroke();
-  // Inferior Derecha
-  c.beginPath(); c.arc(pitchX + pitchW, pitchY + pitchH, cornerR, Math.PI, Math.PI * 1.5); c.stroke();
-
-  // 4. Banderines de esquina pixel art
-  const corners = [
-    [pitchX, pitchY], [pitchX, pitchY + pitchH],
-    [pitchX + pitchW, pitchY], [pitchX + pitchW, pitchY + pitchH]
-  ];
-  for (const [bx, by] of corners) {
-    // Poste blanco
-    c.fillStyle = '#ffffff';
-    c.fillRect(bx - 1, by - 14, 2, 14);
-    // Banderín dorado ondeante
-    c.fillStyle = '#fde047';
-    c.beginPath();
-    c.moveTo(bx, by - 14);
-    c.lineTo(bx + (bx < midX ? 8 : -8), by - 10);
-    c.lineTo(bx, by - 6);
-    c.closePath();
-    c.fill();
+  for (let y = pitch.y; y < pitch.y + pitch.h; y += 92) {
+    if (((y - pitch.y) / 92) % 2) { c.save(); c.globalAlpha = 0.07; rect(c, '#ffffff', 0, y, 1920, 92); c.restore(); }
+  }
+  for (let y = 120; y < 1080; y += PX * 2) {
+    for (let x = 0; x < 1920; x += PX * 2) {
+      const n = hash(x, y);
+      // Matitas de pasto en forma de V (oscuras y claras), pocas para que el césped se vea limpio
+      if (n < 0.025) { rect(c, '#24723a', x, y + 2, 2, 4); rect(c, '#24723a', x + 2, y + 4, 2, 2); rect(c, '#24723a', x + 4, y, 2, 6); }
+      else if (n > 0.975) { rect(c, '#4fb565', x, y + 2, 2, 4); rect(c, '#4fb565', x + 4, y, 2, 6); }
+    }
   }
 
-  // 5. Porterías (Arcos) 3D Pixel Art
-  const netH = 190, netDepth = 36;
-  const netY = midY - netH / 2;
+  // --- Líneas de cal pixeladas ---
+  const LINE = '#f1f5e9', SHADE = '#c9d8c3';
+  const hLine = (x, y, w) => { rect(c, SHADE, x, y + PX, w, 2); rect(c, LINE, x, y, w, PX); };
+  const vLine = (x, y, h) => { rect(c, SHADE, x + PX, y, 2, h); rect(c, LINE, x, y, PX, h); };
+  const box = (x, y, w, h) => { hLine(x, y, w); hLine(x, y + h - PX, w); vLine(x, y, h); vLine(x + w - PX, y, h); };
+  const arc = (cx, cy, r, from, to) => {
+    const steps = Math.ceil(r * Math.abs(to - from) / 2);
+    for (let s = 0; s <= steps; s++) {
+      const a = from + (to - from) * s / steps;
+      const px = Math.round((cx + Math.cos(a) * r) / 2) * 2, py = Math.round((cy + Math.sin(a) * r) / 2) * 2;
+      rect(c, LINE, px - PX / 2, py - PX / 2, PX, PX);
+    }
+  };
+  box(pitch.x, pitch.y, pitch.w, pitch.h);
+  vLine(midX - PX / 2, pitch.y, pitch.h);
+  arc(midX, midY, 120, 0, Math.PI * 2);
+  rect(c, LINE, midX - 6, midY - 6, 12, 12);
+  for (const side of [-1, 1]) {
+    const edge = side < 0 ? pitch.x : pitch.x + pitch.w;
+    const bigW = 270, bigH = 500, smallW = 100, smallH = 240;
+    box(side < 0 ? edge : edge - bigW, midY - bigH / 2, bigW, bigH);
+    box(side < 0 ? edge : edge - smallW, midY - smallH / 2, smallW, smallH);
+    const spot = edge + side * -190;
+    rect(c, LINE, spot - 5, midY - 5, 10, 10);
+    // Medialuna fuera del área grande
+    const reach = Math.acos(80 / 100);
+    if (side < 0) arc(spot, midY, 100, -reach, reach); else arc(spot, midY, 100, Math.PI - reach, Math.PI + reach);
+  }
+  // Córners con banderines
+  for (const [cx, cy, a0] of [[pitch.x, pitch.y, 0], [pitch.x + pitch.w, pitch.y, Math.PI / 2], [pitch.x + pitch.w, pitch.y + pitch.h, Math.PI], [pitch.x, pitch.y + pitch.h, Math.PI * 1.5]]) {
+    arc(cx, cy, 24, a0, a0 + Math.PI / 2);
+    rect(c, '#e5e7eb', cx - 1, cy - 26, 3, 26);
+    rect(c, '#ffd23f', cx + (cx < midX ? 2 : -12), cy - 26, 10, 8);
+    rect(c, '#f59e0b', cx + (cx < midX ? 2 : -12), cy - 22, 10, 2);
+  }
 
-  // Portería Izquierda
-  c.fillStyle = '#061a1299';
-  c.fillRect(pitchX - netDepth, netY + 4, netDepth, netH);
-  // Red cuadriculada
-  c.strokeStyle = '#cbd5e166';
-  c.lineWidth = 1;
-  for (let gy = netY; gy <= netY + netH; gy += 12) {
-    c.beginPath(); c.moveTo(pitchX - netDepth, gy); c.lineTo(pitchX, gy); c.stroke();
+  // --- Arcos: palos con volumen, red cuadriculada y sombra ---
+  for (const side of [-1, 1]) {
+    const gx = side < 0 ? pitch.x : pitch.x + pitch.w, depth = 44, gh = 200, gy = midY - gh / 2;
+    const back = gx + side * depth;
+    rect(c, 'rgba(0,0,0,0.25)', Math.min(gx, back), gy + 8, depth, gh);
+    rect(c, '#0b3b20', Math.min(gx, back), gy, depth, gh);
+    for (let y = gy; y <= gy + gh; y += 10) rect(c, '#d1d5db66', Math.min(gx, back), y, depth, 1);
+    for (let x = 0; x <= depth; x += 10) rect(c, '#d1d5db66', Math.min(gx, back) + x, gy, 1, gh);
+    // Palos y travesaño
+    rect(c, '#f8fafc', gx - 4, gy - 6, 8, gh + 12);
+    rect(c, '#94a3b8', gx + 2, gy - 6, 2, gh + 12);
+    rect(c, '#f8fafc', Math.min(gx, back), gy - 6, depth, 6);
+    rect(c, '#f8fafc', Math.min(gx, back), gy + gh, depth, 6);
+    rect(c, '#e5e7eb', back - 3, gy - 6, 6, gh + 12);
   }
-  for (let gx = pitchX - netDepth; gx <= pitchX; gx += 10) {
-    c.beginPath(); c.moveTo(gx, netY); c.lineTo(gx, netY + netH); c.stroke();
-  }
-  // Postes y Travesaño blancos
-  c.strokeStyle = '#ffffff';
-  c.lineWidth = 5;
-  c.strokeRect(pitchX - netDepth, netY, netDepth, netH);
-  c.beginPath();
-  c.moveTo(pitchX, netY); c.lineTo(pitchX, netY + netH); c.stroke();
 
-  // Portería Derecha
-  c.fillStyle = '#061a1299';
-  c.fillRect(pitchX + pitchW, netY + 4, netDepth, netH);
-  c.strokeStyle = '#cbd5e166';
-  c.lineWidth = 1;
-  for (let gy = netY; gy <= netY + netH; gy += 12) {
-    c.beginPath(); c.moveTo(pitchX + pitchW, gy); c.lineTo(pitchX + pitchW + netDepth, gy); c.stroke();
+  // Luz de los reflectores sobre el césped (horneada)
+  for (const [lx, ly] of [[260, 160], [1660, 160], [260, 1000], [1660, 1000]]) {
+    const glow = c.createRadialGradient(lx, ly, 20, lx, ly, 520);
+    glow.addColorStop(0, 'rgba(255, 252, 220, 0.12)'); glow.addColorStop(1, 'rgba(255, 252, 220, 0)');
+    c.fillStyle = glow; c.fillRect(lx - 520, ly - 520, 1040, 1040);
   }
-  for (let gx = pitchX + pitchW; gx <= pitchX + pitchW + netDepth; gx += 10) {
-    c.beginPath(); c.moveTo(gx, netY); c.lineTo(gx, netY + netH); c.stroke();
-  }
-  c.strokeStyle = '#ffffff';
-  c.lineWidth = 5;
-  c.strokeRect(pitchX + pitchW, netY, netDepth, netH);
-  c.beginPath();
-  c.moveTo(pitchX + pitchW, netY); c.lineTo(pitchX + pitchW, netY + netH); c.stroke();
-
-  c.restore();
 }
 
 // ============================================================================
@@ -572,7 +669,9 @@ const LAVA_BOARD = (() => {
           const v = n * 1.25 + d * 0.55 - 0.35 + Math.sin(x * 0.6 + y * 0.35 + t * 2 + n * 8) * 0.07 + (bay(x, y) - 0.5) * 0.14;
           col = pal[cl(Math.floor(v * 6), 0, 5)];
         } else {
-          col = [rock[i * 3], rock[i * 3 + 1], rock[i * 3 + 2]];
+          // Roca: se copia directo sin crear un arreglo por píxel en cada cuadro
+          D[o] = rock[i * 3]; D[o + 1] = rock[i * 3 + 1]; D[o + 2] = rock[i * 3 + 2]; D[o + 3] = 255;
+          continue;
         }
         D[o] = col[0]; D[o + 1] = col[1]; D[o + 2] = col[2]; D[o + 3] = 255;
       }
@@ -621,28 +720,124 @@ function lavaFloor(c) {
   LAVA_BOARD.draw(c, 1920, 1080, 0);
 }
 
+// Desierto en pixel art: cielo de atardecer con mesetas, dunas con ondas de viento,
+// suelo agrietado, piedras, huesos y matorrales secos. Todo en bloques de 4 px.
+function desertFloor(c) {
+  const hash = (x, y) => { let h = (x * 374761393 + y * 668265263) | 0; h = (h ^ (h >>> 13)) * 1274126177; return ((h ^ (h >>> 16)) >>> 0) / 4294967295; };
+  const P = 4;
+  // --- Cielo en franjas (atardecer) y mesetas rojizas en el horizonte ---
+  const sky = ['#ffcf7a', '#ffb560', '#ff9a52', '#f07a48'];
+  for (let i = 0; i < sky.length; i++) rect(c, sky[i], 0, i * 12, 1920, 12);
+  rect(c, '#e9a463', 0, 48, 1920, 36); // desierto lejano detrás de las mesetas
+  for (let x = 0; x < 1920; x += P) rect(c, '#d98f52', x, 58 + Math.round(Math.sin(x / 70) * 3 / P) * P, P, P);
+  for (let x = 0; x < 1920; x += P) if (hash(x, 1) < 0.5) rect(c, sky[1], x, 10, P, 2); // borde tramado entre franjas
+  rect(c, '#fff1c1', 1520, 6, 40, 40); rect(c, '#ffe08a', 1516, 10, 48, 32); // sol
+  const mesa = (x0, w, top, base, col, stripe) => {
+    for (let x = x0; x < x0 + w; x += P) {
+      const edge = Math.min(x - x0, x0 + w - x);
+      const h = edge < 24 ? top + (24 - edge) * 1.2 : top;
+      rect(c, col, x, h, P, base - h);
+      if (((x - x0) / P) % 9 < 6) rect(c, stripe, x, h + 10, P, 3);
+    }
+  };
+  mesa(40, 360, 22, 84, '#b8543a', '#cf6a45');
+  mesa(520, 240, 30, 84, '#a84a35', '#c25f40');
+  mesa(980, 420, 18, 84, '#b8543a', '#d27048');
+  mesa(1560, 330, 28, 84, '#a84a35', '#c25f40');
+  rect(c, '#8a3b2c', 0, 70, 1920, 14);
+  for (let x = 0; x < 1920; x += P * 2) rect(c, hash(x, 7) < 0.5 ? '#7a3226' : '#9c4632', x, 80 + (hash(x, 8) < 0.5 ? 0 : P), P * 2, P);
+
+  // --- Arena base en dos tonos con tramado ---
+  rect(c, '#e2a85e', 0, 88, 1920, 992);
+  for (let y = 88; y < 1080; y += P) for (let x = 0; x < 1920; x += P) {
+    const n = hash(x, y);
+    if (n < 0.06) rect(c, '#d69a52', x, y, P, P);
+    else if (n > 0.97) rect(c, '#f0c27c', x, y, P, P);
+  }
+  // Dunas: ondas de viento escalonadas (luz arriba, sombra abajo)
+  for (let row = 0; row < 26; row++) {
+    const baseY = 120 + row * 38 + (row % 2) * 6;
+    for (let x = 0; x < 1920; x += P) {
+      const y = Math.round((baseY + Math.sin(x / 90 + row * 1.7) * 9 + Math.sin(x / 31 + row) * 3) / P) * P;
+      if (hash(x, row) < 0.12) continue; // cortes para que no parezcan líneas perfectas
+      rect(c, '#f3c784', x, y, P, P);
+      rect(c, '#c98d4a', x, y + P, P, P);
+    }
+  }
+  // Suelo seco agrietado en parches
+  for (const [px, py, size] of [[420, 640, 150], [1380, 300, 130], [900, 900, 120], [1600, 820, 110], [260, 320, 100]]) {
+    for (let y = py - size / 2; y < py + size / 2; y += P) for (let x = px - size; x < px + size; x += P) {
+      const d = Math.hypot((x - px) / size, (y - py) / (size / 2));
+      if (d < 1) rect(c, d > 0.85 ? '#c99050' : '#d29a5a', x, y, P, P);
+    }
+    // Grietas: red de líneas quebradas de 2 px (barro seco)
+    const inside = (x, y) => Math.hypot((x - px) / size, (y - py) / (size / 2)) < 0.92;
+    const line = (x, y, dx, dy, steps) => {
+      for (let s = 0; s < steps; s++) {
+        if (inside(x, y)) { rect(c, '#9a6230', Math.round(x / 2) * 2, Math.round(y / 2) * 2, 2, 2); rect(c, '#e8b878', Math.round(x / 2) * 2, Math.round(y / 2) * 2 + 2, 2, 1); }
+        x += dx * 2 + (hash(s, x | 0) - 0.5) * 2; y += dy * 2 + (hash(y | 0, s) - 0.5) * 2;
+      }
+    };
+    for (let gy = py - size / 2 + 14; gy < py + size / 2; gy += 22) line(px - size, gy + (hash(gy, px) - 0.5) * 8, 1, (hash(px, gy) - 0.5) * 0.5, size);
+    for (let gx = px - size + 20; gx < px + size; gx += 34) for (let gy = py - size / 2 + 14; gy < py + size / 2; gy += 22) line(gx + (hash(gx, gy) - 0.5) * 12, gy, (hash(gy, gx) - 0.5) * 0.4, 1, 11);
+  }
+  // Piedras con luz y sombra
+  for (let i = 0; i < 46; i++) {
+    const x = Math.round(hash(i, 3) * 1860 + 30), y = Math.round(hash(3, i) * 940 + 110), s = 2 + Math.floor(hash(i, 9) * 3);
+    rect(c, '#00000022', x + 2, y + s * P - 2, s * P + 4, P);
+    rect(c, '#9b6b47', x, y, s * P, s * P - 2);
+    rect(c, '#c49470', x, y, s * P - P, P);
+    rect(c, '#6e4a33', x + s * P - P, y + P, P, s * P - 3);
+  }
+  // Matorrales secos
+  for (let i = 0; i < 22; i++) {
+    const x = Math.round(hash(i, 11) * 1840 + 40), y = Math.round(hash(11, i) * 900 + 140);
+    rect(c, '#00000022', x - 8, y + 10, 24, 4);
+    for (const [dx, dy] of [[0, 0], [-6, -4], [6, -4], [-10, -10], [10, -10], [-2, -12], [4, -16], [-12, 2], [12, 2]]) rect(c, hash(dx + i, dy) < 0.5 ? '#8a6a32' : '#a6843f', x + dx, y + dy, P, P);
+  }
+  // Huesos y una calavera de vaca
+  const skull = (x, y) => {
+    rect(c, '#00000026', x - 2, y + 18, 34, 5);
+    rect(c, '#f4ecd8', x + 6, y + 2, 18, 14); rect(c, '#f4ecd8', x + 10, y + 16, 10, 4);
+    rect(c, '#f4ecd8', x - 4, y, 8, 4); rect(c, '#f4ecd8', x + 26, y, 8, 4); rect(c, '#f4ecd8', x - 6, y - 4, 4, 4); rect(c, '#f4ecd8', x + 32, y - 4, 4, 4);
+    rect(c, '#3b2a20', x + 9, y + 6, 4, 4); rect(c, '#3b2a20', x + 17, y + 6, 4, 4); rect(c, '#c9bea4', x + 12, y + 14, 2, 2); rect(c, '#c9bea4', x + 16, y + 14, 2, 2);
+  };
+  skull(700, 260); skull(1240, 760); skull(320, 900);
+  for (let i = 0; i < 8; i++) {
+    const x = Math.round(hash(i, 21) * 1800 + 60), y = Math.round(hash(21, i) * 880 + 160);
+    rect(c, '#efe5cf', x, y, 20, 4); rect(c, '#efe5cf', x - 3, y - 2, 4, 8); rect(c, '#efe5cf', x + 19, y - 2, 4, 8);
+  }
+  // Guiño: cajón de madera semienterrado con el sello BC
+  rect(c, '#00000026', 1484, 914, 44, 6);
+  rect(c, '#7a4a24', 1480, 884, 40, 30); rect(c, '#9a6230', 1482, 886, 36, 4); rect(c, '#5c3519', 1480, 898, 40, 2);
+  rect(c, '#e2a85e', 1478, 906, 46, 10); for (let x = 1478; x < 1524; x += 8) rect(c, '#f3c784', x, 906, 4, 4);
+  drawBurgosMark(c, 1494, 887, 1, 0.75);
+  // Huellas que cruzan el desierto
+  for (let s = 0; s < 26; s++) {
+    const x = 120 + s * 64, y = 560 + Math.sin(s * 0.45) * 60 + (s % 2) * 10;
+    rect(c, '#c98d4a', x, y, 8, 4); rect(c, '#c98d4a', x + 2, y + 4, 4, 2);
+  }
+}
+
 function dinerFloor(map = 'diner') {
   if (floors.has(map)) return floors.get(map);
   const canvas = document.createElement('canvas'); canvas.width = 1920; canvas.height = 1080;
   const c = canvas.getContext('2d'); const parking = map === 'parking', kitchen = map === 'kitchen';
-  if(map==='football'){footballFloor(c);floors.set(map,canvas);return canvas;}
-  if(map==='lava'){lavaFloor(c);floors.set(map,canvas);return canvas;}
-  if(['snow','desert'].includes(map)){
-    const colors=map==='snow'?['#275574','#35688a']:map==='desert'?['#bb8149','#c99355']:['#3c965b','#48a867'];
-    for(let y=0;y<1080;y+=32)for(let x=0;x<1920;x+=32){rect(c,colors[(x/32+y/32)%2],x,y,32,32);rect(c,map==='snow'?'#7dd3fc1c':'#ffffff0b',x+2,y+2,28,2);}
+  if(map==='football'){footballFloor(c);return cacheSprite(floors,map,canvas);}
+  if(map==='lava'){lavaFloor(c);return cacheSprite(floors,map,canvas);}
+  if(map==='desert'){desertFloor(c);return cacheSprite(floors,map,canvas);}
+  if(map==='snow'){
+    const colors=['#275574','#35688a'];
+    for(let y=0;y<1080;y+=32)for(let x=0;x<1920;x+=32){rect(c,colors[(x/32+y/32)%2],x,y,32,32);rect(c,'#7dd3fc1c',x+2,y+2,28,2);}
     if(map==='snow'){
       for(let i=0;i<160;i++){const x=(i*179)%1920,y=108+(i*91)%920;rect(c,i%2?'#bae6fd':'#e0f2fe',x,y,5,3);rect(c,'#38bdf8',x+1,y+1,2,1);}
       rect(c,'#38bdf8',0,80,1920,3);
       rect(c,'#0d1e2b',0,0,1920,84);rect(c,'#173850',0,76,1920,8);
       for(let x=0;x<1920;x+=64){block(c,x%128?'#1c3d55':'#163246',x+2,5,60,31,2);block(c,'#122839',x+18,40,60,31,2);rect(c,'#38bdf866',x+8,9,38,3);}
       for(const x of [160,540,960,1380,1760]){rect(c,'#e0f2fe',x,72,80,5);rect(c,'#38bdf8',x+8,77,64,3);}
-    }else{
-      for(let i=0;i<100;i++){const x=(i*191)%1920,y=110+(i*73)%920;rect(c,'#e8b975',x,y,10,2);}
-      rect(c,'#75462f',0,0,1920,84);rect(c,'#bf7b47',0,76,1920,8);
-      for(let x=0;x<1920;x+=72){block(c,x%144?'#a9633d':'#995738',x+3,7,67,30,3);block(c,'#8c4d34',x+25,42,67,29,3);}
-      for(const x of [180,680,1200,1680]){rect(c,'#522f2b',x,18,92,34);rect(c,'#e1a958',x+6,24,80,5);rect(c,'#70402f',x+12,34,68,12);}
+      drawBurgosMark(c, 1830, 1000, 2, 0.18); // guiño: sello BC bajo el hielo
     }
-    floors.set(map,canvas);return canvas;
+    return cacheSprite(floors,map,canvas);
   }
   rect(c, parking ? '#121822' : '#171f24', 0, 0, 1920, 1080);
   for (let y = 0; y < 1080; y += 32) for (let x = 0; x < 1920; x += 32) {
@@ -652,87 +847,44 @@ function dinerFloor(map = 'diner') {
     if ((x * 3 + y) % 224 === 0) rect(c, '#0a18181a', x + 9, y + 20, 8, 2);
   }
   if (parking) {
-    // 1. Siluetas de rascacielos lejanos en el horizonte nocturno (fondo detallado)
-    const skyline = [
-      { x: 30, w: 90, h: 68, col: '#09111e' },
-      { x: 135, w: 75, h: 52, col: '#0c1626' },
-      { x: 225, w: 120, h: 74, col: '#070d18' },
-      { x: 360, w: 85, h: 60, col: '#0a1422' },
-      { x: 460, w: 140, h: 76, col: '#050a12' },
-      { x: 620, w: 100, h: 62, col: '#0c1626' },
-      { x: 735, w: 110, h: 72, col: '#08101c' },
-      { x: 860, w: 130, h: 76, col: '#060c16' },
-      { x: 1005, w: 95, h: 56, col: '#0a1320' },
-      { x: 1115, w: 135, h: 74, col: '#070e18' },
-      { x: 1265, w: 115, h: 64, col: '#09121f' },
-      { x: 1395, w: 150, h: 76, col: '#050a14' },
-      { x: 1560, w: 90, h: 58, col: '#0b1524' },
-      { x: 1665, w: 120, h: 70, col: '#080f1b' },
-      { x: 1800, w: 95, h: 62, col: '#060c16' }
-    ];
-    for (const b of skyline) {
-      rect(c, b.col, b.x, 76 - b.h, b.w, b.h);
-      // Antena con baliza roja / cian en lo alto
-      rect(c, '#1e293b', b.x + b.w / 2 - 1, 76 - b.h - 14, 2, 14);
-      rect(c, (b.x % 2 === 0) ? '#ff0055' : '#00f0ff', b.x + b.w / 2 - 2, 76 - b.h - 16, 4, 3);
-      // Ventanas iluminadas en cuadrícula pixel-art
-      for (let wx = b.x + 8; wx < b.x + b.w - 10; wx += 14) {
-        for (let wy = 76 - b.h + 8; wy < 70; wy += 12) {
-          if ((wx * 3 + wy * 7) % 5 === 0) {
-            rect(c, (wx % 2 === 0) ? '#00f0ff55' : '#ff007f55', wx, wy, 4, 5);
-          }
-        }
-      }
-    }
-
-    // 2. Cuadrícula en perspectiva sutil sobre el asfalto (evita que se sienta plano)
-    c.save();
-    c.strokeStyle = '#00f0ff09';
-    c.lineWidth = 1;
-    for (let x = 60; x <= 1860; x += 120) {
-      c.beginPath();
-      c.moveTo(x, 100);
-      c.lineTo(x + (x - 960) * 0.18, 1060);
-      c.stroke();
-    }
-    c.restore();
-
-    // 3. Rejillas de ventilación metálicas con textura e iluminación subterránea
-    const grates = [
-      { x: 260, y: 280, w: 74, h: 42 },
-      { x: 1620, y: 280, w: 74, h: 42 },
-      { x: 620, y: 780, w: 82, h: 46 },
-      { x: 1260, y: 780, w: 82, h: 46 }
-    ];
-    for (const g of grates) {
-      rect(c, '#080d14', g.x - 2, g.y - 2, g.w + 4, g.h + 4);
-      rect(c, '#162232', g.x, g.y, g.w, g.h);
-      rect(c, '#00f0ff44', g.x, g.y, g.w, 2);
-      for (let sl = g.x + 8; sl < g.x + g.w - 8; sl += 8) {
-        rect(c, '#060a10', sl, g.y + 4, 3, g.h - 8);
-        rect(c, '#00f0ff55', sl, g.y + 6, 1, 4);
-      }
-    }
-
-    // 4. Líneas de cajones de estacionamiento con brillo neón cian y magenta
+    // Líneas de cajones de estacionamiento con brillo neón cian y magenta
     for (let x = 120; x < 1860; x += 140) {
+      // Halo neón de las líneas
       rect(c, '#00f0ff22', x - 3, 126, 10, 168);
       rect(c, '#00f0ff', x, 130, 4, 160);
       rect(c, '#ff007f22', x - 3, 746, 10, 228);
       rect(c, '#ff007f', x, 750, 4, 220);
-      // Topes de rueda reflectivos con textura
-      rect(c, '#0a101d', x + 28, 125, 84, 10);
+      // Topes de rueda reflectivos
+      rect(c, '#0f172a', x + 28, 125, 84, 10);
       rect(c, '#ffe066', x + 34, 127, 24, 4);
       rect(c, '#ffe066', x + 82, 127, 24, 4);
-      rect(c, '#0a101d', x + 28, 965, 84, 10);
+      rect(c, '#0f172a', x + 28, 965, 84, 10);
       rect(c, '#00f0ff', x + 34, 967, 24, 4);
       rect(c, '#00f0ff', x + 82, 967, 24, 4);
     }
-
-    // 5. Carril central con pintura reflectiva dorada neón
+    // Carril central con pintura reflectiva dorada neón
     for (let x = 120; x < 1860; x += 70) {
       rect(c, '#ffbe0b24', x - 3, 517, 41, 10);
       rect(c, '#ffbe0b', x, 520, 35, 4);
+    }
+    // Charcos de asfalto húmedo con reflejos de neón cian, magenta y púrpura
+    const puddles = [
+      { x: 340, y: 370, rx: 68, ry: 24, col: 'rgba(0, 240, 255, 0.18)' },
+      { x: 780, y: 640, rx: 82, ry: 28, col: 'rgba(255, 0, 127, 0.18)' },
+      { x: 1180, y: 390, rx: 74, ry: 25, col: 'rgba(168, 85, 247, 0.20)' },
+      { x: 1560, y: 670, rx: 64, ry: 22, col: 'rgba(0, 240, 255, 0.18)' },
+      { x: 520, y: 840, rx: 58, ry: 20, col: 'rgba(255, 190, 11, 0.16)' },
+      { x: 1380, y: 830, rx: 70, ry: 24, col: 'rgba(255, 0, 127, 0.17)' },
+    ];
+    for (const p of puddles) {
+      c.save();
+      c.fillStyle = '#090d14cc';
+      c.beginPath(); c.ellipse(p.x, p.y, p.rx + 6, p.ry + 3, 0, 0, Math.PI * 2); c.fill();
+      c.fillStyle = p.col;
+      c.beginPath(); c.ellipse(p.x, p.y, p.rx, p.ry, 0, 0, Math.PI * 2); c.fill();
+      c.strokeStyle = '#ffffff22'; c.lineWidth = 1.5;
+      c.beginPath(); c.ellipse(p.x, p.y, p.rx * 0.7, p.ry * 0.6, 0, 0, Math.PI); c.stroke();
+      c.restore();
     }
   }
   rect(c, parking ? '#0d131d' : '#172327', 0, 0, 1920, 80);
@@ -757,123 +909,23 @@ function dinerFloor(map = 'diner') {
   }
   rect(c, '#1e2c2c', 48, 98, 1824, 4); rect(c, parking ? '#00f0ff55' : '#819e7d40', 48, 102, 1824, 1);
   for (let x = 50; x < 1870; x += 22) rect(c, parking ? ((x / 22) % 2 === 0 ? '#00f0ff' : '#ff007f') : '#d7b76a', x, 1050, 12, 3);
-  if (!parking) {
-    c.save();
-    c.globalAlpha = .1;
-    c.fillStyle = kitchen ? '#b8d5c8' : '#dbe6c5';
-    c.font = '900 68px monospace';
-    c.textAlign = 'center';
-    c.fillText(kitchen ? 'COCINA INDUSTRIAL 02' : 'DOMI 24/7 ARCADE', 960, 560);
-    c.restore();
-  }
-  floors.set(map, canvas); return canvas;
-}
-
-// Partículas dinámicas extra e iluminación profunda para nevado, desierto y cancha.
-function vignette(c, width, height, inner, color) {
-  const g = c.createRadialGradient(width / 2, height / 2, inner, width / 2, height / 2, Math.hypot(width, height) / 2);
-  g.addColorStop(0, 'rgba(0,0,0,0)');
-  g.addColorStop(1, color);
-  c.fillStyle = g;
-  c.fillRect(0, 0, width, height);
-}
-
-function atmosphereBoost(c, map, width, height, time) {
-  if (map !== 'snow' && map !== 'desert' && map !== 'football') return;
-  c.save();
-  if (map === 'snow') {
-    // Capas de nieve con vaivén lateral y copos grandes cercanos
-    for (let i = 0; i < 70; i++) {
-      const depth = 0.4 + (i % 5) * 0.2;
-      const x = ((i * 211 + time * (22 + depth * 38) + Math.sin(time * 0.9 + i) * 28) % (width + 40)) - 20;
-      const y = ((i * 131 + time * (38 + depth * 60)) % (height + 40)) - 20;
-      const size = 2 + Math.floor(depth * 3);
-      c.globalAlpha = 0.35 + depth * 0.4;
-      c.fillStyle = i % 4 === 0 ? '#ffffff' : '#d6efff';
-      c.fillRect(Math.round(x), Math.round(y), size, size);
-    }
-    // Neblina helada baja
-    for (let i = 0; i < 4; i++) {
-      const fx = ((time * 14 + i * 520) % (width + 600)) - 300;
-      const fog = c.createRadialGradient(fx, height - 120 - i * 60, 10, fx, height - 120 - i * 60, 300);
-      fog.addColorStop(0, 'rgba(186, 230, 253, 0.16)');
-      fog.addColorStop(1, 'rgba(186, 230, 253, 0)');
-      c.globalAlpha = 1;
-      c.fillStyle = fog;
-      c.fillRect(fx - 300, height - 420 - i * 60, 600, 600);
-    }
-    // Iluminación fría profunda
-    c.globalAlpha = 1;
-    vignette(c, width, height, 280, 'rgba(4, 18, 46, 0.62)');
-  } else if (map === 'desert') {
-    // Brasas / chispas de polvo flotando en el aire cálido
-    for (let i = 0; i < 46; i++) {
-      const x = ((i * 173 + time * (30 + (i % 4) * 14)) % (width + 40)) - 20;
-      const rise = (time * (10 + (i % 3) * 7) + i * 61) % 260;
-      const y = ((i * 97) % (height - 200)) + 130 - rise * 0.25 + Math.sin(time * 1.6 + i) * 10;
-      c.globalAlpha = 0.25 + Math.max(0, Math.sin(time * 2.4 + i * 1.3)) * 0.5;
-      c.fillStyle = i % 3 === 0 ? '#fff1c1' : '#ffb347';
-      c.fillRect(Math.round(x), Math.round(y), 2 + (i % 2), 2 + (i % 2));
-    }
-    // Remolinos de polvo horizontales
-    c.strokeStyle = 'rgba(255, 214, 140, 0.22)';
-    c.lineWidth = 2;
-    for (let i = 0; i < 7; i++) {
-      const y = 170 + i * 120 + Math.sin(time * 0.7 + i) * 14;
-      const x = ((time * (110 + i * 18) + i * 300) % (width + 500)) - 250;
-      c.globalAlpha = 0.5;
-      c.beginPath();
-      c.moveTo(x, y);
-      c.quadraticCurveTo(x + 60, y - 14, x + 130, y + 4);
-      c.stroke();
-    }
-    // Rayos de sol diagonales y atardecer profundo
-    c.globalAlpha = 0.09 + Math.sin(time * 0.8) * 0.02;
-    c.fillStyle = '#ffd27a';
-    for (let i = 0; i < 4; i++) {
-      c.beginPath();
-      const bx = 240 + i * 520;
-      c.moveTo(bx, 80); c.lineTo(bx + 90, 80); c.lineTo(bx + 380, height); c.lineTo(bx + 200, height);
-      c.closePath(); c.fill();
-    }
-    c.globalAlpha = 1;
-    vignette(c, width, height, 300, 'rgba(70, 24, 4, 0.55)');
-  } else if (map === 'football') {
-    // Confeti girando (sin tonos rojos), con distintos tamaños y rotación
-    const colors = ['#4ade80', '#38bdf8', '#fde047', '#22d3ee', '#ffffff', '#a78bfa'];
-    for (let i = 0; i < 90; i++) {
-      const x = ((i * 157 + time * (18 + (i % 5) * 9) + Math.sin(time * 1.3 + i) * 24) % (width + 40)) - 20;
-      const y = 95 + ((i * 83 + time * (46 + (i % 4) * 22)) % (height - 120));
-      const spin = time * (3 + (i % 4)) + i;
-      const w = 4 + (i % 3) * 2, h = 2 + (i % 2) * 2;
-      c.save();
-      c.translate(Math.round(x), Math.round(y));
-      c.rotate(spin);
-      c.scale(1, Math.abs(Math.cos(spin * 0.7)) * 0.8 + 0.2);
-      c.globalAlpha = 0.55 + Math.sin(time * 2 + i) * 0.25;
-      c.fillStyle = colors[i % colors.length];
-      c.fillRect(-w / 2, -h / 2, w, h);
-      c.restore();
-    }
-    // Destellos de flash de cámaras desde las gradas
-    for (let i = 0; i < 10; i++) {
-      const fl = Math.max(0, Math.sin(time * 5 + i * 2.3));
-      if (fl > 0.93) {
-        const fx = (i * 193 + 60) % width;
-        const fy = 40 + (i * 29) % 40;
-        const g = c.createRadialGradient(fx, fy, 0, fx, fy, 70);
-        g.addColorStop(0, 'rgba(255,255,255,0.7)');
-        g.addColorStop(1, 'rgba(255,255,255,0)');
-        c.globalAlpha = 1;
-        c.fillStyle = g;
-        c.fillRect(fx - 70, fy - 70, 140, 140);
-      }
-    }
-    // Iluminación nocturna de estadio profunda: bordes oscuros y haces de luz
-    c.globalAlpha = 1;
-    vignette(c, width, height, 340, 'rgba(2, 14, 12, 0.58)');
-  }
+  c.save(); c.globalAlpha = parking ? .16 : .1; c.fillStyle = parking ? '#00f0ff' : '#dbe6c5'; c.font = '900 68px monospace'; c.textAlign = 'center';
+  if (parking) { c.shadowColor = '#ff007f'; c.shadowBlur = 18; }
+  c.fillText(parking ? 'NEON DELIVERY HUB' : kitchen ? 'COCINA INDUSTRIAL 02' : 'DOMI 24/7 ARCADE', 960, 560);
   c.restore();
+  // Guiño a BurgosCorp: sello del fabricante en una baldosa / cajón de estacionamiento, casi invisible
+  if (map === 'diner') drawBurgosMark(c, 1838, 1004, 2, 0.22);
+  else if (kitchen) drawBurgosMark(c, 70, 1004, 2, 0.2);
+  else if (parking) drawBurgosMark(c, 1617, 880, 3, 0.16);
+  // Viñeteado fijo de los bordes: se pinta una vez acá en vez de en cada cuadro (se ve igual)
+  if (map === 'diner' || map === 'parking') {
+    const width = 1920, height = 1080;
+    const v = c.createRadialGradient(width / 2, height / 2, height * 0.35, width / 2, height / 2, Math.max(width, height) * 0.72);
+    if (map === 'diner') { v.addColorStop(0, 'rgba(0, 0, 0, 0)'); v.addColorStop(0.65, 'rgba(10, 16, 20, 0.24)'); v.addColorStop(1, 'rgba(4, 8, 12, 0.58)'); }
+    else { v.addColorStop(0, 'rgba(6, 12, 24, 0.04)'); v.addColorStop(0.65, 'rgba(8, 12, 28, 0.24)'); v.addColorStop(1, 'rgba(3, 6, 16, 0.52)'); }
+    c.fillStyle = v; c.fillRect(0, 0, width, height);
+  }
+  return cacheSprite(floors, map, canvas);
 }
 
 export function drawDiner(c, width, height, time, menu, map = 'diner') {
@@ -993,11 +1045,11 @@ export function drawDiner(c, width, height, time, menu, map = 'diner') {
         c.closePath();
         c.fill();
       }
-      // Confeti festivo (sin puntos rojos, tonos verdes, dorados y cian)
+      // Confeti optimizado
       for (let i = 0; i < 22; i++) {
         const fx = ((i * 149 + time * 28) % width);
         const fy = 100 + ((i * 93 + time * 38) % (height - 180));
-        c.fillStyle = ['#4ade80', '#38bdf8', '#ffbe3b', '#22d3ee', '#ffffff'][i % 5];
+        c.fillStyle = ['#4ade80', '#38bdf8', '#ffbe3b', '#f43f5e', '#ffffff'][i % 5];
         c.globalAlpha = 0.5 + Math.sin(time * 3 + i) * 0.25;
         c.fillRect(Math.round(fx), Math.round(fy), 3, 3);
       }
@@ -1031,14 +1083,9 @@ export function drawDiner(c, width, height, time, menu, map = 'diner') {
     } else if (map === 'parking') {
       c.save();
       // 1. Atmósfera nocturna synthwave
-      const nightVignette = c.createRadialGradient(width / 2, height / 2, height * 0.35, width / 2, height / 2, Math.max(width, height) * 0.72);
-      nightVignette.addColorStop(0, 'rgba(6, 12, 24, 0.04)');
-      nightVignette.addColorStop(0.65, 'rgba(8, 12, 28, 0.24)');
-      nightVignette.addColorStop(1, 'rgba(3, 6, 16, 0.52)');
-      c.fillStyle = nightVignette;
-      c.fillRect(0, 0, width, height);
+      // (el viñeteado nocturno ya viene horneado en la imagen del piso)
 
-      // 2. Farolas de neón superiores con halos volumétricos y piscinas de luz en el suelo
+      // 2. Farolas de neón superiores optimizadas
       const neonLamps = [
         { x: 200, color: '0, 240, 255', hex: '#00f0ff' },
         { x: 580, color: '255, 0, 127', hex: '#ff007f' },
@@ -1048,70 +1095,47 @@ export function drawDiner(c, width, height, time, menu, map = 'diner') {
       ];
       for (let i = 0; i < neonLamps.length; i++) {
         const nl = neonLamps[i];
-        const pulse = 0.18 + Math.sin(time * 3.4 + i * 1.5) * 0.045;
+        const pulse = 0.16 + Math.sin(time * 3.4 + i * 1.5) * 0.035;
 
-        // Cono de luz volumétrica intensa
-        const cone = c.createLinearGradient(nl.x, 78, nl.x, 390);
-        cone.addColorStop(0, `rgba(${nl.color}, ${pulse * 1.8})`);
-        cone.addColorStop(0.45, `rgba(${nl.color}, ${pulse * 0.75})`);
+        // Cono de luz neón desde el muro superior
+        const cone = c.createLinearGradient(nl.x, 78, nl.x, 380);
+        cone.addColorStop(0, `rgba(${nl.color}, ${pulse * 1.5})`);
+        cone.addColorStop(0.5, `rgba(${nl.color}, ${pulse * 0.55})`);
         cone.addColorStop(1, 'transparent');
         c.fillStyle = cone;
         c.beginPath();
-        c.moveTo(nl.x - 30, 78);
-        c.lineTo(nl.x + 30, 78);
-        c.lineTo(nl.x + 205, 390);
-        c.lineTo(nl.x - 205, 390);
+        c.moveTo(nl.x - 26, 78);
+        c.lineTo(nl.x + 26, 78);
+        c.lineTo(nl.x + 185, 380);
+        c.lineTo(nl.x - 185, 380);
         c.closePath();
         c.fill();
 
         // Tubo de neón brillante en la cornisa
         c.fillStyle = nl.hex;
-        c.fillRect(nl.x - 28, 74, 56, 4);
-
-        // LED indicador parpadeante arriba a la izquierda/derecha para guiar al jugador
-        const blink = Math.sin(time * 7 + i * 2) > 0;
-        c.fillStyle = blink ? nl.hex : '#0f172a';
-        c.fillRect(nl.x - 4, 62, 8, 8);
-        if (blink) {
-          c.fillStyle = '#ffffff';
-          c.fillRect(nl.x - 2, 64, 4, 4);
-        }
+        c.fillRect(nl.x - 26, 74, 52, 4);
       }
 
-      // 3. Neblina baja synthwave que recorre el suelo
-      const mistShift = Math.sin(time * 0.8) * 120;
-      const mistGrad = c.createLinearGradient(0, height - 160, 0, height);
-      mistGrad.addColorStop(0, 'transparent');
-      mistGrad.addColorStop(0.6, 'rgba(0, 240, 255, 0.05)');
-      mistGrad.addColorStop(1, 'rgba(255, 0, 127, 0.06)');
-      c.fillStyle = mistGrad;
-      c.fillRect(0, height - 160, width, 160);
-
-      // 4. Partículas de neón, chispas y polvo estelar flotante (56 partículas)
-      const neonPalette = ['#00f0ff', '#ff007f', '#ffe066', '#a855f7', '#38ef7d', '#ffffff'];
-      for (let i = 0; i < 56; i++) {
-        const speedX = 16 + (i % 6) * 8;
-        const speedY = -20 - (i % 5) * 10;
-        const px = ((i * 137 + time * speedX + Math.sin(time * 2.5 + i) * 18 + mistShift * 0.1) % width);
-        const py = 95 + ((i * 89 - time * speedY) % (height - 120));
+      // 3. Partículas de neón optimizadas (38 partículas nítidas y livianas)
+      const neonPalette = ['#00f0ff', '#ff007f', '#ffe066', '#a855f7', '#38ef7d'];
+      for (let i = 0; i < 38; i++) {
+        const speedX = 18 + (i % 5) * 9;
+        const speedY = -22 - (i % 4) * 11;
+        const px = ((i * 157 + time * speedX + Math.sin(time * 2 + i) * 14) % width);
+        const py = 95 + ((i * 97 - time * speedY) % (height - 120));
         const col = neonPalette[i % neonPalette.length];
-        const size = (i % 6 === 0) ? 3.5 : (i % 3 === 0) ? 2.5 : 2;
-        const alpha = 0.35 + Math.sin(time * 4.5 + i * 1.4) * 0.35;
+        const size = (i % 5 === 0) ? 3 : 2;
+        const alpha = 0.4 + Math.sin(time * 4.2 + i * 1.3) * 0.3;
 
         c.fillStyle = col;
-        c.globalAlpha = Math.max(0.12, Math.min(0.9, alpha));
+        c.globalAlpha = Math.max(0.12, alpha);
         c.fillRect(Math.round(px), Math.round(py), size, size);
       }
       c.restore();
     } else {
       // Diner clásico (Local DOMI): Iluminación retro inmersiva optimizada
       c.save();
-      const vignette = c.createRadialGradient(width / 2, height / 2, height * 0.35, width / 2, height / 2, Math.max(width, height) * 0.72);
-      vignette.addColorStop(0, 'rgba(0, 0, 0, 0)');
-      vignette.addColorStop(0.65, 'rgba(10, 16, 20, 0.24)');
-      vignette.addColorStop(1, 'rgba(4, 8, 12, 0.58)');
-      c.fillStyle = vignette;
-      c.fillRect(0, 0, width, height);
+      // (el viñeteado de los bordes ya viene horneado en la imagen del piso)
 
       // Resplandor del letrero de neón DOMI
       const neonGlow = c.createRadialGradient(width / 2, 70, 10, width / 2, 70, 300);
@@ -1170,7 +1194,6 @@ export function drawDiner(c, width, height, time, menu, map = 'diner') {
       }
       c.restore();
     }
-    atmosphereBoost(c, map, width, height, time);
     return;
   }
   rect(c, '#15191c', 0, 0, width, height);

@@ -1,16 +1,16 @@
 import {drawFood} from '../core/art.js';
-import {currentAccount} from '../systems/accountSystem.js';
+import {currentAccount,isGuest} from '../systems/accountSystem.js';
 import {drawAccessory,drawPet,canvasPoint,approachPoint,resolveAccessory} from '../core/presentation.js';
-import {makeRoom,drawStation,drawRoomLight} from './lobbyArt.js';
+import {makeRoom,drawStation,drawRoomLight,drawLobbyLife,lobbyNpcLayers} from './lobbyArt.js';
 import {achievements,unlockedAchievements} from '../systems/achievementSystem.js';
 
 const stations=[
   {id:'portal',   x:960,  y:240, label:'ENTRAR AL TURNO', action:'PARTIDA',   color:'#ffe068'},
-  {id:'wardrobe', x:400,  y:290, label:'ARMARIO / SKINS', action:'ARMARIO',   color:'#ff5c8a'},
+  {id:'shop',     x:400,  y:290, label:'TIENDA ARCADE',   action:'TIENDA',    color:'#ffd000'},
   {id:'pets',     x:1520, y:290, label:'MASCOTAS',        action:'MASCOTAS',  color:'#38ef7d'},
   {id:'npc',      x:400,  y:760, label:'SEÑOR DOMI',      action:'CONSEJOS',  color:'#5ce1e6'},
   {id:'ranking',  x:960,  y:820, label:'HISTORIAL',       action:'RECORDS',   color:'#c084fc'},
-  {id:'shop',     x:1520, y:760, label:'TIENDA ARCADE',   action:'TIENDA',    color:'#ffd000'},
+  {id:'desk',     x:1520, y:760, label:'REGISTRO DE SOCIOS', action:'REGISTRO', color:'#7dd3fc'},
 ];
 
 export class Lobby {
@@ -19,6 +19,8 @@ export class Lobby {
     this.room=makeRoom();
     this.x=960;this.y=520;
     this.camera={x:480,y:270};
+    // Visor del local: alto base 540 y ancho según la proporción de la pantalla (ocupa todo)
+    this.view={w:960,h:540};
     this.near=null;this.hover=null;this.destination=null;
     this.footsteps=[];
     this.sparkles=[];
@@ -42,27 +44,32 @@ export class Lobby {
     });
   }
   point(event){
-    const p=canvasPoint(this.canvas.getBoundingClientRect(),960,540,event.clientX,event.clientY);
+    const p=canvasPoint(this.canvas.getBoundingClientRect(),this.view.w,this.view.h,event.clientX,event.clientY);
     if(!p)return null;
     return {x:p.x+this.camera.x,y:p.y+this.camera.y};
   }
   enter(){
     this.profile=currentAccount();
     this.destination=null;
-    // Recuperar la última posición guardada del jugador en el lobby
-    try {
-      const savedPos = JSON.parse(localStorage.getItem('domi2pancho.lobbyPos') || 'null');
-      if (savedPos && savedPos.x && savedPos.y) {
-        this.x = Math.max(90, Math.min(1830, savedPos.x));
-        this.y = Math.max(180, Math.min(1010, savedPos.y));
-      } else {
-        this.x = 960; this.y = 520;
-      }
-    } catch {
-      this.x = 960; this.y = 520;
-    }
-    this.camera.x=this.x-480;this.camera.y=this.y-270;
+    // Al abrir el juego o al volver de una partida aparecés en el centro, sobre la alfombra.
+    // Si volvés de un lugar del local (tienda, registro, ranking...) seguís donde estabas.
+    if (this.centerNext !== false) { this.x = 960; this.y = 520; }
+    this.centerNext = false;
+    this.resizeView();
+    this.camera.x=Math.max(0,Math.min(1920-this.view.w,this.x-this.view.w/2));this.camera.y=Math.max(0,Math.min(1080-this.view.h,this.y-this.view.h/2));
     document.querySelector('#lobbyWelcome').textContent=this.profile.name.toUpperCase();
+    const roleEl = document.querySelector('#lobbyRole');
+    if (roleEl) {
+      roleEl.textContent = isGuest() ? 'MODO INVITADO / EN EL LOCAL' : 'SOCIO REGISTRADO / EN EL LOCAL';
+    }
+    // El botón de registro permite registrarse o gestionar cuenta
+    const register=document.querySelector('#lobbyRegister');
+    if(register) {
+      register.hidden = false;
+      const span = register.querySelector('span');
+      if (span) span.textContent = isGuest() ? 'REGISTRO' : 'CUENTA';
+      register.title = isGuest() ? 'Registro de socios' : 'Gestión de cuenta / Cambiar';
+    }
     document.querySelector('#lobbyBank').textContent=this.profile.bank.toLocaleString('es-AR');
     document.querySelector('#lobbyAchievementCount').textContent=`${unlockedAchievements().length} / ${achievements.length}`;
     this.draw(0);
@@ -127,49 +134,55 @@ export class Lobby {
       }
     }
 
-    if(this.moving){
-      this._saveT=(this._saveT||0)+dt;
-      if(this._saveT>0.4){this._saveT=0;this.savePos();}
-    }
-
     // Smooth camera follow
-    const targetCamX=this.x-480;
-    const targetCamY=this.y-270;
+    const targetCamX=this.x-this.view.w/2;
+    const targetCamY=this.y-this.view.h/2;
     const lerp=Math.min(1,dt*10);
     this.camera.x+=(targetCamX-this.camera.x)*lerp;
     this.camera.y+=(targetCamY-this.camera.y)*lerp;
-    this.camera.x=Math.max(0,Math.min(1920-960,this.camera.x));
-    this.camera.y=Math.max(0,Math.min(1080-540,this.camera.y));
+    this.camera.x=Math.max(0,Math.min(1920-this.view.w,this.camera.x));
+    this.camera.y=Math.max(0,Math.min(1080-this.view.h,this.camera.y));
 
     this.near=stations.find(s=>Math.hypot(s.x-this.x,(s.y+40)-this.y)<95)||null;
     this.tip.hidden=!this.near;
-    if(this.near)this.tip.textContent=this.near.label;
+    if(this.near) {
+      if (this.near.id === 'desk') {
+        this.tip.textContent = isGuest() ? 'E: Registrarse como socio' : 'E: Cabina de socios (Cambiar cuenta / Registro)';
+      } else {
+        this.tip.textContent = this.near.label;
+      }
+    }
     document.querySelectorAll('[data-station]').forEach(button=>button.classList.toggle('is-near',button.dataset.station===this.near?.id));
     if(input.consume('e')&&this.near){this.activate(this.near.id);return;}
     this.draw(performance.now()/1000);
   }
-  savePos(){
-    try{
-      localStorage.setItem('domi2pancho.lobbyPos', JSON.stringify({x:Math.round(this.x),y:Math.round(this.y)}));
-    }catch{}
-  }
   activate(id){
-    this.destination=null;this.savePos();this.game.audio.play('confirm');
+    this.destination=null;this.game.audio.play('confirm');
     if(id==='portal'){this.game.menu.prepareAccount();this.game.showScreen('setupScreen');}
-    else if(id==='wardrobe')this.game.shop.show('skin',true);
     else if(id==='pets')this.game.shop.show('pet',true);
     else if(id==='shop')this.game.shop.show();
     else if(id==='ranking')this.game.showRanking();
     else if(id==='npc')this.game.domi.show();
+    else if(id==='desk')this.game.openRegistration();
+  }
+  resizeView(){
+    const stage=this.canvas.parentElement;
+    const aspect=(stage?.clientWidth||960)/(stage?.clientHeight||540);
+    let w=960,h=540;
+    if(aspect>=16/9)w=Math.round(540*aspect);else h=Math.round(960/aspect);
+    this.view.w=Math.min(1920,w);this.view.h=Math.min(1080,h);
+    if(this.canvas.width!==this.view.w||this.canvas.height!==this.view.h){this.canvas.width=this.view.w;this.canvas.height=this.view.h;}
   }
   draw(t){
     if(this.game.reducedMotion)t=0;
-    const c=this.ctx;
-    c.clearRect(0,0,960,540);
+    this.resizeView();
+    const c=this.ctx,W=this.view.w,H=this.view.h;
+    c.clearRect(0,0,W,H);
     c.save();
     c.translate(-Math.round(this.camera.x),-Math.round(this.camera.y));
     c.drawImage(this.room,0,0);
     drawRoomLight(c,t);
+    drawLobbyLife(c,t);
 
     // Dibujar huellas doradas en el suelo (debajo de jugadores y estaciones)
     for (const step of this.footsteps) {
@@ -210,14 +223,15 @@ export class Lobby {
     }
     const layers=stations.map(station=>({y:station.y+42,draw:()=>drawStation(c,station,t,this.near?.id===station.id||this.hover?.id===station.id)}));
     layers.push({y:this.y+24,draw:drawPlayer});
+    layers.push(...lobbyNpcLayers(c,t));
     layers.sort((a,b)=>a.y-b.y).forEach(layer=>layer.draw());
     c.restore();
 
     // Screen-space Vignette
-    const vignette=c.createRadialGradient(480,270,220,480,270,540);
+    const vignette=c.createRadialGradient(W/2,H/2,H*0.4,W/2,H/2,Math.hypot(W,H)/2);
     vignette.addColorStop(0,'transparent');
     vignette.addColorStop(1,'rgba(2,7,18,0.55)');
     c.fillStyle=vignette;
-    c.fillRect(0,0,960,540);
+    c.fillRect(0,0,W,H);
   }
 }

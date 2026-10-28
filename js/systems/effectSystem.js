@@ -1,5 +1,11 @@
 import { ObjectPool } from '../core/ObjectPool.js';
 import { gameEvents } from '../core/EventBus.js';
+import { quality } from '../core/quality.js';
+
+// Tope duro de partículas vivas: deja pasar ráfagas nuevas un poco por encima del límite de calidad,
+// y updateEffects recorta las más viejas para que siempre se vean los impactos recientes
+export const particleRoom = () => Math.round(quality.maxParticles * 1.25);
+export const scaledCount = count => Math.max(1, Math.round(count * quality.particleFactor));
 
 // Pre-allocated object pools for high-frequency effects
 export const particlePool = new ObjectPool(
@@ -11,7 +17,7 @@ export const particlePool = new ObjectPool(
 
 export const floaterPool = new ObjectPool(
   () => ({ x: 0, y: 0, text: '', life: 0, maxLife: 0, color: '#fff', scale: 1, kind: 'normal' }),
-  (f) => { f.life = 0; },
+  (f) => { f.life = 0; f.maxLife = undefined; f.tilt = undefined; f.originY = undefined; f.comboVal = undefined; f.enemyRef = null; f.value = 0; },
   128,
   512
 );
@@ -27,8 +33,7 @@ export const ringPool = new ObjectPool(
 export function burst(state, x, y, color, count = 8, power = 100) {
   if (!state.particles) return;
   const currentCount = state.particles.length;
-  const maxAllowed = 800;
-  const toSpawn = Math.min(count, maxAllowed - currentCount);
+  const toSpawn = Math.min(scaledCount(count), particleRoom() - currentCount);
   if (toSpawn <= 0) return;
 
   const defaultPalette = ['#fffbe8', color, '#ff8a3d', '#ff3535'];
@@ -55,7 +60,8 @@ export function burst(state, x, y, color, count = 8, power = 100) {
 export function explosionBurst(state, x, y, color = '#ff7048', count = 26, power = 180) {
   burst(state, x, y, color, count, power);
   const smokePalette = ['#ffd487', '#8b6d63', '#596169', '#29333c'];
-  for (let i = 0; i < 9 && state.particles.length < 800; i++) {
+  const smoke = scaledCount(9);
+  for (let i = 0; i < smoke && state.particles.length < particleRoom(); i++) {
     const angle = Math.random() * Math.PI * 2;
     const speed = 20 + Math.random() * 45;
     const life = 0.65 + Math.random() * 0.55;
@@ -79,8 +85,9 @@ export function explosionBurst(state, x, y, color = '#ff7048', count = 26, power
 export function critBurst(state, x, y) {
   if (!state.particles) return;
   const colors = ['#fff7a0', '#ffe54d', '#ffffff', '#ffd700'];
-  for (let i = 0; i < 16 && state.particles.length < 800; i++) {
-    const angle = (i / 16) * Math.PI * 2;
+  const stars = Math.max(8, scaledCount(16));
+  for (let i = 0; i < stars && state.particles.length < particleRoom(); i++) {
+    const angle = (i / stars) * Math.PI * 2;
     const speed = 90 + Math.random() * 160;
     const life = 0.4 + Math.random() * 0.3;
     const color = colors[i % colors.length];
@@ -145,7 +152,16 @@ export function damageEnemy(state, enemy, damage, type = 'normal') {
   // Filtrado de floaters: mostrar siempre críticos, curaciones y dash; para daño normal sólo 1 de cada 3 para evitar saturar el canvas
   const shouldSpawnFloater = isCrit || type === 'heal' || type === 'dash' || (state.enemies.length < 25) || (Math.random() < 0.35);
 
-  if (state.floaters && state.floaters.length < 50 && shouldSpawnFloater) {
+  const floaterKind = isCrit ? 'crit' : type;
+  // Golpes seguidos al mismo enemigo se suman en un solo número que vuelve a "saltar" (contador arcade)
+  const merged = state.floaters?.find(f => f.enemyRef === enemy && f.kind === floaterKind && f.life > f.maxLife * 0.35);
+  if (merged) {
+    merged.value += finalDamage;
+    merged.text = isCrit ? `✦${Math.ceil(merged.value)}` : String(Math.ceil(merged.value));
+    merged.life = merged.maxLife;
+    merged.x = enemy.x + (Math.random() - 0.5) * 6;
+    merged.y = Math.min(merged.y, enemy.y - 20);
+  } else if (state.floaters && shouldSpawnFloater) {
     const color = isCrit ? DAMAGE_COLORS.crit : (DAMAGE_COLORS[type] || DAMAGE_COLORS.normal);
     const floater = floaterPool.acquire();
     floater.x = enemy.x + (Math.random() - 0.5) * 14;
@@ -155,7 +171,9 @@ export function damageEnemy(state, enemy, damage, type = 'normal') {
     floater.maxLife = floater.life;
     floater.color = color;
     floater.scale = isCrit ? 1.4 : 0.95;
-    floater.kind = isCrit ? 'crit' : type;
+    floater.kind = floaterKind;
+    floater.enemyRef = enemy;
+    floater.value = finalDamage;
     state.floaters.push(floater);
   }
 
@@ -172,6 +190,40 @@ export function damageEnemy(state, enemy, damage, type = 'normal') {
 
   // EventBus hook: onEnemyDamage
   gameEvents.emit('onEnemyDamage', { state, enemy, damage: finalDamage, isCrit, type });
+}
+
+// Recorta los elementos más viejos (al principio del arreglo) sin crear arreglos nuevos
+function trimOldest(list, max, pool) {
+  const extra = list.length - max;
+  if (extra <= 0) return;
+  for (let i = 0; i < extra; i++) pool.release(list[i]);
+  list.copyWithin(0, extra);
+  list.length = max;
+}
+
+// Prioridad al recortar textos: combos y críticos se quedan; los números de daño comunes ceden primero
+const FLOATER_PRIORITY = { combo: 3, crit: 2, heal: 2, dash: 1 };
+function trimFloaters(list, max) {
+  while (list.length > max) {
+    let worst = 0, worstScore = Infinity;
+    for (let i = 0; i < list.length; i++) {
+      const f = list[i];
+      const score = (FLOATER_PRIORITY[f.kind] || 0) * 10 + f.life / (f.maxLife || 1);
+      if (score < worstScore) { worstScore = score; worst = i; }
+    }
+    floaterPool.release(list[worst]);
+    list.splice(worst, 1);
+  }
+}
+
+// Aplica los topes de calidad; se llama también al final del cuadro porque las muertes
+// (textos "+puntos", explosiones temáticas) se resuelven después de updateEffects
+export function capEffects(state) {
+  if (state.particles) trimOldest(state.particles, Math.round(quality.maxParticles * 1.25), particlePool);
+  if (state.floaters) trimFloaters(state.floaters, quality.maxFloaters);
+  // Balas enemigas: si una salva enorme supera el tope, se van primero las más viejas
+  const shots = state.enemyProjectiles;
+  if (shots && shots.length > quality.maxEnemyShots) shots.splice(0, shots.length - quality.maxEnemyShots);
 }
 
 export function updateEffects(state, delta) {
@@ -213,6 +265,7 @@ export function updateEffects(state, delta) {
     }
   }
   state.particles.length = pAlive;
+  trimOldest(state.particles, quality.maxParticles, particlePool);
 
   // 3. Floaters Update with in-place compaction
   let fAlive = 0;
@@ -229,6 +282,7 @@ export function updateEffects(state, delta) {
     }
   }
   state.floaters.length = fAlive;
+  trimFloaters(state.floaters, quality.maxFloaters);
 
   // 4. Rings Update with in-place compaction
   let rAlive = 0;
@@ -299,17 +353,81 @@ export function updateEffects(state, delta) {
   if (player.mustardLevel > 0) {
     player.rainTimer -= delta;
     if (player.rainTimer <= 0 && state.enemies.some(e => e.hp > 0 && e.spawnTime <= 0)) {
-      player.rainTimer = 5;
-      const targets = state.enemies
-        .filter(e => e.hp > 0 && e.spawnTime <= 0)
-        .sort((a, b) => Math.hypot(a.x - player.x, a.y - player.y) - Math.hypot(b.x - player.x, b.y - player.y))
-        .slice(0, 2 + player.mustardLevel);
-      for (const enemy of targets) {
-        damageEnemy(state, enemy, 28 * player.mustardLevel, 'fire');
-        impactRing(state, enemy.x, enemy.y, '#ffcf4a');
-        burst(state, enemy.x, enemy.y, '#ffcf4a', 18, 140);
-      }
-      state.audio?.play('pickup');
+      player.rainTimer = MUSTARD.interval;
+      startMustardRain(state, player);
     }
   }
+  updateMustardDrops(state, delta);
+}
+
+// ============================================================================
+// LLUVIA DE MOSTAZA: gotas que caen del cielo con sombra de aviso, explotan en
+// salpicadura (daño en área + frenan) y dejan un charco que quema a los enemigos
+// ============================================================================
+export const MUSTARD = {
+  interval: 8,
+  drops: level => 5 + level * 2,          // 7 / 9 / 11 gotas
+  damage: level => 35 + level * 25,       // 60 / 85 / 110 por salpicadura
+  splashRadius: 62,
+  fallTime: 0.55,
+  stagger: 0.09,
+  slowTime: 2,
+  puddleLife: 3,
+};
+
+export function startMustardRain(state, player) {
+  const level = player.mustardLevel;
+  const total = MUSTARD.drops(level);
+  const targets = state.enemies
+    .filter(e => e.hp > 0 && e.spawnTime <= 0)
+    .sort((a, b) => Math.hypot(a.x - player.x, a.y - player.y) - Math.hypot(b.x - player.x, b.y - player.y))
+    .slice(0, total);
+  state.mustardDrops ||= [];
+  for (let i = 0; i < total; i++) {
+    // Las gotas sin objetivo caen alrededor del jugador para que la lluvia siempre se vea completa
+    const target = targets[i];
+    const angle = Math.random() * Math.PI * 2, distance = 90 + Math.random() * 170;
+    state.mustardDrops.push({
+      x: target ? target.x : player.x + Math.cos(angle) * distance,
+      y: target ? target.y : player.y + Math.sin(angle) * distance,
+      target: target || null,
+      delay: i * MUSTARD.stagger,
+      fall: MUSTARD.fallTime,
+      damage: MUSTARD.damage(level),
+      wobble: Math.random() * Math.PI * 2,
+    });
+  }
+  state.floaters?.push({ x: player.x, y: player.y - 54, text: '¡LLUVIA DE MOSTAZA!', life: 1.2, kind: 'combo', comboVal: 20 });
+  state.audio?.play('pickup');
+}
+
+function updateMustardDrops(state, delta) {
+  const drops = state.mustardDrops;
+  if (!drops?.length) return;
+  let alive = 0;
+  for (const drop of drops) {
+    if (drop.delay > 0) { drop.delay -= delta; drops[alive++] = drop; continue; }
+    // La gota sigue a su objetivo mientras cae (así no "falla" contra enemigos rápidos)
+    if (drop.target && drop.target.hp > 0) { drop.x += (drop.target.x - drop.x) * Math.min(1, delta * 10); drop.y += (drop.target.y - drop.y) * Math.min(1, delta * 10); }
+    drop.fall -= delta;
+    if (drop.fall > 0) { drops[alive++] = drop; continue; }
+    splashMustard(state, drop);
+  }
+  drops.length = alive;
+}
+
+function splashMustard(state, drop) {
+  const r = MUSTARD.splashRadius;
+  for (const enemy of state.enemies) {
+    if (enemy.hp <= 0 || enemy.spawnTime > 0) continue;
+    if (Math.hypot(enemy.x - drop.x, enemy.y - drop.y) < r + enemy.radius) {
+      damageEnemy(state, enemy, drop.damage, 'fire');
+      enemy.mustardSlowUntil = (state.time || 0) + MUSTARD.slowTime;
+    }
+  }
+  state.hazards?.push({ x: drop.x, y: drop.y, radius: 34, life: MUSTARD.puddleLife, isMustardPuddle: true });
+  impactRing(state, drop.x, drop.y, '#ffd34f');
+  burst(state, drop.x, drop.y, '#ffd34f', 14, 170);
+  burst(state, drop.x, drop.y, '#ff9f1c', 6, 110);
+  state.shake = Math.max(state.shake || 0, 0.06);
 }

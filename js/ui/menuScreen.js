@@ -1,8 +1,9 @@
 import { skins } from "../data/skins.js";
 import { weapons } from "../data/weapons.js";
 import { drawFood, drawWeapon } from "../core/art.js";
+import { drawItemPreview } from "../core/presentation.js";
 import { unlockedAchievements, readAchievementStats, achievements } from "../systems/achievementSystem.js";
-import {currentAccount, clearAccountRuns} from '../systems/accountSystem.js';
+import {currentAccount, clearAccountRuns, isGuest} from '../systems/accountSystem.js';
 import {isOwned} from '../data/shop.js';
 import {refreshIcons} from './icons.js';
 
@@ -97,6 +98,11 @@ export class MenuScreen {
 
   cycleOption(select) {
     if (!select || !select.options) return;
+    if (isGuest() && (select === this.companionInput || select === this.accessoryInput)) {
+      this.game.showToast?.('¡Solo para socios! Creá tu tarjeta en la recepción para desbloquear mascotas y accesorios.');
+      this.game.audio?.play?.('error');
+      return;
+    }
     if ((select === this.modeInput || select === this.difficultyInput) && this.mapInput.value === 'lava') {
       return;
     }
@@ -109,6 +115,147 @@ export class MenuScreen {
     select.dispatchEvent(new Event('change', { bubbles: true }));
     this.syncCards();
     this.game.audio?.play?.('navigate');
+  }
+
+  renderCardThumbnail(card, type, id) {
+    if (!card) return;
+    const box = card.querySelector('.setup-card__icon-box');
+    if (!box) return;
+    const profile = currentAccount();
+
+    let canvas = box.querySelector('canvas.card-icon-canvas');
+    if (!canvas) {
+      canvas = document.createElement('canvas');
+      canvas.className = 'card-icon-canvas';
+      canvas.width = (type === 'accessory') ? 44 : 68;
+      canvas.height = (type === 'accessory') ? 44 : 68;
+    }
+
+    if (id === 'none') {
+      canvas.remove();
+      const existingSvg = box.querySelector('svg');
+      if (existingSvg) existingSvg.style.display = 'block';
+      return;
+    }
+
+    const svg = box.querySelector('svg');
+    if (svg) svg.style.display = 'none';
+
+    if (!box.contains(canvas)) {
+      box.appendChild(canvas);
+    }
+
+    try {
+      drawItemPreview(canvas, { type, id, name: id }, profile, 0);
+    } catch (err) {
+      console.warn('Error rendering card preview:', err);
+    }
+  }
+
+  updateDifficultyCard(diff, isLava) {
+    if (!this.cardDifficulty) return;
+    const box = this.cardDifficulty.querySelector('.setup-card__icon-box');
+    if (!box) return;
+
+    this.cardDifficulty.classList.remove('setup-card--green', 'setup-card--amber', 'setup-card--orange', 'setup-card--red');
+
+    if (isLava || diff === 'quemado') {
+      this.cardDifficulty.classList.add('setup-card--red');
+    } else if (diff === 'extra') {
+      this.cardDifficulty.classList.add('setup-card--orange');
+    } else if (diff === 'suave') {
+      this.cardDifficulty.classList.add('setup-card--green');
+    } else {
+      this.cardDifficulty.classList.add('setup-card--amber');
+    }
+
+    box.innerHTML = this.getDifficultySkullSvg(diff, isLava);
+  }
+
+  getDifficultySkullSvg(diff, isLava) {
+    if (isLava || diff === 'quemado') {
+      return `<svg viewBox="0 0 24 24" class="card-icon-pixel" shape-rendering="crispEdges" aria-hidden="true">
+        <rect x="8" y="2" width="8" height="1" fill="#ef4444"/>
+        <rect x="6" y="3" width="12" height="2" fill="#dc2626"/>
+        <rect x="8" y="3" width="2" height="1" fill="#fca5a5"/>
+        <rect x="4" y="5" width="16" height="5" fill="#b91c1c"/>
+        <rect x="6" y="8" width="4" height="4" fill="#180508"/>
+        <rect x="7" y="9" width="2" height="2" fill="#ff0022"/>
+        <rect x="14" y="8" width="4" height="4" fill="#180508"/>
+        <rect x="15" y="9" width="2" height="2" fill="#ff0022"/>
+        <rect x="11" y="12" width="2" height="2" fill="#180508"/>
+        <rect x="5" y="11" width="3" height="3" fill="#7f1d1d"/>
+        <rect x="16" y="11" width="3" height="3" fill="#7f1d1d"/>
+        <rect x="7" y="15" width="10" height="1" fill="#b91c1c"/>
+        <rect x="8" y="16" width="8" height="3" fill="#fca5a5"/>
+        <rect x="9" y="16" width="1" height="3" fill="#180508"/>
+        <rect x="11" y="16" width="2" height="3" fill="#180508"/>
+        <rect x="14" y="16" width="1" height="3" fill="#180508"/>
+        <rect x="8" y="19" width="8" height="1" fill="#450a0a"/>
+      </svg>`;
+    }
+    if (diff === 'extra') {
+      return `<svg viewBox="0 0 24 24" class="card-icon-pixel" shape-rendering="crispEdges" aria-hidden="true">
+        <rect x="8" y="2" width="8" height="1" fill="#fb923c"/>
+        <rect x="6" y="3" width="12" height="2" fill="#f97316"/>
+        <rect x="8" y="3" width="2" height="1" fill="#fed7aa"/>
+        <rect x="4" y="5" width="16" height="5" fill="#ea580c"/>
+        <rect x="6" y="8" width="4" height="4" fill="#2a0c02"/>
+        <rect x="7" y="9" width="2" height="2" fill="#ff7700"/>
+        <rect x="14" y="8" width="4" height="4" fill="#2a0c02"/>
+        <rect x="15" y="9" width="2" height="2" fill="#ff7700"/>
+        <rect x="11" y="12" width="2" height="2" fill="#2a0c02"/>
+        <rect x="5" y="11" width="3" height="3" fill="#9a3412"/>
+        <rect x="16" y="11" width="3" height="3" fill="#9a3412"/>
+        <rect x="7" y="15" width="10" height="1" fill="#ea580c"/>
+        <rect x="8" y="16" width="8" height="3" fill="#fed7aa"/>
+        <rect x="9" y="16" width="1" height="3" fill="#2a0c02"/>
+        <rect x="11" y="16" width="2" height="3" fill="#2a0c02"/>
+        <rect x="14" y="16" width="1" height="3" fill="#2a0c02"/>
+        <rect x="8" y="19" width="8" height="1" fill="#431407"/>
+      </svg>`;
+    }
+    if (diff === 'suave') {
+      return `<svg viewBox="0 0 24 24" class="card-icon-pixel" shape-rendering="crispEdges" aria-hidden="true">
+        <rect x="8" y="2" width="8" height="1" fill="#4ade80"/>
+        <rect x="6" y="3" width="12" height="2" fill="#22c55e"/>
+        <rect x="8" y="3" width="2" height="1" fill="#ffffff"/>
+        <rect x="4" y="5" width="16" height="5" fill="#16a34a"/>
+        <rect x="6" y="8" width="4" height="4" fill="#052e16"/>
+        <rect x="7" y="9" width="2" height="2" fill="#86efac"/>
+        <rect x="14" y="8" width="4" height="4" fill="#052e16"/>
+        <rect x="15" y="9" width="2" height="2" fill="#86efac"/>
+        <rect x="11" y="12" width="2" height="2" fill="#052e16"/>
+        <rect x="5" y="11" width="3" height="3" fill="#15803d"/>
+        <rect x="16" y="11" width="3" height="3" fill="#15803d"/>
+        <rect x="7" y="15" width="10" height="1" fill="#16a34a"/>
+        <rect x="8" y="16" width="8" height="3" fill="#ffffff"/>
+        <rect x="9" y="16" width="1" height="3" fill="#052e16"/>
+        <rect x="11" y="16" width="2" height="3" fill="#052e16"/>
+        <rect x="14" y="16" width="1" height="3" fill="#052e16"/>
+        <rect x="8" y="19" width="8" height="1" fill="#064e3b"/>
+      </svg>`;
+    }
+    // 'picante' (normal/amber)
+    return `<svg viewBox="0 0 24 24" class="card-icon-pixel" shape-rendering="crispEdges" aria-hidden="true">
+      <rect x="8" y="2" width="8" height="1" fill="#facc15"/>
+      <rect x="6" y="3" width="12" height="2" fill="#eab308"/>
+      <rect x="8" y="3" width="2" height="1" fill="#fef9c3"/>
+      <rect x="4" y="5" width="16" height="5" fill="#ca8a04"/>
+      <rect x="6" y="8" width="4" height="4" fill="#2a1802"/>
+      <rect x="7" y="9" width="2" height="2" fill="#fef08a"/>
+      <rect x="14" y="8" width="4" height="4" fill="#2a1802"/>
+      <rect x="15" y="9" width="2" height="2" fill="#fef08a"/>
+      <rect x="11" y="12" width="2" height="2" fill="#2a1802"/>
+      <rect x="5" y="11" width="3" height="3" fill="#a16207"/>
+      <rect x="16" y="11" width="3" height="3" fill="#a16207"/>
+      <rect x="7" y="15" width="10" height="1" fill="#ca8a04"/>
+      <rect x="8" y="16" width="8" height="3" fill="#ffffff"/>
+      <rect x="9" y="16" width="1" height="3" fill="#2a1802"/>
+      <rect x="11" y="16" width="2" height="3" fill="#2a1802"/>
+      <rect x="14" y="16" width="1" height="3" fill="#2a1802"/>
+      <rect x="8" y="19" width="8" height="1" fill="#713f12"/>
+    </svg>`;
   }
 
   syncCards() {
@@ -133,6 +280,14 @@ export class MenuScreen {
     if (this.cardMode) this.cardMode.classList.toggle('setup-card--locked-lava', isLava);
     if (this.cardDifficulty) this.cardDifficulty.classList.toggle('setup-card--locked-lava', isLava);
 
+    // Miniaturas visuales para mapa, mascota y accesorio
+    this.renderCardThumbnail(this.cardMap, 'map', this.mapInput?.value || 'diner');
+    this.renderCardThumbnail(this.cardCompanion, 'pet', this.companionInput?.value || 'none');
+    this.renderCardThumbnail(this.cardAccessory, 'accessory', this.accessoryInput?.value || 'none');
+
+    // Calavera dinámica y colores de tarjeta de dificultad
+    this.updateDifficultyCard(this.difficultyInput?.value || 'picante', isLava);
+
     refreshIcons();
   }
 
@@ -150,6 +305,23 @@ export class MenuScreen {
       t1.classList.toggle('setup-step-tab--active', step === 1);
       t2.classList.toggle('setup-step-tab--active', step === 2);
     }
+    this.fitSetup();
+  }
+
+  // El selector ocupa toda la pantalla sin scroll: se escala entero (zoom) para que entre justo,
+  // achicándose en pantallas bajas y agrandándose en las grandes
+  fitSetup() {
+    const screen = document.querySelector('#setupScreen');
+    const panel = screen?.querySelector('.setup-panel');
+    if (!panel || !screen.classList.contains('screen--active')) return;
+    panel.style.zoom = '1';
+    const style = getComputedStyle(screen);
+    const availableH = screen.clientHeight - parseFloat(style.paddingTop) - parseFloat(style.paddingBottom);
+    const availableW = screen.clientWidth - parseFloat(style.paddingLeft) - parseFloat(style.paddingRight);
+    const neededH = panel.scrollHeight, neededW = panel.scrollWidth;
+    if (!neededH || !neededW || availableH <= 0) return;
+    const zoom = Math.max(0.45, Math.min(1.5, availableH / neededH, availableW / neededW));
+    panel.style.zoom = String(Math.floor(zoom * 100) / 100);
   }
 
   restoreSetup() {
@@ -172,19 +344,25 @@ export class MenuScreen {
   }
 
   prepareAccount(){const p=currentAccount();if(!p)return;
+    const guest = isGuest();
     this.nameInput.value=p.name;
     this.selectedSkin=p.loadout.skin;
     this.mapInput.value=p.loadout.map;
-    this.companionInput.value=p.loadout.pet;
-    this.accessoryInput.value=p.loadout.accessory;
+    this.companionInput.value=guest ? 'none' : p.loadout.pet;
+    this.accessoryInput.value=guest ? 'none' : p.loadout.accessory;
     for(const [input,type] of [[this.mapInput,'map'],[this.companionInput,'pet'],[this.accessoryInput,'accessory']]){
       for(const option of input.options){
-        const owned=isOwned(p,type,option.value);
+        let owned = isOwned(p,type,option.value);
+        if (guest && (type === 'pet' || type === 'accessory') && option.value !== 'none') {
+          owned = false;
+        }
         option.disabled=!owned;
         if (type === 'map' && option.value === 'lava') {
           option.textContent = owned ? '07 / Caldero de Lava' : '💀 ??? [BLOQUEADO]';
+        } else if (guest && (type === 'pet' || type === 'accessory') && option.value !== 'none') {
+          option.textContent = option.textContent.replace(/ \[(TIENDA|SOLO SOCIOS)\]$/, '') + ' [SOLO SOCIOS]';
         } else {
-          option.textContent=option.textContent.replace(/ \[TIENDA\]$/,'')+(owned?'':' [TIENDA]');
+          option.textContent=option.textContent.replace(/ \[(TIENDA|SOLO SOCIOS)\]$/, '')+(owned?'':' [TIENDA]');
         }
       }
     }
@@ -321,13 +499,13 @@ export class MenuScreen {
     document.querySelector('#volumeSlider').addEventListener('input',event=>audio.setVolume(event.target.value));
     document.querySelector('#clearRankingButton').addEventListener('click',()=>{
       if(confirm('Se borraran las 10 mejores partidas guardadas en este navegador. Continuar?')){
-        localStorage.removeItem('domi2pancho.ranking');clearAccountRuns();this.game.showToast('Ranking borrado.');
+        try{localStorage.removeItem('domi2pancho.ranking');}catch{}clearAccountRuns();this.game.showToast('Ranking borrado.');
       }
     });
     document.querySelector('#clearAchievementsButton').addEventListener('click',()=>{
       if(confirm('Se borrara todo el progreso de logros. Continuar?')){
         const sessionKey = sessionStorage.getItem('domi2pancho.session.v1') || currentAccount()?.name.trim().toLocaleLowerCase('es');
-        localStorage.removeItem(sessionKey ? `domi2pancho.achievements.${sessionKey}` : 'domi2pancho.achievements');this.game.showToast('Progreso de logros borrado.');
+        try{localStorage.removeItem(sessionKey ? `domi2pancho.achievements.${sessionKey}` : 'domi2pancho.achievements');}catch{}this.game.showToast('Progreso de logros borrado.');
         this.renderOptions();
       }
     });

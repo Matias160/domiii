@@ -30,31 +30,9 @@ function scoreboard(c, x, y) {
   shadow(c, x, y + 37, 45, 8); rect(c, INK, x - 43, y - 31, 86, 57); rect(c, '#264a46', x - 37, y - 25, 74, 44); rect(c, '#e8c868', x - 26, y - 15, 19, 15); rect(c, '#e8c868', x + 7, y - 15, 19, 15); rect(c, '#f5edc8', x - 20, y - 11, 7, 7); rect(c, '#f5edc8', x + 13, y - 11, 7, 7); rect(c, '#9dd3ad', x - 27, y + 8, 54, 4); rect(c, '#536d65', x - 30, y + 26, 7, 16); rect(c, '#536d65', x + 23, y + 26, 7, 16);
 }
 
-function billboard(c,x,y,label,tone='#ff3f8b',time=0) {
-  shadow(c,x,y+22,48,7);
-  rect(c,'#040812',x-52,y-22,104,45);
-  rect(c,'#1a102e',x-48,y-18,96,33);
-  rect(c,tone,x-44,y-14,88,4);
-
-  // Luces intermitentes/LEDs en las esquinas superiores del cartel
-  const blink = Math.sin((time || 0) * 7 + x * 0.1) > 0;
-  rect(c, blink ? '#00f0ff' : '#0a1628', x - 47, y - 17, 5, 4);
-  rect(c, !blink ? '#ff007f' : '#0a1628', x + 42, y - 17, 5, 4);
-
-  c.save();
-  c.font = 'bold 9px monospace';
-  c.textAlign = 'center';
-  c.fillStyle = '#05070f';
-  c.fillText(label, x + 1, y + 6);
-  c.fillStyle = '#ffffff';
-  c.shadowColor = tone;
-  c.shadowBlur = 8;
-  c.fillText(label, x, y + 5);
-  c.restore();
-
-  rect(c, tone, x-36, y+11, 72, 3);
-  rect(c, '#243147', x-40, y+23, 7, 12);
-  rect(c, '#243147', x+33, y+23, 7, 12);
+function billboard(c,x,y,label,tone='#ff3f8b') {
+  shadow(c,x,y+22,48,7);rect(c,'#050b17',x-50,y-21,100,43);rect(c,'#2a1644',x-46,y-17,92,31);rect(c,tone,x-42,y-13,84,4);
+  c.fillStyle='#f8f0d0';c.font='bold 9px monospace';c.textAlign='center';c.fillText(label,x,y+5);rect(c,'#4df8dc',x-34,y+11,68,3);rect(c,'#34435d',x-40,y+22,7,12);rect(c,'#34435d',x+33,y+22,7,12);
 }
 
 function floodLight(c,x,y,time) {
@@ -72,44 +50,6 @@ function steam(c, x, y, time, color = '#effff0') {
   c.stroke(); c.restore();
 }
 
-function basaltPillar(c, x, y, time = 0) {
-  shadow(c, x, y + 26, 42, 10);
-  rect(c, '#080204', x - 22, y - 48, 44, 76);
-  rect(c, '#1a0b10', x - 18, y - 44, 36, 68);
-  rect(c, '#2d141c', x - 14, y - 40, 28, 60);
-  // Runas de magma incandescentes talladas en el basalto
-  const glow = 0.5 + Math.sin(time * 3 + x) * 0.4;
-  c.fillStyle = `rgba(255, 68, 0, ${glow})`;
-  rect(c, c.fillStyle, x - 4, y - 32, 8, 3);
-  rect(c, c.fillStyle, x - 2, y - 29, 4, 18);
-  rect(c, c.fillStyle, x - 6, y - 18, 12, 3);
-  rect(c, c.fillStyle, x - 5, y - 4, 10, 3);
-  // Capitel con magma
-  rect(c, '#ffaa00', x - 8, y - 46, 16, 2);
-}
-
-function lavaCauldron(c, x, y, time = 0) {
-  shadow(c, x, y + 22, 38, 8);
-  rect(c, '#090305', x - 26, y - 18, 52, 38);
-  rect(c, '#1f0d14', x - 22, y - 14, 44, 30);
-  // Patas de hierro fundido
-  rect(c, '#0d0407', x - 20, y + 16, 8, 10);
-  rect(c, '#0d0407', x + 12, y + 16, 8, 10);
-  // Núcleo de lava hirviente
-  const flameH = 4 + Math.sin(time * 6 + x) * 3;
-  rect(c, '#ff2200', x - 18, y - 14, 36, 12);
-  rect(c, '#ff8800', x - 14, y - 12 - flameH, 28, 10 + flameH);
-  rect(c, '#ffee44', x - 8, y - 10 - flameH, 16, 6 + flameH);
-  // Resplandor de calor del caldero
-  c.save();
-  const cGlow = c.createRadialGradient(x, y - 8, 4, x, y - 8, 44);
-  cGlow.addColorStop(0, 'rgba(255, 100, 0, 0.28)');
-  cGlow.addColorStop(1, 'transparent');
-  c.fillStyle = cGlow;
-  c.fillRect(x - 44, y - 52, 88, 88);
-  c.restore();
-}
-
 function heatHaze(c, x, y, time) {
   c.save(); c.globalAlpha = .16; c.strokeStyle = '#ffe4a0'; c.lineWidth = 2;
   for (let i = 0; i < 3; i++) { const wave = Math.sin(time * 1.8 + i) * 3; c.beginPath(); c.moveTo(x - 30, y + i * 7); c.lineTo(x + wave, y - 4 + i * 7); c.lineTo(x + 30, y + i * 7); c.stroke(); }
@@ -122,7 +62,7 @@ export function drawWorldProps(ctx, map = 'diner', time = 0, world = { width: 19
   const w = world.width, h = world.height;
   const isVisible = (x, y, radius = 90) => {
     if (!cam) return true;
-    return x >= cam.x - radius && x <= cam.x + 960 + radius && y >= cam.y - radius && y <= cam.y + 540 + radius;
+    return x >= cam.x - radius && x <= cam.x + (cam.w || 960) + radius && y >= cam.y - radius && y <= cam.y + (cam.h || 540) + radius;
   };
 
   if (map === 'snow') {
@@ -169,10 +109,10 @@ export function drawWorldProps(ctx, map = 'diner', time = 0, world = { width: 19
     if (isVisible(w - 200, 170)) machine(ctx, w - 200, 170, '#1e293b');
     if (isVisible(200, h - 200)) machine(ctx, 200, h - 200, '#1e293b');
     if (isVisible(w - 200, h - 200)) machine(ctx, w - 200, h - 200, '#1e293b');
-    if (isVisible(420, 145)) billboard(ctx, 420, 145, 'NEON DRIVE', '#00f0ff', time);
-    if (isVisible(w - 420, 145)) billboard(ctx, w - 420, 145, 'CYBER DELIVERY', '#ff007f', time + 1.2);
-    if (isVisible(420, h - 105)) billboard(ctx, 420, h - 105, 'TURBO PANCHO', '#ffbe0b', time + 2.4);
-    if (isVisible(w - 420, h - 105)) billboard(ctx, w - 420, h - 105, '24H VIP LOT', '#a855f7', time + 3.6);
+    if (isVisible(420, 145)) billboard(ctx, 420, 145, 'NEON DRIVE', '#00f0ff');
+    if (isVisible(w - 420, 145)) billboard(ctx, w - 420, 145, 'CYBER DELIVERY', '#ff007f');
+    if (isVisible(420, h - 105)) billboard(ctx, 420, h - 105, 'TURBO PANCHO', '#ffbe0b');
+    if (isVisible(w - 420, h - 105)) billboard(ctx, w - 420, h - 105, '24H VIP LOT', '#a855f7');
     if (isVisible(120, 95)) floodLight(ctx, 120, 95, time);
     if (isVisible(w - 120, 95)) floodLight(ctx, w - 120, 95, time + 0.7);
     if (isVisible(340, 360)) steam(ctx, 340, 360, time, '#00f0ff');

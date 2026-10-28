@@ -98,7 +98,7 @@ export function drawMapObstacles(ctx, state) {
     if (o.warning > 0) {
       ctx.save();
       const direction = o.vx > 0 ? 1 : -1;
-      const x = direction > 0 ? (state.camera?.x || 0) + 40 : (state.camera?.x || 0) + 920;
+      const x = direction > 0 ? (state.camera?.x || 0) + 40 : (state.camera?.x || 0) + (state.view?.w || 960) - 40;
       ctx.fillStyle = '#f8dc8c'; ctx.beginPath();
       ctx.moveTo(x + direction * 14, o.y); ctx.lineTo(x - direction * 8, o.y - 12); ctx.lineTo(x - direction * 8, o.y + 12); ctx.fill();
       ctx.strokeStyle = '#ffd57c88'; ctx.setLineDash([6, 8]);
@@ -114,7 +114,11 @@ export function drawMapObstacles(ctx, state) {
 
     if (state.mapId === 'football') {
       if (o.kicked) {
-        ctx.shadowColor = '#00ffcc'; ctx.shadowBlur = 24;
+        // Estela neón de pelota pateada (anillos translúcidos en vez de shadowBlur)
+        ctx.fillStyle = '#00ffcc';
+        ctx.globalAlpha = 0.18; ctx.beginPath(); ctx.arc(0, 0, 28, 0, Math.PI * 2); ctx.fill();
+        ctx.globalAlpha = 0.3; ctx.beginPath(); ctx.arc(0, 0, 22, 0, Math.PI * 2); ctx.fill();
+        ctx.globalAlpha = 1;
       }
       if (pelotaSheet && pelotaSheet.complete && pelotaSheet.naturalWidth > 0) {
         ctx.imageSmoothingEnabled = false;

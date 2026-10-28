@@ -1,34 +1,27 @@
 import { drawFood } from '../core/art.js';
-import { modes, RUSH_BOSS_GOAL } from '../systems/directorSystem.js';
-const maps = {diner:'01 / LOCAL DOMI',kitchen:'02 / COCINA INDUSTRIAL',parking:'03 / ESTACIONAMIENTO',snow:'04 / BAJO CERO',desert:'05 / DESIERTO',football:'06 / ESTADIO',lava:'07 / CALDERO DE LAVA'};
 export class Hud {
   constructor() {
     this.root = document.querySelector('#hud');
     this.hpFill = document.querySelector('#hpFill'); this.xpFill = document.querySelector('#xpFill');
-    this.buffs = document.querySelector('#activeBuffs');
-    this.runBar = document.querySelector('#runBar'); this.bossMeter = document.querySelector('#bossMeter');
     this.dashControl = document.querySelector('#dashControl');
     this.dashControl.addEventListener('animationend', () => this.dashControl.classList.remove('dash-refilled'));
-    this.comboMilestones = document.querySelector('#comboMilestones');
-    this.eventBanner = document.querySelector('#eventBanner');
+    // Valores ya escritos en el DOM: solo se toca un elemento cuando su valor cambia
+    this.written = new Map();
     const stats = document.querySelector('#hudStats');
     stats.innerHTML = '<span>TIEMPO<b id="timeValue">00:00</b></span><span>KOs<b id="killsValue">0</b></span><span>PUNTOS<b id="scoreValue">000000</b></span>';
-    this.nodes = Object.fromEntries(['hpValue','levelValue','hudName','hudWeapon','weaponEvolutionStatus','scoreValue','timeValue','killsValue','dashLabel','comboCount','comboMultiplier','comboChain','runLocation','runDifficulty','dashFill','bossFill','bossName','eventName','eventTime'].map(id=>[id,document.getElementById(id)]));
+    this.nodes = Object.fromEntries(['hpValue','levelValue','hudName','hudWeapon','weaponEvolutionStatus','scoreValue','timeValue','killsValue','dashLabel','dashFill'].map(id=>[id,document.getElementById(id)]));
     this.root.addEventListener('animationend',()=>this.root.classList.remove('hud--hit'));
-    this.comboMilestones.addEventListener('animationend',()=>this.comboMilestones.classList.remove('combo-milestones--pop'));
   }
   show(isPaused = false) {
     this.root.hidden = false;
-    this.runBar.hidden = isPaused;
     this.dashControl.hidden = isPaused;
-    this.comboMilestones.hidden = true;
-    if (isPaused) {
-      this.bossMeter.hidden = true;
-      this.eventBanner.hidden = true;
-    }
   }
-  hide() { this.root.hidden = true; this.runBar.hidden = true; this.dashControl.hidden = true; this.comboMilestones.hidden = true; this.bossMeter.hidden = true; this.eventBanner.hidden = true; }
+  hide() { this.root.hidden = true; this.dashControl.hidden = true; }
   set(id, text) { if (this.nodes[id].textContent !== text) this.nodes[id].textContent = text; }
+  // Escribe estilos/atributos solo si cambiaron: evita que el navegador recalcule el HUD en cada cuadro
+  style(element, prop, value) { const key = element.id + '|' + prop; if (this.written.get(key) === value) return; this.written.set(key, value); element.style.setProperty(prop, value); }
+  data(element, name, value) { if (element.dataset[name] !== value) element.dataset[name] = value; }
+  attr(element, name, value) { if (element.getAttribute(name) !== value) element.setAttribute(name, value); }
   update(state) {
     const p = state.player;
     if (this.previousLevel !== undefined && p.level > this.previousLevel) {
@@ -42,83 +35,39 @@ export class Hud {
       requestAnimationFrame(() => this.root.classList.add('hud--hit'));
     }
     this.previousHp=p.hp;
-    this.root.dataset.danger=String(p.hp/p.maxHp<.25);
-    this.hpFill.style.width = `${Math.max(0,p.hp/p.maxHp*100)}%`;
-    this.xpFill.style.width = `${p.xp/p.xpToNext*100}%`;
+    this.data(this.root,'danger',String(p.hp/p.maxHp<.25));
+    this.style(this.hpFill,'width',`${Math.max(0,p.hp/p.maxHp*100).toFixed(1)}%`);
+    this.style(this.xpFill,'width',`${(p.xp/p.xpToNext*100).toFixed(1)}%`);
     this.set('hpValue',`${Math.ceil(p.hp)} / ${p.maxHp}`); this.set('levelValue',`NV ${p.level}`);
     this.set('hudName',p.skin.name); this.set('hudWeapon',p.weaponEvolution?.name||p.weapon.name);
     this.set('weaponEvolutionStatus',p.weaponEvolution?'EVOLUCION ACTIVA':`EVOLUCION ${Math.min(p.level,15)} / 15`);
-    this.nodes.weaponEvolutionStatus.dataset.ready=String(Boolean(p.weaponEvolution));
+    this.data(this.nodes.weaponEvolutionStatus,'ready',String(Boolean(p.weaponEvolution)));
     const nextAbilities = [5, 10, 15].filter(lvl => lvl > p.level);
-    const nextAbilityLvl = p.level < 45 ? (Math.floor(p.level / 5) + 1) * 5 : null;
+    const nextAbilityLvl = nextAbilities.length > 0 ? nextAbilities[0] : null;
     const abilityProgress = nextAbilityLvl ? `ACTIVA EN NV ${nextAbilityLvl}` : 'ACTIVAS MAX';
-    this.nodes.weaponEvolutionStatus.textContent = p.weaponEvolution ? `${p.weaponEvolution.name.toUpperCase()} · ${abilityProgress}` : `${abilityProgress} (NV ${p.level})`;
+    this.set('weaponEvolutionStatus', p.weaponEvolution ? `${p.weaponEvolution.name.toUpperCase()} · ${abilityProgress}` : `${abilityProgress} (NV ${p.level})`);
     this.set('scoreValue',String(Math.floor(state.score)).padStart(6,'0'));
     this.set('timeValue',formatTime(state.time)); this.set('killsValue',String(state.kills));
-    const combo = state.combo || 0;
-    if(combo>(this.previousCombo||0)){
-      this.comboMilestones.classList.remove('combo-milestones--pop');
-      requestAnimationFrame(() => this.comboMilestones.classList.add('combo-milestones--pop'));
-    }
-    this.previousCombo=combo;
-    const comboMultiplier=Math.min(3,1+Math.floor(combo/5)*.25);
-    this.set('comboCount',combo>0?`COMBO ${combo} / x${comboMultiplier.toFixed(2)} / ${state.comboTime.toFixed(1)}s`:'COMBO / x1');
-    this.set('comboMultiplier',`x${comboMultiplier.toFixed(2)}`);
-    this.set('comboChain',combo?`${combo} KOs`:'INICIÁ LA RACHA');
-    this.comboMilestones.dataset.active=String(combo>0);
-    this.comboMilestones.querySelectorAll('[data-combo-step]').forEach(step=>{
-      const goal=Number(step.dataset.comboStep);step.dataset.reached=String(combo>=goal);
-      step.dataset.next=String(combo<goal&&![...this.comboMilestones.querySelectorAll('[data-combo-step]')].some(other=>Number(other.dataset.comboStep)<goal&&combo<Number(other.dataset.comboStep)));
-    });
-    this.nodes.comboCount.style.setProperty('--combo-left',`${Math.max(0,Math.min(1,state.comboTime/3.5))*100}%`);
-    this.nodes.comboCount.dataset.active=String(combo>0);
-    this.nodes.comboCount.dataset.urgent=String(combo>0&&state.comboTime<1);
+    // Combo, jefe, evento y mejoras activas ahora son imágenes en el canvas de carteles (hudCanvas.js)
     const isDashReady = p.dashCooldown <= 0;
     if (isDashReady && this.wasDashReady === false) this.dashControl.classList.add('dash-refilled');
     this.wasDashReady = isDashReady;
     const maxDashCd = 2.8 * (p.dashCooldownMultiplier || 1);
-    this.dashControl.setAttribute('aria-disabled', String(!isDashReady));
-    this.dashControl.dataset.active = String(p.dashTime > 0);
+    this.attr(this.dashControl,'aria-disabled', String(!isDashReady));
+    this.data(this.dashControl,'active',String(p.dashTime > 0));
     this.set('dashLabel',p.dashTime>0?'IMPACTO':p.dashCooldown>0?`${p.dashCooldown.toFixed(1)} s`:'LISTO');
     if (this.dashControl) {
-      this.dashControl.dataset.status = isDashReady ? 'ready' : 'cooldown';
-      this.dashControl.dataset.ready = String(isDashReady);
-      this.dashControl.classList.toggle('is-ready', isDashReady);
-      this.dashControl.classList.toggle('is-cooldown', !isDashReady);
-      this.dashControl.style.setProperty('--charge', `${Math.max(0, Math.min(1, 1-p.dashCooldown/maxDashCd))*100}%`);
+      this.data(this.dashControl,'status',isDashReady ? 'ready' : 'cooldown');
+      this.data(this.dashControl,'ready',String(isDashReady));
+      if (this.dashControl.classList.contains('is-ready') !== isDashReady) {
+        this.dashControl.classList.toggle('is-ready', isDashReady);
+        this.dashControl.classList.toggle('is-cooldown', !isDashReady);
+      }
+      this.style(this.dashControl,'--charge', `${Math.round(Math.max(0, Math.min(1, 1-p.dashCooldown/maxDashCd))*100)}%`);
     }
     if (this.nodes.dashFill) {
-      this.nodes.dashFill.style.width = `${Math.max(0, Math.min(1, 1-p.dashCooldown/maxDashCd))*100}%`;
+      this.style(this.nodes.dashFill,'width', `${Math.round(Math.max(0, Math.min(1, 1-p.dashCooldown/maxDashCd))*100)}%`);
     }
-    this.set('runLocation',maps[state.mapId]); this.set('runDifficulty',state.difficulty.name.toUpperCase());
-    const progress=state.modeId==='waves'?'OLEADA '+state.wave+'/8':state.modeId==='rush'?`DUELO DE JEFES ${state.bossesKilled}/${RUSH_BOSS_GOAL}`:modes[state.modeId].name.toUpperCase();
-    this.nodes.runLocation.title = progress;
-    const boss = state.enemies.find(e=>e.isBoss&&e.hp>0);
-    this.bossMeter.hidden = !boss;
-    if (boss) {
-      const isColossus = boss.type.bossStyle === 'colossus';
-      this.bossMeter.classList.toggle('boss-meter--colossus', isColossus);
-      this.nodes.bossFill.style.width = `${Math.max(0,boss.hp/boss.maxHp)*100}%`;
-      const phaseSuffix = isColossus ? (boss.bossPhase === 'stunned' ? ' [¡ATURDIDO! x2 DAÑO]' : boss.phaseThree ? ' [FASE 3: FURIA TOTAL]' : boss.phaseTwo ? ' [FASE 2: FURIA FUNDIDA]' : '') : '';
-      const bossTitle = isColossus
-        ? `★ DOMI COLOSAL — EL SEÑOR DE LA PLANCHA NEGRA ★${phaseSuffix}`
-        : (boss.bossRank ? `#${boss.bossRank} ${boss.type.name.toUpperCase()}` : boss.type.name.toUpperCase());
-      this.set('bossName', bossTitle);
-    }
-    const event=state.activeEvent,snowAlert=state.mapId==='snow'&&(state.mapWarning||state.wasFreezing);
-    this.eventBanner.hidden=!(event||snowAlert||state.modeId==='rush');
-    this.set('eventName',event?event.name:progress);
-    this.set('eventTime',event?Math.ceil(state.eventRemaining)+'s':state.modeId==='waves'&&state.waveRest>0?'EN '+Math.ceil(state.waveRest)+'s':'');
-    if(snowAlert){
-      this.set('eventName',state.wasFreezing?'VENTISCA / SUELO HELADO':'SE ACERCA UNA VENTISCA');
-      this.set('eventTime',Math.ceil((state.wasFreezing?34:28)-state.mapClock%34)+'s');
-    }
-    this.eventBanner.style.setProperty('--event-color',event?.color||'#a2aaa4');
-    const labels = [['damageTime','DANO'],['speedTime','VELOCIDAD'],['fireTime','CADENCIA']];
-    const activeLabels=labels.filter(([key])=>p.buffs[key]>0).map(([key,label])=>`${label} ${Math.ceil(p.buffs[key])}s`);
-    if(p.comboFeverTime>0)activeLabels.push(`FIEBRE ${Math.ceil(p.comboFeverTime)}s`);
-    const buffText=activeLabels.join(' / ');
-    if(this.buffs.textContent!==buffText)this.buffs.textContent=buffText;
     if(this.skin!==p.skin.id){
       this.skin=p.skin.id;const c=document.querySelector('#hudPortrait').getContext('2d');c.clearRect(0,0,64,64);drawFood(c,p.skin.id,32,30,.85);
     }

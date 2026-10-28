@@ -1,5 +1,5 @@
 import {domiGifImage} from '../core/art.js';
-import {currentAccount, grantItem, equip} from '../systems/accountSystem.js';
+import {currentAccount, grantItem, equip, isGuest} from '../systems/accountSystem.js';
 import {shopItems, isOwned} from '../data/shop.js';
 import {drawItemPreview, drawAccessoryIcon} from '../core/presentation.js';
 import {drawFood} from '../core/art.js';
@@ -41,13 +41,6 @@ export const adviceList = [
     title: 'Poderes Activos',
     badge: 'COMBATE',
     description: 'Se desbloquean por nivel de partida: Q al Nivel 5 (ráfaga radial), E al Nivel 10 (clon señuelo) y R al Nivel 15 (escudo de inmunidad).'
-  },
-  {
-    id: 'adv_primes',
-    category: 'combat',
-    title: 'Habilidades Primarias',
-    badge: 'COMBATE',
-    description: 'Q desata una ráfaga radial en el Nivel 5, E invoca un clon señuelo en el Nivel 10 y R genera un escudo de invulnerabilidad temporal en el Nivel 15.'
   },
   {
     id: 'adv_evo',
@@ -398,6 +391,7 @@ export class DomiScreen {
       { id: 'tray', type: 'enemy', name: 'Bandeja Blindada', category: 'ENEMIGO', stats: { hp: '105', spd: '48', dmg: '16', perk: 'Blindaje Pesado (x2)' }, desc: 'Cuerpo metálico que reduce el daño recibido un 50%. Bloquea pasajes.', lockText: '100 KOs Totales', isUnlocked: totalKills >= 100 },
       { id: 'mayo', type: 'enemy', name: 'Mayonesa Médica', category: 'ENEMIGO', stats: { hp: '52', spd: '57', dmg: '9', perk: 'Aura Sanadora' }, desc: 'Unidad de apoyo. Regenera la salud de los clientes molestos cercanos.', lockText: '150 KOs Totales', isUnlocked: totalKills >= 150 },
       { id: 'chef', type: 'enemy', name: 'Chef Invocador', category: 'ENEMIGO', stats: { hp: '78', spd: '44', dmg: '12', perk: 'Invoca Refuerzos' }, desc: 'Cocina nuevos pedidos sobre la marcha atrayendo hordas sin cesar.', lockText: '200 KOs Totales', isUnlocked: totalKills >= 200 },
+      { id: 'chili', type: 'enemy', name: 'Ají Kamikaze', category: 'ENEMIGO', stats: { hp: '18', spd: '118', dmg: '24', perk: 'Embestida Explosiva' }, desc: 'Se frena, tiembla y marca una línea roja antes de salir disparado. ¡Esquivalo y explota contra sus amigos!', lockText: '250 KOs Totales', isUnlocked: totalKills >= 250 },
 
       // --- GRANDES JEFES DE LA COCINA ---
       { id: 'boss_double', type: 'boss', enemyId: 'double', name: 'Rey del Mostrador', category: 'GRAN JEFE', stats: { hp: '820', spd: '58', dmg: '24', perk: 'Salva Radial x10' }, desc: 'El soberano indiscutido del Local Domi. Furia desatada bajo el 50% de vida.', lockText: 'Vence 1 Jefe', isUnlocked: totalBosses >= 1 },
@@ -454,6 +448,22 @@ export class DomiScreen {
      ========================================================================= */
   renderMissions(container, profile) {
     this.previewCanvas = null;
+    if (isGuest()) {
+      const lockedBox = document.createElement('div');
+      lockedBox.className = 'domi-guest-locked-notice';
+      lockedBox.style.cssText = 'text-align:center;padding:48px 24px;background:#111a20;border:3px solid #284452;border-radius:4px;margin:20px auto;max-width:540px;box-shadow:0 0 30px rgba(0,0,0,0.8);';
+      lockedBox.innerHTML = `
+        <div style="font-size:36px;margin-bottom:16px;">📜🔒</div>
+        <h3 style="font-family:'Press Start 2P',monospace;font-size:13px;color:#facc15;margin:0 0 14px;line-height:1.5;">EXCLUSIVO PARA SOCIOS REGISTRADOS</h3>
+        <p style="font-family:'Trebuchet MS',Arial,sans-serif;font-size:14px;color:#cbd5e1;line-height:1.6;margin:0 0 24px;">Las misiones y reliquias exclusivas del Señor Domi solo están disponibles para socios del club. ¡Creá tu carnet en el mostrador para desbloquearlas y guardar tus trofeos!</p>
+        <button id="domiGuestDeskBtn" type="button" class="pixel-button pixel-button--green" style="padding:14px 28px;font-size:12px;">IR A LA CABINA DE REGISTRO</button>
+      `;
+      lockedBox.querySelector('#domiGuestDeskBtn')?.addEventListener('click', () => {
+        this.game.openRegistration();
+      });
+      container.append(lockedBox);
+      return;
+    }
     const missions = this.getMissions(profile);
     const claimedCount = missions.filter(m => m.isClaimed).length;
     const pct = Math.round((claimedCount / missions.length) * 100);
@@ -529,7 +539,7 @@ export class DomiScreen {
         btn.textContent = '¡RECLAMAR!';
         btn.onclick = () => {
           btn.disabled = true;
-          m.claim();
+          try { m.claim(); } catch (err) { btn.disabled = false; this.game.showToast?.(err.message); return; }
           this.game.audio.play('levelUp');
           this.game.menu?.prepareAccount?.();
           this.game.showToast?.(`¡RECOMPENSA OBTENIDA: ${m.rewardName}!`, { type: m.rewardType, id: m.rewardId, name: m.rewardName });
@@ -749,7 +759,7 @@ export class DomiScreen {
         actionBtn.textContent = isEquipped ? '✓ EN USO' : 'EQUIPAR ACCESORIO';
         actionBtn.disabled = isEquipped;
         actionBtn.onclick = () => {
-          equip('accessory', current.id);
+          try { equip('accessory', current.id); } catch (err) { this.game.showToast?.(err.message); return; }
           this.game.menu?.prepareAccount?.();
           this.game.audio.play('purchase');
           this.render();

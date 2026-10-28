@@ -1,127 +1,132 @@
-import { login, register, guestLogin, resetPassword } from '../systems/accountSystem.js';
+import { login, register, guestLogin, currentAccount, logout } from '../systems/accountSystem.js';
 
 export function bindAuth(game) {
   const form = document.querySelector('#authForm');
   const name = document.querySelector('#authName');
-  const password = document.querySelector('#authPassword');
   const submit = document.querySelector('#authSubmit');
   const switchMode = document.querySelector('#authSwitch');
   const guestBtn = document.querySelector('#authGuest');
-  const resetBtn = document.querySelector('#authReset');
-  const toggle = document.querySelector('#authPasswordToggle');
   const error = document.querySelector('#authError');
-  const capsLock = document.querySelector('#authCapsLock');
   let mode = 'login';
   let busy = false;
 
-  function concealPassword() {
-    password.type = 'password';
-    toggle.textContent = 'Mostrar';
-    toggle.setAttribute('aria-label', 'Mostrar contraseña');
-    toggle.setAttribute('aria-pressed', 'false');
-    capsLock.hidden = true;
+  function showWelcomeBanner(account, isGuestMode = false) {
+    const userSpan = document.querySelector('#onboardingUserName');
+    const statusBadge = document.querySelector('#onboardingStatusBadge');
+    const statusDesc = document.querySelector('#onboardingStatusDesc');
+    const eyebrow = document.querySelector('#onboardingScreen .eyebrow');
+
+    if (userSpan) {
+      userSpan.textContent = isGuestMode ? 'INVITADO' : (account?.name || 'SOCIO').toUpperCase();
+    }
+    if (statusBadge) {
+      if (isGuestMode) {
+        statusBadge.textContent = 'MODO INVITADO (SIN REGISTRO)';
+        statusBadge.className = 'onboarding-status-badge onboarding-status-badge--guest';
+      } else {
+        statusBadge.textContent = '✓ SOCIO REGISTRADO CON ÉXITO';
+        statusBadge.className = 'onboarding-status-badge';
+      }
+    }
+    if (statusDesc) {
+      if (isGuestMode) {
+        statusDesc.textContent = 'Estás jugando como invitado. Para reclamar misiones y guardar accesorios, creá tu carnet en el mostrador.';
+      } else {
+        statusDesc.textContent = `¡Bienvenido al club, ${account?.name}! Tu cuenta está activa y tu progreso se guardará en este navegador.`;
+      }
+    }
+    if (eyebrow) {
+      eyebrow.innerHTML = `<i data-lucide="sparkles"></i> BIENVENIDO AL TURNO`;
+    }
   }
 
   function setMode(newMode, clearError = true) {
     mode = newMode;
     const signingUp = mode === 'register';
-    document.querySelector('#authTitle').textContent = signingUp ? 'Creá tu cuenta' : 'Entrá al club';
-    submit.textContent = signingUp ? 'CREAR CUENTA' : 'ENTRAR';
-    switchMode.textContent = signingUp ? 'Ya tengo cuenta' : 'Crear cuenta';
-    resetBtn.hidden = signingUp;
-    guestBtn.hidden = signingUp;
-    password.autocomplete = signingUp ? 'new-password' : 'current-password';
-    document.querySelector('#authNameHint').hidden = !signingUp;
-    document.querySelector('#authPasswordHint').hidden = !signingUp;
-    if (clearError) error.hidden = true;
+    const isSwitching = mode === 'switch';
+    const curr = currentAccount();
+
+    if (isSwitching && curr) {
+      document.querySelector('#authTitle').textContent = `Cambiar cuenta (Actual: ${curr.name})`;
+      submit.textContent = 'CAMBIAR A ESTA CUENTA';
+      switchMode.textContent = 'Crear cuenta nueva';
+    } else {
+      document.querySelector('#authTitle').textContent = signingUp ? 'Creá tu cuenta' : 'Entrá al club';
+      submit.textContent = signingUp ? 'CREAR CUENTA' : 'ENTRAR';
+      switchMode.textContent = signingUp ? 'Ya tengo cuenta' : 'Crear cuenta';
+    }
+
+    const hint = document.querySelector('#authNameHint');
+    if (hint) hint.hidden = !signingUp && !isSwitching;
+    if (clearError && error) error.hidden = true;
   }
 
-  switchMode.addEventListener('click', () => {
+  // El escritorio de registro del local abre esta pantalla
+  game.openAuth = (startMode = 'register') => {
+    setMode(startMode);
+    if (name) {
+      name.value = '';
+    }
+    game.showScreen('authScreen');
+    setTimeout(() => name?.focus(), 50);
+  };
+
+  switchMode?.addEventListener('click', () => {
     if (busy) return;
     setMode(mode === 'login' ? 'register' : 'login');
-    password.value = '';
-    concealPassword();
-    name.focus();
+    name?.focus();
   });
 
   guestBtn?.addEventListener('click', (e) => {
     e.preventDefault();
     try {
-      guestLogin();
+      const guestAcc = guestLogin();
+      showWelcomeBanner(guestAcc, true);
       game.menu?.prepareAccount?.();
       game.showScreen('onboardingScreen');
-      game.showToast?.('¡Bienvenido al local! Entraste como Invitado.');
     } catch (err) {
       console.error('Error entering guest mode:', err);
-      game.showScreen('onboardingScreen');
+      game.showToast?.(err.message || 'No se pudo entrar como Invitado.');
+      game.showScreen('lobbyScreen');
     }
   });
 
-  resetBtn?.addEventListener('click', async () => {
-    const username = name.value.trim();
-    if (!username) {
-      error.textContent = 'Escribí tu nombre de usuario arriba antes de restablecer clave.';
-      error.hidden = false;
-      name.focus();
-      return;
-    }
-    const newPass = prompt(`Ingresá una nueva contraseña para "${username}" (mínimo 6 caracteres):`);
-    if (!newPass) return;
-    if (newPass.length < 6) {
-      alert('La contraseña debe tener al menos 6 caracteres.');
-      return;
-    }
-    try {
-      await resetPassword(username, newPass);
-      alert(`¡Contraseña restablecida con éxito para "${username}"! Ingresando al juego...`);
-      game.menu.prepareAccount();
-      game.showScreen('onboardingScreen');
-    } catch (err) {
-      alert(err.message || 'No se pudo restablecer la contraseña.');
-    }
-  });
+  form?.addEventListener('input', () => { if (error) error.hidden = true; });
 
-  toggle.addEventListener('click', () => {
-    const showing = password.type === 'password';
-    password.type = showing ? 'text' : 'password';
-    toggle.textContent = showing ? 'Ocultar' : 'Mostrar';
-    toggle.setAttribute('aria-label', showing ? 'Ocultar contraseña' : 'Mostrar contraseña');
-    toggle.setAttribute('aria-pressed', String(showing));
-  });
-  for (const eventName of ['keydown', 'keyup']) {
-    password.addEventListener(eventName, event => {
-      capsLock.hidden = !event.getModifierState('CapsLock');
-    });
-  }
-  password.addEventListener('blur', () => { capsLock.hidden = true; });
-  form.addEventListener('input', () => { error.hidden = true; });
-
-  form.addEventListener('submit', async event => {
+  form?.addEventListener('submit', async event => {
     event.preventDefault();
     if (busy) return;
     busy = true;
-    error.hidden = true;
+    if (error) error.hidden = true;
     form.setAttribute('aria-busy', 'true');
-    submit.disabled = switchMode.disabled = toggle.disabled = true;
+    if (submit) submit.disabled = true;
+    if (switchMode) switchMode.disabled = true;
     if (guestBtn) guestBtn.disabled = true;
-    name.readOnly = password.readOnly = true;
-    submit.textContent = mode === 'login' ? 'ENTRANDO...' : 'CREANDO CUENTA...';
+    if (name) name.readOnly = true;
+
+    if (submit) {
+      submit.textContent = mode === 'register' ? 'CREANDO CUENTA...' : 'ENTRANDO...';
+    }
+
     try {
-      await (mode === 'login' ? login : register)(name.value, password.value);
-      password.value = '';
-      concealPassword();
-      game.menu.prepareAccount();
+      const username = name.value.trim();
+      const account = await (mode === 'register' ? register : login)(username);
+      showWelcomeBanner(account, false);
+      game.menu?.prepareAccount?.();
       game.showScreen('onboardingScreen');
     } catch (failure) {
-      error.textContent = failure.message || 'No se pudo entrar. Intentá nuevamente.';
-      error.hidden = false;
-      error.focus();
+      if (error) {
+        error.textContent = failure.message || 'No se pudo entrar. Intentá nuevamente.';
+        error.hidden = false;
+        error.focus();
+      }
     } finally {
       busy = false;
       form.setAttribute('aria-busy', 'false');
-      submit.disabled = switchMode.disabled = toggle.disabled = false;
+      if (submit) submit.disabled = false;
+      if (switchMode) switchMode.disabled = false;
       if (guestBtn) guestBtn.disabled = false;
-      name.readOnly = password.readOnly = false;
+      if (name) name.readOnly = false;
       setMode(mode, false);
     }
   });

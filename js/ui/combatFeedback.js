@@ -76,22 +76,21 @@ export function drawCombatFeedback(ctx, state, reducedMotion = false) {
       ctx.beginPath(); ctx.arc(x, y, zone.radius, 0, Math.PI * 2); ctx.fill();
       ctx.restore();
 
+      // Cuenta regresiva de la zona (0 = impacta ya): la usan el anillo de aviso y el meteorito
+      const progress = Math.max(0, Math.min(1, zone.delay / (zone.maxDelay || 1.2)));
       ctx.strokeStyle=zoneColor;ctx.fillStyle=zoneColor+'22';ctx.lineWidth=3;ctx.setLineDash([8,6]);ctx.beginPath();ctx.arc(x,y,zone.radius,0,Math.PI*2);ctx.fill();ctx.stroke();
-      const maxDelay = zone.maxDelay || 1.2;
-      const progress = Math.max(0, Math.min(1, zone.delay / maxDelay));
       if(warning){
         ctx.save();ctx.beginPath();ctx.arc(x,y,zone.radius-3,0,Math.PI*2);ctx.clip();ctx.globalAlpha=.32;ctx.setLineDash([]);ctx.lineWidth=4;
         for(let line=-zone.radius*2;line<zone.radius*2;line+=14){ctx.beginPath();ctx.moveTo(x-zone.radius,line+y-zone.radius);ctx.lineTo(x+zone.radius,line+y+zone.radius);ctx.stroke();}
         ctx.restore();
         // Anillo de cuenta regresiva decreciente para timing perfecto de evasión
         ctx.save();
-        ctx.strokeStyle = '#ffffff';
-        ctx.lineWidth = 3;
-        ctx.shadowColor = zoneColor; ctx.shadowBlur = 10;
         ctx.setLineDash([]);
         ctx.beginPath();
         ctx.arc(x, y, Math.max(6, zone.radius * progress), 0, Math.PI * 2);
-        ctx.stroke();
+        // Halo neón como doble trazo (ancho translúcido + núcleo blanco) en vez de shadowBlur
+        ctx.strokeStyle = zoneColor; ctx.globalAlpha = 0.35; ctx.lineWidth = 10; ctx.stroke();
+        ctx.globalAlpha = 1; ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 3; ctx.stroke();
         ctx.restore();
       }
       if(zone.kind==='rain')for(let i=-2;i<=2;i++){ctx.beginPath();ctx.moveTo(x+i*13-8,y-70);ctx.lineTo(x+i*13+5,y-45);ctx.stroke();}
@@ -154,12 +153,14 @@ export function drawCombatFeedback(ctx, state, reducedMotion = false) {
   // Anillos de Fuego expansivos lanzados por el Jefe Colosal
   for (const ring of state.bossFireRings || []) {
     ctx.save();
-    ctx.strokeStyle = ring.color || '#ff4400';
-    ctx.lineWidth = 4;
-    ctx.shadowColor = '#ff2200';
-    ctx.shadowBlur = 12;
+    // Halo ancho translúcido + trazo fino (en vez de shadowBlur, que es caro)
     ctx.beginPath();
     ctx.arc(ring.x, ring.y, ring.radius, 0, Math.PI * 2);
+    ctx.strokeStyle = 'rgba(255, 34, 0, 0.3)';
+    ctx.lineWidth = 12;
+    ctx.stroke();
+    ctx.strokeStyle = ring.color || '#ff4400';
+    ctx.lineWidth = 4;
     ctx.stroke();
     // Chispas de fuego perimetrales
     const sparkCount = 10;
@@ -175,10 +176,6 @@ export function drawCombatFeedback(ctx, state, reducedMotion = false) {
 
   // Indicador de cooldown de dash (con reflejo cálido en entorno de lava)
   ctx.save();
-  if (state.mapId === 'lava') {
-    ctx.shadowColor = '#ff5500';
-    ctx.shadowBlur = 8;
-  }
   ctx.strokeStyle = p.dashCooldown > 0
     ? (state.mapId === 'lava' ? '#c96b4b' : '#7ba998')
     : (state.mapId === 'lava' ? '#ffcf66' : '#cde6a3');
@@ -235,26 +232,27 @@ export function drawScreenCombatOverlays(ctx, state, reducedMotion = false) {
 
   // Borde de peligro (vida baja) — pulsación animada + vignette ajustada a toda la pantalla del viewport (960x540)
   if (p.hp / p.maxHp < 0.25) {
+    const W = ctx.canvas.width, H = ctx.canvas.height;
     const pulse = reducedMotion ? 0.7 : 0.55 + Math.sin(performance.now() / 180) * 0.45;
     ctx.save();
     // Vignette roja desde los bordes de la pantalla
-    const vg = ctx.createRadialGradient(480, 270, 200, 480, 270, 520);
+    const vg = ctx.createRadialGradient(W / 2, H / 2, H * 0.37, W / 2, H / 2, Math.hypot(W, H) / 2);
     vg.addColorStop(0, 'transparent');
     vg.addColorStop(1, `rgba(220, 30, 30, ${pulse * 0.35})`);
     ctx.fillStyle = vg;
-    ctx.fillRect(0, 0, 960, 540);
+    ctx.fillRect(0, 0, W, H);
 
     // Borde neón pulsante pixel-art en todo el marco de la pantalla
     ctx.strokeStyle = `rgba(255, 60, 60, ${pulse})`;
     ctx.lineWidth = 6;
-    ctx.strokeRect(3, 3, 954, 534);
+    ctx.strokeRect(3, 3, W - 6, H - 6);
 
     // Esquinas reforzadas pixel-art de alerta
     ctx.fillStyle = `rgba(255, 80, 80, ${pulse})`;
     ctx.fillRect(0, 0, 24, 6); ctx.fillRect(0, 0, 6, 24);
-    ctx.fillRect(936, 0, 24, 6); ctx.fillRect(954, 0, 6, 24);
-    ctx.fillRect(0, 534, 24, 6); ctx.fillRect(0, 516, 6, 24);
-    ctx.fillRect(936, 534, 24, 6); ctx.fillRect(954, 516, 6, 24);
+    ctx.fillRect(W - 24, 0, 24, 6); ctx.fillRect(W - 6, 0, 6, 24);
+    ctx.fillRect(0, H - 6, 24, 6); ctx.fillRect(0, H - 24, 6, 24);
+    ctx.fillRect(W - 24, H - 6, 24, 6); ctx.fillRect(W - 6, H - 24, 6, 24);
     ctx.restore();
   }
 }

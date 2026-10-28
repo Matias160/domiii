@@ -1,4 +1,4 @@
-import {drawFood, domiGifImage} from '../core/art.js';
+import {drawFood, domiGifImage, drawBurgosMark} from '../core/art.js';
 import {drawPet} from '../core/presentation.js';
 
 import {createAnimatedGif} from '../core/animatedGif.js';
@@ -140,11 +140,11 @@ export function makeRoom(){
     }
     c.restore();
   };
-  drawArrow(620,470,'left','ARMARIO');
+  drawArrow(620,470,'left','TIENDA');
   drawArrow(1300,470,'right','MASCOTAS');
   drawArrow(960,370,'up','A LA COCINA');
   drawArrow(620,670,'left','SEÑOR DOMI');
-  drawArrow(1300,670,'right','TIENDA');
+  drawArrow(1300,670,'right','REGISTRO');
 
   // Back Wall (y: 0 to 150)
   box(c,20,16,1880,136,'#12202b');
@@ -159,21 +159,23 @@ export function makeRoom(){
   text(c,'EL CLUB DEL ULTIMO TURNO · FAST FOOD COMBAT',960,98,9,'#a3eedf');
 
   // Side Wall Posters and Neon Signs
+  // Plaquita "construido por BurgosCorp" entre los carteles de la pared
+  drawBurgosMark(c,330,58,2,0.85);
   box(c,60,36,260,68,'#162a30');
   text(c,'COMBO DE LA CASA',190,62,11,'#ffe078');
   text(c,'SOBREVIVIR AL TURNO',190,82,8,'#8ad8b8');
 
   box(c,370,36,250,68,'#1c2638');
-  text(c,'01 / VESTUARIO',495,62,11,'#ff7597');
-  text(c,'NUEVAS SKINS EN CARTA',495,82,8,'#ffb0c4');
+  text(c,'01 / BAZAR ARCADE',495,62,11,'#ffd000');
+  text(c,'SKINS, MAPAS Y MAS',495,82,8,'#ffea88');
 
   box(c,1290,36,260,68,'#163226');
   text(c,'02 / GUARDERIA',1420,62,11,'#56e39f');
   text(c,'MASCOTAS Y ALIADOS',1420,82,8,'#9cf5ca');
 
   box(c,1600,36,260,68,'#362a14');
-  text(c,'03 / BAZAR ARCADE',1730,62,11,'#ffd000');
-  text(c,'CANJEA TUS PUNTOS',1730,82,8,'#ffea88');
+  text(c,'03 / REGISTRO',1730,62,11,'#7dd3fc');
+  text(c,'HACETE SOCIO DEL CLUB',1730,82,8,'#bae6fd');
 
   // Decorative Arcade Cabinets along back wall
   drawArcadeCabinet(c,660,102,'PAC', '#2b4d8a','#38d9ff',0);
@@ -185,6 +187,7 @@ export function makeRoom(){
   drawArcadeCabinet(c,760,860,'RET', '#5c2b8a','#c084fc',1);
   drawArcadeCabinet(c,800,860,'TUR', '#8a2b4b','#ff3b69',2);
   drawArcadeCabinet(c,1100,860,'DOM', '#2b778a','#38bdf8',3);
+  drawBurgosMark(c,1123,906,1,0.8); // calcomanía BC en el costado de la máquina DOM
   drawArcadeCabinet(c,1140,860,'MAX', '#2b8a77','#34d399',0);
 
   // Diner Tables & Seating
@@ -242,8 +245,9 @@ export function drawRoomLight(c,t){
     const y=290-phase*150;
     c.globalAlpha=Math.sin(phase*Math.PI)*0.85;
     c.fillStyle=i%3===0?'#00ffcc':i%3===1?'#ffe066':'#ff3b69';
-    c.shadowColor=c.fillStyle;c.shadowBlur=8;
     const s=2+(i%3)*1.5;
+    // Halo como cuadrado translúcido (más barato que shadowBlur)
+    const a=c.globalAlpha;c.globalAlpha=a*0.3;c.fillRect(Math.round(x-s),Math.round(y-s),s*3,s*3);c.globalAlpha=a;
     c.fillRect(Math.round(x),Math.round(y),s,s);
   }
   c.globalAlpha=1;c.shadowBlur=0;
@@ -314,18 +318,6 @@ export function drawStation(c,s,t,active){
       c.fillStyle='#ff2a44';for(let i=0;i<7;i++)c.fillRect(-70+i*22,34,10,10);
     }
   }
-  else if(id==='wardrobe'){
-    box(c,-60,-82,120,118,'#b94b63');
-    box(c,-50,-72,100,98,'#36222e');
-    // Mirror with reflection
-    c.fillStyle='#65c5db';c.fillRect(-40,-62,38,80);
-    c.fillStyle='#a6efff';c.fillRect(-38,-60,10,76); // Shimmer
-    c.fillStyle='#fff';c.fillRect(-22,-50,4,50);
-    // Clothes hanger rack
-    c.fillStyle='#d4aa7d';c.fillRect(8,-60,34,4);c.fillRect(23,-60,4,80);
-    drawFood(c,'nugget',24,-30,0.55,t);
-    drawFood(c,'pizza',24,5,0.55,t);
-  }
   else if(id==='pets'){
     // Day care enclosure
     box(c,-72,-48,144,82,'#3e6f54');
@@ -360,6 +352,52 @@ export function drawStation(c,s,t,active){
     text(c,'$',0,5,12,'#1a1500');
     c.restore();
     box(c,-48,18,96,16,'#1a2928');
+  }
+  else if(id==='desk'){
+    // Mostrador de registro de socios: recepcionista tecleando, monitor vivo, timbre y carnets
+    box(c,-64,-104,128,24,'#14223a');
+    const neonOn=Math.sin(t*3)>-0.6;
+    text(c,'REGISTRO',0,-86,12,neonOn?'#7dd3fc':'#24425a');
+    c.fillStyle=neonOn?'#38bdf8':'#1a3346';c.fillRect(-58,-82,116,2);
+    // Recepcionista (papas fritas con auriculares) que se balancea mientras escribe
+    const sway=Math.round(Math.sin(t*2)*1.5);
+    drawFood(c,'papas',sway,-42,0.72,0);
+    c.fillStyle='#1f2937';c.fillRect(-17+sway,-70,34,3);c.fillRect(-19+sway,-68,4,12);c.fillRect(15+sway,-68,4,12);
+    c.fillStyle='#38bdf8';c.fillRect(-21+sway,-60,5,7);c.fillRect(16+sway,-60,5,7);
+    c.fillStyle='#e5e7eb';c.fillRect(16+sway,-54,2,8);c.fillRect(8+sway,-47,10,2); // micrófono
+    // Escritorio
+    box(c,-74,-8,148,44,'#7c4a2d');
+    c.fillStyle='#a8683f';c.fillRect(-70,-8,140,6);
+    c.fillStyle='#5b3520';for(let i=0;i<5;i++)c.fillRect(-66+i*30,4,22,2);
+    box(c,-34,12,68,16,'#f4e4c1');text(c,'SOCIOS',0,24,8,'#7c4a2d');
+    // Monitor con datos que se van escribiendo
+    box(c,-66,-40,40,30,'#1e293b');
+    c.fillStyle='#04121a';c.fillRect(-62,-36,32,20);
+    const typed=Math.floor(t*6)%24;
+    c.fillStyle='#4ade80';
+    for(let line=0;line<3;line++){const w=Math.max(0,Math.min(26,typed*3-line*26));if(w)c.fillRect(-60,-33+line*6,w,2);}
+    if(Math.floor(t*3)%2)c.fillRect(-60+Math.min(26,typed*3%27),-21,3,3); // cursor
+    c.fillStyle='#334155';c.fillRect(-50,-10,8,4);
+    // Teclado y manos que tipean
+    c.fillStyle='#cbd5e1';c.fillRect(-20,-14,40,6);
+    c.fillStyle='#94a3b8';for(let k=0;k<6;k++)c.fillRect(-18+k*6,-13,4,2);
+    const tap=Math.floor(t*10)%2;
+    c.fillStyle='#f5c26b';c.fillRect(-14,-18+(tap?2:0),7,5);c.fillRect(7,-18+(tap?0:2),7,5);
+    // Carnets de socio apilados y timbre que suena cada tanto
+    for(let k=0;k<3;k++){c.fillStyle=['#38bdf8','#ffd23f','#ff5c8a'][k];c.fillRect(28+k*2,-16-k*3,22,12);c.fillStyle='#fff';c.fillRect(31+k*2,-13-k*3,8,2);}
+    const ding=(t%4)<0.35;
+    c.fillStyle='#fbbf24';c.fillRect(56,-18-(ding?2:0),12,6);c.fillRect(60,-21-(ding?2:0),4,3);
+    c.fillStyle='#78350f';c.fillRect(54,-12,16,3);
+    if(ding){c.fillStyle='#fff7c2';c.fillRect(52,-30,3,3);c.fillRect(70,-30,3,3);c.fillRect(61,-34,3,3);}
+    // Globito: invita a registrarse cuando no estás cerca
+    if(!active){
+      const float=Math.sin(t*3)*3;
+      c.save();c.translate(-70,-142+float);
+      box(c,0,0,140,26,'#fff7e0');
+      c.fillStyle='#fff7e0';c.fillRect(62,26,10,6);c.fillRect(65,32,4,3);
+      text(c,'¡HACETE SOCIO!',70,17,8,'#1e293b');
+      c.restore();
+    }
   }
   else if(id==='npc'){
     // Señor Domi Chef booth
@@ -474,4 +512,143 @@ export function drawStation(c,s,t,active){
 
   c.restore();
   c.restore();
+}
+
+// Vida del local: todo se dibuja con rectángulos simples (sin sombras difusas) para no pesar
+const CABINETS=[[660,102],[700,102],[1200,102],[1240,102],[760,860],[800,860],[1100,860],[1140,860]];
+const BOOTHS=[[160,500],[160,640],[1680,500],[1680,640]];
+const BULB_COLORS=['#ffe066','#ff3b69','#00e5ff'];
+export function drawLobbyLife(c,t){
+  c.save();
+  // Pantallas de las máquinas arcade: cada una corre su propio "jueguito"
+  CABINETS.forEach(([x,y],i)=>{
+    const k=t*1.6+i*0.9;
+    c.fillStyle='#060d12';c.fillRect(x+4,y+20,24,20);
+    c.fillStyle=['#00ffcc','#ff0066','#ffe066','#38ef7d'][i%4];
+    c.fillRect(x+6+Math.round((Math.sin(k)*0.5+0.5)*16),y+22+Math.round((Math.cos(k*1.3)*0.5+0.5)*13),4,4);
+    c.fillStyle='#ffffff';c.fillRect(x+6+Math.round(((k*6)%18)),y+36,2,2);
+    if(Math.sin(t*9+i*2)>0.92){c.globalAlpha=0.35;c.fillStyle='#ffffff';c.fillRect(x+4,y+20,24,20);c.globalAlpha=1;}
+  });
+  // Foquitos que corren alrededor del cartel DOMI ARCADE
+  const bulbs=40,step=Math.floor(t*10);
+  for(let b=0;b<bulbs;b++){
+    const side=b<15?0:b<20?1:b<35?2:3,u=side===0?b/15:side===1?(b-15)/5:side===2?(b-20)/15:(b-35)/5;
+    const bx=side===0?762+u*396:side===1?1158:side===2?1158-u*396:762,by=side===0?27:side===1?27+u*80:side===2?107:107-u*80;
+    c.fillStyle=(b+step)%3===0?BULB_COLORS[(b+step)%BULB_COLORS.length]:'#3a1c26';
+    c.fillRect(Math.round(bx)-2,Math.round(by)-2,4,4);
+  }
+  // Pulso de luz que recorre la tira de neón de la pared
+  const runX=20+((t*420)%1880);
+  c.globalAlpha=0.85;c.fillStyle='#ffd1e6';c.fillRect(Math.round(runX),148,90,4);
+  c.fillStyle='#d6fbff';c.fillRect(Math.round(1880-((t*360)%1860)),152,70,3);c.globalAlpha=1;
+  // Vapor de los cafés en los reservados
+  BOOTHS.forEach(([x,y],i)=>{
+    for(let s=0;s<3;s++){
+      const p=(t*0.55+s/3+i*0.21)%1;
+      c.globalAlpha=Math.sin(p*Math.PI)*0.45;c.fillStyle='#e8f4ff';
+      c.fillRect(Math.round(x+29+Math.sin(p*6+s)*3),Math.round(y+12-p*26),3,3);
+    }
+  });
+  c.globalAlpha=1;
+  // Luces de boliche girando sobre la alfombra central
+  const dots=['#ff3b69','#00e5ff','#ffe066','#38ef7d','#c084fc'];
+  dots.forEach((col,i)=>{
+    const a=t*0.7+i*Math.PI*2/dots.length;
+    c.globalAlpha=0.16;c.fillStyle=col;
+    c.beginPath();c.ellipse(960+Math.cos(a)*230,540+Math.sin(a*1.3)*120,46,18,0,0,7);c.fill();
+  });
+  c.globalAlpha=1;
+  // Robot barrendero que patrulla el local con su luz que titila
+  const lap=(t*0.045)%1,path=[[560,430],[1360,430],[1360,640],[560,640]];
+  const seg=Math.floor(lap*4),f=lap*4-seg,[ax,ay]=path[seg],[bx2,by2]=path[(seg+1)%4];
+  const rx=Math.round(ax+(bx2-ax)*f),ry=Math.round(ay+(by2-ay)*f);
+  c.fillStyle='rgba(0,0,0,0.35)';c.beginPath();c.ellipse(rx,ry+9,15,5,0,0,7);c.fill();
+  c.fillStyle='#22313b';c.fillRect(rx-13,ry-6,26,14);c.fillStyle='#8fa9b5';c.fillRect(rx-11,ry-8,22,6);
+  c.fillStyle=Math.sin(t*8)>0?'#38ef7d':'#0d3b24';c.fillRect(rx-2,ry-7,4,3);
+  c.fillStyle='#e11d2e';c.fillRect(rx+6,ry-4,3,3);c.fillStyle='#18181b';c.fillRect(rx+7,ry-3,1,1); // sello BC del fabricante del robot
+  c.fillStyle='#ffe066';c.fillRect(rx-9,ry+1,3,2);c.fillRect(rx+6,ry+1,3,2);
+  // Chispitas de limpieza detrás del robot
+  for(let s=1;s<=3;s++){c.globalAlpha=0.5-s*0.13;c.fillStyle='#d6fbff';c.fillRect(rx-(bx2-ax?Math.sign(bx2-ax):0)*s*12-1,ry-(by2-ay?Math.sign(by2-ay):0)*s*12+2,2,2);}
+  c.restore();
+}
+
+// ---------------------------------------------------------------------------
+// Clientes del local (NPCs): caminan rutas fijas, juegan a los arcades y charlan.
+// La posición sale del tiempo (sin estado), así siempre están en movimiento y no cuestan nada.
+// ---------------------------------------------------------------------------
+const NPC_WALKERS = [
+  { kind: 'nugget',   speed: 70, path: [[240, 430], [660, 430], [660, 560], [240, 560]], lines: ['¡Que hambre!', 'Hoy salgo top 10'] },
+  { kind: 'pizza',    speed: 60, path: [[1260, 450], [1700, 450], [1700, 590], [1260, 590]], lines: ['¿Y si pruebo el desierto?', '¡Mozzarella!'] },
+  { kind: 'papas',    speed: 85, path: [[720, 960], [1200, 960]], lines: ['Me faltan puntos...', '¡Vamos turno!'] },
+  { kind: 'empanada', speed: 55, path: [[1240, 360], [1240, 660], [1180, 660], [1180, 360]], lines: ['¿Viste el jefe nuevo?'] },
+];
+const NPC_PLAYERS = [
+  { kind: 'choripan', x: 676, y: 186, lines: ['¡Record!', 'Una ficha mas...'] },
+  { kind: 'nugget',   x: 1216, y: 186, lines: ['¡Dale, dale!'] },
+  { kind: 'pizza',    x: 776, y: 944, lines: ['¡Game over! :('] },
+];
+const NPC_CHAT = [
+  { kind: 'papas', x: 250, y: 660, other: { kind: 'empanada', x: 300, y: 660 }, lines: ['¿Jugaste en la lava?', '¡Todavia no!', 'Dicen que hay un Coloso...'] },
+];
+
+function walkerPosition(npc, t) {
+  const pts = npc.path, closed = pts.length > 2;
+  const segs = closed ? pts.map((p, i) => [p, pts[(i + 1) % pts.length]]) : [[pts[0], pts[1]], [pts[1], pts[0]]];
+  const lengths = segs.map(([a, b]) => Math.hypot(b[0] - a[0], b[1] - a[1]));
+  const total = lengths.reduce((s, l) => s + l, 0);
+  let d = (t * npc.speed) % total;
+  for (let i = 0; i < segs.length; i++) {
+    if (d <= lengths[i]) { const [a, b] = segs[i], k = d / lengths[i]; return { x: a[0] + (b[0] - a[0]) * k, y: a[1] + (b[1] - a[1]) * k }; }
+    d -= lengths[i];
+  }
+  return { x: pts[0][0], y: pts[0][1] };
+}
+
+function speechBubble(c, x, y, line) {
+  c.font = "8px 'Press Start 2P', monospace";
+  const w = Math.ceil(c.measureText(line).width) + 14;
+  c.fillStyle = '#071116'; c.fillRect(Math.round(x - w / 2) - 2, y - 22, w + 4, 22);
+  c.fillStyle = '#fff7e0'; c.fillRect(Math.round(x - w / 2), y - 20, w, 18);
+  c.fillRect(Math.round(x) - 3, y - 2, 6, 4);
+  c.fillStyle = '#1e293b'; c.textAlign = 'center'; c.fillText(line, Math.round(x), y - 7);
+}
+
+// Cada NPC habla de vez en cuando (unos segundos cada tanto, desfasados entre sí)
+function talking(t, seed, lines) {
+  const cycle = 9, phase = (t + seed * 3.7) % cycle;
+  return phase < 2.6 ? lines[Math.floor((t + seed * 3.7) / cycle) % lines.length] : null;
+}
+
+function npcBody(c, kind, x, y, t, moving) {
+  c.fillStyle = 'rgba(0,0,0,0.35)'; c.beginPath(); c.ellipse(x, y + 22, 18, 6, 0, 0, 7); c.fill();
+  drawFood(c, kind, x, y, 0.62, moving ? t : 0);
+}
+
+export function lobbyNpcLayers(c, t) {
+  const layers = [];
+  NPC_WALKERS.forEach((npc, i) => {
+    const p = walkerPosition(npc, t);
+    layers.push({ y: p.y + 24, draw: () => {
+      npcBody(c, npc.kind, p.x, p.y, t + i, true);
+      const line = talking(t, i, npc.lines); if (line) speechBubble(c, p.x, p.y - 26, line);
+    } });
+  });
+  NPC_PLAYERS.forEach((npc, i) => {
+    layers.push({ y: npc.y + 24, draw: () => {
+      // Se balancea frente a la máquina como si apretara botones
+      const jiggle = Math.round(Math.sin(t * 14 + i) * 1.5);
+      npcBody(c, npc.kind, npc.x + jiggle, npc.y, 0, false);
+      const line = talking(t, i + 5, npc.lines); if (line) speechBubble(c, npc.x, npc.y - 26, line);
+    } });
+  });
+  NPC_CHAT.forEach((npc, i) => {
+    layers.push({ y: npc.y + 24, draw: () => {
+      const nod = Math.sin(t * 3) > 0.6 ? -2 : 0;
+      npcBody(c, npc.kind, npc.x, npc.y + nod, 0, false);
+      npcBody(c, npc.other.kind, npc.other.x, npc.other.y - nod, 0, false);
+      const step = Math.floor(t / 3) % npc.lines.length;
+      if ((t % 3) < 2.3) speechBubble(c, step % 2 ? npc.other.x : npc.x, npc.y - 26, npc.lines[step]);
+    } });
+  });
+  return layers;
 }

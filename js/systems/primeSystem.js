@@ -1,9 +1,9 @@
 import {Projectile} from '../entities/Projectile.js';
 import {drawFood} from '../core/art.js';
 export const primes=[
-  {key:'q',level:5,name:'Rafaga 360',cooldown:18,symbol:'✳'},
-  {key:'e',level:10,name:'Doble señuelo',cooldown:28,symbol:'◈'},
-  {key:'r',level:15,name:'Campana blindada',cooldown:40,symbol:'⬡'},
+  {key:'q',level:5,name:'Rafaga 360',cooldown:18,symbol:'✳',info:'Dispara 20 proyectiles en círculo a tu alrededor. Ideal cuando te rodean.'},
+  {key:'e',level:10,name:'Doble señuelo',cooldown:28,symbol:'◈',info:'Suelta un clon que corre hacia el borde del mapa y se lleva a los enemigos detrás.'},
+  {key:'r',level:15,name:'Campana blindada',cooldown:40,symbol:'⬡',info:'Te cubre con un escudo 3,5 segundos: no recibís daño y empujás a los que están cerca.'},
 ];
 export function updatePrimes(state,dt){
   for(const prime of primes)state.primeCooldowns[prime.key]=Math.max(0,(state.primeCooldowns[prime.key]||0)-dt);
@@ -57,14 +57,16 @@ export function activatePrime(state,key){const prime=primes.find(p=>p.key===key)
 export function drawPrimeEffects(ctx,state){
   if(state.decoy){
     ctx.save();
+    // Aura celeste del señuelo con círculos translúcidos (sin shadowBlur)
+    ctx.fillStyle = '#38bdf8';
+    ctx.globalAlpha = 0.12; ctx.beginPath(); ctx.arc(state.decoy.x, state.decoy.y - 4, 38, 0, Math.PI * 2); ctx.fill();
+    ctx.globalAlpha = 0.18; ctx.beginPath(); ctx.arc(state.decoy.x, state.decoy.y - 4, 28, 0, Math.PI * 2); ctx.fill();
     ctx.globalAlpha = 0.85;
-    ctx.shadowColor = '#38bdf8';
-    ctx.shadowBlur = 12;
     drawFood(ctx, state.decoy.skin, state.decoy.x, state.decoy.y, 0.95, state.time);
     ctx.restore();
     if(false && state.rings && (Math.sin(state.time * 6) > 0.85)){
       state.rings.push({x: state.decoy.x, y: state.decoy.y, radius: 26, life: 0.35, color: '#38bdf8'});
     }
   }
-  if(state.player.shieldTime>0){ctx.save();ctx.strokeStyle='#95f7e9';ctx.lineWidth=4;ctx.shadowColor='#95f7e9';ctx.shadowBlur=14;ctx.beginPath();ctx.arc(state.player.x,state.player.y,32+Math.sin(state.time*8)*2,0,7);ctx.stroke();ctx.restore();}
+  if(state.player.shieldTime>0){ctx.save();ctx.strokeStyle='#95f7e9';ctx.beginPath();ctx.arc(state.player.x,state.player.y,32+Math.sin(state.time*8)*2,0,7);ctx.globalAlpha=.3;ctx.lineWidth=12;ctx.stroke();ctx.globalAlpha=1;ctx.lineWidth=4;ctx.stroke();ctx.restore();}
 }

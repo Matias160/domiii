@@ -1,5 +1,5 @@
 import {shopItems,isOwned} from '../data/shop.js';
-import {currentAccount,purchase,equip} from '../systems/accountSystem.js';
+import {currentAccount,purchase,equip,isGuest} from '../systems/accountSystem.js';
 import {drawItemPreview} from '../core/presentation.js';
 import {skins} from '../data/skins.js';
 import {icon} from './icons.js';
@@ -110,6 +110,22 @@ export class Shop{
       for(const [label,value] of [['VIDA',skin.maxHp],['VELOCIDAD',skin.speed],['DEFENSA',skin.defense.toFixed(2)],['DAÑO',`${Math.round(skin.damageMultiplier*100)}%`],['PROYECTILES',`+${skin.extraProjectiles}`]]){const stat=node('span','');stat.append(node('small','',label),node('b','',String(value)));stats.append(stat);}body.append(stats);
     }
     if(item.type==='pet')body.append(node('p','pet-function',`FUNCIÓN · ${companions[item.id].detail}`));
+    if(isGuest() && (item.type==='accessory' || item.type==='pet')){
+      const locked=node('div','detail-action');
+      locked.append(node('p','purchase-explainer','Los accesorios y mascotas son exclusivos para socios registrados. Registrate en el mostrador para desbloquearlos y equiparlos.'));
+      const regBtn=node('button','pixel-button purchase-button arcade-action');
+      regBtn.type='button';
+      regBtn.innerHTML=icon('UserRound');
+      const copy=node('span','purchase-copy');
+      copy.append(node('span','purchase-label','IR A REGISTRO'),node('small','purchase-price','CREAR CARNET'));
+      regBtn.append(copy);
+      regBtn.onclick=()=>{
+        this.game.audio?.play?.('navigate');
+        this.game.openRegistration();
+      };
+      locked.append(regBtn);
+      root.append(top,stage,body,locked);drawItemPreview(canvas,item,profile);return;
+    }
     if(!owned&&item.domiExclusive){
       const action=node('div','detail-action');
       action.append(node('p','purchase-explainer',isMysteryLava?'??? · Completá todas las misiones del Señor Domi para revelar este secreto.':'Reliquia exclusiva del Señor Domi. Completá sus misiones para desbloquearla.'));

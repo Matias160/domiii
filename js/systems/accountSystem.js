@@ -48,23 +48,24 @@ function sha256Sync(ascii) {
   return result;
 }
 
-function all(){
+const LOGIN_ERROR='Usuario o contraseña incorrectos. Revisá mayúsculas o hacé clic en "Restablecer clave".';
+const READ_ERROR='No se pudo leer los datos guardados de las cuentas. No se modificaron para no perderlos.';
+const WRITE_ERROR='No se pudo guardar en este navegador. Revisá el espacio disponible o salí del modo privado.';
+// strict: antes de escribir, nunca tratar datos dañados o ilegibles como "vacío" (evita sobrescribirlos)
+function all(strict=false){
+  const empty=()=>{if(strict)throw Error(READ_ERROR);return Object.create(null);};
   let raw = null;
-  try{raw=localStorage.getItem(KEY);}catch{throw Error('No se pudo leer el almacenamiento local.');}
-  if(!raw)return Object.create(null);
+  try{raw=localStorage.getItem(KEY);}catch{return empty();}
+  if(raw===null||raw===undefined||raw==='')return Object.create(null);
   try{
     const data=JSON.parse(raw);
-    if(!data||typeof data!=='object'||Array.isArray(data))throw Error('No se pudo leer datos de cuentas.');
+    if(!data||typeof data!=='object'||Array.isArray(data))return empty();
     return Object.assign(Object.create(null),data);
-  }catch(e){
-    if (e.message?.includes('No se pudo leer')) throw e;
-    throw Error('No se pudo leer los datos guardados.');
+  }catch{
+    return empty();
   }
 }
-function write(data){
-  try{localStorage.setItem(KEY,JSON.stringify(data));}
-  catch(e){throw Error('No se pudo guardar la información de la cuenta.');}
-}
+function write(data){try{localStorage.setItem(KEY,JSON.stringify(data));}catch{throw Error(WRITE_ERROR);}}
 function setSession(id){try{sessionStorage.setItem(SESSION,id);}catch{}}
 function bytesToHex(bytes){return [...bytes].map(x=>x.toString(16).padStart(2,'0')).join('');}
 
@@ -88,11 +89,13 @@ async function digest(password,salt){
 }
 function clean(name){return name.trim().toLocaleLowerCase('es');}
 export function currentAccount(){try{const id=sessionStorage.getItem(SESSION);return id?all()[id]||null:null;}catch{return null;}}
-export function logout(){sessionStorage.removeItem(SESSION);}
+export function logout(){try{sessionStorage.removeItem(SESSION);}catch{}}
+// El invitado es la cuenta compartida 'invitado': no tiene nombre propio ni contraseña
+export function isGuest(){try{return sessionStorage.getItem(SESSION)==='invitado';}catch{return false;}}
 
 export function guestLogin(){
   const id='invitado';
-  const data=all();
+  const data=all(true);
   if(!data[id]){
     data[id]={
       name:'Invitado',
@@ -110,49 +113,32 @@ export function guestLogin(){
   return data[id];
 }
 
-export async function register(name,password){
+export async function register(name, _password = ''){
   name=name.trim();if(!/^[\p{L}\p{N}_ -]{3,16}$/u.test(name))throw Error('Nombre: 3 a 16 letras o números.');
-  if(password.length<6)throw Error('La contraseña necesita al menos 6 caracteres.');
-  const id=clean(name);if(Object.hasOwn(all(),id))throw Error('Ese nombre ya existe. Hacé clic en "Iniciar sesión" o elegí otro nombre.');
-  const salt=getSalt();
-  const hash=await digest(password,salt);
-  const data=all();if(Object.hasOwn(data,id))throw Error('Ese nombre ya existe.');
-  data[id]={name,salt,hash,bank:0,totalEarned:0,purchases:[],loadout:{skin:'pancho',map:'diner',pet:'none',accessory:'none'},runs:[]};
+  const id=clean(name);
+  const data=all(true);
+  if(Object.hasOwn(data,id))throw Error('Ese nombre ya existe. Hacé clic en "Iniciar sesión" o elegí otro nombre.');
+  data[id]={name,salt:'none',hash:'none',bank:0,totalEarned:0,purchases:[],loadout:{skin:'pancho',map:'diner',pet:'none',accessory:'none'},runs:[]};
   write(data);setSession(id);return data[id];
 }
 
-export async function login(name,password){
+export async function login(name, _password = ''){
+  name=name.trim();if(!name)throw Error('Ingresá tu nombre de usuario.');
   const data=all(),id=clean(name),profile=data[id];
   if(!profile){
-    throw Error('Datos incorrectos. Ese usuario no está registrado.');
-  }
-  if(!profile.hash){
-    throw Error('Datos de cuenta dañados. Creá una cuenta nueva o entrá como Invitado.');
-  }
-  let hash='';
-  try { hash=await digest(password,profile.salt||'00'); } catch {}
-  const fallbackH=sha256Sync(password+':'+(profile.salt||'00'));
-  const isMatch=(hash&&hash===profile.hash)||(fallbackH===profile.hash)||(profile.hash==='guest');
-  if(!isMatch){
-    throw Error('Credenciales o contraseña incorrectos. Revisá mayúsculas o hacé clic en "Restablecer clave".');
+    throw Error(`La cuenta "${name}" no existe. Hacé clic en "Crear cuenta" para registrarte.`);
   }
   setSession(id);return profile;
 }
 
-export async function resetPassword(name,newPassword){
+export async function resetPassword(name, _newPassword = ''){
   name=name.trim();
-  const id=clean(name),data=all();
+  const id=clean(name),data=all(true);
   if(!data[id])throw Error(`La cuenta "${name}" no existe.`);
-  if(newPassword.length<6)throw Error('La nueva contraseña necesita al menos 6 caracteres.');
-  const salt=getSalt();
-  const hash=await digest(newPassword,salt);
-  data[id].salt=salt;
-  data[id].hash=hash;
-  write(data);
   setSession(id);
   return data[id];
 }
-function mutate(change){const id=sessionStorage.getItem(SESSION),data=all();if(!id||!data[id])throw Error('Inicia sesión para continuar.');
+function mutate(change){const id=sessionStorage.getItem(SESSION),data=all(true);if(!id||!data[id])throw Error('Inicia sesión para continuar.');
   const result=change(data[id]);write(data);return result;
 }
 export function purchase(type,id){const item=shopItems.find(x=>x.type===type&&x.id===id);if(!item)throw Error('Articulo desconocido.');

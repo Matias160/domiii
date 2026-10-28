@@ -3,12 +3,12 @@ import assert from 'node:assert/strict';
 import { bindAuth } from '../js/ui/authScreen.js';
 import { currentAccount, logout } from '../js/systems/accountSystem.js';
 
-test('registration, duplicate submits, password visibility and login errors work together', async () => {
+test('registration, duplicate submits, passwordless flow and login errors work together', async () => {
   const previousDocument = globalThis.document;
   const elements = new Map();
   const element = () => ({
-    value: '', type: 'password', hidden: true, disabled: false, readOnly: false,
-    attributes: {}, handlers: {}, textContent: '',
+    value: '', type: 'text', hidden: true, disabled: false, readOnly: false,
+    attributes: {}, handlers: {}, textContent: '', className: '',
     addEventListener(type, callback) { this.handlers[type] = callback; },
     setAttribute(key, value) { this.attributes[key] = value; },
     focus() { this.focused = true; },
@@ -29,34 +29,24 @@ test('registration, duplicate submits, password visibility and login errors work
   try {
     bindAuth({ menu: { prepareAccount() {} }, showScreen: screen => screens.push(screen) });
     get('authSwitch').fire('click');
-    assert.equal(get('authPassword').autocomplete, 'new-password');
     assert.equal(get('authNameHint').hidden, false);
     get('authName').value = 'PruebaUI';
-    get('authPassword').value = 'claveDePrueba';
-    get('authPasswordToggle').fire('click');
-    assert.equal(get('authPassword').type, 'text');
-    get('authPassword').fire('keydown', { getModifierState: () => true });
-    assert.equal(get('authCapsLock').hidden, false);
 
     const pending = get('authForm').fire('submit');
     assert.equal(get('authSubmit').disabled, true);
     assert.equal(get('authName').readOnly, true);
-    get('authSwitch').fire('click');
-    await get('authForm').fire('submit');
     await pending;
+
     assert.deepEqual(screens, ['onboardingScreen']);
     assert.equal(currentAccount().name, 'PruebaUI');
-    assert.equal(get('authPassword').value, '');
-    assert.equal(get('authPassword').type, 'password');
     assert.equal(get('authSubmit').disabled, false);
 
     logout();
     get('authSwitch').fire('click');
-    assert.equal(get('authPassword').autocomplete, 'current-password');
-    get('authPassword').value = 'incorrecta';
+    get('authName').value = 'NoExiste';
     await get('authForm').fire('submit');
     assert.equal(currentAccount(), null);
-    assert.match(get('authError').textContent, /incorrect/i);
+    assert.match(get('authError').textContent, /no existe/i);
     assert.equal(get('authError').hidden, false);
     assert.equal(get('authError').focused, true);
     assert.equal(get('authSubmit').disabled, false);

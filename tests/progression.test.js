@@ -16,8 +16,8 @@ test('local profiles isolate points, purchases and run rewards',async()=>{
   assert.equal(currentAccount().loadout.skin,'nugget');
   logout();await register('CuentaDos','clave456');assert.equal(currentAccount().bank,0);
   assert.equal(currentAccount().purchases.length,0);
-  logout();await assert.rejects(login('CuentaUno','incorrecta'));
-  await login('CuentaUno','clave123');assert.equal(currentAccount().bank,550);
+  logout();await assert.rejects(login('CuentaInexistente'));
+  await login('CuentaUno');assert.equal(currentAccount().bank,550);
 });
 
 test('primes unlock at levels 10, 20 and 30 with cooldowns',()=>{

@@ -7,7 +7,7 @@ export const rarities = {
 
 export const abilities = [
   { id:'extraShot',name:'Pedido doble',category:'Ataque',rarity:'legendary',description:'Dispara +2 proyectiles adicionales en abanico.',maxStacks:3,apply:player=>{player.extraProjectiles+=2;} },
-  { id:'mustardRain',name:'Lluvia de mostaza',category:'Especial',rarity:'legendary',description:'Cada 5 segundos, bombardea de 3 a 5 enemigos con 28 a 84 de daño.',maxStacks:3,apply:player=>{player.mustardLevel+=1;} },
+  { id:'mustardRain',name:'Lluvia de mostaza',category:'Especial',rarity:'legendary',description:'Cada 8 segundos caen 7 gotas de mostaza (+2 por nivel): explotan en área, frenan y dejan charcos que queman.',maxStacks:3,apply:player=>{player.mustardLevel+=1;} },
   { id:'hotSauce',name:'Salsa picante',category:'Ataque',rarity:'epic',description:'Multiplica el daño de proyectiles un +50%.',maxStacks:5,apply:player=>{player.damageMultiplier*=1.5;} },
   { id:'deathBlast',name:'Salchicha explosiva',category:'Especial',rarity:'epic',description:'Los enemigos derrotados estallan: 40 de daño en área.',maxStacks:3,apply:player=>{player.explosionDamage+=40;} },
   { id:'armor',name:'Pan más duro',category:'Defensa',rarity:'epic',description:'Reduce todo el daño recibido un 35%.',maxStacks:3,apply:player=>{player.defense*=1.35;} },

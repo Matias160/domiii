@@ -121,10 +121,6 @@ export class Player {
     ctx.beginPath();ctx.ellipse(this.x,this.y+18,27,10,0,0,7);ctx.stroke();
     const bob = Math.round(Math.sin(this.walkTime * 7 + this.x * .05) * 1.5);
     ctx.save();
-    if (this.inLavaMap) {
-      ctx.shadowColor = '#ff4500';
-      ctx.shadowBlur = 14;
-    }
     drawAccessory(ctx, this.accessory, this.x, this.y + bob, 0.85, 'back');
     drawFood(ctx, this.skin.id, this.x, this.y, 0.85, this.walkTime);
     drawAccessory(ctx, this.accessory, this.x, this.y + bob, 0.85, 'front');
@@ -145,7 +141,7 @@ export class Player {
     if(this.muzzleTime>0&&(this.weapon.id==='fork'||this.weapon.id==='skewer')){
       ctx.save();ctx.translate(this.x,this.y);ctx.rotate(this.aimAngle);ctx.globalAlpha=Math.min(1,this.muzzleTime/.06);
       const slash=ctx.createRadialGradient(0,0,8,0,0,52);slash.addColorStop(0,'#ffffff00');slash.addColorStop(.55,this.weapon.color+'dd');slash.addColorStop(1,'#ffffff00');
-      ctx.strokeStyle=slash;ctx.shadowColor=this.weapon.color;ctx.shadowBlur=12;ctx.lineWidth=9;ctx.beginPath();ctx.arc(0,0,43,-.72,.72);ctx.stroke();ctx.restore();
+      ctx.beginPath();ctx.arc(0,0,43,-.72,.72);ctx.strokeStyle=this.weapon.color+'44';ctx.lineWidth=17;ctx.stroke();ctx.strokeStyle=slash;ctx.lineWidth=9;ctx.stroke();ctx.restore();
     }
     if(this.muzzleTime>0){
       ctx.translate(this.x+Math.cos(this.aimAngle)*30,this.y+Math.sin(this.aimAngle)*24);ctx.rotate(this.aimAngle);

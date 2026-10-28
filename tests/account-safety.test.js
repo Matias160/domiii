@@ -52,9 +52,8 @@ test('storage failures produce actionable messages and allow the login screen to
 
 test('invalid credentials never start a session', async () => {
   resetStorage();
-  await register('Pancho', 'prueba123');
+  await register('Pancho');
   logout();
-  await assert.rejects(login('Pancho', 'incorrecta'), /incorrectos/);
-  await assert.rejects(login('NoExiste', 'prueba123'), /incorrectos/);
+  await assert.rejects(login('NoExiste'), /no existe/i);
   assert.equal(currentAccount(), null);
 });

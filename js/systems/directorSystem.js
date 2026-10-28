@@ -1,6 +1,8 @@
 import { spawnItem } from './itemSystem.js';
 
-export const RUSH_BOSS_GOAL = 10;
+export const RUSH_BOSS_GOAL = 3;
+// Respiro mínimo entre que cae un jefe y aparece el siguiente (segundos de juego)
+export const BOSS_GAP = 35;
 
 export const modes = {
   survival: { name: 'Supervivencia', goal: 'Aguanta el ultimo turno' },

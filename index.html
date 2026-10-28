@@ -6,6 +6,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <title>DOMI 2: PANCHO</title>
+    <link rel="icon" href="data:," />
     <meta name="theme-color" content="#0c1013" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -16,38 +17,63 @@
     <link rel="stylesheet" href="./css/gameplay.css" />
     <link rel="stylesheet" href="./css/interface.css" />
     <link rel="stylesheet" href="./css/mobile.css" />
-    <link rel="stylesheet" href="./css/final.css" />
+    <!-- Última: su Ñ tiene que declararse después de Press Start 2P para ganarle solo en esa letra -->
+    <link rel="stylesheet" href="./css/enye-font.css" />
   </head>
   <body>
     <main id="app" class="app">
+      <!-- Presentación al abrir el juego (se ve desde el primer instante, sin parpadeo del login) -->
+      <div id="splashScreen" class="splash-screen" role="img" aria-label="PanchOS por BurgosCorp presentan DOMI 2: Pancho">
+        <div class="splash-stage" id="splashStage">
+          <canvas id="splashCanvas" width="320" height="180"></canvas>
+          <!-- Marca BurgosCorp: el mismo isologo y tipografías del proyecto RN3 (BrandLogo.tsx), sin pixel art -->
+          <div class="splash-burgos" aria-hidden="true">
+            <svg class="splash-burgos__logo" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+              <defs>
+                <linearGradient id="bcShieldSplash" x1="0" y1="0" x2="1" y2="1">
+                  <stop offset="0" stop-color="#2e2e33" />
+                  <stop offset="1" stop-color="#050505" />
+                </linearGradient>
+              </defs>
+              <path class="splash-burgos__shield" d="M24 2 43 9v14c0 11.5-8 19.8-19 23C13 42.8 5 34.5 5 23V9Z" fill="url(#bcShieldSplash)" />
+              <path class="splash-burgos__border" pathLength="1" d="M24 5.5 40 11.4V23c0 9.7-6.6 16.8-16 19.8C14.6 39.8 8 32.7 8 23V11.4Z" fill="none" stroke="#e11d2e" stroke-width="1.75" />
+              <text class="splash-burgos__monogram" x="24" y="30" text-anchor="middle" font-family="Georgia" font-size="17" font-weight="700" fill="#ffffff">BC</text>
+            </svg>
+            <div class="splash-burgos__name">Burgos<span class="splash-burgos__corp">Corp</span></div>
+          </div>
+        </div>
+        <p class="splash-skip" aria-hidden="true">CLIC O CUALQUIER TECLA PARA SALTAR</p>
+      </div>
       <canvas id="gameCanvas" width="960" height="540" aria-label="DOMI 2: PANCHO"></canvas>
 
-      <section id="authScreen" class="screen screen--active auth-screen">
+      <section id="authScreen" class="screen auth-screen">
         <div class="auth-brand"><span>DOMI <b>2</b></span><strong>PANCHO</strong><small>ARCADE CLUB / TU TURNO EMPIEZA ACÁ</small><p class="auth-intro">Sobreviví al turno. Armá tu combo.</p></div>
         <form id="authForm" class="auth-panel screen__panel">
           <p class="eyebrow">TARJETA DE SOCIO</p>
           <h2 id="authTitle">Entrá al club</h2>
-          <label class="field" for="authName">Usuario<input id="authName" name="username" autocomplete="username" autocapitalize="none" spellcheck="false" minlength="3" maxlength="16" aria-describedby="authNameHint" required /></label>
+          <label class="field" for="authName">Nombre de socio
+            <input id="authName" name="username" autocomplete="username" autocapitalize="none" spellcheck="false" minlength="3" maxlength="16" aria-describedby="authNameHint" placeholder="Elegí tu nombre..." required />
+          </label>
           <p id="authNameHint" class="field-hint" hidden>De 3 a 16 caracteres. Letras, números o espacios.</p>
-          <div class="field"><label for="authPassword">Contraseña</label><div class="password-field"><input id="authPassword" name="password" type="password" autocomplete="current-password" minlength="6" aria-describedby="authPasswordHint authCapsLock" required /><button id="authPasswordToggle" class="password-toggle" type="button" aria-controls="authPassword" aria-label="Mostrar contraseña" aria-pressed="false">Mostrar</button></div></div>
-          <p id="authPasswordHint" class="field-hint" hidden>Mínimo 6 caracteres.</p>
-          <p id="authCapsLock" class="field-hint caps-lock" role="status" hidden>Bloq Mayús está activado.</p>
           <p id="authError" class="form-error" role="alert" tabindex="-1" hidden></p>
           <button class="pixel-button" type="submit" id="authSubmit">ENTRAR</button>
-          <button class="pixel-button pixel-button--guest" type="button" id="authGuest">JUGAR COMO INVITADO</button>
+          <button class="pixel-button pixel-button--guest" type="button" id="authGuest">VOLVER AL LOCAL COMO INVITADO</button>
           <div class="auth-links">
             <button class="text-button" type="button" id="authSwitch">Crear cuenta</button>
-            <button class="text-button" type="button" id="authReset">Recuperar clave</button>
           </div>
           <small class="save-note">El progreso queda guardado en este navegador.</small>
         </form>
       </section>
 
-      <!-- Pantalla de Introducción / Presentación del Club Domi -->
+      <!-- Pantalla de Introducción / Bienvenida -->
       <section id="onboardingScreen" class="screen onboarding-screen" aria-labelledby="onboardingTitle">
         <div class="screen__panel onboarding-panel">
           <p class="eyebrow"><i data-lucide="sparkles"></i> BIENVENIDO AL TURNO</p>
-          <h2 id="onboardingTitle">DOMI 2: PANCHO</h2>
+          <h2 id="onboardingTitle">HOLA, <span id="onboardingUserName">PANCHO</span></h2>
+          <div id="onboardingStatusBox" class="onboarding-status-box">
+            <span id="onboardingStatusBadge" class="onboarding-status-badge">✓ SOCIO REGISTRADO CON ÉXITO</span>
+            <span id="onboardingStatusDesc" class="onboarding-status-desc">Tu tarjeta de socio está lista. Tu progreso y monedas quedan guardados en este navegador.</span>
+          </div>
           <p class="onboarding-subtitle">Guía rápida para sobrevivir y dominar el mostrador.</p>
 
           <div class="onboarding-cards">
@@ -92,7 +118,7 @@
       </section>
 
       <section id="lobbyScreen" class="screen lobby-screen">
-        <header class="lobby-header"><span class="brand-mark">D<span>2</span></span><div><strong id="lobbyWelcome">PANCHO</strong><small>SOCIO DEL CLUB / EN EL LOCAL</small></div><span class="wallet"><i data-lucide="coins"></i><b id="lobbyBank">0</b><small>PT</small></span><button id="lobbyAchievements" class="lobby-achievements" title="Ver logros" aria-label="Ver logros y progreso"><i data-lucide="trophy"></i><span>LOGROS <b id="lobbyAchievementCount">0 / 6</b></span></button><button id="lobbyHelp" class="icon-button" title="Guía y Presentación" aria-label="Ver guía del juego"><i data-lucide="help-circle"></i></button><button id="lobbyOptions" class="icon-button" title="Opciones" aria-label="Opciones"><i data-lucide="settings-2"></i></button><button id="logoutButton" class="icon-button" title="Cerrar sesion" aria-label="Cerrar sesion"><i data-lucide="log-out"></i></button></header>
+        <header class="lobby-header"><span class="brand-mark">D<span>2</span></span><div><strong id="lobbyWelcome">PANCHO</strong><small id="lobbyRole">SOCIO DEL CLUB / EN EL LOCAL</small></div><span class="wallet"><i data-lucide="coins"></i><b id="lobbyBank">0</b><small>PT</small></span><button id="lobbyAchievements" class="lobby-achievements" title="Ver logros" aria-label="Ver logros y progreso"><i data-lucide="trophy"></i><span>LOGROS <b id="lobbyAchievementCount">0 / 6</b></span></button><button id="lobbyRegister" class="lobby-achievements lobby-register" title="Registro de socios" aria-label="Ir al registro de socios"><i data-lucide="user-plus"></i><span>REGISTRO</span></button><button id="lobbyHelp" class="icon-button" title="Guía y Presentación" aria-label="Ver guía del juego"><i data-lucide="help-circle"></i></button><button id="lobbyOptions" class="icon-button" title="Opciones" aria-label="Opciones"><i data-lucide="settings-2"></i></button><button id="logoutButton" class="icon-button" title="Cerrar sesion" aria-label="Cerrar sesion"><i data-lucide="log-out"></i></button></header>
         <div class="lobby-stage"><canvas id="lobbyCanvas" width="960" height="540" aria-label="Lobby interactivo"></canvas><p class="lobby-controls"><kbd>WASD</kbd> / flechas: moverte <span>·</span> <kbd>E</kbd>: interactuar <span>·</span> También podés hacer clic en los lugares.</p><div class="lobby-tip" id="lobbyTip" hidden></div></div>
       </section>
 
@@ -409,7 +435,7 @@
 
       <section id="rankingScreen" class="screen">
         <div class="screen__panel">
-          <h2>Ranking</h2>
+          <h2>Top 10</h2>
           <ol id="rankingList" class="ranking-list"></ol>
           <div class="menu-actions">
             <button id="rankingBackButton" class="pixel-button">Volver</button>
@@ -465,6 +491,15 @@
               <img id="victoryGif" src="./final.gif" alt="¡Ganaste! Victoria Final" class="victory-gif" />
             </div>
           </div>
+          <form id="topTenEntry" class="topten-entry" hidden autocomplete="off" novalidate>
+            <p class="topten-title">¡ENTRASTE AL TOP 10!</p>
+            <label for="topTenName" class="topten-label">Escribí tu nombre de arcade (hasta 5 letras)</label>
+            <div class="topten-row">
+              <input id="topTenName" class="topten-input" maxlength="5" spellcheck="false" autocapitalize="characters" inputmode="text" aria-describedby="topTenStatus" />
+              <button id="topTenSave" type="submit" class="pixel-button pixel-button--green">GUARDAR</button>
+            </div>
+            <p id="topTenStatus" class="topten-status" role="status"></p>
+          </form>
           <div id="gameOverStats" class="stats"></div>
           <div id="newAchievements" class="result-achievements"></div>
           <div class="menu-actions">
@@ -478,13 +513,28 @@
         <div class="screen__panel ability-panel">
           <p class="eyebrow">Nuevo nivel</p>
           <h2 id="abilityTitle">Elegi una mejora</h2>
-          <p class="ability-help">Presioná la tecla o hacé clic. El turno sigue.</p>
-          <div class="ability-timer"><div id="abilityTimerFill"></div></div>
+          <p class="ability-help">Partida en pausa. Presioná 1, 2 o 3 o hacé clic en una carta.</p>
           <div id="abilityOptions" class="ability-grid"></div>
         </div>
       </section>
       <aside id="combatRail" class="combat-rail" hidden><div class="rail-brand">D<span>2</span><small>EL ULTIMO TURNO</small></div><div class="rail-section"><span class="rail-label">TU RECETA</span><div id="liveBuild" class="live-build"></div></div><div class="rail-next"><i data-lucide="sparkles"></i><span id="nextPrimeLabel">PRIME EN NIVEL 10</span></div></aside>
 
+      <div id="runTutorial" class="run-tutorial" role="status" aria-live="polite" hidden>
+        <span class="run-tutorial__title">TUTORIAL <b class="run-tutorial__step" id="runTutorialStep">1/2</b></span>
+        <span class="run-tutorial__keys" id="runTutorialKeys" aria-hidden="true"></span>
+        <span class="run-tutorial__text" id="runTutorialText"></span>
+        <span class="run-tutorial__bar" aria-hidden="true"><i id="runTutorialFill"></i></span>
+      </div>
+      <div id="primeIntro" class="prime-intro" role="dialog" aria-modal="true" aria-labelledby="primeIntroName" hidden>
+        <div class="prime-intro__card">
+          <p class="prime-intro__eyebrow">¡NUEVO PODER DESBLOQUEADO!</p>
+          <kbd class="prime-intro__key" id="primeIntroKey">Q</kbd>
+          <h2 id="primeIntroName" class="prime-intro__name">Ráfaga 360</h2>
+          <p id="primeIntroInfo" class="prime-intro__info"></p>
+          <p id="primeIntroHint" class="prime-intro__hint"></p>
+          <button id="primeIntroButton" type="button" class="pixel-button pixel-button--green">¡USARLO AHORA!</button>
+        </div>
+      </div>
       <div id="hud" class="hud" hidden>
         <div class="hud-identity"><canvas id="hudPortrait" width="64" height="64" aria-hidden="true"></canvas><div><strong id="hudName">Pancho</strong><span id="hudWeapon">Tenedor</span><small id="weaponEvolutionStatus">EVOLUCION 1 / 15</small></div></div>
         <div class="hud__bar hud__bar--hp">
@@ -498,9 +548,7 @@
         <div id="hudStats" class="hud__stats"></div>
         <button id="aimButton" class="icon-button" title="Punteria automatica" aria-label="Alternar punteria manual" aria-pressed="false"><i data-lucide="crosshair"></i></button>
         <button id="pauseButton" class="icon-button" title="Pausa (Esc)" aria-label="Pausar partida"><i data-lucide="pause"></i></button>
-        <div id="activeBuffs" class="active-buffs" aria-live="polite"></div>
       </div>
-      <div id="runBar" class="run-bar" hidden><span id="runLocation">LOCAL DOMI</span><span id="comboCount" aria-live="polite">COMBO x1</span><span id="runDifficulty">PICANTE</span></div>
       <button type="button" id="dashControl" class="dash-control prime-slot dash-box-pixel" hidden title="Acelerón (Espacio)" aria-label="Usar acelerón">
         <div class="dash-inner-frame">
           <kbd class="pixel-key dash-key">ESP</kbd>
@@ -522,17 +570,7 @@
         </div>
         <span class="dash-meter"><span class="meter"><i id="dashFill"></i></span></span>
       </button>
-      <aside id="comboMilestones" class="combo-milestones" hidden style="display: none !important;" aria-label="Progresión del combo">
-        <div class="combo-current"><i data-lucide="biceps-flexed" aria-hidden="true"></i><strong id="comboMultiplier">x1.00</strong><span id="comboChain">0 KOs</span></div>
-        <div class="combo-steps"><span data-combo-step="10">x10</span><span data-combo-step="20">x20</span><span data-combo-step="30">x30</span></div>
-      </aside>
-      <div id="lobbyGifPreloads" style="display: none;" aria-hidden="true">
-        <img id="portalGifAsset" src="./portal.gif" alt="" />
-        <img id="copaGifAsset" src="./copa rankin.gif" alt="" />
-      </div>
       <div id="primeBar" class="prime-bar" hidden></div>
-      <div id="bossMeter" class="boss-meter" hidden><span id="bossName">EL REY DEL MOSTRADOR</span><div class="meter"><div id="bossFill" class="meter__fill"></div></div></div>
-      <div id="eventBanner" class="event-banner" hidden><span id="eventName"></span><b id="eventTime"></b></div>
 
       <div id="toast" class="toast" role="status" hidden></div>
 
@@ -564,7 +602,8 @@
       </div>
     </main>
 
-    <script src="./node_modules/lucide/dist/umd/lucide.min.js"></script>
+    <!-- Íconos lucide v0.468.0 (licencia ISC, ver js/vendor/LICENSE-lucide.txt): incluidos en el proyecto, no hace falta npm -->
+    <script src="./js/vendor/lucide.min.js"></script>
     <script type="module" src="./js/main.js"></script>
   </body>
 </html>

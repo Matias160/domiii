@@ -805,3 +805,586 @@
     font-size: 7px !important;
   }
 }
+
+/* ============================================================================
+   PARTIDA A PANTALLA COMPLETA: el canvas ocupa todo el viewport y el HUD flota encima
+   ============================================================================ */
+.app[data-playing="true"] #gameCanvas {
+  inset: 0 !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: contain;
+}
+/* HUD flotante: sin franja de fondo, solo los indicadores sobre el juego */
+.app[data-playing="true"] .hud,
+.app[data-playing="true"] .run-bar {
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+}
+.app[data-playing="true"] .hud { pointer-events: none; }
+.app[data-playing="true"] .hud button,
+.app[data-playing="true"] .hud a { pointer-events: auto; }
+.app[data-playing="true"] .hud__stats {
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+.app[data-playing="true"] .hud,
+.app[data-playing="true"] .run-bar { text-shadow: 2px 2px 0 #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000; }
+
+/* ============================================================================
+   CARTAS DE MEJORA: partida en pausa y tres cartas centradas (estilo pick-a-card)
+   ============================================================================ */
+#abilityScreen.ability-screen {
+  z-index: 45 !important;
+  display: none;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 24px 16px !important;
+  pointer-events: auto !important;
+  background:
+    linear-gradient(rgba(0, 0, 0, 0) 50%, rgba(0, 0, 0, 0.28) 50%),
+    radial-gradient(circle at center, #0f1c21d9 0%, #05090cf2 75%) !important;
+  background-size: 100% 4px, 100% 100% !important;
+  backdrop-filter: none !important;
+}
+#abilityScreen.ability-screen.screen--active { display: flex !important; }
+
+#abilityScreen .ability-panel {
+  width: min(1000px, 100%) !important;
+  max-width: none !important;
+  max-height: 100% !important;
+  overflow: auto !important;
+  margin: auto !important;
+  padding: 0 !important;
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  text-align: center !important;
+}
+#abilityScreen .ability-panel .eyebrow {
+  display: inline-block !important;
+  padding: 6px 10px !important;
+  margin: 0 0 14px !important;
+  font-size: 10px !important;
+  color: #0f1c21 !important;
+  background: #38ef7d !important;
+  box-shadow: 3px 3px 0 #000 !important;
+}
+#abilityScreen #abilityTitle {
+  font-size: clamp(18px, 2.6vw, 28px) !important;
+  color: #ffe066 !important;
+  text-shadow: 3px 3px 0 #000, 0 0 18px rgba(255, 224, 102, 0.35) !important;
+  margin: 0 0 10px !important;
+}
+#abilityScreen .ability-help { margin: 0 0 26px !important; font-size: 9px !important; }
+#abilityScreen .ability-timer { display: none !important; }
+
+#abilityScreen .ability-grid {
+  display: flex !important;
+  flex-direction: row !important;
+  justify-content: center !important;
+  align-items: stretch !important;
+  gap: clamp(12px, 2vw, 26px) !important;
+}
+
+#abilityScreen .ability-card {
+  flex: 1 1 0 !important;
+  max-width: 290px !important;
+  min-width: 0 !important;
+  min-height: 340px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  gap: 12px !important;
+  padding: 58px 18px 22px !important;
+  text-align: center !important;
+  border: 4px solid #20353c !important;
+  border-bottom: 8px solid #000 !important;
+  border-left-width: 4px !important;
+  background:
+    linear-gradient(180deg, var(--card-tint, #00e5ff) 0 6px, transparent 6px),
+    linear-gradient(180deg, #172a31 0%, #0f1c21 100%) !important;
+  box-shadow: 6px 6px 0 #000 !important;
+  animation: ability-card-deal .35s steps(5) both !important;
+}
+#abilityScreen .ability-card:nth-child(1) { --card-tint: #00e5ff; border-color: #00e5ff !important; border-bottom-color: #000 !important; }
+#abilityScreen .ability-card:nth-child(2) { --card-tint: #ffd700; border-color: #ffd700 !important; border-bottom-color: #000 !important; animation-delay: .08s !important; }
+#abilityScreen .ability-card:nth-child(3) { --card-tint: #00ff88; border-color: #00ff88 !important; border-bottom-color: #000 !important; animation-delay: .16s !important; }
+
+#abilityScreen .ability-card:hover,
+#abilityScreen .ability-card:focus-visible {
+  transform: translateY(-10px) !important;
+  background:
+    linear-gradient(180deg, var(--card-tint) 0 6px, transparent 6px),
+    linear-gradient(180deg, #1e3640 0%, #13252b 100%) !important;
+  box-shadow: 8px 10px 0 #000, 0 0 22px var(--card-tint) !important;
+  outline: none !important;
+}
+
+#abilityScreen .choice-key {
+  top: 14px !important;
+  left: 50% !important;
+  right: auto !important;
+  transform: translateX(-50%) !important;
+}
+#abilityScreen .ability-icon {
+  flex-shrink: 0 !important;
+  width: 84px !important;
+  height: 84px !important;
+  font-size: 44px !important;
+  color: var(--card-tint) !important;
+  background: #0a1418 !important;
+  border: 3px solid var(--card-tint) !important;
+  box-shadow: 4px 4px 0 #000, inset 0 0 0 3px #000 !important;
+}
+/* Respaldo si la librería de íconos no está disponible */
+#abilityScreen .ability-icon:empty::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  background: #fff;
+  box-shadow:
+    0px -12px 0 var(--card-tint),
+    0px -6px 0 var(--card-tint),
+    0px 6px 0 var(--card-tint),
+    0px 12px 0 var(--card-tint),
+    -12px 0px 0 var(--card-tint),
+    -6px 0px 0 var(--card-tint),
+    6px 0px 0 var(--card-tint),
+    12px 0px 0 var(--card-tint),
+    -6px -6px 0 #ffffff55,
+    6px -6px 0 #ffffff55,
+    -6px 6px 0 #ffffff55,
+    6px 6px 0 #ffffff55;
+}
+#abilityScreen .ability-icon svg { width: 44px !important; height: 44px !important; }
+#abilityScreen .ability-card__top {
+  width: 100% !important;
+  justify-content: space-between !important;
+  padding: 6px 0 !important;
+  border-top: 2px dashed #2d424b !important;
+  border-bottom: 2px dashed #2d424b !important;
+}
+#abilityScreen .ability-card strong {
+  font-size: clamp(11px, 1.2vw, 14px) !important;
+  color: #fff !important;
+  text-shadow: 2px 2px 0 #000 !important;
+}
+#abilityScreen .ability-card__description { font-size: 9px !important; line-height: 1.8 !important; }
+
+@keyframes ability-card-deal {
+  from { opacity: 0; transform: translateY(60px) scale(.85); }
+  to { opacity: 1; transform: none; }
+}
+
+@media (max-width: 700px) {
+  #abilityScreen .ability-grid { flex-direction: column !important; align-items: center !important; }
+  #abilityScreen .ability-card { flex: 0 0 auto !important; width: 100% !important; max-width: 420px !important; min-height: 0 !important; padding: 50px 14px 16px !important; }
+  #abilityScreen .ability-icon { width: 56px !important; height: 56px !important; }
+  #abilityScreen .ability-icon svg { width: 30px !important; height: 30px !important; }
+}
+@media (prefers-reduced-motion: reduce) {
+  #abilityScreen .ability-card { animation: none !important; }
+  #abilityScreen .ability-card:hover { transform: none !important; }
+}
+
+/* ============================================================================
+   LOBBY A PANTALLA COMPLETA: el local ocupa todo y la cabecera flota encima
+   ============================================================================ */
+#lobbyScreen.lobby-screen.screen--active { display: block !important; padding: 0 !important; }
+#lobbyScreen .lobby-stage { position: absolute !important; inset: 0 !important; }
+#lobbyScreen .lobby-stage canvas { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; }
+#lobbyScreen .lobby-header {
+  position: absolute !important;
+  top: 0; left: 0; right: 0;
+  z-index: 2;
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  text-shadow: 2px 2px 0 #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000;
+}
+/* La app siempre entra justo en la ventana (sin scroll en el local ni en la partida) */
+.app { min-height: 0 !important; height: 100vh; height: 100svh; }
+/* En pantallas angostas el bloque del nombre no debe meterse debajo de la barra de vida */
+@media (max-width: 700px) {
+  .app[data-playing="true"] .hud-identity { min-width: 0 !important; max-width: 100% !important; overflow: hidden; }
+  .app[data-playing="true"] .hud-identity > div { min-width: 0; }
+  .app[data-playing="true"] :is(#hudName, #hudWeapon, #weaponEvolutionStatus) {
+    display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+}
+
+/* ============================================================================
+   CARTELES SIN ENCIMARSE: columna izquierda minimapa -> combo -> evento,
+   barra de jefe arriba al centro y avisos abajo al centro sobre los poderes
+   ============================================================================ */
+.app[data-playing="true"] #comboMilestones {
+  top: calc(var(--minimap-bottom, 210px) + 12px) !important;
+  left: 24px !important;
+}
+.app[data-playing="true"] #eventBanner {
+  top: calc(var(--minimap-bottom, 210px) + 96px) !important;
+  left: 24px !important;
+  max-width: 260px !important;
+}
+.app[data-playing="true"] #toast {
+  top: auto !important;
+  bottom: 104px !important;
+  z-index: 6;
+}
+@media (max-width: 700px) {
+  .app[data-playing="true"] #comboMilestones { left: 8px !important; }
+  .app[data-playing="true"] #eventBanner { top: calc(var(--minimap-bottom, 210px) + 70px) !important; left: 8px !important; }
+  .app[data-playing="true"] #toast { bottom: 80px !important; }
+}
+@media (max-width: 700px) {
+  .app[data-playing="true"] #activeBuffs { top: calc(var(--hud-bottom, 110px) + 6px) !important; }
+  .app[data-playing="true"] #bossMeter { top: calc(var(--hud-bottom, 110px) + 24px) !important; }
+}
+
+/* ============================================================================
+   GAME OVER SIEMPRE ENTERO: el panel ya no recorta arriba/abajo, las estadísticas
+   se compactan y los botones quedan fijos y legibles al pie del panel
+   ============================================================================ */
+#gameOverScreen.screen--active {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 12px !important;
+  overflow: hidden !important;
+}
+#gameOverScreen .screen__panel {
+  width: min(1000px, 100%) !important;
+  max-height: 100% !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  justify-content: flex-start !important;
+  margin: 0 auto !important;
+  padding: 14px 20px 0 !important;
+  scrollbar-width: thin;
+}
+#gameOverScreen .gameover-pixel-banner {
+  flex-shrink: 0;
+  max-width: 100%;
+  margin: 6px 0 6px !important;
+  font-size: clamp(20px, 3.4vw, 40px) !important;
+  overflow-wrap: anywhere;
+}
+#gameOverScreen #gameOverPhrase { margin: 2px 0 6px !important; }
+#gameOverScreen #gameOverStats {
+  grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+  gap: 4px 12px !important;
+  max-width: 920px !important;
+  flex-shrink: 0;
+}
+#gameOverScreen #gameOverStats p { padding: 5px 0 !important; margin: 0 !important; overflow-wrap: anywhere; }
+#gameOverScreen .result-summary { padding: 12px !important; }
+#gameOverScreen .result-summary b { font-size: clamp(16px, 2.2vw, 22px) !important; }
+#gameOverScreen .result-unlock { font-size: 13px !important; margin: 4px 0 0 !important; }
+#gameOverScreen .menu-actions {
+  position: sticky;
+  bottom: 0;
+  z-index: 2;
+  flex-shrink: 0;
+  width: calc(100% + 40px);
+  margin: 10px -20px 0 !important;
+  padding: 12px 16px 14px !important;
+  display: flex !important;
+  flex-wrap: wrap !important;
+  justify-content: center !important;
+  gap: 12px !important;
+  background: linear-gradient(180deg, #0f171ccc 0%, #0f171c 35%) !important;
+  border-top: 2px solid #283e47;
+}
+#gameOverScreen .menu-actions .pixel-button {
+  min-width: 0 !important;
+  max-width: 100%;
+  white-space: normal !important;
+  line-height: 1.4 !important;
+  font-size: 11px !important;
+}
+@media (max-width: 760px) {
+  #gameOverScreen #gameOverStats { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+  #gameOverScreen .screen__panel { padding: 10px 12px 0 !important; }
+  #gameOverScreen .menu-actions { width: calc(100% + 24px); margin: 8px -12px 0 !important; }
+  #gameOverScreen .menu-actions .pixel-button { flex: 1 1 160px; }
+}
+
+/* ============================================================================
+   PAUSA A LA ALTURA DE LA PANTALLA: nunca se desplaza; los botones siempre se ven
+   y solo la lista de la receta (si es larga) tiene su propio desplazamiento
+   ============================================================================ */
+#pauseScreen.screen--active {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 12px !important;
+  overflow: hidden !important;
+}
+#pauseScreen .pause-panel {
+  max-height: 100% !important;
+  height: auto !important;
+  overflow: hidden !important;
+  display: flex !important;
+  flex-direction: column !important;
+  margin: 0 auto !important;
+}
+#pauseScreen .pause-panel > * { flex-shrink: 0; }
+#pauseScreen .pause-columns {
+  flex: 1 1 auto !important;
+  flex-shrink: 1 !important;
+  min-height: 0 !important;
+  overflow: hidden !important;
+}
+#pauseScreen .pause-section {
+  min-height: 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  overflow: hidden !important;
+}
+#pauseScreen .pause-section > * { flex-shrink: 0; }
+#pauseScreen .build-list,
+#pauseScreen .pause-powers {
+  flex: 1 1 auto !important;
+  flex-shrink: 1 !important;
+  min-height: 0 !important;
+  max-height: none !important;
+  overflow-y: auto !important;
+}
+#pauseScreen .menu-actions { margin-top: 10px !important; }
+
+/* Ventanas bajas: todo más compacto para que entre sin desplazar */
+@media (max-height: 720px) {
+  #pauseScreen .pause-panel { padding: 10px 14px !important; gap: 8px !important; }
+  #pauseScreen .pause-header h2, #pauseScreen #pauseTitle { font-size: 16px !important; margin: 0 !important; }
+  #pauseScreen .pause-summary { gap: 6px !important; }
+  #pauseScreen .pause-stat { padding: 6px 8px !important; }
+  #pauseScreen .pause-stat strong { font-size: 14px !important; }
+  #pauseScreen .pause-objective { padding: 6px 10px !important; }
+  #pauseScreen .pause-section h3 { margin: 0 0 4px !important; }
+  #pauseScreen .menu-actions { margin-top: 6px !important; }
+  #pauseScreen .menu-actions .pixel-button { min-height: 38px !important; padding: 8px 14px !important; }
+}
+@media (max-height: 560px) {
+  #pauseScreen .pause-objective { display: none !important; }
+  #pauseScreen .pause-emblem { width: 30px !important; height: 30px !important; }
+  #pauseScreen .pause-summary { grid-template-columns: repeat(5, minmax(0, 1fr)) !important; }
+  #pauseScreen .pause-stat span { font-size: 7px !important; }
+}
+
+/* ============================================================================
+   CANVAS DE CARTELES: transparente, sobre el juego y debajo de menús y botones
+   ============================================================================ */
+#hudCanvas { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 2; pointer-events: none; image-rendering: auto; }
+.app:not([data-playing="true"]) #hudCanvas { display: none; }
+.sr-only { position: absolute !important; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+
+/* Selector en dos pasos: sin barra horizontal (los pedestales animados sobresalen unos píxeles) */
+#setupScreen { overflow-x: hidden; }
+
+/* ============================================================================
+   CARTAS DE MEJORA: color por rareza, chispas que suben y un brillo que barre la carta
+   ============================================================================ */
+#abilityScreen .ability-card[data-rarity] { border-color: var(--card-tint) !important; border-bottom-color: #000 !important; overflow: hidden; isolation: isolate; }
+#abilityScreen .ability-card[data-rarity] > :not(.card-fx) { position: relative; z-index: 1; }
+#abilityScreen .ability-card .choice-key { z-index: 2 !important; }
+.card-fx { position: absolute !important; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
+.card-fx::after { /* brillo diagonal que pasa cada tanto */
+  content: ""; position: absolute; top: -20%; bottom: -20%; width: 34%; left: -50%;
+  background: linear-gradient(100deg, transparent, color-mix(in srgb, var(--card-tint) 28%, transparent), transparent);
+  transform: skewX(-18deg); animation: card-shine 3.2s steps(16) infinite;
+}
+.card-fx i {
+  position: absolute; left: var(--x); bottom: -8px; width: var(--size); height: var(--size);
+  background: var(--card-tint); box-shadow: 0 0 0 2px color-mix(in srgb, var(--card-tint) 35%, transparent);
+  opacity: 0; animation: card-spark var(--dur) linear var(--delay) infinite;
+}
+.card-fx i:nth-child(3n) { background: #fff; }
+@keyframes card-spark {
+  0% { transform: translate(0, 0); opacity: 0; }
+  15% { opacity: .9; }
+  70% { opacity: .6; }
+  100% { transform: translate(var(--drift), -360px); opacity: 0; }
+}
+@keyframes card-shine { 0%, 55% { left: -50%; } 100% { left: 130%; } }
+#abilityScreen .ability-card .ability-icon { animation: card-icon-bob 1.6s steps(4) infinite; }
+@keyframes card-icon-bob { 50% { transform: translateY(-4px); } }
+.ability-rarity {
+  margin-top: auto; padding: 4px 8px; font: bold 8px/1 'Press Start 2P', monospace; letter-spacing: 1px;
+  color: #071014; background: var(--card-tint); box-shadow: 3px 3px 0 #000;
+}
+/* Legendarias: rayos de luz girando detrás del ícono */
+#abilityScreen .ability-card[data-rarity="legendary"] .ability-icon::after {
+  content: ""; position: absolute; inset: -26px; z-index: -1;
+  background: repeating-conic-gradient(color-mix(in srgb, var(--card-tint) 45%, transparent) 0 10deg, transparent 10deg 30deg);
+  animation: card-rays 6s linear infinite; border-radius: 50%;
+}
+#abilityScreen .ability-card[data-rarity="legendary"] .ability-icon { position: relative; }
+#abilityScreen .ability-card[data-rarity="legendary"] { box-shadow: 6px 6px 0 #000, 0 0 18px color-mix(in srgb, var(--card-tint) 55%, transparent) !important; }
+@keyframes card-rays { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) {
+  .card-fx, #abilityScreen .ability-card .ability-icon, #abilityScreen .ability-card .ability-icon::after { animation: none !important; }
+  .card-fx i { display: none; }
+}
+
+/* ============================================================================
+   TOP 10: nombre de arcade de 5 letras para invitados (fin de partida)
+   ============================================================================ */
+.topten-entry { display: grid; gap: 8px; justify-items: center; margin: 6px auto 10px; padding: 12px 16px; max-width: 420px; border: 3px solid #ffd23f; background: #1a1606; box-shadow: 4px 4px 0 #000; }
+.topten-entry[hidden] { display: none !important; }
+.topten-title { margin: 0; font: 12px/1.4 'Press Start 2P', monospace; color: #ffd23f; text-shadow: 2px 2px 0 #000; animation: topten-blink 1s steps(2) infinite; }
+.topten-label { font: 9px/1.6 'Press Start 2P', monospace; color: #fff3c4; text-align: center; }
+.topten-row { display: flex; gap: 10px; align-items: center; }
+.topten-input {
+  width: 9.2ch; padding: 6px 4px 8px 12px; font: 22px/1 'Press Start 2P', monospace; letter-spacing: .5ch; text-transform: uppercase;
+  color: #fff; background: #050b10 repeating-linear-gradient(90deg, transparent 0 calc(1.5ch - 4px), #ffd23f calc(1.5ch - 4px) 1.5ch) bottom 4px left 12px / calc(100% - 16px) 3px no-repeat;
+  border: 3px solid #ffd23f; caret-color: #ffd23f;
+}
+.topten-input:focus-visible { outline: 3px solid #fff; outline-offset: 2px; }
+.topten-status { margin: 0; min-height: 1.4em; font: 9px/1.6 'Press Start 2P', monospace; color: #a7f3d0; text-align: center; }
+.topten-entry.is-saved .topten-title { animation: none; color: #4ade80; }
+@keyframes topten-blink { 50% { opacity: .45; } }
+@media (prefers-reduced-motion: reduce) { .topten-title { animation: none; } }
+
+/* Cartas con las puntas redondeadas (también el brillo y el ícono acompañan la curva) */
+#abilityScreen .ability-card { border-radius: 16px !important; }
+#abilityScreen .ability-card .card-fx { border-radius: 12px; }
+#abilityScreen .ability-icon { border-radius: 12px !important; }
+#abilityScreen .ability-rarity, #abilityScreen .choice-key { border-radius: 6px !important; }
+
+/* ============================================================================
+   MINI TUTORIAL DE INICIO (moverse y dash): cartel flotante abajo, no tapa la acción
+   ============================================================================ */
+.run-tutorial {
+  position: absolute; left: 50%; top: 92px; z-index: 12; transform: translateX(-50%);
+  display: flex; align-items: center; gap: 12px; max-width: min(640px, calc(100% - 32px));
+  padding: 10px 16px; border: 3px solid #4df8dc; border-radius: 10px; background: #081a1fe8;
+  box-shadow: 4px 4px 0 #000, 0 0 18px #4df8dc44; pointer-events: none;
+  animation: tutorial-pop .3s steps(4) both;
+}
+.run-tutorial[hidden] { display: none; }
+.run-tutorial[data-step="dash"] { border-color: #ffd23f; box-shadow: 4px 4px 0 #000, 0 0 18px #ffd23f44; }
+.run-tutorial[data-step="done"] { border-color: #4ade80; }
+.run-tutorial__step { font: 10px/1 'Press Start 2P', monospace; color: #071014; background: #4df8dc; padding: 5px 6px; border-radius: 4px; }
+.run-tutorial[data-step="dash"] .run-tutorial__step { background: #ffd23f; }
+.run-tutorial[data-step="done"] .run-tutorial__step { background: #4ade80; }
+.run-tutorial__keys { display: flex; gap: 4px; }
+.run-tutorial__keys kbd { animation: tutorial-key 1.2s steps(2) infinite; }
+.run-tutorial__keys kbd:nth-child(2) { animation-delay: .3s; } .run-tutorial__keys kbd:nth-child(3) { animation-delay: .6s; } .run-tutorial__keys kbd:nth-child(4) { animation-delay: .9s; }
+.run-tutorial__text { font: 9px/1.7 'Press Start 2P', monospace; color: #eafff9; }
+@keyframes tutorial-pop { from { opacity: 0; transform: translate(-50%, -20px); } }
+@keyframes tutorial-key { 50% { transform: translateY(2px); filter: brightness(1.4); } }
+
+/* ============================================================================
+   ANUNCIO DE PODER NUEVO: la partida queda en pausa hasta que lo usás
+   ============================================================================ */
+.prime-intro { position: absolute; inset: 0; z-index: 40; display: grid; place-items: center; background: #02080bcc; }
+.prime-intro[hidden] { display: none; }
+.prime-intro__card {
+  display: grid; justify-items: center; gap: 12px; width: min(440px, calc(100% - 32px)); padding: 22px 22px 20px;
+  text-align: center; border: 4px solid #ffd23f; border-radius: 16px; background: linear-gradient(180deg, #1d2a14, #0d160c);
+  box-shadow: 6px 6px 0 #000, 0 0 32px #ffd23f55; animation: ability-card-deal .35s steps(5) both;
+}
+.prime-intro__eyebrow { margin: 0; font: 10px/1.4 'Press Start 2P', monospace; color: #4ade80; animation: topten-blink 1s steps(2) infinite; }
+.prime-intro__key {
+  display: grid; place-items: center; width: 78px; height: 78px; font: 34px/1 'Press Start 2P', monospace; color: #1a1500;
+  background: #ffd23f; border: 4px solid #fff3b0; border-bottom-width: 9px; border-radius: 10px; box-shadow: 4px 4px 0 #000;
+  animation: prime-key-press 1s steps(2) infinite;
+}
+.prime-intro__name { margin: 0; font: 16px/1.4 'Press Start 2P', monospace; color: #fff; text-shadow: 3px 3px 0 #000; }
+.prime-intro__info { margin: 0; font: 10px/1.8 'Press Start 2P', monospace; color: #d9f99d; }
+.prime-intro__hint { margin: 0; font: 9px/1.8 'Press Start 2P', monospace; color: #ffd23f; }
+@keyframes prime-key-press { 50% { transform: translateY(4px); border-bottom-width: 5px; } }
+@media (prefers-reduced-motion: reduce) {
+  .run-tutorial, .run-tutorial__keys kbd, .prime-intro__card, .prime-intro__key, .prime-intro__eyebrow { animation: none !important; }
+}
+
+/* Botón de registro en la cabecera del local (solo invitados) */
+.lobby-register { border-color: #3aa8d8 !important; background: #10283a !important; color: #7dd3fc !important; min-width: 0 !important; }
+.lobby-register[hidden] { display: none !important; }
+.lobby-register > span { font: bold 8px monospace; }
+
+/* Tutorial más visible: tarjeta grande arriba al centro, con título, teclas grandes y barra de progreso */
+.run-tutorial {
+  top: 18% !important; display: grid !important; grid-template-columns: auto; justify-items: center; gap: 12px !important;
+  min-width: min(560px, calc(100% - 32px)); padding: 18px 26px 16px !important; border-width: 4px !important; border-radius: 14px !important;
+  background: #06161bf2 !important; animation: tutorial-pop .3s steps(4) both, tutorial-glow 1.2s steps(2) infinite !important;
+}
+.run-tutorial[hidden] { display: none !important; }
+.run-tutorial__title { display: flex; align-items: center; gap: 10px; font: 12px/1 'Press Start 2P', monospace; color: #4df8dc; letter-spacing: 2px; }
+.run-tutorial[data-step="dash"] .run-tutorial__title { color: #ffd23f; }
+.run-tutorial[data-step="done"] .run-tutorial__title { color: #4ade80; }
+.run-tutorial__step { font: 11px/1 'Press Start 2P', monospace !important; padding: 6px 8px !important; }
+.run-tutorial__keys { gap: 8px !important; }
+.run-tutorial__keys kbd { min-width: 44px; height: 44px; display: grid; place-items: center; padding: 0 10px; font: 14px/1 'Press Start 2P', monospace; border-radius: 8px; }
+.run-tutorial__text { font: 12px/1.7 'Press Start 2P', monospace !important; text-align: center; color: #ffffff !important; text-shadow: 2px 2px 0 #000; }
+.run-tutorial__bar { width: 100%; height: 8px; background: #0f2b31; border: 2px solid #000; border-radius: 4px; overflow: hidden; }
+.run-tutorial__bar i { display: block; height: 100%; width: 0; background: #4df8dc; transition: width .12s steps(3); }
+.run-tutorial[data-step="dash"] .run-tutorial__bar i { background: #ffd23f; }
+.run-tutorial[data-step="done"] .run-tutorial__bar i { background: #4ade80; }
+@keyframes tutorial-glow { 50% { box-shadow: 4px 4px 0 #000, 0 0 30px currentColor; } }
+.run-tutorial { color: #4df8dc; }
+.run-tutorial[data-step="dash"] { color: #ffd23f; }
+.run-tutorial[data-step="done"] { color: #4ade80; }
+/* Pantallas bajas: tarjeta compacta pegada al HUD para no tapar al jugador (que está en el centro) */
+@media (max-height: 700px) {
+  .run-tutorial { top: 70px !important; gap: 6px !important; padding: 8px 14px 10px !important; }
+  .run-tutorial__keys kbd { min-width: 32px; height: 32px; font-size: 11px; }
+  .run-tutorial__text { font-size: 9px !important; }
+}
+@media (prefers-reduced-motion: reduce) { .run-tutorial { animation: none !important; } }
+
+/* ============================================================================
+   PRESENTACIÓN AL ABRIR: PanchOS x BurgosCorp (lienzo pixel art a pantalla completa)
+   ============================================================================ */
+.splash-screen { position: fixed; inset: 0; z-index: 100000; display: grid; place-items: center; background: #05070c; cursor: pointer; transition: opacity .35s steps(5); }
+.splash-screen[hidden] { display: none; }
+.splash-screen.splash--out { opacity: 0; pointer-events: none; }
+.splash-screen canvas { image-rendering: pixelated; image-rendering: crisp-edges; max-width: 100vw; max-height: 100vh; }
+.splash-skip { position: absolute; bottom: 14px; left: 0; right: 0; margin: 0; text-align: center; font: 8px/1 'Press Start 2P', monospace; color: #5b6b84; animation: topten-blink 1.2s steps(2) infinite; }
+@media (prefers-reduced-motion: reduce) { .splash-skip { animation: none; } .splash-screen { transition: none; } }
+
+/* Marca BurgosCorp en la presentación: isologo y tipografías del proyecto RN3, en alta definición sobre el lienzo pixel art */
+.splash-stage { position: relative; display: block; line-height: 0; }
+.splash-stage canvas { display: block; }
+.splash-burgos {
+  position: absolute; left: calc(var(--u, 3px) * 230); top: calc(var(--u, 3px) * 20); transform: translateX(-50%);
+  display: grid; justify-items: center; gap: calc(var(--u, 3px) * 6); line-height: 1; pointer-events: none;
+  opacity: 0; transition: opacity .2s ease;
+}
+.splash-burgos__logo { width: calc(var(--u, 3px) * 64); height: calc(var(--u, 3px) * 64); overflow: visible; filter: drop-shadow(0 0 calc(var(--u, 3px) * 4) rgba(225, 29, 46, .45)); }
+.splash-burgos__border { stroke-dasharray: 1; stroke-dashoffset: 1; }
+.splash-burgos__monogram { opacity: 0; font-family: Georgia, "Times New Roman", serif !important; font-weight: 700 !important; }
+/* Nombre como en BrandLogo.tsx: fuente del sistema, peso 800, "Corp" en el rojo del tema oscuro */
+.splash-burgos__name, .splash-burgos__name span { font-family: system-ui, "Segoe UI", sans-serif !important; font-weight: 800 !important; }
+.splash-burgos__name { font-size: calc(var(--u, 3px) * 18); letter-spacing: .02em; color: #e4e4e7; white-space: nowrap; opacity: 0; transform: translateY(calc(var(--u, 3px) * 6)); }
+.splash-burgos__corp { color: #ef3b4f; }
+/* Entra el escudo: cae con un rebote, se traza el borde rojo, aparece el monograma y después el nombre */
+.splash-screen[data-phase="burgos"] .splash-burgos, .splash-screen[data-phase="together"] .splash-burgos { opacity: 1; }
+.splash-screen[data-phase="burgos"] .splash-burgos__logo, .splash-screen[data-phase="together"] .splash-burgos__logo { animation: burgos-drop .45s cubic-bezier(.2, 1.4, .4, 1) both; }
+.splash-screen[data-phase="burgos"] .splash-burgos__border, .splash-screen[data-phase="together"] .splash-burgos__border { animation: burgos-draw .6s ease-out .15s forwards; }
+.splash-screen[data-phase="burgos"] .splash-burgos__monogram, .splash-screen[data-phase="together"] .splash-burgos__monogram { transition: opacity .3s ease .6s; opacity: 1; }
+.splash-screen[data-phase="burgos"] .splash-burgos__name, .splash-screen[data-phase="together"] .splash-burgos__name { transition: opacity .35s ease .75s, transform .35s ease .75s; opacity: 1; transform: none; }
+@keyframes burgos-drop { from { transform: translateY(calc(var(--u, 3px) * -50)) scale(.6); opacity: 0; } to { transform: none; opacity: 1; } }
+@keyframes burgos-draw { to { stroke-dashoffset: 0; } }
+@media (prefers-reduced-motion: reduce) {
+  .splash-burgos, .splash-burgos__name, .splash-burgos__monogram { transition: none !important; }
+  .splash-burgos__logo, .splash-burgos__border { animation: none !important; }
+  .splash-burgos__border { stroke-dashoffset: 0; }
+}
+
+/* Selector "Arma tu combo": nunca scrollea; el panel se escala para entrar entero (menuScreen.fitSetup) */
+#setupScreen.screen--active { overflow: hidden !important; display: grid !important; place-items: center !important; }
+#setupScreen .setup-panel { max-height: none !important; overflow: visible !important; }
+/* El rótulo "ORDEN / NUEVA PARTIDA" tenía margen negativo y se encimaba con el título */
+#setupScreen .setup-header .eyebrow { margin-bottom: 8px !important; }
+
+/* Teclas del tutorial: el ancho se adapta al texto ("ESPACIO", "JOYSTICK", "DASH"); .pixel-key traía 30px fijos */
+.run-tutorial__keys kbd.pixel-key { width: auto !important; min-width: 44px; padding: 0 14px !important; white-space: nowrap; box-sizing: border-box; }
+@media (max-height: 700px) { .run-tutorial__keys kbd.pixel-key { min-width: 32px; padding: 0 10px !important; } }

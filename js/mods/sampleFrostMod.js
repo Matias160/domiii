@@ -61,8 +61,8 @@ export const FrostbiteMod = {
         // Ralentizar enemigos en el área
         for (const enemy of state.enemies) {
           if (enemy.hp > 0 && Math.hypot(enemy.x - player.x, enemy.y - player.y) < 160) {
-            enemy.speedMultiplier = 0.3;
-            setTimeout(() => { enemy.speedMultiplier = 1; }, 2500);
+            // Congelado 2.5 s de tiempo de juego (respeta la pausa); game.js aplica el frenado cada cuadro
+            enemy.frozenUntil = (state.time || 0) + 2.5;
           }
         }
       }

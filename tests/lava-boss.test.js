@@ -172,3 +172,19 @@ test('Domi Colosal charge wall hit triggers stunned state with double damage and
   assert.equal(boss.armor, 0.5, 'Stunned boss should receive double damage (armor 0.5)');
   assert.ok(state.items.length >= 1, 'Stunned boss should drop tactical recovery item');
 });
+
+test('Domi Colosal falls once (no second life), plays its death sequence and only then wins', async () => {
+  const { resolveDeaths } = await import('../js/systems/scoreSystem.js');
+  const state = createRunState({ mapId: 'lava' });
+  const colossusType = enemyTypes.find(t => t.id === 'lava_boss');
+  const boss = new Enemy({ x: 960, y: 300, type: colossusType, difficulty: state.difficulty });
+  boss.spawnTime = 0; boss.hp = 0;
+  state.enemies = [boss];
+  resolveDeaths(state, () => {});
+  assert.equal(boss.enraged, undefined, 'the colossus does not get the regular boss second life');
+  assert.ok(state.bossDying, 'death sequence starts');
+  assert.equal(state.bossesKilled || 0, 0, 'victory waits for the sequence');
+  assert.equal(state.enemies.filter(e => !e.isBoss).length, 0, 'no minions released in the final duel');
+  updateDirector(state, 0.016, bounds);
+  assert.notEqual(state.victory, true);
+});

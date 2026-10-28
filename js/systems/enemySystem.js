@@ -1,4 +1,5 @@
-import { Enemy, enemyTypes } from "../entities/Enemy.js";
+import { Enemy, enemyTypes, KAMIKAZE } from "../entities/Enemy.js";
+import { quality } from '../core/quality.js';
 import { circlesOverlap } from "../core/collision.js";
 import { damageEnemy, explosionBurst, burst, impactRing } from './effectSystem.js';
 import { RUSH_BOSS_GOAL } from './directorSystem.js';
@@ -10,39 +11,56 @@ export const difficulties = {
   quemado: { id: "quemado", name: "Modo quemado", hp: 1.55, speed: 1.3, damage: 1.45, spawn: 0.62, score: 1.6 },
 };
 
+// Mínimo de clientes vivos que se busca mantener (crece con el tiempo hasta un tope) y ritmo del relleno.
+// El tope evita que la arena se llene cada vez más con el correr de la partida.
+export const SPAWN_REFILL = { base: 4, growEvery: 20, max: 10, interval: 0.35, emptyBurst: 3, graceTime: 3 };
+
 export function updateEnemies(state, delta, canvas) {
+  // Durante el tutorial de inicio la arena queda vacía: no entran clientes ni jefes
   state.spawnTimer -= delta;
+  // Durante el tutorial de inicio la arena queda vacía: no entran clientes ni jefes
+  const hold = Boolean(state.holdSpawns);
   const pressure = Math.max(0, 1 - state.time / 240);
   const spawnEvery = state.difficulty.spawn * Math.max(0.32, 1.15 * pressure) * (state.activeEvent?.id === 'promo' ? .55 : 1);
   let bossSpawned = false;
 
-  const activeBossCount = state.enemies.filter(enemy => enemy.isBoss && enemy.hp > 0).length;
+  // Un jefe cuenta desde que aparece hasta que resolveDeaths lo saca, aunque un cuadro quede en 0 HP
+  // (si no, un charco que lo deja en 0 antes de esta revisión hacía aparecer un jefe duplicado)
+  const activeBossCount = state.enemies.filter(enemy => enemy.isBoss).length;
   const maxConcurrentBosses = state.modeId === 'rush' && (state.bossesKilled || 0) >= 6 ? 2 : 1;
   const waveBoss = state.modeId === 'waves' && state.waveRest <= 0 && state.waveBossPending;
 
-  if ((state.time >= state.nextBossAt || waveBoss) && activeBossCount < maxConcurrentBosses) {
+  if (!hold && (state.time >= state.nextBossAt || waveBoss) && activeBossCount < maxConcurrentBosses) {
     if (state.modeId !== 'rush' || (state.bossesKilled || 0) + activeBossCount < RUSH_BOSS_GOAL) {
       spawnEnemy(state, canvas, true);
       state.waveBossPending = false;
-      if (state.modeId === 'rush') {
-        const nextAllowed = (state.bossesKilled || 0) >= 6 && activeBossCount + 1 < maxConcurrentBosses;
-        state.nextBossAt = nextAllowed ? state.time + 14 : Infinity;
-      } else {
-        state.nextBossAt = state.modeId === 'survival' || !state.modeId ? state.time + 85 : Infinity;
-      }
+      // El próximo jefe se agenda cuando cae este (scoreSystem), con BOSS_GAP de respiro
+      state.nextBossAt = Infinity;
       bossSpawned = true;
     }
   }
 
+  // Con un jefe en la arena no entran clientes normales: es el jefe quien invoca ayudantes de a poco
+  // En el Caldero de Lava el duelo es contra el Coloso: como mucho un ayudante a la vez
   const isLavaMode = state.modeId === 'boss_legendary' || state.mapId === 'lava';
-  const nonBossCount = state.enemies.filter(e => !e.isBoss && e.hp > 0).length;
-  const canSpawn = isLavaMode ? (activeBossCount > 0 && nonBossCount < 1 && state.time > 18) :
+  const nonBossCount = isLavaMode ? state.enemies.filter(e => !e.isBoss && e.hp > 0).length : 0;
+  const canSpawn = hold ? false : isLavaMode ? (activeBossCount > 0 && nonBossCount < 1 && state.time > 18) :
+    activeBossCount > 0 ? false :
     state.modeId === 'waves' ? state.waveRest <= 0 && state.waveRemaining > 0 :
-    state.modeId === 'rush' ? activeBossCount > 0 && state.enemies.length < 18 : true;
-  if (canSpawn && state.spawnTimer <= 0 && state.enemies.length < 100) {
-    spawnEnemy(state, canvas);
-    if (state.modeId === 'waves') state.waveRemaining -= 1;
-    state.spawnTimer = isLavaMode ? 18.0 : state.modeId === 'rush' ? 1.85 : spawnEvery;
+    state.modeId === 'rush' ? state.enemies.length < 18 : true;
+  // Relleno: si la arena quedó casi vacía (mataste al último), los clientes llegan enseguida
+  // y aparecen justo afuera del borde de la pantalla, no lejos (antes tardaban varios segundos en verse)
+  const alive = isLavaMode ? 0 : state.enemies.reduce((n, e) => n + (!e.isBoss && e.hp > 0 ? 1 : 0), 0);
+  const starving = !isLavaMode && canSpawn && alive < Math.min(enemyCap(), SPAWN_REFILL.max, SPAWN_REFILL.base + Math.floor(state.time / SPAWN_REFILL.growEvery));
+  if (starving) state.spawnTimer = Math.min(state.spawnTimer, alive === 0 ? 0 : SPAWN_REFILL.interval);
+  if (canSpawn && state.spawnTimer <= 0 && state.enemies.length < enemyCap()) {
+    const batch = starving && alive === 0 && state.time > SPAWN_REFILL.graceTime ? SPAWN_REFILL.emptyBurst : 1;
+    for (let i = 0; i < batch && state.enemies.length < enemyCap(); i++) {
+      if (state.modeId === 'waves' && state.waveRemaining <= 0) break;
+      spawnEnemy(state, canvas, false, starving);
+      if (state.modeId === 'waves') state.waveRemaining -= 1;
+    }
+    state.spawnTimer = isLavaMode ? 18.0 : state.modeId === 'rush' ? 1.85 : starving ? SPAWN_REFILL.interval : spawnEvery;
   }
 
   for (const enemy of state.enemies) {
@@ -58,10 +76,20 @@ export function updateEnemies(state, delta, canvas) {
     }
     if (enemy.fuse !== undefined && enemy.fuse <= 0 && !enemy.exploded) {
       enemy.exploded = true;
-      state.rings?.push({x:enemy.x,y:enemy.y,radius:enemy.radius+42,life:.6,color:'#ff6c70'});
-      explosionBurst(state,enemy.x,enemy.y,'#ff654f',30,190);
-      if (Math.hypot(state.player.x - enemy.x, state.player.y - enemy.y) < enemy.radius + state.player.radius + 24 && state.player.takeDamage(enemy.damage)) {
+      const kamikaze = Boolean(enemy.type.kamikaze);
+      const blast = kamikaze ? KAMIKAZE.blastRadius : enemy.radius + state.player.radius + 24;
+      state.rings?.push({x:enemy.x,y:enemy.y,radius:kamikaze?blast+18:enemy.radius+42,life:.6,color:'#ff6c70'});
+      explosionBurst(state,enemy.x,enemy.y,'#ff654f',kamikaze?36:30,kamikaze?220:190);
+      if (Math.hypot(state.player.x - enemy.x, state.player.y - enemy.y) < blast && state.player.takeDamage(enemy.damage)) {
         state.shake = 0.28;state.audio?.play('damage');
+      }
+      if (kamikaze) {
+        // ¡BOOM! El ají también lastima a los enemigos que tenga al lado
+        state.shake = Math.max(state.shake, 0.22);
+        state.floaters?.push({ x: enemy.x, y: enemy.y - 26, text: '¡BOOM!', life: .8, kind: 'crit' });
+        for (const other of state.enemies) {
+          if (other !== enemy && other.hp > 0 && !other.isBoss && Math.hypot(other.x - enemy.x, other.y - enemy.y) < blast * 1.2) damageEnemy(state, other, enemy.damage * 1.6, 'fire');
+        }
       }
       enemy.hp = 0;
     }
@@ -88,6 +116,35 @@ export function updateEnemies(state, delta, canvas) {
   return bossSpawned;
 }
 
+// Tope de enemigos vivos: alto para que no se note, y baja solo si la calidad automática lo pide
+export function enemyCap() { return quality.maxEnemies; }
+
+// Al caer un jefe sus "ayudantes" salen disparados en ronda (respetando el tope de enemigos)
+const BOSS_MINION_IDS = ['fries', 'burger', 'soda', 'chili'];
+export function spawnBossMinions(state, boss) {
+  const room = enemyCap() + 8 - state.enemies.length;
+  const count = Math.min(6, room);
+  if (count <= 0) return 0;
+  const worldW = state.world?.width || 1920, worldH = state.world?.height || 1080;
+  const pool = enemyTypes.filter(type => !type.boss && BOSS_MINION_IDS.includes(type.id));
+  for (let i = 0; i < count; i++) {
+    const angle = (i / count) * Math.PI * 2 + Math.random() * 0.4;
+    const distance = boss.radius + 34;
+    // Como mucho un kamikaze por camada, para que sea emocionante y no injusto
+    const type = i === 0 ? pool.find(t => t.id === 'chili') : pool.filter(t => t.id !== 'chili')[i % (pool.length - 1)];
+    const minion = new Enemy({
+      x: Math.max(60, Math.min(worldW - 60, boss.x + Math.cos(angle) * distance)),
+      y: Math.max(140, Math.min(worldH - 40, boss.y + Math.sin(angle) * distance)),
+      type, difficulty: state.difficulty
+    });
+    minion.spawnTime = 0.7 + i * 0.08;
+    state.enemies.push(minion);
+  }
+  state.rings?.push({ x: boss.x, y: boss.y, radius: boss.radius + 60, life: .7, maxLife: .7, color: '#ffae00' });
+  state.floaters?.push({ x: boss.x, y: boss.y - boss.radius - 30, text: '¡AYUDANTES!', life: 1.3, kind: 'combo', comboVal: 20 });
+  return count;
+}
+
 function updateBossZones(state,delta){
   state.bossZones ||= [];
   for(const zone of state.bossZones){
@@ -110,8 +167,11 @@ function updateBossZones(state,delta){
         });
       }
     }else{
-      const x=zone.kind==='rain'?zone.targetX:zone.x,y=zone.kind==='rain'?zone.targetY:zone.y;
-      if(Math.hypot(state.player.x-x,state.player.y-y)<zone.radius+state.player.radius&&state.player.takeDamage(zone.damage)){state.audio?.play('damage');}
+      const targeted=zone.kind==='rain'||zone.kind==='meteor'||zone.kind==='freeze';
+      const x=targeted?zone.targetX:zone.x,y=targeted?zone.targetY:zone.y;
+      const inside=Math.hypot(state.player.x-x,state.player.y-y)<zone.radius+state.player.radius;
+      if(inside&&zone.kind==='freeze')state.player.buffs.slowTime=Math.max(state.player.buffs.slowTime||0,1.6);
+      if(inside&&state.player.takeDamage(zone.damage)){state.audio?.play('damage');}
       state.rings?.push({x,y,radius:zone.radius,life:.5,maxLife:.5,color:zone.kind==='rain'?'#ffd34f':'#ff5f75'});
       explosionBurst(state,x,y,zone.kind==='rain'?'#ffd34f':'#ff5f75',zone.kind==='rain'?24:32,180);
     }
@@ -147,33 +207,35 @@ function updateBossZones(state,delta){
   }
 }
 
-function spawnEnemy(state, canvas, boss = false) {
+function spawnEnemy(state, canvas, boss = false, nearEdge = false) {
   const worldW = state.world?.width || 1920;
   const worldH = state.world?.height || 1080;
-  const cam = state.camera || { x: (worldW - 960) / 2, y: (worldH - 540) / 2 };
+  const vw = state.view?.w || 960, vh = state.view?.h || 540;
+  const cam = state.camera || { x: (worldW - vw) / 2, y: (worldH - vh) / 2 };
   const p = state.player;
 
   let px, py;
   if (boss) {
     // Los jefes aparecen a una distancia épica frente a la cámara
-    px = Math.max(80, Math.min(worldW - 80, cam.x + 480 + (Math.random() - 0.5) * 180));
-    py = Math.max(160, Math.min(worldH - 120, cam.y + 110));
+    px = Math.max(80, Math.min(worldW - 80, cam.x + vw / 2 + (Math.random() - 0.5) * 180));
+    // A un tercio de la pantalla: se ve bien la entrada y no queda tapado por el HUD
+    py = Math.max(170, Math.min(worldH - 120, cam.y + vh * 0.34));
   } else {
-    if (Math.random() < 0.7) {
+    if (nearEdge || Math.random() < 0.7) {
       const side = Math.floor(Math.random() * 4);
       const margin = 40 + Math.random() * 60;
       if (side === 0) {
-        px = cam.x + Math.random() * 960;
+        px = cam.x + Math.random() * vw;
         py = cam.y - margin;
       } else if (side === 1) {
-        px = cam.x + 960 + margin;
-        py = cam.y + Math.random() * 540;
+        px = cam.x + vw + margin;
+        py = cam.y + Math.random() * vh;
       } else if (side === 2) {
-        px = cam.x + Math.random() * 960;
-        py = cam.y + 540 + margin;
+        px = cam.x + Math.random() * vw;
+        py = cam.y + vh + margin;
       } else {
         px = cam.x - margin;
-        py = cam.y + Math.random() * 540;
+        py = cam.y + Math.random() * vh;
       }
     } else {
       const angle = Math.random() * Math.PI * 2;
@@ -204,7 +266,7 @@ function spawnEnemy(state, canvas, boss = false) {
   // En modo Duelo de Jefes ("rush"), los jefes son mucho más resistentes y escalan en cada ronda
   const rushBossHpMult = (boss && state.modeId === 'rush')
     ? (2.45 + spawnedBossIndex * 0.48)
-    : (boss ? (1.35 + (state.bossesKilled || 0) * 0.3) : 1);
+    : (boss ? (1.7 + (state.bossesKilled || 0) * 0.35) : 1);
   const rushBossSpdMult = (boss && state.modeId === 'rush') ? (1.06 + spawnedBossIndex * 0.03) : 1;
   const difficulty = {
     ...state.difficulty,

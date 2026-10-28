@@ -1,10 +1,17 @@
 import { primes } from '../systems/primeSystem.js';
 
+const TOUCH_KEY = 'domi_touch_controls';
+// El almacenamiento puede estar bloqueado (modo privado, cookies apagadas): nunca debe romper el juego
+function readPreference() { try { return localStorage.getItem(TOUCH_KEY); } catch { return null; } }
+function writePreference(value) { try { if (value === null) localStorage.removeItem(TOUCH_KEY); else localStorage.setItem(TOUCH_KEY, value); } catch {} }
+// Solo toca el DOM cuando el valor cambia (se llama en cada cuadro)
+function setText(node, text) { if (node && node.textContent !== text) node.textContent = text; }
+
 export class TouchControls {
   constructor(game) {
     this.game = game;
     this.enabled = false;
-    this.forced = localStorage.getItem('domi_touch_controls');
+    this.forced = readPreference();
     this.isTouch = this.detectTouch();
     this.joystickPointerId = null;
     this.baseX = 0;
@@ -28,8 +35,7 @@ export class TouchControls {
 
   setForced(value) {
     this.forced = value === null ? null : String(Boolean(value));
-    if (this.forced === null) localStorage.removeItem('domi_touch_controls');
-    else localStorage.setItem('domi_touch_controls', this.forced);
+    writePreference(this.forced);
     this.isTouch = this.detectTouch();
     this.updateVisibility();
   }
@@ -250,6 +256,8 @@ export class TouchControls {
     const triggerDash = (e) => {
       e.preventDefault();
       e.stopPropagation();
+      // Durante la entrada del jefe, el botón grande sirve para saltearla
+      if (this.game.entrance) { this.game.skipEntrance?.(); return; }
       if (this.game.running && this.game.state?.player) {
         if (this.game.state.player.dashCooldown <= 0) {
           this.game.input.pressed.add(' ');
@@ -337,9 +345,11 @@ export class TouchControls {
   updateVisibility() {
     if (!this.layer) return;
     const shouldShow = (this.isTouch || this.forced === 'true') && 
-      (this.game.running || this.currentScreen === 'lobbyScreen');
+      ['gameScreen', 'lobbyScreen'].includes(this.currentScreen);
 
     this.layer.style.display = shouldShow ? 'block' : 'none';
+    // Con controles táctiles, la ayuda de teclado del local sobra y tapa el joystick
+    document.body.classList.toggle('touch-controls-on', shouldShow);
 
     // Ajustar visibilidad de botones según sea partida o lobby
     const inLobby = this.currentScreen === 'lobbyScreen';
@@ -357,7 +367,14 @@ export class TouchControls {
   }
 
   update(state) {
-    if (!this.layer || this.layer.style.display === 'none' || !state) return;
+    if (!this.layer || this.layer.style.display === 'none') return;
+    // En el local no hay partida: solo se actualiza el botón de interactuar
+    if (this.currentScreen === 'lobbyScreen' && this.interactBtn) {
+      const near = this.game.lobby?.near;
+      this.interactBtn.hidden = !near;
+      if (near) setText(this.interactBtn.querySelector('span'), near.label || 'INTERACTUAR');
+    }
+    if (!state) return;
 
     // Actualizar Dash en pantalla móvil
     const p = state.player;
@@ -368,7 +385,7 @@ export class TouchControls {
 
       this.dashBtn.dataset.ready = String(isReady);
       this.dashBtn.disabled = !isReady;
-      this.dashTimer.textContent = p.dashTime > 0 ? 'DASH!' : p.dashCooldown > 0 ? `${p.dashCooldown.toFixed(1)}s` : 'LISTO';
+      setText(this.dashTimer, p.dashTime > 0 ? 'DASH!' : p.dashCooldown > 0 ? `${p.dashCooldown.toFixed(1)}s` : 'LISTO');
 
       // Anillo circular de enfriamiento (stroke-dashoffset para radio 30: circunferencia ~ 188.5)
       const circ = 188.5;
@@ -394,24 +411,16 @@ export class TouchControls {
       const coolText = btn.querySelector('.prime-btn-cool');
       const meter = btn.querySelector('.prime-btn-meter');
       if (locked) {
-        coolText.textContent = `NV ${prime.level}`;
+        setText(coolText, `NV ${prime.level}`);
         meter.style.height = '0%';
       } else if (cool > 0) {
-        coolText.textContent = `${Math.ceil(cool)}s`;
+        setText(coolText, `${Math.ceil(cool)}s`);
         meter.style.height = `${(1 - cool / prime.cooldown) * 100}%`;
       } else {
-        coolText.textContent = 'LISTO';
+        setText(coolText, 'LISTO');
         meter.style.height = '100%';
       }
     }
 
-    // Actualizar estado de interacción en lobby
-    if (this.currentScreen === 'lobbyScreen' && this.interactBtn) {
-      const near = this.game.lobby?.near;
-      this.interactBtn.hidden = !near;
-      if (near) {
-        this.interactBtn.querySelector('span').textContent = near.action || 'INTERACTUAR';
-      }
-    }
   }
 }
