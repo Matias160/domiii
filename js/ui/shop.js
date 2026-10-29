@@ -17,7 +17,7 @@ const basics=[
 export const catalog=[...basics,...shopItems];
 const normalize=value=>value.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLocaleLowerCase('es');
 export function filterCatalog(profile,{type='skin',ownedOnly=false,query='',affordable=false,sort='featured'}={}){
-  const result=catalog.filter(item=>item.type===type&&(!ownedOnly||isOwned(profile,item.type,item.id))&&(!affordable||isOwned(profile,item.type,item.id)||(!item.domiExclusive&&item.cost<=profile.bank))&&normalize(item.name+' '+item.description).includes(normalize(query.trim())));
+  const result=catalog.filter(item=>item.type===type&&(!ownedOnly||isOwned(profile,item.type,item.id))&&(!affordable||isOwned(profile,item.type,item.id)||((!item.domiExclusive&&!item.cartographyExclusive)&&item.cost<=profile.bank))&&normalize(item.name+' '+item.description).includes(normalize(query.trim())));
   if(sort==='price')result.sort((a,b)=>a.cost-b.cost);
   if(sort==='name')result.sort((a,b)=>a.name.localeCompare(b.name,'es'));
   return result;
@@ -97,7 +97,7 @@ export class Shop{
       const isMysteryLava=item.type==='map'&&item.id==='lava'&&!owned;
       const displayName=isMysteryLava?'???':item.name;
       const displayDesc=isMysteryLava?'??? · ???':item.description;
-      const statusText=equipped?'Equipado':owned?'Listo para equipar':isMysteryLava?'???':item.domiExclusive?'Misión Don Domi':`${item.cost.toLocaleString('es-AR')} PT`;
+      const statusText=equipped?'Equipado':owned?'Listo para equipar':isMysteryLava?'???':item.cartographyExclusive?'Misión de Mapa':item.domiExclusive?'Misión Don Domi':`${item.cost.toLocaleString('es-AR')} PT`;
       const button=node('button','catalog-item');button.type='button';button.dataset.item=item.id;button.dataset.type=item.type;button.dataset.owned=String(Boolean(owned));
       button.setAttribute('aria-label',`${displayName}, ${statusText}. Ver detalle`);button.setAttribute('aria-pressed',String(this.selected?.id===item.id));button.setAttribute('aria-controls','shopDetail');
       const art=node('div','catalog-art');const canvas=document.createElement('canvas');canvas.width=280;canvas.height=180;canvas.setAttribute('aria-hidden','true');drawItemPreview(canvas,item,profile);
@@ -105,7 +105,7 @@ export class Shop{
       if(equipped) art.append(node('span','catalog-badge','✓ EN USO'));
       if(!owned){const lock=node('span','catalog-lock');lock.innerHTML=icon('LockKeyhole');lock.setAttribute('aria-hidden','true');art.append(lock);}
       const copy=node('div','catalog-copy');copy.append(node('strong','catalog-name',displayName),node('span','catalog-description',displayDesc));
-      const footer=node('span','catalog-status');footer.innerHTML=icon(equipped?'CircleCheck':owned?'Check':item.domiExclusive?'Scroll':'Coins');footer.append(node('span','',statusText),node('span','catalog-arrow','↗'));
+      const footer=node('span','catalog-status');footer.innerHTML=icon(equipped?'CircleCheck':owned?'Check':item.cartographyExclusive?'Map':item.domiExclusive?'Scroll':'Coins');footer.append(node('span','',statusText),node('span','catalog-arrow','↗'));
       copy.append(footer);button.append(art,copy);
       button.onclick=()=>{
         this.selected=item;root.querySelectorAll('.catalog-item').forEach(card=>card.setAttribute('aria-pressed',String(card===button)));this.renderDetail();this.game.audio.play('navigate');
@@ -151,6 +151,21 @@ export class Shop{
       };
       locked.append(regBtn);
       root.append(top,stage,body,locked);drawItemPreview(canvas,item,profile);return;
+    }
+    if(!owned&&item.cartographyExclusive){
+      const action=node('div','detail-action');
+      action.append(node('p','purchase-explainer',`Accesorio exclusivo de Cartografía. Completá la misión temática de este mapa en la Mesa de Cartografía para desbloquearlo.`));
+      const atlasBtn=node('button','pixel-button purchase-button arcade-action');atlasBtn.type='button';
+      atlasBtn.innerHTML=icon('Map');
+      const copy=node('span','purchase-copy');
+      copy.append(node('span','purchase-label','IR AL ATLAS'),node('small','purchase-price','VER CARTOGRAFÍA'));
+      atlasBtn.append(copy);
+      atlasBtn.onclick=()=>{
+        this.game.audio?.play?.('navigate');
+        this.game.showAtlas();
+      };
+      action.append(atlasBtn);
+      root.append(top,stage,body,action);drawItemPreview(canvas,item,profile);return;
     }
     if(!owned&&item.domiExclusive){
       const action=node('div','detail-action');

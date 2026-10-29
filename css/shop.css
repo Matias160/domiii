@@ -679,7 +679,7 @@
   background: #03101c;
 }
 
-.atlas-stage canvas {
+#atlasCanvas {
   position: absolute;
   inset: 0;
   width: 100%;
@@ -688,7 +688,7 @@
   cursor: grab;
 }
 
-.atlas-stage canvas:active {
+#atlasCanvas:active {
   cursor: grabbing;
 }
 
@@ -768,18 +768,25 @@
 }
 
 .atlas-card-canvas-wrap {
-  width: 44px;
-  height: 44px;
+  position: relative !important;
+  width: 48px !important;
+  height: 48px !important;
   background: #08111a;
   border: 1px solid #1e3a53;
   display: grid;
   place-items: center;
   flex-shrink: 0;
+  border-radius: 4px;
+  overflow: hidden;
 }
 
 .atlas-card-canvas-wrap canvas {
-  display: block;
+  position: static !important;
+  width: 40px !important;
+  height: 40px !important;
+  display: block !important;
   image-rendering: pixelated;
+  cursor: default !important;
 }
 
 .atlas-card-info {

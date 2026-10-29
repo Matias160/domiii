@@ -569,6 +569,7 @@ export class AtlasScreen {
           <canvas id="atlasCardEnemyCanvas" width="40" height="40"></canvas>
         </div>
         <div class="atlas-card-info">
+          <span class="atlas-card-label" style="color:#38bdf8;">AMENAZA NATIVA</span>
           <strong style="color:${region.color};">${region.enemyName}</strong>
           <small>${region.enemyRole} · ${region.enemyDesc}</small>
         </div>
@@ -577,15 +578,18 @@ export class AtlasScreen {
       <!-- Misión Temática -->
       <div class="atlas-mission-prog-wrap">
         <div class="atlas-mission-prog-header">
-          <span style="color:#fef08a;">${region.missionName}</span>
-          <span style="color:${mission.completed ? '#4ade80' : '#94a3b8'};">
+          <div>
+            <span class="atlas-card-label" style="color:#a78bfa;">MISIÓN DE MAPA</span>
+            <strong style="color:#fef08a; font-size:10px;">${region.missionName}</strong>
+          </div>
+          <span style="color:${mission.completed ? '#4ade80' : '#facc15'}; font:bold 10px monospace;">
             ${mission.completed ? 'COMPLETADA ✔' : `${mission.progress} / ${region.target}`}
           </span>
         </div>
         <div class="atlas-bar-track">
           <div class="atlas-bar-fill" style="width: ${progressPct}%; background: ${mission.completed ? '#4ade80' : region.color};"></div>
         </div>
-        <small style="color:#94a3b8; font-size:10px; line-height:1.3;">${region.missionDesc}</small>
+        <small style="color:#94a3b8; font-size:11px; line-height:1.3;">${region.missionDesc}</small>
       </div>
 
       <!-- Accesorio Exclusivo de Misión -->
@@ -594,13 +598,14 @@ export class AtlasScreen {
           <canvas id="atlasCardAccCanvas" width="40" height="40"></canvas>
         </div>
         <div class="atlas-card-info">
-          <strong>${region.accessoryName}</strong>
+          <span class="atlas-card-label" style="color:#fde047;">RELIQUIA TEMÁTICA</span>
+          <strong style="color:#fef08a;">${region.accessoryName}</strong>
           <small>${region.accessoryDesc}</small>
           ${accessoryOwned
             ? `<button id="atlasCardEquipBtn" class="pixel-button pixel-button--sm ${isEquipped ? 'is-active' : ''}" style="margin-top:6px;">
                 ${isEquipped ? 'EQUIPADO ✔' : 'EQUIPAR'}
               </button>`
-            : `<small style="color:#f87171; display:block; margin-top:4px;">Bloqueado: completa la misión</small>`
+            : `<small style="color:#f87171; display:block; margin-top:4px; font-weight:bold;">🔒 Bloqueado: completa la misión</small>`
           }
         </div>
       </div>
@@ -754,16 +759,27 @@ export class AtlasScreen {
       c.save();
       c.translate(r.x, r.y);
 
-      // Aguas someras / arrecife alrededor de cada isla
-      c.fillStyle = 'rgba(14, 165, 233, 0.20)';
+      // Aguas someras / arrecife alrededor de cada isla con oleaje
+      const foamPulse = Math.sin(t * 3 + i) * 3;
+      c.fillStyle = 'rgba(14, 165, 233, 0.22)';
       c.beginPath();
-      c.ellipse(0, 12, 68, 38, 0, 0, Math.PI * 2);
+      c.ellipse(0, 14, 82 + foamPulse, 46 + foamPulse * 0.5, 0, 0, Math.PI * 2);
       c.fill();
 
-      // Sombra de contacto de la isla
-      c.fillStyle = 'rgba(2, 6, 23, 0.55)';
+      // Línea de espuma costera
+      c.strokeStyle = 'rgba(255, 255, 255, 0.28)';
+      c.lineWidth = 1.5;
+      c.setLineDash([4, 6]);
+      c.lineDashOffset = t * 10;
       c.beginPath();
-      c.ellipse(0, 10, 56, 30, 0, 0, Math.PI * 2);
+      c.ellipse(0, 14, 80, 44, 0, 0, Math.PI * 2);
+      c.stroke();
+      c.setLineDash([]);
+
+      // Sombra de contacto de la isla
+      c.fillStyle = 'rgba(2, 6, 23, 0.60)';
+      c.beginPath();
+      c.ellipse(0, 12, 70, 38, 0, 0, Math.PI * 2);
       c.fill();
 
       // Terreno base del bioma
@@ -775,14 +791,14 @@ export class AtlasScreen {
         c.strokeStyle = isSelected ? r.color : '#ffffff';
         c.lineWidth = isSelected ? 3.5 : 2;
         c.beginPath();
-        c.arc(0, 0, 36 + (isSelected ? pulse * 5 : 2), 0, Math.PI * 2);
+        c.arc(0, 0, 42 + (isSelected ? pulse * 5 : 2), 0, Math.PI * 2);
         c.stroke();
       }
 
       // Pin central con icono y número de región
       c.fillStyle = '#0f172a';
       c.beginPath();
-      c.arc(0, -4, 16, 0, Math.PI * 2);
+      c.arc(0, -6, 17, 0, Math.PI * 2);
       c.fill();
       c.strokeStyle = r.color;
       c.lineWidth = 2.5;
@@ -792,18 +808,18 @@ export class AtlasScreen {
       c.textAlign = 'center';
       c.textBaseline = 'middle';
       c.fillStyle = '#f8fafc';
-      c.fillText(`0${r.index}`, 0, -4);
+      c.fillText(`0${r.index}`, 0, -6);
 
       // Cartel con nombre de la región
       c.fillStyle = '#0b1522';
-      c.fillRect(-48, 22, 96, 16);
+      c.fillRect(-52, 24, 104, 18);
       c.strokeStyle = isSelected ? r.color : '#203a4f';
       c.lineWidth = 1.5;
-      c.strokeRect(-48, 22, 96, 16);
+      c.strokeRect(-52, 24, 104, 18);
 
       c.font = 'bold 8px monospace';
       c.fillStyle = isSelected ? r.color : '#f8fafc';
-      c.fillText(r.name.toUpperCase(), 0, 31);
+      c.fillText(r.name.toUpperCase(), 0, 34);
 
       // Indicador de bloqueo
       const profile = currentAccount() || {};
@@ -838,95 +854,124 @@ export class AtlasScreen {
     if (id === 'snow') {
       // Montañas nevadas y pinos
       c.fillStyle = '#e2e8f0';
-      c.beginPath(); c.ellipse(0, 0, 52, 26, 0, 0, Math.PI * 2); c.fill();
+      c.beginPath(); c.ellipse(0, 0, 68, 34, 0, 0, Math.PI * 2); c.fill();
+      c.fillStyle = '#cbd5e1';
+      c.beginPath(); c.ellipse(0, 4, 62, 28, 0, 0, Math.PI * 2); c.fill();
+      // Picos glaciares
       c.fillStyle = '#93c5fd';
-      c.beginPath(); c.moveTo(-28, 4); c.lineTo(-12, -22); c.lineTo(4, 4); c.fill();
-      c.beginPath(); c.moveTo(-6, 6); c.lineTo(14, -28); c.lineTo(32, 6); c.fill();
+      c.beginPath(); c.moveTo(-36, 6); c.lineTo(-18, -26); c.lineTo(2, 6); c.fill();
+      c.beginPath(); c.moveTo(-8, 8); c.lineTo(18, -32); c.lineTo(42, 8); c.fill();
       c.fillStyle = '#ffffff';
-      c.beginPath(); c.moveTo(-16, -14); c.lineTo(-12, -22); c.lineTo(-8, -14); c.fill();
-      c.beginPath(); c.moveTo(10, -20); c.lineTo(14, -28); c.lineTo(18, -20); c.fill();
+      c.beginPath(); c.moveTo(-24, -16); c.lineTo(-18, -26); c.lineTo(-12, -16); c.fill();
+      c.beginPath(); c.moveTo(12, -22); c.lineTo(18, -32); c.lineTo(24, -22); c.fill();
+      // Pinos escarchados
+      c.fillStyle = '#0f766e';
+      c.beginPath(); c.moveTo(-42, 4); c.lineTo(-36, -8); c.lineTo(-30, 4); c.fill();
+      c.beginPath(); c.moveTo(30, 6); c.lineTo(36, -6); c.lineTo(42, 6); c.fill();
     } else if (id === 'kitchen') {
       // Fábrica industrial de acero y chimeneas con humo
       c.fillStyle = '#475569';
-      c.beginPath(); c.ellipse(0, 0, 52, 26, 0, 0, Math.PI * 2); c.fill();
-      c.fillStyle = '#1e293b';
-      c.fillRect(-24, -18, 48, 18);
+      c.beginPath(); c.ellipse(0, 0, 68, 34, 0, 0, Math.PI * 2); c.fill();
       c.fillStyle = '#334155';
-      c.fillRect(-18, -30, 8, 14); c.fillRect(10, -32, 10, 16);
+      c.beginPath(); c.ellipse(0, 4, 62, 28, 0, 0, Math.PI * 2); c.fill();
+      // Estructura de la fábrica
+      c.fillStyle = '#1e293b';
+      c.fillRect(-32, -22, 64, 22);
+      c.fillStyle = '#f97316';
+      c.fillRect(-26, -16, 8, 8); c.fillRect(-12, -16, 8, 8); c.fillRect(2, -16, 8, 8);
+      // Chimeneas humeantes
+      c.fillStyle = '#0f172a';
+      c.fillRect(-22, -36, 10, 16); c.fillRect(14, -40, 12, 20);
       // Humo animado
       const puff = Math.sin(t * 4) * 4;
-      c.fillStyle = 'rgba(241, 245, 249, 0.45)';
-      c.beginPath(); c.arc(-14 + puff, -38, 5, 0, Math.PI * 2); c.fill();
-      c.beginPath(); c.arc(15 - puff, -42, 7, 0, Math.PI * 2); c.fill();
+      c.fillStyle = 'rgba(241, 245, 249, 0.55)';
+      c.beginPath(); c.arc(-17 + puff, -44, 6, 0, Math.PI * 2); c.fill();
+      c.beginPath(); c.arc(20 - puff, -48, 8, 0, Math.PI * 2); c.fill();
     } else if (id === 'parking') {
-      // Asfalto gris con líneas amarillas de estacionamiento
+      // Asfalto gris con líneas amarillas de estacionamiento y farolas
       c.fillStyle = '#1e293b';
-      c.beginPath(); c.ellipse(0, 0, 50, 25, 0, 0, Math.PI * 2); c.fill();
+      c.beginPath(); c.ellipse(0, 0, 66, 33, 0, 0, Math.PI * 2); c.fill();
       c.fillStyle = '#334155';
-      c.fillRect(-26, -12, 52, 24);
+      c.fillRect(-34, -16, 68, 30);
       c.fillStyle = '#facc15';
-      for (let p = -20; p <= 16; p += 9) {
-        c.fillRect(p, -10, 2, 8); c.fillRect(p, 2, 2, 8);
+      for (let p = -28; p <= 22; p += 10) {
+        c.fillRect(p, -14, 2, 10); c.fillRect(p, 2, 2, 10);
       }
+      // Autito estacionado
+      c.fillStyle = '#ef4444';
+      c.fillRect(-8, -12, 16, 8);
+      c.fillStyle = '#38bdf8';
+      c.fillRect(-6, -10, 12, 4);
     } else if (id === 'desert') {
-      // Dunas doradas y cactus
+      // Dunas doradas onduladas y cactus con espinas
       c.fillStyle = '#d97706';
-      c.beginPath(); c.ellipse(0, 0, 52, 26, 0, 0, Math.PI * 2); c.fill();
+      c.beginPath(); c.ellipse(0, 0, 68, 34, 0, 0, Math.PI * 2); c.fill();
       c.fillStyle = '#f59e0b';
-      c.beginPath(); c.ellipse(-8, -4, 38, 18, -0.2, 0, Math.PI * 2); c.fill();
-      // Cactus
+      c.beginPath(); c.ellipse(-12, -6, 48, 22, -0.2, 0, Math.PI * 2); c.fill();
+      c.beginPath(); c.ellipse(14, 4, 38, 18, 0.15, 0, Math.PI * 2); c.fill();
+      // Cactus grande
       c.fillStyle = '#15803d';
-      c.fillRect(-22, -18, 4, 16); c.fillRect(-26, -14, 12, 3);
-      c.fillRect(-26, -17, 3, 4); c.fillRect(-17, -17, 3, 4);
+      c.fillRect(-28, -24, 6, 22); c.fillRect(-34, -18, 18, 4);
+      c.fillRect(-34, -22, 4, 6); c.fillRect(-20, -22, 4, 6);
+      // Cactus pequeño
+      c.fillRect(24, -14, 4, 14); c.fillRect(20, -10, 10, 3);
     } else if (id === 'football') {
       // Césped de cancha con franjas y arcos
       c.fillStyle = '#16a34a';
-      c.beginPath(); c.ellipse(0, 0, 52, 26, 0, 0, Math.PI * 2); c.fill();
+      c.beginPath(); c.ellipse(0, 0, 68, 34, 0, 0, Math.PI * 2); c.fill();
       c.fillStyle = '#15803d';
-      for (let f = -28; f <= 20; f += 12) c.fillRect(f, -12, 6, 24);
+      for (let f = -36; f <= 26; f += 14) c.fillRect(f, -16, 7, 32);
       c.strokeStyle = '#ffffff'; c.lineWidth = 1.5;
-      c.strokeRect(-24, -12, 48, 24);
-      c.beginPath(); c.arc(0, 0, 8, 0, Math.PI * 2); c.stroke();
+      c.strokeRect(-32, -15, 64, 30);
+      c.beginPath(); c.arc(0, 0, 10, 0, Math.PI * 2); c.stroke();
+      c.strokeRect(-32, -7, 10, 14); c.strokeRect(22, -7, 10, 14);
     } else if (id === 'beach') {
       // Costa de arena y palmeras
       c.fillStyle = '#fde047';
-      c.beginPath(); c.ellipse(0, 0, 52, 26, 0, 0, Math.PI * 2); c.fill();
+      c.beginPath(); c.ellipse(0, 0, 68, 34, 0, 0, Math.PI * 2); c.fill();
       c.fillStyle = '#2dd4bf';
-      c.beginPath(); c.ellipse(14, 6, 32, 14, 0.2, 0, Math.PI * 2); c.fill();
-      // Palmera
+      c.beginPath(); c.ellipse(18, 8, 42, 18, 0.2, 0, Math.PI * 2); c.fill();
+      // Palmera principal
       c.fillStyle = '#78350f';
-      c.fillRect(-20, -18, 4, 16);
+      c.fillRect(-26, -24, 5, 22);
       c.fillStyle = '#22c55e';
-      c.beginPath(); c.arc(-18, -20, 8, 0, Math.PI * 2); c.fill();
-      c.beginPath(); c.arc(-26, -18, 6, 0, Math.PI * 2); c.fill();
-      c.beginPath(); c.arc(-10, -18, 6, 0, Math.PI * 2); c.fill();
+      c.beginPath(); c.arc(-24, -26, 10, 0, Math.PI * 2); c.fill();
+      c.beginPath(); c.arc(-34, -24, 8, 0, Math.PI * 2); c.fill();
+      c.beginPath(); c.arc(-14, -24, 8, 0, Math.PI * 2); c.fill();
+      // Conchas marinas
+      c.fillStyle = '#fda4af';
+      c.fillRect(-8, 6, 3, 3); c.fillRect(6, 10, 3, 3);
     } else if (id === 'lava') {
       // Cráter de basalto negro con magma incandescente
       c.fillStyle = '#1c090d';
-      c.beginPath(); c.ellipse(0, 0, 54, 28, 0, 0, Math.PI * 2); c.fill();
+      c.beginPath(); c.ellipse(0, 0, 70, 35, 0, 0, Math.PI * 2); c.fill();
+      c.fillStyle = '#2d0f14';
+      c.beginPath(); c.ellipse(0, 2, 60, 28, 0, 0, Math.PI * 2); c.fill();
       // Magma pulsante
       const lavaPulse = (Math.sin(t * 4) + 1) * 0.5;
       c.fillStyle = '#ef4444';
-      c.beginPath(); c.ellipse(0, 0, 36 + lavaPulse * 4, 18 + lavaPulse * 2, 0, 0, Math.PI * 2); c.fill();
+      c.beginPath(); c.ellipse(0, 0, 44 + lavaPulse * 4, 22 + lavaPulse * 2, 0, 0, Math.PI * 2); c.fill();
       c.fillStyle = '#f97316';
-      c.beginPath(); c.ellipse(0, 0, 24, 12, 0, 0, Math.PI * 2); c.fill();
+      c.beginPath(); c.ellipse(0, 0, 30, 15, 0, 0, Math.PI * 2); c.fill();
       c.fillStyle = '#fef08a';
-      c.beginPath(); c.ellipse(0, 0, 12, 6, 0, 0, Math.PI * 2); c.fill();
+      c.beginPath(); c.ellipse(0, 0, 16, 8, 0, 0, Math.PI * 2); c.fill();
     } else {
       // Diner clásico (Local DOMI)
       c.fillStyle = '#b45309';
-      c.beginPath(); c.ellipse(0, 0, 54, 28, 0, 0, Math.PI * 2); c.fill();
+      c.beginPath(); c.ellipse(0, 0, 70, 35, 0, 0, Math.PI * 2); c.fill();
+      c.fillStyle = '#78350f';
+      c.beginPath(); c.ellipse(0, 3, 62, 28, 0, 0, Math.PI * 2); c.fill();
       // Fachada con techo rojo y blanco
       c.fillStyle = '#dc2626';
-      c.fillRect(-22, -18, 44, 16);
+      c.fillRect(-28, -22, 56, 20);
       c.fillStyle = '#ffffff';
-      c.fillRect(-18, -18, 8, 16); c.fillRect(10, -18, 8, 16);
+      c.fillRect(-22, -22, 10, 20); c.fillRect(12, -22, 10, 20);
       // Cartel de neón DOMI
       c.fillStyle = '#fef08a';
-      c.fillRect(-12, -26, 24, 8);
+      c.fillRect(-16, -32, 32, 10);
       c.fillStyle = '#b91c1c';
-      c.font = 'bold 6px monospace';
-      c.fillText('DOMI', 0, -20);
+      c.font = 'bold 8px monospace';
+      c.fillText('DOMI', 0, -24);
     }
   }
 

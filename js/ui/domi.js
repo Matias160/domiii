@@ -393,6 +393,16 @@ export class DomiScreen {
       { id: 'chef', type: 'enemy', name: 'Chef Invocador', category: 'ENEMIGO', stats: { hp: '78', spd: '44', dmg: '12', perk: 'Invoca Refuerzos' }, desc: 'Cocina nuevos pedidos sobre la marcha atrayendo hordas sin cesar.', lockText: '200 KOs Totales', isUnlocked: totalKills >= 200 },
       { id: 'chili', type: 'enemy', name: 'Ají Kamikaze', category: 'ENEMIGO', stats: { hp: '18', spd: '118', dmg: '24', perk: 'Embestida Explosiva' }, desc: 'Se frena, tiembla y marca una línea roja antes de salir disparado. ¡Esquivalo y explota contra sus amigos!', lockText: '250 KOs Totales', isUnlocked: totalKills >= 250 },
 
+      // --- AMENAZAS NATIVAS DE CARTOGRAFÍA (LOS 8 MAPAS) ---
+      { id: 'bill_collector', type: 'enemy', name: 'Cobrador de cuentas', category: 'ENEMIGO NATIVO', stats: { hp: '44', spd: '110', dmg: '14', perk: 'Persecución Rápida' }, desc: 'Mozo con libreta del Local DOMI. Te persigue sin tregua para cobrarte el saldo pendiente.', lockText: 'Nativo de Local DOMI', isUnlocked: true },
+      { id: 'frying_pan', type: 'enemy', name: 'Sartén poseída', category: 'ENEMIGO NATIVO', stats: { hp: '68', spd: '58', dmg: '16', perk: 'Blindaje Frontal (x1.6)' }, desc: 'Sartén de hierro fundido de la Cocina Industrial. Absorbe y desvía impactos frontales.', lockText: 'Nativo de Cocina', isUnlocked: true },
+      { id: 'delivery_kart', type: 'enemy', name: 'Autito de reparto', category: 'ENEMIGO NATIVO', stats: { hp: '75', spd: '95', dmg: '18', perk: 'Embestida y Bocina' }, desc: 'Vehículo del Estacionamiento. Toca bocina y embiste a gran velocidad en línea recta.', lockText: 'Nativo de Estacionamiento', isUnlocked: true },
+      { id: 'ice_pop', type: 'enemy', name: 'Paleta congelante', category: 'ENEMIGO NATIVO', stats: { hp: '36', spd: '78', dmg: '13', perk: 'Esquirlas Gélidas' }, desc: 'Paleta helada del Nevado. Dispara esquirlas y desata escarcha fría que entorpece tus pasos.', lockText: 'Nativo de Nevado', isUnlocked: true },
+      { id: 'burrower_chili', type: 'enemy', name: 'Chile excavador', category: 'ENEMIGO NATIVO', stats: { hp: '35', spd: '115', dmg: '20', perk: 'Emboscada Subterránea' }, desc: 'Ají del Desierto que se entierra bajo las dunas y brota por sorpresa bajo tus pies.', lockText: 'Nativo de Desierto', isUnlocked: true },
+      { id: 'goalie_bot', type: 'enemy', name: 'Arquero mecánico', category: 'ENEMIGO NATIVO', stats: { hp: '95', spd: '52', dmg: '16', perk: 'Desvío de Tiros' }, desc: 'Autómata gigante de la Cancha de fútbol. Desvía disparos con sus manoplas blindadas.', lockText: 'Nativo de Cancha', isUnlocked: true },
+      { id: 'armored_crab', type: 'enemy', name: 'Cangrejo acorazado', category: 'ENEMIGO NATIVO', stats: { hp: '65', spd: '64', dmg: '15', perk: 'Caparazón Blindado' }, desc: 'Crustáceo de la Playa Tropical con pinzas afiladas. Camina de costado protegido por su concha.', lockText: 'Nativo de Playa Tropical', isUnlocked: true },
+      { id: 'exotic_juice', type: 'enemy', name: 'Zumo exótico', category: 'ENEMIGO NATIVO', stats: { hp: '30', spd: '125', dmg: '16', perk: 'Sorbete Metralla' }, desc: 'Bebida frutal costera con sorbete. Dispara ráfagas veloces de jugo a distancia.', lockText: 'Nativo de Playa', isUnlocked: true },
+
       // --- GRANDES JEFES DE LA COCINA ---
       { id: 'boss_double', type: 'boss', enemyId: 'double', name: 'Rey del Mostrador', category: 'GRAN JEFE', stats: { hp: '820', spd: '58', dmg: '24', perk: 'Salva Radial x10' }, desc: 'El soberano indiscutido del Local Domi. Furia desatada bajo el 50% de vida.', lockText: 'Vence 1 Jefe', isUnlocked: totalBosses >= 1 },
       { id: 'boss_ketchup', type: 'boss', enemyId: 'ketchup', name: 'Señor Ketchup', category: 'GRAN JEFE', stats: { hp: '960', spd: '78', dmg: '25', perk: 'Triple Sniper' }, desc: 'Tirador implacable de la cocina industrial. Marca líneas rojas antes de disparar.', lockText: 'Vence 2 Jefes', isUnlocked: totalBosses >= 2 },
@@ -803,10 +813,10 @@ export class DomiScreen {
 
     // Fondo oscuro con gradiente según categoría
     const bg = c.createRadialGradient(w / 2, h / 2, 4, w / 2, h / 2, w * 0.55);
-    if (slot.category === 'GRAN JEFE') {
+    if (slot.category === 'GRAN JEFE' || slot.category === 'COLOSO FINAL') {
       bg.addColorStop(0, '#36151c');
       bg.addColorStop(1, '#0e0508');
-    } else if (slot.category === 'ENEMIGO') {
+    } else if (slot.category === 'ENEMIGO' || slot.category === 'ENEMIGO NATIVO') {
       bg.addColorStop(0, '#1d261e');
       bg.addColorStop(1, '#09100a');
     } else if (slot.category === 'LEYENDA') {
@@ -849,8 +859,8 @@ export class DomiScreen {
     c.clearRect(0, 0, w, h);
 
     // Fondo vitrina con atmósfera por categoría
-    const isBoss = item.category === 'GRAN JEFE';
-    const isEnemy = item.category === 'ENEMIGO';
+    const isBoss = item.category === 'GRAN JEFE' || item.category === 'COLOSO FINAL';
+    const isEnemy = item.category === 'ENEMIGO' || item.category === 'ENEMIGO NATIVO';
     const isLegend = item.category === 'LEYENDA';
 
     const bgGrad = c.createRadialGradient(w/2, h*0.5, 10, w/2, h*0.5, w*0.7);

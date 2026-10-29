@@ -143,6 +143,7 @@ function mutate(change){const id=sessionStorage.getItem(SESSION),data=all(true);
 }
 export function purchase(type,id){const item=shopItems.find(x=>x.type===type&&x.id===id);if(!item)throw Error('Articulo desconocido.');
   if(item.domiExclusive)throw Error('Este artículo exclusivo se obtiene en las misiones de Don Domi.');
+  if(item.cartographyExclusive)throw Error('Este accesorio exclusivo se obtiene completando la misión del mapa en la Mesa de Cartografía.');
   return mutate(p=>{if(isOwned(p,type,id))throw Error('Ya lo tenes.');if(p.bank<item.cost)throw Error('No alcanzan los puntos.');p.bank-=item.cost;p.purchases.push(`${type}:${id}`);return p;});
 }
 export function equip(type,id){return mutate(p=>{if(!isOwned(p,type,id))throw Error('Primero tenes que comprarlo.');p.loadout[type]=id;return p;});}
