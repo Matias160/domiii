@@ -154,17 +154,17 @@ export class Shop{
     }
     if(!owned&&item.cartographyExclusive){
       const action=node('div','detail-action');
-      action.append(node('p','purchase-explainer',`Accesorio exclusivo de Cartografía. Completá la misión temática de este mapa en la Mesa de Cartografía para desbloquearlo.`));
-      const atlasBtn=node('button','pixel-button purchase-button arcade-action');atlasBtn.type='button';
-      atlasBtn.innerHTML=icon('Map');
+      action.append(node('p','purchase-explainer',`Accesorio exclusivo de Región. Completá la misión temática de este mapa en Don Domi o en Selección de Mapa para desbloquearlo.`));
+      const domiBtn=node('button','pixel-button purchase-button arcade-action');domiBtn.type='button';
+      domiBtn.innerHTML=icon('Scroll');
       const copy=node('span','purchase-copy');
-      copy.append(node('span','purchase-label','IR AL ATLAS'),node('small','purchase-price','VER CARTOGRAFÍA'));
-      atlasBtn.append(copy);
-      atlasBtn.onclick=()=>{
+      copy.append(node('span','purchase-label','IR A DON DOMI'),node('small','purchase-price','MISIONES DE REGIÓN'));
+      domiBtn.append(copy);
+      domiBtn.onclick=()=>{
         this.game.audio?.play?.('navigate');
-        this.game.showAtlas();
+        this.game.domi?.openMissionsTab?.('regions');
       };
-      action.append(atlasBtn);
+      action.append(domiBtn);
       root.append(top,stage,body,action);drawItemPreview(canvas,item,profile);return;
     }
     if(!owned&&item.domiExclusive){

@@ -1,11 +1,12 @@
 import {domiGifImage} from '../core/art.js';
-import {currentAccount, grantItem, equip, isGuest} from '../systems/accountSystem.js';
+import {currentAccount, grantItem, equip, isGuest, getCartographyMissions} from '../systems/accountSystem.js';
 import {shopItems, isOwned} from '../data/shop.js';
 import {drawItemPreview, drawAccessoryIcon} from '../core/presentation.js';
 import {drawFood} from '../core/art.js';
 import {icon, refreshIcons} from './icons.js';
 import {enemyTypes} from '../entities/Enemy.js';
 import {skins} from '../data/skins.js';
+import {REGIONS} from './atlasScreen.js';
 
 const tabs = [
   ['missions', 'Misiones', 'Scroll'],
@@ -76,6 +77,7 @@ export class DomiScreen {
   constructor(game) {
     this.game = game;
     this.type = 'missions';
+    this.missionFilter = 'founder'; // 'founder' | 'regions'
     this.adviceFilter = 'all';
     this.selectedSlot = null;
     this.previewCanvas = null;
@@ -83,6 +85,12 @@ export class DomiScreen {
     document.querySelector('#domiBackButton')?.addEventListener('click', () => {
       this.game.showScreen('lobbyScreen');
     });
+  }
+
+  openMissionsTab(filter = 'founder') {
+    this.type = 'missions';
+    this.missionFilter = filter;
+    this.show('missions');
   }
 
   show(tab = 'missions') {
@@ -474,6 +482,35 @@ export class DomiScreen {
       container.append(lockedBox);
       return;
     }
+
+    // Subpestañas: Misiones del Fundador (14) vs Misiones de Región (8)
+    const subtabs = document.createElement('div');
+    subtabs.className = 'domi-missions-subtabs';
+    subtabs.innerHTML = `
+      <button type="button" class="domi-subtab-btn ${this.missionFilter === 'founder' ? 'is-active' : ''}" id="btnDomiFounder">
+        <i data-lucide="award"></i> <span>MISIONES DEL FUNDADOR (14)</span>
+      </button>
+      <button type="button" class="domi-subtab-btn ${this.missionFilter === 'regions' ? 'is-active' : ''}" id="btnDomiRegions">
+        <i data-lucide="map-pin"></i> <span>MISIONES DE REGIÓN (8)</span>
+      </button>
+    `;
+    subtabs.querySelector('#btnDomiFounder')?.addEventListener('click', () => {
+      this.missionFilter = 'founder';
+      this.game.audio?.play?.('navigate');
+      this.render();
+    });
+    subtabs.querySelector('#btnDomiRegions')?.addEventListener('click', () => {
+      this.missionFilter = 'regions';
+      this.game.audio?.play?.('navigate');
+      this.render();
+    });
+    container.append(subtabs);
+
+    if (this.missionFilter === 'regions') {
+      this.renderRegionMissions(container, profile);
+      return;
+    }
+
     const missions = this.getMissions(profile);
     const claimedCount = missions.filter(m => m.isClaimed).length;
     const pct = Math.round((claimedCount / missions.length) * 100);
@@ -482,7 +519,7 @@ export class DomiScreen {
     header.className = 'domi-missions-header';
     header.innerHTML = `
       <div class="domi-progress-title-row">
-        <span class="domi-progress-label">REGISTRO DE MISIONES</span>
+        <span class="domi-progress-label">MISIONES DEL FUNDADOR</span>
         <b class="domi-progress-count">(${claimedCount} / ${missions.length})</b>
       </div>
       <div class="domi-progress-bar-thick" role="progressbar" aria-valuenow="${claimedCount}" aria-valuemin="0" aria-valuemax="${missions.length}">
@@ -568,6 +605,154 @@ export class DomiScreen {
             fbText.textContent = ` ¡Excelente trabajo! Desbloqueaste: ${m.rewardName}.`;
             fb.append(fbText);
           }
+          this.render();
+        };
+      } else {
+        btn.disabled = true;
+        btn.classList.add('btn-locked');
+        btn.textContent = 'EN CURSO';
+      }
+
+      right.append(rewardWrap, btn);
+      card.append(iconBox, center, right);
+      list.append(card);
+    }
+
+    container.append(list);
+  }
+
+  getRegionMissions(profile) {
+    const missions = getCartographyMissions();
+    return REGIONS.map(r => {
+      const m = missions[r.missionId] || { progress: 0, target: r.target, completed: false };
+      const isOwnedAcc = isOwned(profile, 'accessory', r.accessoryId) || m.completed;
+      const isClaimed = isOwnedAcc;
+      const isDone = m.completed || ((m.progress || 0) >= r.target) || isClaimed;
+      const isEquipped = profile?.loadout?.accessory === r.accessoryId;
+      return {
+        id: r.id,
+        regionIndex: r.index,
+        regionName: r.name,
+        regionSub: r.sub,
+        icon: r.icon,
+        color: r.color,
+        name: r.missionName,
+        description: r.missionDesc,
+        current: Math.min(r.target, m.progress || 0),
+        target: r.target,
+        unit: 'derribos',
+        isDone,
+        isClaimed,
+        isEquipped,
+        enemyId: r.enemyId,
+        enemyName: r.enemyName,
+        enemyRole: r.enemyRole,
+        hazard: r.hazard,
+        rewardType: 'accessory',
+        rewardId: r.accessoryId,
+        rewardName: r.accessoryName,
+        rewardTooltip: `${r.accessoryName}: ${r.accessoryDesc}`
+      };
+    });
+  }
+
+  renderRegionMissions(container, profile) {
+    const missions = this.getRegionMissions(profile);
+    const claimedCount = missions.filter(m => m.isClaimed).length;
+    const pct = Math.round((claimedCount / missions.length) * 100);
+
+    const header = document.createElement('div');
+    header.className = 'domi-missions-header';
+    header.innerHTML = `
+      <div class="domi-progress-title-row">
+        <span class="domi-progress-label">MISIONES DE REGIÓN</span>
+        <b class="domi-progress-count">(${claimedCount} / ${missions.length})</b>
+      </div>
+      <div class="domi-progress-bar-thick" role="progressbar" aria-valuenow="${claimedCount}" aria-valuemin="0" aria-valuemax="${missions.length}">
+        <div class="domi-progress-fill-thick" style="width: ${pct}%;"></div>
+      </div>
+    `;
+    container.append(header);
+
+    const list = document.createElement('div');
+    list.className = 'domi-missions-list';
+
+    for (const m of missions) {
+      const card = document.createElement('div');
+      card.className = `domi-mission-card ${m.isClaimed ? 'is-claimed' : m.isDone ? 'is-done' : 'is-progress'}`;
+
+      const iconBox = document.createElement('div');
+      iconBox.className = 'domi-mission-icon-box';
+      iconBox.style.fontSize = '20px';
+      iconBox.textContent = m.icon;
+
+      const center = document.createElement('div');
+      center.className = 'domi-mission-center';
+      const mPct = Math.min(100, Math.round((m.current / m.target) * 100));
+      center.innerHTML = `
+        <div class="domi-mission-head">
+          <strong class="domi-mission-title">${m.regionName.toUpperCase()}: ${m.name}</strong>
+          <span class="domi-mission-ratio">${m.current}/${m.target} ${m.unit}</span>
+        </div>
+        <p class="domi-mission-desc">${m.description}</p>
+        <p style="font-size: 11px; color: #7dd3fc; margin: 2px 0 0;">
+          <b style="color: #f87171;">👾 Amenaza:</b> ${m.enemyName} (${m.enemyRole}) · <b style="color: #fbbf24;">Peligro:</b> ${m.hazard}
+        </p>
+        <div class="domi-mission-mini-bar">
+          <div class="domi-mini-fill" style="width: ${mPct}%;"></div>
+        </div>
+      `;
+
+      const right = document.createElement('div');
+      right.className = 'domi-mission-right';
+
+      const rewardWrap = document.createElement('div');
+      rewardWrap.className = 'domi-reward-wrap';
+
+      const rewardCanvas = document.createElement('canvas');
+      rewardCanvas.width = 36;
+      rewardCanvas.height = 36;
+      rewardCanvas.className = 'domi-reward-mini-canvas';
+      rewardCanvas.title = m.rewardName;
+      const rCtx = rewardCanvas.getContext('2d');
+      drawAccessoryIcon(rCtx, m.rewardId, 18, 18, 32);
+
+      const tooltip = document.createElement('div');
+      tooltip.className = 'domi-pixel-tooltip';
+      tooltip.textContent = m.rewardTooltip || m.rewardName;
+
+      rewardWrap.append(rewardCanvas, tooltip);
+
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'pixel-button domi-claim-btn';
+
+      if (m.isEquipped) {
+        btn.disabled = true;
+        btn.classList.add('btn-claimed');
+        btn.textContent = '✓ EQUIPADO';
+      } else if (m.isClaimed) {
+        btn.classList.add('pixel-button--claim');
+        btn.textContent = '⚡ EQUIPAR';
+        btn.onclick = () => {
+          equip('accessory', m.rewardId);
+          this.game.audio?.play?.('confirm');
+          this.game.menu?.prepareAccount?.();
+          this.game.showToast?.(`¡${m.rewardName} equipado!`);
+          this.render();
+        };
+      } else if (m.isDone) {
+        btn.classList.add('pixel-button--claim');
+        btn.textContent = '¡RECLAMAR!';
+        btn.onclick = () => {
+          btn.disabled = true;
+          try {
+            grantItem('accessory', m.rewardId);
+            equip('accessory', m.rewardId);
+          } catch {}
+          this.game.audio?.play?.('levelUp');
+          this.game.menu?.prepareAccount?.();
+          this.game.showToast?.(`¡RECOMPENSA OBTENIDA: ${m.rewardName}!`);
           this.render();
         };
       } else {

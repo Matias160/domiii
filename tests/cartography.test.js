@@ -6,6 +6,7 @@ import { resolveAccessory } from '../js/core/accessories.js';
 import { createRunState } from '../js/core/runState.js';
 import { enemyTypes } from '../js/entities/Enemy.js';
 import { REGIONS } from '../js/ui/atlasScreen.js';
+import { DomiScreen } from '../js/ui/domi.js';
 
 function memoryStorage() {
   const map = new Map();
@@ -194,4 +195,17 @@ test('cartography: single active accessory rule and moderate bonuses', () => {
   assert.equal(state.player.accessory, 'thermal_scarf');
   assert.equal(state.player.coldResistance, 0.60, 'thermal scarf grants cold resistance');
   assert.ok(state.player.maxHp >= 112, 'thermal scarf gives moderate hp bonus (+12)');
+});
+
+test('cartography: DomiScreen getRegionMissions returns 8 region missions with rewards', () => {
+  resetStorage();
+  const profile = guestLogin();
+  const regionMissions = DomiScreen.prototype.getRegionMissions(profile);
+  assert.equal(regionMissions.length, 8, '8 region missions returned');
+  for (const rm of regionMissions) {
+    assert.ok(rm.regionName, 'region name defined');
+    assert.ok(rm.enemyName, 'enemy name defined');
+    assert.ok(rm.rewardId, 'reward accessory id defined');
+    assert.ok(rm.target > 0, 'target > 0');
+  }
 });
