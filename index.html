@@ -195,9 +195,9 @@
             <div class="prize-control-panel">
               <div class="prize-rules-card">
                 <div class="prize-badge-row">
-                  <span class="prize-chip prize-chip--skin">🎭 PERSONAJES</span>
-                  <span class="prize-chip prize-chip--acc">🎩 ACCESORIOS</span>
-                  <span class="prize-chip prize-chip--pet">🐾 MASCOTAS</span>
+                  <span class="prize-chip prize-chip--skin"><i data-lucide="user-round"></i> PERSONAJES</span>
+                  <span class="prize-chip prize-chip--acc"><i data-lucide="sparkles"></i> ACCESORIOS</span>
+                  <span class="prize-chip prize-chip--pet"><i data-lucide="paw-print"></i> MASCOTAS</span>
                 </div>
                 <p class="prize-rules-desc">
                   ¡Probá tu suerte! Cada tirada extrae una cápsula que desbloquea un <strong>personaje</strong>, <strong>accesorio</strong> o <strong>mascota</strong> no adquirido. Si ya tenés todo, ¡te llevás un <strong>Bote de 300 Puntos</strong>!
@@ -211,20 +211,28 @@
               <!-- Botón principal para girar palanca -->
               <div class="prize-actions">
                 <button id="prizePullBtn" class="pixel-button pixel-button--gold prize-pull-btn">
-                  <span class="prize-btn-text">🎰 ¡GIRAR PALANCA! (150 PT)</span>
+                  <i data-lucide="sparkles"></i><span class="prize-btn-text">GIRAR PALANCA · 150 PT</span>
                 </button>
                 <p id="prizeNotice" class="prize-notice"></p>
               </div>
 
-              <!-- Tarjeta de Premio Revelado -->
-              <div id="prizeRevealCard" class="prize-reveal-card" hidden>
+            </div>
+
+            <div id="prizeRevealCard" class="prize-reveal-overlay" role="dialog" aria-modal="true" aria-labelledby="prizeItemName" hidden>
+              <div id="prizeRevealParticles" class="prize-reveal-particles" aria-hidden="true"></div>
+              <div class="prize-reveal-card">
+                <span class="prize-reveal-kicker">¡CÁPSULA ABIERTA!</span>
                 <div class="prize-reveal-header">
                   <span id="prizeRarityPill" class="prize-rarity-pill">¡ÉPICO!</span>
                   <h3 id="prizeItemName">Nombre del Ítem</h3>
                 </div>
                 <div class="prize-reveal-body">
-                  <canvas id="prizeItemCanvas" width="80" height="80"></canvas>
-                  <p id="prizeItemDesc">Descripción del premio desbloqueado.</p>
+                  <div class="prize-item-frame"><canvas id="prizeItemCanvas" width="96" height="96"></canvas></div>
+                  <div class="prize-item-copy">
+                    <span id="prizeItemType" class="prize-item-type">NUEVO OBJETO</span>
+                    <p id="prizeItemDesc">Descripción del premio desbloqueado.</p>
+                    <span class="prize-saved-note">GUARDADO EN TU COLECCIÓN</span>
+                  </div>
                 </div>
                 <div class="prize-reveal-actions">
                   <button id="prizeEquipBtn" class="pixel-button pixel-button--green">

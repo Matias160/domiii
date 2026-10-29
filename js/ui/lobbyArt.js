@@ -16,6 +16,14 @@ function box(c,x,y,w,h,color,shadow=true){
   c.fillStyle='rgba(0,0,0,0.3)';c.fillRect(x+2,y+h-3,w-4,2);
 }
 
+function pixelDisk(c,x,y,r,color,step=3){
+  c.fillStyle=color;
+  for(let row=-r;row<r;row+=step){
+    const half=Math.floor(Math.sqrt(Math.max(0,r*r-row*row))/step)*step;
+    c.fillRect(x-half,y+row,Math.max(step,half*2),step);
+  }
+}
+
 function text(c,value,x,y,size=11,color='#f6edcf',align='center'){
   c.textAlign=align;c.fillStyle=color;c.font=`900 ${size}px 'Press Start 2P', monospace`;
   c.shadowColor='#000';c.shadowBlur=3;
@@ -363,68 +371,52 @@ export function drawStation(c,s,t,active){
       c.restore();
     }
 
-    // --- MÁQUINA DE PREMIOS / GASHAPON ARCADE ---
-    // Cartel superior de Neón: "★ PREMIOS ★"
-    box(c,-60,-104,120,24,'#831843');
-    const neonOn=Math.sin(t*4)>-0.6;
-    text(c,'★ PREMIOS ★',0,-86,10,neonOn?'#f472b6':'#500724');
-    c.fillStyle=neonOn?'#fbcfe8':'#360416';c.fillRect(-54,-82,108,2);
-
-    // Bolitas de luz de marquesina animadas
-    for(let i=0;i<8;i++){
-      const lit=(Math.floor(t*6)+i)%2===0;
-      c.fillStyle=lit?'#facc15':'#4a044e';
-      c.beginPath();c.arc(-49+i*14,-100,3,0,Math.PI*2);c.fill();
+    // The lobby cabinet uses the same silhouette and color cues as its close-up.
+    box(c,-60,-104,120,24,'#a93a65');
+    c.fillStyle='#0d1726';c.fillRect(-53,-98,106,12);
+    text(c,'PREMIOS',0,-88,9,'#fff4c4');
+    for(let i=0;i<10;i++){
+      c.fillStyle=(Math.floor(t*8)+i)%3===0?'#fff8d0':'#ffb653';
+      c.fillRect(-53+i*11,-103,5,3);
+      c.fillRect(-53+i*11,-83,5,3);
     }
 
-    // Gran Esfera de Cristal (Gashapon)
-    const globeY = -38;
-    const globeR = 36;
-    c.fillStyle='rgba(15, 23, 42, 0.9)';
-    c.beginPath();c.arc(0,globeY,globeR,0,Math.PI*2);c.fill();
-
-    // Cápsulas de colores flotando adentro
-    const capColors = ['#ef4444', '#3b82f6', '#10b981', '#f59e0b', '#a855f7', '#ec4899'];
-    for(let k=0;k<6;k++){
-      const ang = k * 1.05 + Math.sin(t * 2 + k) * 0.4;
-      const d = 16 + Math.cos(t * 1.5 + k) * 8;
-      const cx = Math.cos(ang) * d;
-      const cy = globeY + Math.sin(ang) * d;
-      c.fillStyle = capColors[k % capColors.length];
-      c.beginPath();c.arc(cx,cy,7,Math.PI,0);c.fill();
-      c.fillStyle = '#ffffff';
-      c.beginPath();c.arc(cx,cy,7,0,Math.PI);c.fill();
-      c.fillStyle = '#0f172a';c.fillRect(cx-7,cy-1,14,2);
+    pixelDisk(c,0,-38,39,'#09111c');
+    pixelDisk(c,0,-38,36,'#ffe17a');
+    pixelDisk(c,0,-38,32,'#1a354e');
+    const positions=[[-19,-52],[-5,-62],[13,-55],[-22,-35],[-6,-37],[15,-35],[-13,-20],[8,-20]];
+    const capColors=['#7ce5ff','#f472b6','#82e8ae','#ffe17a','#d7a4ff','#ff9d78','#75a7ff','#ffe17a'];
+    positions.forEach(([px,py],i)=>{
+      const bob=Math.round(Math.sin(t*2+i)*2);
+      c.fillStyle='#07111c';c.fillRect(px-6,py-5+bob,12,12);
+      c.fillStyle=capColors[i];c.fillRect(px-4,py-4+bob,8,5);
+      c.fillStyle='#f1f4ff';c.fillRect(px-4,py+2+bob,8,4);
+      c.fillStyle='#14202b';c.fillRect(px-5,py+1+bob,10,2);
+    });
+    c.fillStyle='rgba(230,255,255,0.35)';
+    c.fillRect(-24,-62,10,3);c.fillRect(-27,-59,3,12);
+    c.fillRect(18,-68,6,3);
+    for(let i=0;i<14;i++){
+      const angle=i*Math.PI/7;
+      c.fillStyle=(Math.floor(t*10)+i)%4===0?'#fff7c4':'#f472b6';
+      c.fillRect(Math.round(Math.cos(angle)*35)-2,Math.round(-38+Math.sin(angle)*35)-2,4,4);
     }
 
-    // Reflejo brillante en el cristal
-    c.fillStyle='rgba(255, 255, 255, 0.28)';
-    c.beginPath();c.ellipse(-14,globeY-14,16,7,-Math.PI/4,0,Math.PI*2);c.fill();
-    c.strokeStyle='#f472b6';c.lineWidth=3;c.beginPath();c.arc(0,globeY,globeR,0,Math.PI*2);c.stroke();
-
-    // Mueble inferior / Chasis arcade
-    box(c,-50,0,100,38,'#4c0519');
-    c.fillStyle='#831843';c.fillRect(-46,4,92,30);
-    c.fillStyle='#fbcfe8';c.fillRect(-50,0,100,3);c.fillRect(-50,35,100,3);
-
-    // Palanca / Manivela giratoria cromada
-    c.fillStyle='#374151';c.beginPath();c.arc(-22,18,10,0,Math.PI*2);c.fill();
-    const crankRot = t * 1.5;
-    c.save();c.translate(-22,18);c.rotate(crankRot);
-    c.fillStyle='#e5e7eb';c.fillRect(-3,-3,18,6);
-    c.fillStyle='#ef4444';c.beginPath();c.arc(14,0,5,0,Math.PI*2);c.fill();
+    box(c,-52,0,104,40,'#a93a65');
+    c.fillStyle='#f472b6';c.fillRect(-52,0,104,4);c.fillRect(-52,36,104,4);
+    c.fillStyle='#7ce5dc';c.fillRect(-12,3,24,6);
+    c.fillStyle='#08111d';c.fillRect(-15,13,30,20);
+    c.fillStyle='#ffe17a';c.fillRect(-17,11,34,3);c.fillRect(-17,32,34,3);
+    c.fillStyle='#351b38';c.fillRect(-12,16,24,14);
+    c.fillStyle='#09111b';c.fillRect(-43,9,25,25);
+    c.fillStyle='#ffe17a';c.fillRect(-40,12,19,19);
+    c.fillStyle='#29485a';c.fillRect(-37,15,13,13);
+    c.save();c.translate(-30,21);c.rotate(t*1.5);
+    c.fillStyle='#e7f5f4';c.fillRect(-2,-2,14,4);
+    c.fillStyle='#f472b6';c.fillRect(10,-4,7,8);
     c.restore();
-
-    // Rampa de entrega iluminada (Boca de salida)
-    c.fillStyle='#0f172a';c.fillRect(6,10,34,20);
-    c.strokeStyle='#f472b6';c.lineWidth=2;c.strokeRect(6,10,34,20);
-    const pulseChute = Math.sin(t*5)*0.25+0.5;
-    c.fillStyle=`rgba(236, 72, 153, ${pulseChute})`;
-    c.fillRect(8,12,30,16);
-
-    // Ranura de Moneda
-    c.fillStyle='#000';c.fillRect(-42,12,4,12);
-    c.fillStyle='#facc15';c.fillRect(-43,10,6,2);
+    c.fillStyle='#08111d';c.fillRect(28,10,16,23);
+    c.fillStyle='#ffe17a';c.fillRect(31,12,10,3);c.fillRect(35,18,3,11);
 
     // Globito flotante: invita a probar la máquina
     if(!active){

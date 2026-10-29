@@ -24,8 +24,10 @@ export class PrizeMachine {
     this.noticeEl = doc?.querySelector('#prizeNotice');
     this.backBtn = doc?.querySelector('#prizeBackButton');
     this.revealCard = doc?.querySelector('#prizeRevealCard') || { hidden: true };
+    this.revealParticles = doc?.querySelector('#prizeRevealParticles');
     this.rarityPill = doc?.querySelector('#prizeRarityPill');
     this.itemNameEl = doc?.querySelector('#prizeItemName');
+    this.itemTypeEl = doc?.querySelector('#prizeItemType');
     this.itemCanvas = doc?.querySelector('#prizeItemCanvas');
     this.itemDescEl = doc?.querySelector('#prizeItemDesc');
     this.equipBtn = doc?.querySelector('#prizeEquipBtn');
@@ -37,7 +39,10 @@ export class PrizeMachine {
     this.droppedCapsule = null;
     this.particles = [];
     this.crankAngle = 0;
-    this.coin = { active: false, x: 0, y: 0, targetX: 0, targetY: 0, t: 0 };
+    this.coin = { active: false, t: 0 };
+    this.slotFlash = 0;
+    this.screenFlash = 0;
+    this.shake = 0;
 
     this.bindEvents();
   }
@@ -86,8 +91,10 @@ export class PrizeMachine {
       this.game.audio?.play('navigate');
       this.revealCard.hidden = true;
       this.currentPrize = null;
+      this.droppedCapsule = null;
       this.state = 'IDLE';
       this.updateUI();
+      this.pullBtn?.focus?.();
     });
 
     this.equipBtn?.addEventListener('click', () => {
@@ -114,12 +121,16 @@ export class PrizeMachine {
 
   show() {
     this.game.showScreen('prizeScreen');
+    if (this.currentPrize && this.state !== 'IDLE') {
+      this.state = 'REVEAL';
+      this.showRevealCard();
+    } else {
+      this.revealCard.hidden = true;
+      this.state = 'IDLE';
+      this.particles = [];
+      this.droppedCapsule = null;
+    }
     this.updateUI();
-    this.revealCard.hidden = true;
-    this.state = 'IDLE';
-    this.particles = [];
-    this.droppedCapsule = null;
-    this.currentPrize = null;
 
     if (!this.rafId) {
       let lastT = performance.now();
@@ -153,7 +164,7 @@ export class PrizeMachine {
 
     if (this.pullBtn) {
       const canAfford = bank >= this.cost;
-      const isBusy = this.state !== 'IDLE' && this.state !== 'REVEAL';
+      const isBusy = this.state !== 'IDLE';
       this.pullBtn.disabled = !canAfford || isBusy;
     }
 
@@ -169,6 +180,7 @@ export class PrizeMachine {
   }
 
   pull() {
+    if (this.state !== 'IDLE') return;
     const account = currentAccount();
     if (!account) return;
     if (account.bank < this.cost) {
@@ -196,23 +208,21 @@ export class PrizeMachine {
       });
     } catch (e) {
       console.warn('Prize mutation failed:', e);
+      this.currentPrize = null;
+      if (this.noticeEl) this.noticeEl.textContent = 'No se pudo guardar la tirada. Probá otra vez.';
+      return;
     }
-
-    // Refresh UI
-    this.updateUI();
-    this.revealCard.hidden = true;
 
     // Start Animation Sequence
     this.state = 'COIN';
     this.stateTime = 0;
-    this.coin = {
-      active: true,
-      x: 480,
-      y: 350,
-      targetX: 385,
-      targetY: 340,
-      t: 0
-    };
+    this.coin = { active: true, t: 0 };
+    this.slotFlash = 0;
+    this.screenFlash = 0;
+    this.shake = 0;
+    this.particles = [];
+    this.revealCard.hidden = true;
+    this.updateUI();
     this.game.audio?.play('purchase');
   }
 
@@ -270,12 +280,18 @@ export class PrizeMachine {
   update(dt, t) {
     this.animTime += dt;
     this.stateTime += dt;
+    this.slotFlash = Math.max(0, this.slotFlash - dt * 2.8);
+    this.screenFlash = Math.max(0, this.screenFlash - dt * 2.5);
+    this.shake = Math.max(0, this.shake - dt * 12);
 
     // --- State Machine ---
     if (this.state === 'COIN') {
-      this.coin.t += dt * 2.8;
+      this.coin.t += dt * 1.55;
       if (this.coin.t >= 1) {
         this.coin.active = false;
+        this.slotFlash = 1;
+        this.shake = 3;
+        this.spawnBurst(392, 340, 20, ['#fff7c3', '#ffe17a', '#fb923c'], 130);
         this.state = 'CRANK';
         this.stateTime = 0;
         this.game.audio?.play('door_bell');
@@ -285,6 +301,7 @@ export class PrizeMachine {
       if (this.stateTime >= 0.55) {
         this.state = 'VORTEX';
         this.stateTime = 0;
+        this.shake = 2;
         this.game.audio?.play('telegraph');
       }
     } else if (this.state === 'VORTEX') {
@@ -295,9 +312,9 @@ export class PrizeMachine {
         const color = this.currentPrize?.rarity === 'legendary' ? '#facc15' : (this.currentPrize?.rarity === 'rare' ? '#c084fc' : '#38bdf8');
         this.droppedCapsule = {
           x: 280,
-          y: 280,
+          y: 325,
           vx: 0,
-          vy: 80,
+          vy: 50,
           color: color,
           botColor: '#ffffff',
           r: 18,
@@ -305,6 +322,7 @@ export class PrizeMachine {
           bounceCount: 0
         };
         this.game.audio?.play('pickup');
+        this.spawnBurst(280, 334, 16, [color, '#fff7c3', '#f472b6'], 110);
       }
     } else if (this.state === 'DROP') {
       if (this.droppedCapsule) {
@@ -315,6 +333,8 @@ export class PrizeMachine {
           this.droppedCapsule.y = groundY;
           this.droppedCapsule.vy = -this.droppedCapsule.vy * 0.45;
           this.droppedCapsule.bounceCount++;
+          this.shake = this.droppedCapsule.bounceCount >= 3 ? 5 : 2;
+          this.spawnBurst(280, groundY, 10, [this.droppedCapsule.color, '#fff7c3'], 90);
           if (this.droppedCapsule.bounceCount >= 3) {
             this.state = 'SHAKE';
             this.stateTime = 0;
@@ -323,10 +343,13 @@ export class PrizeMachine {
         }
       }
     } else if (this.state === 'SHAKE') {
+      this.shake = Math.max(this.shake, 2 + 4 * Math.min(1, this.stateTime / 0.8));
       if (this.stateTime >= 0.8) {
         this.state = 'REVEAL';
         this.stateTime = 0;
         this.spawnConfetti();
+        this.screenFlash = 0.75;
+        this.shake = 8;
         this.game.audio?.play('victory');
         this.showRevealCard();
       }
@@ -352,7 +375,9 @@ export class PrizeMachine {
 
       c.x += c.vx * dt;
       c.y += c.vy * dt;
-      c.rot += c.vrot;
+      c.vx = Math.max(-360, Math.min(360, c.vx));
+      c.vy = Math.max(-360, Math.min(360, c.vy));
+      c.rot += c.vrot * dt * 60;
 
       // Collide with spherical globe boundary
       const dist = Math.hypot(c.x - this.globe.x, c.y - this.globe.y);
@@ -367,35 +392,86 @@ export class PrizeMachine {
         c.vy = (c.vy - 2 * dot * ny) * 0.75;
       }
     }
+    for (let pass = 0; pass < 2; pass++) {
+      for (let i = 0; i < this.capsules.length; i++) {
+        for (let j = i + 1; j < this.capsules.length; j++) {
+          const a = this.capsules[i], b = this.capsules[j];
+          const dx = b.x - a.x, dy = b.y - a.y;
+          const dist = Math.hypot(dx, dy);
+          const gap = a.r + b.r + 2;
+          if (dist >= gap) continue;
+          const angle = (i * 13 + j * 7) * 2.4;
+          const nx = dist > 0.01 ? dx / dist : Math.cos(angle);
+          const ny = dist > 0.01 ? dy / dist : Math.sin(angle);
+          const push = (gap - dist) * 0.5;
+          a.x -= nx * push; a.y -= ny * push;
+          b.x += nx * push; b.y += ny * push;
+          const impact = (b.vx - a.vx) * nx + (b.vy - a.vy) * ny;
+          if (impact < 0) {
+            a.vx += impact * nx * 0.28; a.vy += impact * ny * 0.28;
+            b.vx -= impact * nx * 0.28; b.vy -= impact * ny * 0.28;
+          }
+        }
+      }
+      for (const capsule of this.capsules) {
+        const dx = capsule.x - this.globe.x, dy = capsule.y - this.globe.y;
+        const dist = Math.hypot(dx, dy);
+        const limit = this.globe.r - capsule.r;
+        if (dist > limit) {
+          capsule.x = this.globe.x + dx / dist * limit;
+          capsule.y = this.globe.y + dy / dist * limit;
+        }
+      }
+    }
 
-    // Update Confetti
+    // Sparks and confetti share one bounded particle system.
     for (let i = this.particles.length - 1; i >= 0; i--) {
       const p = this.particles[i];
       p.x += p.vx * dt;
       p.y += p.vy * dt;
-      p.vy += 300 * dt;
+      const drag = Math.pow(0.94, dt * 60);
+      p.vx *= drag;
+      p.vy = p.vy * drag + p.gravity * dt;
       p.life -= dt;
-      p.rot += p.vrot;
+      p.rot += p.vrot * dt;
       if (p.life <= 0) this.particles.splice(i, 1);
     }
   }
 
+  spawnBurst(x, y, count, colors, speed) {
+    for (let i = 0; i < count; i++) {
+      const angle = Math.PI * 2 * i / count + (Math.random() - 0.5) * 0.25;
+      const velocity = speed * (0.45 + Math.random() * 0.75);
+      const life = 0.35 + Math.random() * 0.45;
+      this.particles.push({
+        x, y, vx: Math.cos(angle) * velocity, vy: Math.sin(angle) * velocity,
+        gravity: 150, size: 2 + Math.random() * 3,
+        color: colors[i % colors.length], life, maxLife: life,
+        rot: 0, vrot: 0, kind: 'spark'
+      });
+    }
+    if (this.particles.length > 160) this.particles.splice(0, this.particles.length - 160);
+  }
+
   spawnConfetti() {
-    this.particles = [];
-    const colors = ['#facc15', '#ec4899', '#38bdf8', '#c084fc', '#4ade80', '#fb923c'];
-    for (let i = 0; i < 60; i++) {
-      const angle = (Math.PI * 2 * i) / 60 + (Math.random() - 0.5) * 0.5;
-      const speed = 120 + Math.random() * 260;
+    const colors = ['#ffe17a', '#f472b6', '#7ce5ff', '#d7a4ff', '#82e8ae', '#fff7c3'];
+    this.spawnBurst(280, 405, 42, colors, 300);
+    for (let i = 0; i < 44; i++) {
+      const angle = Math.PI * 2 * i / 44 + (Math.random() - 0.5) * 0.3;
+      const speed = 120 + Math.random() * 230;
+      const life = 1.25 + Math.random() * 1.2;
       this.particles.push({
         x: 280,
-        y: 415,
+        y: 400,
         vx: Math.cos(angle) * speed,
-        vy: Math.sin(angle) * speed - 150,
-        r: 3 + Math.random() * 4,
+        vy: Math.sin(angle) * speed - 90,
+        gravity: 220,
+        size: 3 + Math.random() * 4,
         color: colors[i % colors.length],
-        life: 1.8 + Math.random() * 0.8,
+        life, maxLife: life,
         rot: Math.random() * Math.PI,
-        vrot: (Math.random() - 0.5) * 8
+        vrot: (Math.random() - 0.5) * 10,
+        kind: 'confetti'
       });
     }
   }
@@ -404,6 +480,13 @@ export class PrizeMachine {
     if (!this.currentPrize) return;
     this.revealCard.hidden = false;
 
+    const machineFrame = this.canvas?.closest('.prize-canvas-container');
+    machineFrame?.classList.remove('prize-machine-zoom');
+    if (machineFrame && !this.game.reducedMotion) {
+      void machineFrame.offsetWidth;
+      machineFrame.classList.add('prize-machine-zoom');
+    }
+
     // Rarity Pill
     const rarities = {
       common: { text: '★ COMÚN', bg: '#38bdf8', color: '#000' },
@@ -411,6 +494,7 @@ export class PrizeMachine {
       legendary: { text: '★★★ LEGENDARIO', bg: '#facc15', color: '#000' }
     };
     const rMeta = rarities[this.currentPrize.rarity] || rarities.common;
+    if (this.revealCard.dataset) this.revealCard.dataset.rarity = this.currentPrize.rarity;
     if (this.rarityPill) {
       this.rarityPill.textContent = rMeta.text;
       this.rarityPill.style.background = rMeta.bg;
@@ -418,6 +502,7 @@ export class PrizeMachine {
     }
 
     if (this.itemNameEl) this.itemNameEl.textContent = this.currentPrize.name;
+    if (this.itemTypeEl) this.itemTypeEl.textContent = this.isJackpot ? 'BOTE DE PUNTOS' : ({ skin: 'PERSONAJE', accessory: 'ACCESORIO', pet: 'MASCOTA' }[this.currentPrize.type] || 'COLECCIONABLE');
     if (this.itemDescEl) this.itemDescEl.textContent = this.currentPrize.description || '¡Nuevo coleccionable listo para usar!';
 
     if (this.equipBtn) {
@@ -432,6 +517,28 @@ export class PrizeMachine {
 
     // Render Preview in item canvas
     this.renderItemCanvas();
+    this.spawnRevealParticles();
+    (this.isJackpot ? this.nextBtn : this.equipBtn)?.focus?.();
+  }
+
+  spawnRevealParticles() {
+    if (!this.revealParticles || this.game.reducedMotion) return;
+    this.revealParticles.replaceChildren();
+    const colors = ['#ffe17a', '#7ce5ff', '#f472b6', '#82e8ae', '#fff6c8'];
+    const count = 72;
+    for (let i = 0; i < count; i++) {
+      const particle = document.createElement('i');
+      const angle = i * Math.PI * 2 / count + (Math.random() - 0.5) * 0.09;
+      const distance = 220 + Math.random() * 430;
+      particle.style.setProperty('--dx', `${Math.round(Math.cos(angle) * distance)}px`);
+      particle.style.setProperty('--dy', `${Math.round(Math.sin(angle) * distance)}px`);
+      particle.style.setProperty('--rot', `${(i % 7 - 3) * 45}deg`);
+      particle.style.setProperty('--delay', `${Math.floor(Math.random() * 110)}ms`);
+      particle.style.setProperty('--size', `${5 + Math.floor(Math.random() * 8)}px`);
+      particle.style.background = colors[i % colors.length];
+      particle.style.color = colors[i % colors.length];
+      this.revealParticles.append(particle);
+    }
   }
 
   renderItemCanvas() {
@@ -441,16 +548,8 @@ export class PrizeMachine {
     ctx.clearRect(0, 0, w, h);
 
     if (this.isJackpot) {
-      // Golden coin stack
-      ctx.fillStyle = '#facc15';
-      ctx.beginPath();
-      ctx.arc(w / 2, h / 2, 28, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.fillStyle = '#ca8a04';
-      ctx.font = '900 24px monospace';
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.fillText('$', w / 2, h / 2);
+      this.drawCoin(ctx, w / 2 - 11, h / 2 + 9, 1.5, 0);
+      this.drawCoin(ctx, w / 2 + 10, h / 2 - 9, 1.65, 0);
       return;
     }
 
@@ -458,7 +557,7 @@ export class PrizeMachine {
     if (type === 'skin') {
       drawFood(ctx, id, w / 2, h * 0.54, 1.4, 0);
     } else if (type === 'accessory') {
-      drawAccessoryIcon(ctx, id, 0, 0, w, h);
+      drawAccessoryIcon(ctx, id, w / 2, h / 2, Math.min(w, h) * 0.85);
     } else if (type === 'pet') {
       drawPet(ctx, id, w / 2, h * 0.58, 1.3, 0);
     }
@@ -469,106 +568,125 @@ export class PrizeMachine {
     const c = this.ctx;
     const W = this.canvas.width, H = this.canvas.height;
     c.clearRect(0, 0, W, H);
+    c.imageSmoothingEnabled = false;
+    this.drawStage(c, t);
+    const motion = this.game.reducedMotion ? 0 : this.shake;
+    c.save();
+    c.translate(Math.round(Math.sin(t * 111) * motion), Math.round(Math.cos(t * 137) * motion * 0.65));
 
     // --- 1. ARCADE CABINET BODY ---
-    // Shadow
-    c.fillStyle = 'rgba(0, 0, 0, 0.5)';
-    c.beginPath();
-    c.ellipse(280, 460, 190, 16, 0, 0, Math.PI * 2);
-    c.fill();
-
-    // Base Pedestal
-    c.fillStyle = '#1e112a';
-    c.fillRect(150, 420, 260, 40);
-    c.fillStyle = '#701a75';
-    c.fillRect(156, 424, 248, 4);
-
-    // Chute Opening
-    c.fillStyle = '#0a020f';
-    c.fillRect(230, 390, 100, 45);
-    c.strokeStyle = '#a21caf';
-    c.lineWidth = 3;
-    c.strokeRect(230, 390, 100, 45);
-
-    // Chute Interior glow
-    const chutePulse = Math.sin(t * 6) * 0.2 + 0.5;
-    c.fillStyle = `rgba(236, 72, 153, ${chutePulse})`;
-    c.fillRect(234, 394, 92, 37);
-
-    // Lower Cabinet Chassis
-    c.fillStyle = '#4c0519';
-    c.fillRect(140, 290, 280, 130);
-    c.fillStyle = '#831843';
-    c.fillRect(146, 296, 268, 120);
-
-    // Chrome Trim
-    c.fillStyle = '#fbcfe8';
-    c.fillRect(140, 288, 280, 4);
-    c.fillRect(140, 418, 280, 4);
-
-    // Coin Slot
-    c.fillStyle = '#000';
-    c.fillRect(380, 325, 8, 28);
-    c.fillStyle = '#facc15';
-    c.font = '800 7px "Press Start 2P", monospace';
+    c.fillStyle = 'rgba(0, 0, 0, 0.55)';
+    c.fillRect(93, 455, 384, 13);
+    c.fillRect(112, 448, 346, 13);
+    c.fillStyle = '#070b13';
+    c.fillRect(102, 278, 356, 166);
+    c.fillStyle = '#5a2348';
+    c.fillRect(110, 282, 340, 152);
+    c.fillStyle = '#f472b6';
+    c.fillRect(110, 282, 340, 7);
+    c.fillRect(110, 424, 340, 8);
+    c.fillStyle = '#a93a65';
+    c.fillRect(119, 291, 322, 128);
+    c.fillStyle = '#6c284f';
+    c.fillRect(119, 394, 322, 25);
+    c.fillStyle = '#ffadd2';
+    c.fillRect(122, 295, 6, 96);
+    c.fillStyle = '#351b38';
+    c.fillRect(126, 434, 308, 18);
+    c.fillStyle = '#e681b4';
+    c.fillRect(126, 434, 308, 4);
+    c.fillStyle = '#091320';
+    c.fillRect(210, 286, 140, 34);
+    c.fillStyle = '#7ce5dc';
+    c.fillRect(215, 291, 130, 24);
+    c.fillStyle = '#0d2633';
+    c.font = '8px "Press Start 2P", monospace';
     c.textAlign = 'center';
-    c.fillText('150 PT', 384, 318);
+    c.fillText('PANCHOMATICA', 280, 307);
 
-    // Crank Base
-    c.fillStyle = '#374151';
-    c.beginPath();
-    c.arc(200, 350, 22, 0, Math.PI * 2);
-    c.fill();
-    c.fillStyle = '#9ca3af';
-    c.beginPath();
-    c.arc(200, 350, 16, 0, Math.PI * 2);
-    c.fill();
+    // Prize chute, recessed behind a bright pixel rim.
+    c.fillStyle = '#07101c';
+    c.fillRect(222, 374, 116, 57);
+    c.fillStyle = '#ffd875';
+    c.fillRect(226, 378, 108, 5);
+    c.fillRect(226, 425, 108, 5);
+    c.fillRect(226, 378, 5, 52);
+    c.fillRect(329, 378, 5, 52);
+    c.fillStyle = '#321934';
+    c.fillRect(233, 386, 94, 36);
+    c.fillStyle = `rgba(255, 134, 200, ${0.2 + 0.14 * Math.sin(t * 5)})`;
+    c.fillRect(237, 390, 86, 28);
+    c.fillStyle = '#090e18';
+    c.fillRect(243, 396, 74, 20);
 
-    // Crank Handle
+    // Coin receiver and mechanical lever.
+    c.fillStyle = '#09111b';
+    c.fillRect(367, 309, 50, 68);
+    c.fillStyle = '#ffd875';
+    c.fillRect(371, 313, 42, 5);
+    c.fillRect(371, 369, 42, 4);
+    c.fillStyle = this.slotFlash > 0 ? '#fff5ca' : '#283f50';
+    c.fillRect(375, 321, 34, 42);
+    c.fillStyle = this.slotFlash > 0 ? '#ffe17a' : '#07101b';
+    c.fillRect(389, 326, 6, 28);
+    c.fillStyle = '#ffe17a';
+    c.font = '7px "Press Start 2P", monospace';
+    c.fillText('150 PT', 392, 304);
+    c.fillStyle = '#09111b';
+    c.fillRect(133, 319, 68, 68);
+    c.fillStyle = '#ffd875';
+    c.fillRect(138, 324, 58, 58);
+    c.fillStyle = '#29485a';
+    c.fillRect(144, 330, 46, 46);
+    c.fillStyle = '#91ecdf';
+    c.fillRect(150, 336, 34, 34);
     c.save();
-    c.translate(200, 350);
+    c.translate(167, 353);
     c.rotate(this.crankAngle);
-    c.fillStyle = '#d1d5db';
-    c.fillRect(-6, -6, 42, 12);
-    c.fillStyle = '#ef4444';
-    c.beginPath();
-    c.arc(36, 0, 10, 0, Math.PI * 2);
-    c.fill();
+    c.fillStyle = '#101924';
+    c.fillRect(-5, -6, 44, 16);
+    c.fillStyle = '#dcecf3';
+    c.fillRect(-3, -4, 38, 10);
+    c.fillStyle = '#f472b6';
+    c.fillRect(30, -9, 18, 20);
+    c.fillStyle = '#ffc3dd';
+    c.fillRect(32, -7, 12, 5);
     c.restore();
+    c.fillStyle = '#ffe17a';
+    c.fillRect(145, 391, 44, 4);
+    c.fillStyle = '#111724';
+    c.font = '7px "Press Start 2P", monospace';
+    c.fillText('GIRA', 167, 407);
 
-    // Flying Coin (during COIN state)
+    // A short arc and afterimages make the payment readable even at speed.
     if (this.coin.active) {
-      const curX = this.coin.x + (this.coin.targetX - this.coin.x) * this.coin.t;
-      const curY = this.coin.y + (this.coin.targetY - this.coin.y) * this.coin.t - Math.sin(this.coin.t * Math.PI) * 40;
-      c.fillStyle = '#facc15';
-      c.beginPath();
-      c.ellipse(curX, curY, 9, 13, t * 10, 0, Math.PI * 2);
-      c.fill();
-      c.strokeStyle = '#ca8a04';
-      c.lineWidth = 2;
-      c.stroke();
+      for (let i = 3; i >= 0; i--) {
+        const progress = Math.max(0, this.coin.t - i * 0.045);
+        const x = 60 + 332 * progress;
+        const y = 390 - 54 * progress - Math.sin(progress * Math.PI) * 86;
+        this.drawCoin(c, x, y, 0.5 + progress * 0.5, t * 18 - i * 0.9, i === 0 ? 1 : (0.25 - i * 0.045));
+      }
     }
 
     // --- 2. GLASS DOME & CAPSULES ---
-    // Dome Back / Depth
-    const domeGrad = c.createRadialGradient(this.globe.x - 30, this.globe.y - 30, 10, this.globe.x, this.globe.y, this.globe.r);
-    domeGrad.addColorStop(0, '#312e81');
-    domeGrad.addColorStop(0.7, '#1e1b4b');
-    domeGrad.addColorStop(1, '#0f172a');
-    c.fillStyle = domeGrad;
-    c.beginPath();
-    c.arc(this.globe.x, this.globe.y, this.globe.r, 0, Math.PI * 2);
-    c.fill();
-
-    // Internal Spinner Rod
-    c.fillStyle = '#475569';
-    c.fillRect(this.globe.x - 5, this.globe.y - 30, 10, 60);
+    this.fillPixelDisk(c, 280, 175, 116, 4, '#0a111e');
+    this.fillPixelDisk(c, 280, 175, 110, 4, '#ffd875');
+    this.fillPixelDisk(c, 280, 175, 103, 4, '#263f5d');
+    this.fillPixelDisk(c, 280, 175, 97, 4, '#142c43');
+    c.fillStyle = '#355676';
+    for (let i = 0; i < 12; i++) c.fillRect(201 + i * 13, 124 + (i % 3) * 34, 6, 4);
+    c.fillStyle = '#1d344a';
+    c.fillRect(274, 137, 12, 82);
+    c.fillStyle = '#7ce5dc';
+    c.fillRect(278, 145, 4, 65);
     const paddleRot = this.state === 'VORTEX' ? t * 24 : t * 2;
     c.save();
     c.translate(this.globe.x, this.globe.y);
     c.rotate(paddleRot);
-    c.fillStyle = '#facc15';
-    c.fillRect(-45, -4, 90, 8);
+    c.fillStyle = '#07131f';
+    c.fillRect(-50, -7, 100, 14);
+    c.fillStyle = '#ffe17a';
+    c.fillRect(-46, -3, 92, 6);
     c.restore();
 
     // Draw Capsules Inside
@@ -576,52 +694,41 @@ export class PrizeMachine {
       this.drawCapsule(c, cap.x, cap.y, cap.r, cap.rot, cap.topColor, cap.botColor);
     }
 
-    // Glass Reflections & Specular Highlights
-    c.save();
-    c.beginPath();
-    c.arc(this.globe.x, this.globe.y, this.globe.r - 2, 0, Math.PI * 2);
-    c.clip();
-
-    // High Gloss Glint Top-Left
-    c.fillStyle = 'rgba(255, 255, 255, 0.22)';
-    c.beginPath();
-    c.ellipse(this.globe.x - 38, this.globe.y - 38, 45, 20, -Math.PI / 4, 0, Math.PI * 2);
-    c.fill();
-
-    // Edge Rim Glow
-    c.strokeStyle = 'rgba(255, 255, 255, 0.35)';
-    c.lineWidth = 4;
-    c.stroke();
-    c.restore();
-
-    // Dome Metal Ring Trim
-    c.strokeStyle = '#f472b6';
-    c.lineWidth = 6;
-    c.beginPath();
-    c.arc(this.globe.x, this.globe.y, this.globe.r, 0, Math.PI * 2);
-    c.stroke();
+    // Pixel-glass reflections and a rotating chase of lamps.
+    c.fillStyle = 'rgba(230, 255, 255, 0.22)';
+    c.fillRect(215, 109, 30, 7);
+    c.fillRect(207, 116, 14, 24);
+    c.fillRect(217, 143, 6, 13);
+    c.fillRect(328, 96, 16, 5);
+    c.fillRect(342, 103, 8, 11);
+    for (let i = 0; i < 24; i++) {
+      const a = i * Math.PI / 12;
+      c.fillStyle = (Math.floor(t * 12) + i) % 4 === 0 ? '#fff8d0' : '#f472b6';
+      c.fillRect(Math.round(280 + Math.cos(a) * 107) - 3, Math.round(175 + Math.sin(a) * 107) - 3, 6, 6);
+    }
+    if (this.state === 'VORTEX') {
+      c.fillStyle = `rgba(124, 229, 220, ${0.14 + 0.12 * Math.sin(t * 20)})`;
+      c.fillRect(230, 172, 100, 7);
+      c.fillRect(275, 128, 8, 92);
+    }
 
     // --- 3. TOP MARQUEE (PANCHOMÁTICA) ---
-    c.fillStyle = '#831843';
-    c.fillRect(170, 20, 220, 48);
-    c.strokeStyle = '#f472b6';
-    c.lineWidth = 4;
-    c.strokeRect(170, 20, 220, 48);
-
-    c.fillStyle = '#fdf2f8';
-    c.font = '900 13px "Press Start 2P", monospace';
+    c.fillStyle = '#070e18';
+    c.fillRect(149, 13, 262, 58);
+    c.fillStyle = '#f472b6';
+    c.fillRect(155, 19, 250, 46);
+    c.fillStyle = '#512144';
+    c.fillRect(161, 25, 238, 34);
+    c.fillStyle = '#0d1726';
+    c.fillRect(168, 30, 224, 24);
+    c.fillStyle = '#fff4c4';
+    c.font = '12px "Press Start 2P", monospace';
     c.textAlign = 'center';
-    c.fillText('★ PREMIOS ★', 280, 50);
-
-    // Chasing Marquee Lights
-    for (let i = 0; i < 14; i++) {
-      const lit = (Math.floor(t * 8) + i) % 2 === 0;
-      c.fillStyle = lit ? '#facc15' : '#701a75';
-      c.beginPath();
-      c.arc(178 + i * 16, 26, 4, 0, Math.PI * 2);
-      c.fill();
-      c.arc(178 + i * 16, 62, 4, 0, Math.PI * 2);
-      c.fill();
+    c.fillText('PREMIOS', 280, 48);
+    for (let i = 0; i < 13; i++) {
+      c.fillStyle = (Math.floor(t * 10) + i) % 3 === 0 ? '#fff8d0' : '#ffba53';
+      c.fillRect(158 + i * 20, 19, 8, 5);
+      c.fillRect(158 + i * 20, 60, 8, 5);
     }
 
     // --- 4. DROPPED / SHAKING / REVEALING CAPSULE ---
@@ -630,22 +737,20 @@ export class PrizeMachine {
       let capY = this.droppedCapsule.y;
 
       if (this.state === 'SHAKE') {
-        capX += (Math.random() - 0.5) * 6;
-        capY += (Math.random() - 0.5) * 4;
+        if (!this.game.reducedMotion) {
+          capX += (Math.random() - 0.5) * 6;
+          capY += (Math.random() - 0.5) * 4;
+        }
 
-        // Aura glow of rarity
-        const auraColor = this.currentPrize?.rarity === 'legendary' ? 'rgba(250, 204, 21, 0.7)' : (this.currentPrize?.rarity === 'rare' ? 'rgba(192, 132, 252, 0.7)' : 'rgba(56, 189, 248, 0.7)');
-        c.fillStyle = auraColor;
-        c.beginPath();
-        c.arc(capX, capY, 28 + Math.sin(t * 20) * 6, 0, Math.PI * 2);
-        c.fill();
+        const auraColor = this.currentPrize?.rarity === 'legendary' ? 'rgba(255, 225, 122, 0.5)' : (this.currentPrize?.rarity === 'rare' ? 'rgba(215, 164, 255, 0.5)' : 'rgba(124, 229, 255, 0.5)');
+        this.fillPixelDisk(c, capX, capY, 28 + Math.sin(t * 20) * 4, 4, auraColor);
       }
 
       if (this.state !== 'REVEAL') {
         this.drawCapsule(c, capX, capY, this.droppedCapsule.r, this.droppedCapsule.rot, this.droppedCapsule.color, this.droppedCapsule.botColor);
       } else {
         // Exploded Capsule halves
-        const popOffset = Math.min(this.stateTime * 60, 30);
+        const popOffset = Math.min(this.stateTime * 110, 46);
         this.drawCapsuleHalf(c, capX - popOffset, capY - popOffset * 0.4, this.droppedCapsule.r, -0.4, this.droppedCapsule.color, true);
         this.drawCapsuleHalf(c, capX + popOffset, capY + popOffset * 0.4, this.droppedCapsule.r, 0.4, this.droppedCapsule.botColor, false);
       }
@@ -654,67 +759,133 @@ export class PrizeMachine {
     // --- 5. CONFETTI PARTICLES ---
     for (const p of this.particles) {
       c.save();
+      c.globalAlpha = Math.max(0, Math.min(1, p.life / p.maxLife));
+      if (p.kind === 'spark') {
+        c.globalCompositeOperation = 'lighter';
+        c.shadowColor = p.color;
+        c.shadowBlur = 9;
+      }
       c.translate(p.x, p.y);
       c.rotate(p.rot);
       c.fillStyle = p.color;
-      c.fillRect(-p.r, -p.r, p.r * 2, p.r * 2);
+      const size = Math.max(1, Math.round(p.size * Math.min(1, p.life / p.maxLife * 2)));
+      c.fillRect(-size, -size, size * 2, p.kind === 'spark' ? size * 2 : size);
       c.restore();
     }
+    c.restore();
+    if (this.screenFlash > 0 && !this.game.reducedMotion) {
+      c.fillStyle = `rgba(255, 246, 210, ${this.screenFlash * 0.7})`;
+      c.fillRect(0, 0, W, H);
+    }
+  }
+
+  drawStage(c, t) {
+    c.fillStyle = '#0b1420';
+    c.fillRect(0, 0, 560, 480);
+    for (let y = 0; y < 400; y += 28) {
+      for (let x = 0; x < 560; x += 28) {
+        c.fillStyle = ((x / 28 + y / 28) % 2) ? '#101e2c' : '#132436';
+        c.fillRect(x + 1, y + 1, 26, 26);
+        c.fillStyle = '#24394c';
+        c.fillRect(x + 3, y + 3, 4, 2);
+      }
+    }
+    c.fillStyle = '#263a50';
+    c.fillRect(0, 396, 560, 9);
+    c.fillStyle = '#7ce5dc';
+    c.fillRect(0, 396, 560, 3);
+    c.fillStyle = '#0a111c';
+    c.fillRect(0, 405, 560, 75);
+    for (let x = 0; x < 560; x += 32) {
+      c.fillStyle = x % 64 ? '#142334' : '#192a3c';
+      c.fillRect(x, 409, 30, 68);
+      c.fillStyle = '#31465b';
+      c.fillRect(x + 2, 413, 26, 3);
+    }
+    for (const x of [18, 534]) {
+      c.fillStyle = '#07101b';
+      c.fillRect(x, 24, 8, 350);
+      c.fillStyle = '#f472b6';
+      c.fillRect(x + 2, 32, 4, 335);
+      c.fillStyle = '#fff2bb';
+      c.fillRect(x - 3, 23, 18, 8);
+      c.fillRect(x - 3, 368, 18, 8);
+    }
+    c.fillStyle = '#ffe17a';
+    c.font = '8px "Press Start 2P", monospace';
+    c.textAlign = 'center';
+    c.fillText('ARCADE', 85, 453);
+    c.fillText('CLUB', 484, 453);
+    c.fillStyle = (Math.floor(t * 2) % 2) ? '#7ce5dc' : '#ffe17a';
+    c.fillRect(46, 58, 8, 8);
+    c.fillRect(506, 58, 8, 8);
+  }
+
+  fillPixelDisk(c, cx, cy, radius, step, color) {
+    c.fillStyle = color;
+    for (let y = -radius; y < radius; y += step) {
+      const half = Math.floor(Math.sqrt(Math.max(0, radius * radius - y * y)) / step) * step;
+      c.fillRect(Math.round(cx - half), Math.round(cy + y), Math.max(step, half * 2), step);
+    }
+  }
+
+  drawCoin(c, x, y, scale, phase, alpha = 1) {
+    c.save();
+    c.globalAlpha = Math.max(0, alpha);
+    c.translate(Math.round(x), Math.round(y));
+    c.scale(Math.max(0.18, Math.abs(Math.cos(phase))) * scale, scale);
+    c.fillStyle = '#49230e';
+    c.fillRect(-10, -17, 20, 34);
+    c.fillRect(-14, -13, 28, 26);
+    c.fillStyle = '#ffb633';
+    c.fillRect(-8, -15, 16, 30);
+    c.fillRect(-12, -11, 24, 22);
+    c.fillStyle = '#fff1a1';
+    c.fillRect(-7, -11, 13, 3);
+    c.fillRect(-9, -8, 3, 15);
+    c.fillStyle = '#c7771e';
+    c.fillRect(-2, -9, 5, 18);
+    c.fillRect(-6, -6, 13, 4);
+    c.fillRect(-6, 2, 13, 4);
+    c.restore();
   }
 
   drawCapsule(c, x, y, r, rot, topCol, botCol) {
     c.save();
-    c.translate(x, y);
+    c.translate(Math.round(x), Math.round(y));
     c.rotate(rot);
-
-    // Bottom Half
+    c.fillStyle = '#07111f';
+    c.fillRect(-r + 5, -r, r * 2 - 10, r * 2);
+    c.fillRect(-r, -r + 5, r * 2, r * 2 - 10);
     c.fillStyle = botCol;
-    c.beginPath();
-    c.arc(0, 0, r, 0, Math.PI);
-    c.fill();
-
-    // Top Half
+    c.fillRect(-r + 3, 2, r * 2 - 6, r - 5);
+    c.fillRect(-r + 6, r - 4, r * 2 - 12, 2);
     c.fillStyle = topCol;
-    c.beginPath();
-    c.arc(0, 0, r, Math.PI, 0);
-    c.fill();
-
-    // Seam band
-    c.fillStyle = '#0f172a';
-    c.fillRect(-r, -2, r * 2, 4);
-
-    // Center button
-    c.fillStyle = '#ffffff';
-    c.beginPath();
-    c.arc(0, 0, 4, 0, Math.PI * 2);
-    c.fill();
-    c.strokeStyle = '#0f172a';
-    c.lineWidth = 1.5;
-    c.stroke();
-
-    // Gloss glint
-    c.fillStyle = 'rgba(255, 255, 255, 0.4)';
-    c.beginPath();
-    c.ellipse(-r * 0.35, -r * 0.35, r * 0.3, r * 0.15, -Math.PI / 4, 0, Math.PI * 2);
-    c.fill();
-
+    c.fillRect(-r + 3, -r + 5, r * 2 - 6, r - 7);
+    c.fillRect(-r + 6, -r + 2, r * 2 - 12, 2);
+    c.fillStyle = '#091522';
+    c.fillRect(-r + 1, -2, r * 2 - 2, 5);
+    c.fillStyle = '#fff4d2';
+    c.fillRect(-3, -4, 6, 8);
+    c.fillStyle = 'rgba(255, 255, 255, 0.6)';
+    c.fillRect(-r + 6, -r + 6, 5, 8);
     c.restore();
   }
 
   drawCapsuleHalf(c, x, y, r, rot, color, isTop) {
     c.save();
-    c.translate(x, y);
+    c.translate(Math.round(x), Math.round(y));
     c.rotate(rot);
     c.fillStyle = color;
-    c.beginPath();
     if (isTop) {
-      c.arc(0, 0, r, Math.PI, 0);
+      c.fillRect(-r + 4, -r + 4, r * 2 - 8, r - 4);
+      c.fillRect(-r + 7, -r, r * 2 - 14, 5);
     } else {
-      c.arc(0, 0, r, 0, Math.PI);
+      c.fillRect(-r + 4, 0, r * 2 - 8, r - 4);
+      c.fillRect(-r + 7, r - 5, r * 2 - 14, 5);
     }
-    c.fill();
-    c.fillStyle = '#0f172a';
-    c.fillRect(-r, -2, r * 2, 4);
+    c.fillStyle = '#091522';
+    c.fillRect(-r + 4, isTop ? 0 : -3, r * 2 - 8, 4);
     c.restore();
   }
 }

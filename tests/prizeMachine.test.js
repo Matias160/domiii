@@ -60,3 +60,23 @@ test('PrizeMachine: rejects pull if insufficient points', () => {
   assert.equal(updated.bank, 50, 'Bank remains unchanged');
   assert.equal(machine.state, 'IDLE', 'State stays IDLE on failure');
 });
+
+test('PrizeMachine: one pull gives one prize and reveals it after the animation', () => {
+  resetStorage();
+  guestLogin();
+  mutate(p => { p.bank = 500; return p; });
+
+  const machine = new PrizeMachine({ audio: { play() {} }, showScreen() {} });
+  machine.pull();
+  const awarded = currentAccount().purchases.length;
+  machine.pull();
+  assert.equal(currentAccount().bank, 350, 'A rapid second click must not charge again');
+  assert.equal(currentAccount().purchases.length, awarded);
+
+  for (let i = 0; i < 140 && machine.state !== 'REVEAL'; i++) machine.update(0.05, i * 0.05);
+  assert.equal(machine.state, 'REVEAL');
+  assert.equal(machine.revealCard.hidden, false);
+  assert.ok(machine.particles.length > 0, 'Reveal should launch celebratory particles');
+  machine.pull();
+  assert.equal(currentAccount().bank, 350, 'A pull behind the reward card must be ignored');
+});
