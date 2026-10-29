@@ -11,7 +11,7 @@ export const REGIONS = [
     index: 1,
     name: 'Local DOMI',
     sub: 'Centro Urbano Gastronómico',
-    x: 230, y: 190,
+    x: 640, y: 370,
     icon: '🏪',
     color: '#facc15',
     cost: 0,
@@ -33,7 +33,7 @@ export const REGIONS = [
     index: 2,
     name: 'Cocina Industrial',
     sub: 'Norte Tecnológico y Hornallas',
-    x: 270, y: 90,
+    x: 640, y: 140,
     icon: '🍳',
     color: '#fb923c',
     cost: 0,
@@ -55,7 +55,7 @@ export const REGIONS = [
     index: 3,
     name: 'Estacionamiento',
     sub: 'Oeste Asfáltico y Delivery',
-    x: 105, y: 200,
+    x: 200, y: 390,
     icon: '🚗',
     color: '#38bdf8',
     cost: 0,
@@ -77,7 +77,7 @@ export const REGIONS = [
     index: 4,
     name: 'Nevado',
     sub: 'Noroeste Glacial y Ventiscas',
-    x: 105, y: 80,
+    x: 220, y: 160,
     icon: '❄️',
     color: '#a5f3fc',
     cost: 800,
@@ -99,7 +99,7 @@ export const REGIONS = [
     index: 5,
     name: 'Desierto',
     sub: 'Suroeste Árido y Dunas',
-    x: 125, y: 325,
+    x: 280, y: 590,
     icon: '🌵',
     color: '#f59e0b',
     cost: 1000,
@@ -121,7 +121,7 @@ export const REGIONS = [
     index: 6,
     name: 'Cancha de fútbol',
     sub: 'Este Deportivo y Tribuna',
-    x: 395, y: 160,
+    x: 1040, y: 170,
     icon: '⚽',
     color: '#4ade80',
     cost: 1200,
@@ -143,7 +143,7 @@ export const REGIONS = [
     index: 7,
     name: 'Playa Tropical',
     sub: 'Sureste Costero y Olas',
-    x: 420, y: 300,
+    x: 1040, y: 520,
     icon: '🏖️',
     color: '#2dd4bf',
     cost: 0,
@@ -165,7 +165,7 @@ export const REGIONS = [
     index: 8,
     name: 'Caldero de Lava',
     sub: 'Abismo Volcánico Oculto',
-    x: 270, y: 310,
+    x: 640, y: 590,
     icon: '🌋',
     color: '#ef4444',
     cost: 0,
@@ -188,12 +188,78 @@ export const REGIONS = [
 export class AtlasScreen {
   constructor(game) {
     this.game = game;
+    this.world = { w: 1280, h: 720 };
+    this.view = { w: 960, h: 540 };
+    this.camera = { x: 160, y: 90 };
+    this.targetCamera = { x: 160, y: 90 };
+
     this.selectedRegionIndex = 0;
     this.hoverRegionIndex = -1;
+    this.cardVisible = true;
     this.animTime = 0;
+
+    // Pancho aventurero en el mapa mundi
+    this.pancho = {
+      x: 640,
+      y: 370,
+      targetX: 640,
+      targetY: 370,
+      moving: false,
+      angle: 0
+    };
+
+    // Partículas ambientales del mundo
+    this.particles = [];
+    this.initParticles();
+
+    // Arrastre con mouse / touch
+    this.isDragging = false;
+    this.dragStart = { x: 0, y: 0 };
+    this.camStart = { x: 0, y: 0 };
+    this.dragDist = 0;
+
     this.canvas = null;
     this.ctx = null;
     this.bound = false;
+  }
+
+  initParticles() {
+    this.particles = [];
+    // Copos de nieve en la zona noroeste
+    for (let i = 0; i < 35; i++) {
+      this.particles.push({
+        type: 'snow',
+        x: 60 + Math.random() * 320,
+        y: 40 + Math.random() * 260,
+        vx: -15 - Math.random() * 25,
+        vy: 20 + Math.random() * 35,
+        size: 2 + Math.random() * 2.5
+      });
+    }
+    // Chispas de lava en la zona sur
+    for (let i = 0; i < 30; i++) {
+      this.particles.push({
+        type: 'ember',
+        x: 520 + Math.random() * 240,
+        y: 520 + Math.random() * 160,
+        vx: (Math.random() - 0.5) * 20,
+        vy: -25 - Math.random() * 35,
+        size: 2 + Math.random() * 2.5,
+        life: Math.random() * 1.5,
+        maxLife: 1.5
+      });
+    }
+    // Polvo de desierto
+    for (let i = 0; i < 25; i++) {
+      this.particles.push({
+        type: 'sand',
+        x: 160 + Math.random() * 260,
+        y: 500 + Math.random() * 180,
+        vx: 30 + Math.random() * 40,
+        vy: -5 + Math.random() * 10,
+        size: 2
+      });
+    }
   }
 
   init() {
@@ -203,51 +269,101 @@ export class AtlasScreen {
     this.ctx = this.canvas.getContext('2d');
 
     document.querySelector('#atlasBackButton')?.addEventListener('click', () => {
+      this.game.audio?.play('navigate');
       this.game.showScreen('lobbyScreen');
+    });
+
+    // Barra de navegación rápida superior
+    const navBar = document.querySelector('#atlasQuickNav');
+    if (navBar) {
+      navBar.innerHTML = '';
+      REGIONS.forEach((r, idx) => {
+        const btn = document.createElement('button');
+        btn.className = `atlas-quick-btn ${idx === this.selectedRegionIndex ? 'is-active' : ''}`;
+        btn.textContent = `0${r.index} ${r.name}`;
+        btn.dataset.idx = idx;
+        btn.addEventListener('click', () => {
+          this.game.audio?.play('navigate');
+          this.selectRegion(idx);
+        });
+        navBar.appendChild(btn);
+      });
+    }
+
+    // Pointer events para arrastre y clic en el mapa mundi
+    this.canvas.addEventListener('pointerdown', (e) => {
+      this.isDragging = true;
+      this.dragDist = 0;
+      this.dragStart = { x: e.clientX, y: e.clientY };
+      this.camStart = { x: this.camera.x, y: this.camera.y };
+      this.canvas.setPointerCapture?.(e.pointerId);
     });
 
     this.canvas.addEventListener('pointermove', (e) => {
       const rect = this.canvas.getBoundingClientRect();
-      const scaleX = this.canvas.width / rect.width;
-      const scaleY = this.canvas.height / rect.height;
-      const mx = (e.clientX - rect.left) * scaleX;
-      const my = (e.clientY - rect.top) * scaleY;
+      const scaleX = this.view.w / rect.width;
+      const scaleY = this.view.h / rect.height;
+
+      if (this.isDragging) {
+        const dx = (e.clientX - this.dragStart.x) * scaleX;
+        const dy = (e.clientY - this.dragStart.y) * scaleY;
+        this.dragDist += Math.hypot(dx, dy);
+        this.camera.x = Math.max(0, Math.min(this.world.w - this.view.w, this.camStart.x - dx));
+        this.camera.y = Math.max(0, Math.min(this.world.h - this.view.h, this.camStart.y - dy));
+        this.targetCamera.x = this.camera.x;
+        this.targetCamera.y = this.camera.y;
+        return;
+      }
+
+      // Hover check sobre las regiones (en coordenadas del mundo)
+      const mouseWorldX = (e.clientX - rect.left) * scaleX + this.camera.x;
+      const mouseWorldY = (e.clientY - rect.top) * scaleY + this.camera.y;
 
       let found = -1;
       for (let i = 0; i < REGIONS.length; i++) {
         const r = REGIONS[i];
-        if (Math.hypot(mx - r.x, my - r.y) < 32) {
+        if (Math.hypot(mouseWorldX - r.x, mouseWorldY - r.y) < 42) {
           found = i;
           break;
         }
       }
       if (found !== this.hoverRegionIndex) {
         this.hoverRegionIndex = found;
-        this.canvas.style.cursor = found >= 0 ? 'pointer' : 'default';
-        this.drawMap();
+        this.canvas.style.cursor = found >= 0 ? 'pointer' : 'grab';
       }
     });
 
-    this.canvas.addEventListener('click', (e) => {
-      const rect = this.canvas.getBoundingClientRect();
-      const scaleX = this.canvas.width / rect.width;
-      const scaleY = this.canvas.height / rect.height;
-      const mx = (e.clientX - rect.left) * scaleX;
-      const my = (e.clientY - rect.top) * scaleY;
+    const onPointerUp = (e) => {
+      if (!this.isDragging) return;
+      this.isDragging = false;
+      this.canvas.releasePointerCapture?.(e.pointerId);
 
-      for (let i = 0; i < REGIONS.length; i++) {
-        const r = REGIONS[i];
-        if (Math.hypot(mx - r.x, my - r.y) < 32) {
-          this.selectRegion(i);
-          this.game.audio?.play('navigate');
-          break;
+      // Si fue un clic simple sin arrastre, seleccionar región
+      if (this.dragDist < 8) {
+        const rect = this.canvas.getBoundingClientRect();
+        const scaleX = this.view.w / rect.width;
+        const scaleY = this.view.h / rect.height;
+        const clickWorldX = (e.clientX - rect.left) * scaleX + this.camera.x;
+        const clickWorldY = (e.clientY - rect.top) * scaleY + this.camera.y;
+
+        for (let i = 0; i < REGIONS.length; i++) {
+          const r = REGIONS[i];
+          if (Math.hypot(clickWorldX - r.x, clickWorldY - r.y) < 46) {
+            this.selectRegion(i);
+            this.game.audio?.play('navigate');
+            break;
+          }
         }
       }
-    });
+    };
+
+    this.canvas.addEventListener('pointerup', onPointerUp);
+    this.canvas.addEventListener('pointercancel', onPointerUp);
 
     window.addEventListener('keydown', (e) => {
       const screen = document.querySelector('#atlasScreen');
       if (!screen || screen.classList.contains('hidden') || screen.style.display === 'none') return;
+
       if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') {
         this.selectRegion((this.selectedRegionIndex + 1) % REGIONS.length);
         this.game.audio?.play('navigate');
@@ -256,10 +372,37 @@ export class AtlasScreen {
         this.game.audio?.play('navigate');
       } else if (e.key === 'Escape') {
         this.game.showScreen('lobbyScreen');
+      } else if (e.key === ' ' || e.key === 'Enter') {
+        const playBtn = document.querySelector('#atlasPlayBtn');
+        const buyBtn = document.querySelector('#atlasBuyBtn');
+        if (playBtn) playBtn.click();
+        else if (buyBtn) buyBtn.click();
       }
     });
 
     this.bound = true;
+  }
+
+  resizeView() {
+    if (!this.canvas) return;
+    const stage = this.canvas.parentElement;
+    const cw = stage?.clientWidth || 960;
+    const ch = stage?.clientHeight || 540;
+    const aspect = cw / ch;
+
+    let w = 960, h = 540;
+    if (aspect >= 16 / 9) {
+      w = Math.round(540 * aspect);
+    } else {
+      h = Math.round(960 / aspect);
+    }
+    this.view.w = Math.min(this.world.w, w);
+    this.view.h = Math.min(this.world.h, h);
+
+    if (this.canvas.width !== this.view.w || this.canvas.height !== this.view.h) {
+      this.canvas.width = this.view.w;
+      this.canvas.height = this.view.h;
+    }
   }
 
   show() {
@@ -269,15 +412,23 @@ export class AtlasScreen {
       this.game.showScreen('authScreen');
       return;
     }
+
     const currentMapId = profile.loadout?.map || 'diner';
     const foundIdx = REGIONS.findIndex(r => r.id === currentMapId);
     this.selectedRegionIndex = foundIdx >= 0 ? foundIdx : 0;
 
+    const r = REGIONS[this.selectedRegionIndex];
+    this.pancho.x = r.x;
+    this.pancho.y = r.y;
+    this.pancho.targetX = r.x;
+    this.pancho.targetY = r.y;
+    this.focusRegion(this.selectedRegionIndex, true);
+
     const bankEl = document.querySelector('#atlasBank');
     if (bankEl) bankEl.textContent = profile.bank.toLocaleString('es-AR');
 
-    this.renderDetail();
-    this.drawMap();
+    this.cardVisible = true;
+    this.renderFloatingCard();
     this.game.showScreen('atlasScreen');
     refreshIcons();
     this.startLoop();
@@ -286,29 +437,109 @@ export class AtlasScreen {
   startLoop() {
     if (this.loopRunning) return;
     this.loopRunning = true;
-    const tick = () => {
+    let lastTime = performance.now();
+
+    const tick = (now) => {
       const screen = document.querySelector('#atlasScreen');
       if (!screen || screen.classList.contains('hidden') || screen.style.display === 'none') {
         this.loopRunning = false;
         return;
       }
-      this.animTime += 0.035;
-      this.drawMap();
+      const dt = Math.min(0.1, (now - lastTime) / 1000);
+      lastTime = now;
+      this.animTime += dt;
+
+      this.update(dt);
+      this.draw();
+
       requestAnimationFrame(tick);
     };
     requestAnimationFrame(tick);
   }
 
+  focusRegion(index, instant = false) {
+    const r = REGIONS[index];
+    if (!r) return;
+    this.targetCamera.x = Math.max(0, Math.min(this.world.w - this.view.w, r.x - this.view.w / 2));
+    this.targetCamera.y = Math.max(0, Math.min(this.world.h - this.view.h, r.y - this.view.h / 2));
+    if (instant) {
+      this.camera.x = this.targetCamera.x;
+      this.camera.y = this.targetCamera.y;
+    }
+  }
+
   selectRegion(index) {
     this.selectedRegionIndex = index;
-    this.renderDetail();
-    this.drawMap();
+    const r = REGIONS[index];
+    this.pancho.targetX = r.x;
+    this.pancho.targetY = r.y;
+    this.focusRegion(index);
+    this.cardVisible = true;
+
+    // Actualizar botones de navegación rápida
+    document.querySelectorAll('.atlas-quick-btn').forEach((btn, i) => {
+      btn.classList.toggle('is-active', i === index);
+    });
+
+    this.renderFloatingCard();
     refreshIcons();
   }
 
-  renderDetail() {
-    const detail = document.querySelector('#atlasRegionDetail');
-    if (!detail) return;
+  update(dt) {
+    // Suavizado de cámara hacia el objetivo
+    if (!this.isDragging) {
+      const lerp = Math.min(1, dt * 5.5);
+      this.camera.x += (this.targetCamera.x - this.camera.x) * lerp;
+      this.camera.y += (this.targetCamera.y - this.camera.y) * lerp;
+    }
+
+    // Movimiento de Pancho entre regiones
+    const dx = this.pancho.targetX - this.pancho.x;
+    const dy = this.pancho.targetY - this.pancho.y;
+    const dist = Math.hypot(dx, dy);
+
+    if (dist > 3) {
+      this.pancho.moving = true;
+      const speed = 360 * dt;
+      this.pancho.x += (dx / dist) * Math.min(dist, speed);
+      this.pancho.y += (dy / dist) * Math.min(dist, speed);
+      this.pancho.angle = Math.atan2(dy, dx);
+    } else {
+      this.pancho.x = this.pancho.targetX;
+      this.pancho.y = this.pancho.targetY;
+      this.pancho.moving = false;
+    }
+
+    // Actualizar partículas ambientales
+    for (const p of this.particles) {
+      p.x += p.vx * dt;
+      p.y += p.vy * dt;
+      if (p.type === 'snow') {
+        if (p.y > 320) { p.y = 40; p.x = 60 + Math.random() * 320; }
+        if (p.x < 40) { p.x = 380; }
+      } else if (p.type === 'ember') {
+        p.life -= dt;
+        if (p.life <= 0 || p.y < 460) {
+          p.life = p.maxLife;
+          p.x = 520 + Math.random() * 240;
+          p.y = 620 + Math.random() * 80;
+        }
+      } else if (p.type === 'sand') {
+        if (p.x > 440) { p.x = 160; p.y = 500 + Math.random() * 180; }
+      }
+    }
+  }
+
+  renderFloatingCard() {
+    const card = document.querySelector('#atlasFloatingCard');
+    if (!card) return;
+
+    if (!this.cardVisible) {
+      card.hidden = true;
+      return;
+    }
+    card.hidden = false;
+
     const region = REGIONS[this.selectedRegionIndex];
     const profile = currentAccount() || {};
     const owned = isOwned(profile, 'map', region.id);
@@ -318,122 +549,102 @@ export class AtlasScreen {
     const accessory = resolveAccessory(region.accessoryId);
     const accessoryOwned = isOwned(profile, 'accessory', region.accessoryId);
     const isEquipped = profile.loadout?.accessory === region.accessoryId;
-
     const progressPct = Math.min(100, Math.round((mission.progress / region.target) * 100));
 
-    detail.innerHTML = `
-      <div class="atlas-card-header" style="border-left: 4px solid ${region.color};">
-        <div class="atlas-card-title-row">
-          <span class="atlas-region-badge" style="background:${region.color}22; color:${region.color}; border: 1px solid ${region.color}66;">
-            0${region.index} / REGISTRO
+    card.innerHTML = `
+      <div class="atlas-card-top" style="border-left: 4px solid ${region.color}; padding-left: 8px;">
+        <div>
+          <h3 class="atlas-card-reg-name">${region.name}</h3>
+          <p class="atlas-card-sub">${region.sub}</p>
+        </div>
+        <span class="atlas-tag-badge ${owned ? 'is-owned' : 'is-locked'}">
+          ${owned ? 'DESBLOQUEADO' : region.cost ? `${region.cost} PT` : 'BLOQUEADO'}
+        </span>
+      </div>
+
+      <!-- Amenaza Nativa -->
+      <div class="atlas-card-row">
+        <div class="atlas-card-canvas-wrap">
+          <canvas id="atlasCardEnemyCanvas" width="40" height="40"></canvas>
+        </div>
+        <div class="atlas-card-info">
+          <strong style="color:${region.color};">${region.enemyName}</strong>
+          <small>${region.enemyRole} · ${region.enemyDesc}</small>
+        </div>
+      </div>
+
+      <!-- Misión Temática -->
+      <div class="atlas-mission-prog-wrap">
+        <div class="atlas-mission-prog-header">
+          <span style="color:#fef08a;">${region.missionName}</span>
+          <span style="color:${mission.completed ? '#4ade80' : '#94a3b8'};">
+            ${mission.completed ? 'COMPLETADA ✔' : `${mission.progress} / ${region.target}`}
           </span>
-          <span class="atlas-owned-badge ${owned ? 'is-owned' : 'is-locked'}">
-            ${owned ? 'PROPIEDAD' : region.cost ? `${region.cost} PT` : 'BLOQUEADO'}
-          </span>
         </div>
-        <h3 class="atlas-region-name">${region.name}</h3>
-        <p class="atlas-region-sub">${region.sub}</p>
-      </div>
-
-      <div class="atlas-section">
-        <h4 class="atlas-section-title"><i data-lucide="alert-triangle"></i> PELIGRO AMBIENTAL</h4>
-        <p class="atlas-hazard-desc">${region.hazard}</p>
-      </div>
-
-      <div class="atlas-section">
-        <h4 class="atlas-section-title"><i data-lucide="bar-chart-2"></i> ESTADÍSTICAS PERMANENTES</h4>
-        <div class="atlas-stats-grid">
-          <div class="atlas-stat-box"><small>PARTIDAS</small><strong>${stats.runs}</strong></div>
-          <div class="atlas-stat-box"><small>VICTORIAS</small><strong style="color:#4ade80;">${stats.victories}</strong></div>
-          <div class="atlas-stat-box"><small>BAJAS</small><strong>${stats.kills}</strong></div>
-          <div class="atlas-stat-box"><small>MÁX TIEMPO</small><strong>${Math.floor(stats.maxTime / 60)}:${String(Math.floor(stats.maxTime % 60)).padStart(2, '0')}</strong></div>
+        <div class="atlas-bar-track">
+          <div class="atlas-bar-fill" style="width: ${progressPct}%; background: ${mission.completed ? '#4ade80' : region.color};"></div>
         </div>
+        <small style="color:#94a3b8; font-size:10px; line-height:1.3;">${region.missionDesc}</small>
       </div>
 
-      <div class="atlas-section">
-        <h4 class="atlas-section-title"><i data-lucide="skull"></i> AMENAZA NATIVA</h4>
-        <div class="atlas-enemy-card">
-          <div class="atlas-enemy-preview">
-            <canvas id="atlasEnemyCanvas" width="56" height="56"></canvas>
-          </div>
-          <div class="atlas-enemy-info">
-            <strong class="atlas-enemy-name">${region.enemyName}</strong>
-            <small class="atlas-enemy-role" style="color:${region.color};">${region.enemyRole}</small>
-            <p class="atlas-enemy-desc">${region.enemyDesc}</p>
-          </div>
+      <!-- Accesorio Exclusivo de Misión -->
+      <div class="atlas-card-row">
+        <div class="atlas-card-canvas-wrap">
+          <canvas id="atlasCardAccCanvas" width="40" height="40"></canvas>
+        </div>
+        <div class="atlas-card-info">
+          <strong>${region.accessoryName}</strong>
+          <small>${region.accessoryDesc}</small>
+          ${accessoryOwned
+            ? `<button id="atlasCardEquipBtn" class="pixel-button pixel-button--sm ${isEquipped ? 'is-active' : ''}" style="margin-top:6px;">
+                ${isEquipped ? 'EQUIPADO ✔' : 'EQUIPAR'}
+              </button>`
+            : `<small style="color:#f87171; display:block; margin-top:4px;">Bloqueado: completa la misión</small>`
+          }
         </div>
       </div>
 
-      <div class="atlas-section">
-        <h4 class="atlas-section-title"><i data-lucide="flag"></i> MISIÓN TEMÁTICA</h4>
-        <div class="atlas-mission-card">
-          <div class="atlas-mission-header">
-            <strong>${region.missionName}</strong>
-            <span class="atlas-mission-status ${mission.completed ? 'is-done' : ''}">
-              ${mission.completed ? 'COMPLETADA ✔' : `${mission.progress} / ${region.target}`}
-            </span>
-          </div>
-          <p class="atlas-mission-desc">${region.missionDesc}</p>
-          <div class="atlas-progress-track">
-            <div class="atlas-progress-fill" style="width: ${progressPct}%; background: ${mission.completed ? '#4ade80' : region.color};"></div>
-          </div>
-        </div>
+      <!-- Estadísticas rápidas -->
+      <div class="atlas-stats-mini">
+        <div class="atlas-stat-mini-box"><small>PARTIDAS</small><strong>${stats.runs}</strong></div>
+        <div class="atlas-stat-mini-box"><small>VICTORIAS</small><strong style="color:#4ade80;">${stats.victories}</strong></div>
+        <div class="atlas-stat-mini-box"><small>BAJAS</small><strong>${stats.kills}</strong></div>
       </div>
 
-      <div class="atlas-section">
-        <h4 class="atlas-section-title"><i data-lucide="award"></i> RECOMPENSA EXCLUSIVA</h4>
-        <div class="atlas-accessory-card ${accessoryOwned ? 'is-unlocked' : 'is-locked'}">
-          <div class="atlas-accessory-preview">
-            <canvas id="atlasAccessoryCanvas" width="48" height="48"></canvas>
-            ${!accessoryOwned ? '<div class="atlas-lock-overlay"><i data-lucide="lock"></i></div>' : ''}
-          </div>
-          <div class="atlas-accessory-info">
-            <strong>${region.accessoryName}</strong>
-            <p class="atlas-accessory-desc">${region.accessoryDesc}</p>
-            ${accessoryOwned
-              ? `<button id="atlasEquipBtn" class="pixel-button pixel-button--sm ${isEquipped ? 'is-active' : ''}">
-                  ${isEquipped ? 'EQUIPADO ✔' : 'EQUIPAR'}
-                </button>`
-              : `<small class="atlas-locked-hint">Completa la misión para desbloquear</small>`
-            }
-          </div>
-        </div>
-      </div>
-
-      <div class="atlas-actions">
+      <!-- Botón de Acción Principal -->
+      <div class="atlas-card-actions">
         ${owned
-          ? `<button id="atlasPlayBtn" class="pixel-button pixel-button--green" style="width:100%; padding:12px; font-size:12px;">
-              JUGAR EN ESTA REGIÓN
+          ? `<button id="atlasPlayBtn" class="pixel-button pixel-button--green" style="width:100%; padding:12px; font-size:11px;">
+              JUGAR EN ESTA REGIÓN (ESPACIO)
             </button>`
           : region.domiExclusive
-            ? `<button disabled class="pixel-button pixel-button--secondary" style="width:100%; opacity:0.6; padding:12px; font-size:11px;">
-                BLOQUEADO (RELIQUIA SUPREMA)
+            ? `<button disabled class="pixel-button pixel-button--secondary" style="width:100%; opacity:0.6; padding:10px; font-size:10px;">
+                RELIQUIA DEL COLOSO (BLOQUEADO)
               </button>`
-            : `<button id="atlasBuyBtn" class="pixel-button pixel-button--yellow" style="width:100%; padding:12px; font-size:12px;">
-                COMPRAR MAPA (${region.cost} PT)
+            : `<button id="atlasBuyBtn" class="pixel-button pixel-button--yellow" style="width:100%; padding:12px; font-size:11px;">
+                COMPRAR REGIÓN (${region.cost} PT)
               </button>`
         }
       </div>
     `;
 
-    // Renderizar preview del enemigo nativo
-    const enemyCv = detail.querySelector('#atlasEnemyCanvas');
+    // Renderizar preview animado del enemigo nativo
+    const enemyCv = card.querySelector('#atlasCardEnemyCanvas');
     if (enemyCv) {
       const ectx = enemyCv.getContext('2d');
-      ectx.clearRect(0, 0, 56, 56);
-      drawFood(ectx, region.enemyId, 28, 28, 0.72, this.animTime, true);
+      ectx.clearRect(0, 0, 40, 40);
+      drawFood(ectx, region.enemyId, 20, 20, 0.60, this.animTime, true);
     }
 
     // Renderizar preview del accesorio
-    const accCv = detail.querySelector('#atlasAccessoryCanvas');
+    const accCv = card.querySelector('#atlasCardAccCanvas');
     if (accCv) {
       const actx = accCv.getContext('2d');
-      actx.clearRect(0, 0, 48, 48);
-      drawAccessoryIcon(actx, region.accessoryId, 24, 24, 40);
+      actx.clearRect(0, 0, 40, 40);
+      drawAccessoryIcon(actx, region.accessoryId, 20, 20, 34);
     }
 
-    // Botones de acción
-    detail.querySelector('#atlasPlayBtn')?.addEventListener('click', () => {
+    card.querySelector('#atlasPlayBtn')?.addEventListener('click', () => {
       this.game.audio?.play('confirm');
       try {
         equip('map', region.id);
@@ -443,15 +654,14 @@ export class AtlasScreen {
       this.game.showScreen('setupScreen');
     });
 
-    detail.querySelector('#atlasBuyBtn')?.addEventListener('click', () => {
+    card.querySelector('#atlasBuyBtn')?.addEventListener('click', () => {
       try {
         purchase('map', region.id);
         this.game.audio?.play('victory');
         const p = currentAccount();
         const b = document.querySelector('#atlasBank');
         if (b && p) b.textContent = p.bank.toLocaleString('es-AR');
-        this.renderDetail();
-        this.drawMap();
+        this.renderFloatingCard();
         refreshIcons();
       } catch (err) {
         this.game.showToast?.(err.message);
@@ -459,11 +669,11 @@ export class AtlasScreen {
       }
     });
 
-    detail.querySelector('#atlasEquipBtn')?.addEventListener('click', () => {
+    card.querySelector('#atlasCardEquipBtn')?.addEventListener('click', () => {
       try {
         equip('accessory', region.accessoryId);
         this.game.audio?.play('confirm');
-        this.renderDetail();
+        this.renderFloatingCard();
         refreshIcons();
       } catch (err) {
         this.game.showToast?.(err.message);
@@ -471,55 +681,62 @@ export class AtlasScreen {
     });
   }
 
-  drawMap() {
+  draw() {
+    this.resizeView();
     if (!this.ctx || !this.canvas) return;
     const c = this.ctx;
-    const w = this.canvas.width;
-    const h = this.canvas.height;
+    const W = this.view.w;
+    const H = this.view.h;
     const t = this.animTime;
 
-    // Fondo del mar oceánico retro con gradiente
-    const seaGrad = c.createLinearGradient(0, 0, 0, h);
-    seaGrad.addColorStop(0, '#041726');
-    seaGrad.addColorStop(0.5, '#06263f');
-    seaGrad.addColorStop(1, '#083354');
-    c.fillStyle = seaGrad;
-    c.fillRect(0, 0, w, h);
+    c.clearRect(0, 0, W, H);
 
-    // Olas animadas en el océano
+    c.save();
+    c.translate(-Math.round(this.camera.x), -Math.round(this.camera.y));
+
+    // --- 1. OCÉANO Y CORRIENTES MARINAS ---
+    const oceanGrad = c.createLinearGradient(0, 0, 0, this.world.h);
+    oceanGrad.addColorStop(0, '#021220');
+    oceanGrad.addColorStop(0.4, '#041d33');
+    oceanGrad.addColorStop(1, '#062846');
+    c.fillStyle = oceanGrad;
+    c.fillRect(0, 0, this.world.w, this.world.h);
+
+    // Olas animadas en el mar
     c.fillStyle = 'rgba(56, 189, 248, 0.12)';
-    for (let row = 0; row < 14; row++) {
+    for (let row = 0; row < 24; row++) {
       const y = 20 + row * 30;
-      const waveShift = Math.sin(t * 1.5 + row * 0.8) * 16;
-      for (let x = -20; x < w + 20; x += 40) {
-        c.fillRect(x + waveShift, y, 16, 2);
+      const waveShift = Math.sin(t * 1.8 + row * 0.9) * 20;
+      for (let x = -20; x < this.world.w + 40; x += 48) {
+        c.fillRect(x + waveShift, y, 20, 2);
       }
     }
 
-    // Dibujar rutas marítimas y terrestres entre regiones
+    // --- 2. RUTAS TERRESTRES Y MARÍTIMAS CONECTADAS ---
     const routes = [
-      ['diner', 'kitchen'],
-      ['diner', 'parking'],
-      ['parking', 'snow'],
       ['snow', 'kitchen'],
-      ['diner', 'football'],
-      ['football', 'beach'],
+      ['snow', 'parking'],
+      ['kitchen', 'diner'],
+      ['kitchen', 'football'],
+      ['parking', 'diner'],
       ['parking', 'desert'],
+      ['diner', 'football'],
+      ['diner', 'lava'],
       ['desert', 'lava'],
-      ['beach', 'lava'],
-      ['diner', 'lava']
+      ['football', 'beach'],
+      ['beach', 'lava']
     ];
 
-    c.lineWidth = 2;
+    c.lineWidth = 3;
     for (const [fromId, toId] of routes) {
       const from = REGIONS.find(r => r.id === fromId);
       const to = REGIONS.find(r => r.id === toId);
       if (!from || !to) continue;
 
-      const isLavaPath = fromId === 'lava' || toId === 'lava';
-      c.strokeStyle = isLavaPath ? 'rgba(239, 68, 68, 0.45)' : 'rgba(254, 240, 138, 0.28)';
-      c.setLineDash([4, 6]);
-      c.lineDashOffset = -t * 12;
+      const isLava = fromId === 'lava' || toId === 'lava';
+      c.strokeStyle = isLava ? 'rgba(239, 68, 68, 0.45)' : 'rgba(254, 240, 138, 0.32)';
+      c.setLineDash([5, 7]);
+      c.lineDashOffset = -t * 18;
       c.beginPath();
       c.moveTo(from.x, from.y);
       c.lineTo(to.x, to.y);
@@ -527,85 +744,233 @@ export class AtlasScreen {
     }
     c.setLineDash([]);
 
-    // Dibujar islas y nodos de región
-    const profile = currentAccount() || {};
+    // --- 3. DIBUJADO DE REGIONES Y BIOMAS PIXEL ART ---
     for (let i = 0; i < REGIONS.length; i++) {
       const r = REGIONS[i];
       const isSelected = i === this.selectedRegionIndex;
       const isHover = i === this.hoverRegionIndex;
-      const owned = isOwned(profile, 'map', r.id);
 
-      // Isla / Tierra bajo el nodo
       c.save();
       c.translate(r.x, r.y);
 
-      // Sombra de isla
+      // Aguas someras / arrecife alrededor de cada isla
+      c.fillStyle = 'rgba(14, 165, 233, 0.20)';
+      c.beginPath();
+      c.ellipse(0, 12, 68, 38, 0, 0, Math.PI * 2);
+      c.fill();
+
+      // Sombra de contacto de la isla
       c.fillStyle = 'rgba(2, 6, 23, 0.55)';
       c.beginPath();
-      c.ellipse(0, 8, 30, 18, 0, 0, Math.PI * 2);
+      c.ellipse(0, 10, 56, 30, 0, 0, Math.PI * 2);
       c.fill();
 
-      // Superficie de la isla según bioma
-      const biomeColors = {
-        diner: '#a16207',
-        kitchen: '#78350f',
-        parking: '#334155',
-        snow: '#93c5fd',
-        desert: '#d97706',
-        football: '#15803d',
-        beach: '#eab308',
-        lava: '#7f1d1d'
-      };
-      c.fillStyle = biomeColors[r.id] || '#334155';
-      c.beginPath();
-      c.ellipse(0, 0, 26, 16, 0, 0, Math.PI * 2);
-      c.fill();
+      // Terreno base del bioma
+      this.drawBiomeTerrain(c, r.id, t);
 
-      // Anillo de selección pulsante
+      // Aro de selección o hover
       if (isSelected || isHover) {
-        const pulse = (Math.sin(t * 5) + 1) * 0.5;
+        const pulse = (Math.sin(t * 6) + 1) * 0.5;
         c.strokeStyle = isSelected ? r.color : '#ffffff';
-        c.lineWidth = isSelected ? 3 : 2;
+        c.lineWidth = isSelected ? 3.5 : 2;
         c.beginPath();
-        c.arc(0, 0, 22 + (isSelected ? pulse * 4 : 2), 0, Math.PI * 2);
+        c.arc(0, 0, 36 + (isSelected ? pulse * 5 : 2), 0, Math.PI * 2);
         c.stroke();
       }
 
-      // Base del pin
+      // Pin central con icono y número de región
       c.fillStyle = '#0f172a';
       c.beginPath();
-      c.arc(0, -2, 14, 0, Math.PI * 2);
+      c.arc(0, -4, 16, 0, Math.PI * 2);
       c.fill();
       c.strokeStyle = r.color;
-      c.lineWidth = 2;
+      c.lineWidth = 2.5;
       c.stroke();
 
-      // Número de región
-      c.font = 'bold 10px monospace';
+      c.font = 'bold 11px monospace';
       c.textAlign = 'center';
       c.textBaseline = 'middle';
       c.fillStyle = '#f8fafc';
-      c.fillText(`0${r.index}`, 0, -2);
+      c.fillText(`0${r.index}`, 0, -4);
 
-      // Etiqueta flotante con nombre
-      c.font = 'bold 9px monospace';
-      c.fillStyle = '#0f172a';
-      c.fillRect(-44, 18, 88, 14);
-      c.strokeStyle = isSelected ? r.color : '#334155';
-      c.lineWidth = 1;
-      c.strokeRect(-44, 18, 88, 14);
+      // Cartel con nombre de la región
+      c.fillStyle = '#0b1522';
+      c.fillRect(-48, 22, 96, 16);
+      c.strokeStyle = isSelected ? r.color : '#203a4f';
+      c.lineWidth = 1.5;
+      c.strokeRect(-48, 22, 96, 16);
+
+      c.font = 'bold 8px monospace';
       c.fillStyle = isSelected ? r.color : '#f8fafc';
-      c.fillText(r.name.toUpperCase(), 0, 26);
+      c.fillText(r.name.toUpperCase(), 0, 31);
 
-      // Candado si no es propio
+      // Indicador de bloqueo
+      const profile = currentAccount() || {};
+      const owned = isOwned(profile, 'map', r.id);
       if (!owned) {
         c.fillStyle = '#ef4444';
-        c.fillRect(10, -14, 8, 8);
+        c.fillRect(10, -18, 10, 10);
         c.fillStyle = '#ffffff';
-        c.fillRect(12, -12, 4, 4);
+        c.fillRect(13, -15, 4, 4);
       }
 
       c.restore();
+    }
+
+    // --- 4. PANCHO VIAJANDO POR EL MAPA ---
+    this.drawPanchoOnMap(c, t);
+
+    // --- 5. PARTÍCULAS AMBIENTALES ---
+    this.drawParticles(c);
+
+    c.restore();
+
+    // Viñeta de bordes arcade sobre el viewport
+    const vignette = c.createRadialGradient(W / 2, H / 2, H * 0.45, W / 2, H / 2, Math.hypot(W, H) / 2);
+    vignette.addColorStop(0, 'transparent');
+    vignette.addColorStop(1, 'rgba(2, 6, 16, 0.45)');
+    c.fillStyle = vignette;
+    c.fillRect(0, 0, W, H);
+  }
+
+  drawBiomeTerrain(c, id, t) {
+    if (id === 'snow') {
+      // Montañas nevadas y pinos
+      c.fillStyle = '#e2e8f0';
+      c.beginPath(); c.ellipse(0, 0, 52, 26, 0, 0, Math.PI * 2); c.fill();
+      c.fillStyle = '#93c5fd';
+      c.beginPath(); c.moveTo(-28, 4); c.lineTo(-12, -22); c.lineTo(4, 4); c.fill();
+      c.beginPath(); c.moveTo(-6, 6); c.lineTo(14, -28); c.lineTo(32, 6); c.fill();
+      c.fillStyle = '#ffffff';
+      c.beginPath(); c.moveTo(-16, -14); c.lineTo(-12, -22); c.lineTo(-8, -14); c.fill();
+      c.beginPath(); c.moveTo(10, -20); c.lineTo(14, -28); c.lineTo(18, -20); c.fill();
+    } else if (id === 'kitchen') {
+      // Fábrica industrial de acero y chimeneas con humo
+      c.fillStyle = '#475569';
+      c.beginPath(); c.ellipse(0, 0, 52, 26, 0, 0, Math.PI * 2); c.fill();
+      c.fillStyle = '#1e293b';
+      c.fillRect(-24, -18, 48, 18);
+      c.fillStyle = '#334155';
+      c.fillRect(-18, -30, 8, 14); c.fillRect(10, -32, 10, 16);
+      // Humo animado
+      const puff = Math.sin(t * 4) * 4;
+      c.fillStyle = 'rgba(241, 245, 249, 0.45)';
+      c.beginPath(); c.arc(-14 + puff, -38, 5, 0, Math.PI * 2); c.fill();
+      c.beginPath(); c.arc(15 - puff, -42, 7, 0, Math.PI * 2); c.fill();
+    } else if (id === 'parking') {
+      // Asfalto gris con líneas amarillas de estacionamiento
+      c.fillStyle = '#1e293b';
+      c.beginPath(); c.ellipse(0, 0, 50, 25, 0, 0, Math.PI * 2); c.fill();
+      c.fillStyle = '#334155';
+      c.fillRect(-26, -12, 52, 24);
+      c.fillStyle = '#facc15';
+      for (let p = -20; p <= 16; p += 9) {
+        c.fillRect(p, -10, 2, 8); c.fillRect(p, 2, 2, 8);
+      }
+    } else if (id === 'desert') {
+      // Dunas doradas y cactus
+      c.fillStyle = '#d97706';
+      c.beginPath(); c.ellipse(0, 0, 52, 26, 0, 0, Math.PI * 2); c.fill();
+      c.fillStyle = '#f59e0b';
+      c.beginPath(); c.ellipse(-8, -4, 38, 18, -0.2, 0, Math.PI * 2); c.fill();
+      // Cactus
+      c.fillStyle = '#15803d';
+      c.fillRect(-22, -18, 4, 16); c.fillRect(-26, -14, 12, 3);
+      c.fillRect(-26, -17, 3, 4); c.fillRect(-17, -17, 3, 4);
+    } else if (id === 'football') {
+      // Césped de cancha con franjas y arcos
+      c.fillStyle = '#16a34a';
+      c.beginPath(); c.ellipse(0, 0, 52, 26, 0, 0, Math.PI * 2); c.fill();
+      c.fillStyle = '#15803d';
+      for (let f = -28; f <= 20; f += 12) c.fillRect(f, -12, 6, 24);
+      c.strokeStyle = '#ffffff'; c.lineWidth = 1.5;
+      c.strokeRect(-24, -12, 48, 24);
+      c.beginPath(); c.arc(0, 0, 8, 0, Math.PI * 2); c.stroke();
+    } else if (id === 'beach') {
+      // Costa de arena y palmeras
+      c.fillStyle = '#fde047';
+      c.beginPath(); c.ellipse(0, 0, 52, 26, 0, 0, Math.PI * 2); c.fill();
+      c.fillStyle = '#2dd4bf';
+      c.beginPath(); c.ellipse(14, 6, 32, 14, 0.2, 0, Math.PI * 2); c.fill();
+      // Palmera
+      c.fillStyle = '#78350f';
+      c.fillRect(-20, -18, 4, 16);
+      c.fillStyle = '#22c55e';
+      c.beginPath(); c.arc(-18, -20, 8, 0, Math.PI * 2); c.fill();
+      c.beginPath(); c.arc(-26, -18, 6, 0, Math.PI * 2); c.fill();
+      c.beginPath(); c.arc(-10, -18, 6, 0, Math.PI * 2); c.fill();
+    } else if (id === 'lava') {
+      // Cráter de basalto negro con magma incandescente
+      c.fillStyle = '#1c090d';
+      c.beginPath(); c.ellipse(0, 0, 54, 28, 0, 0, Math.PI * 2); c.fill();
+      // Magma pulsante
+      const lavaPulse = (Math.sin(t * 4) + 1) * 0.5;
+      c.fillStyle = '#ef4444';
+      c.beginPath(); c.ellipse(0, 0, 36 + lavaPulse * 4, 18 + lavaPulse * 2, 0, 0, Math.PI * 2); c.fill();
+      c.fillStyle = '#f97316';
+      c.beginPath(); c.ellipse(0, 0, 24, 12, 0, 0, Math.PI * 2); c.fill();
+      c.fillStyle = '#fef08a';
+      c.beginPath(); c.ellipse(0, 0, 12, 6, 0, 0, Math.PI * 2); c.fill();
+    } else {
+      // Diner clásico (Local DOMI)
+      c.fillStyle = '#b45309';
+      c.beginPath(); c.ellipse(0, 0, 54, 28, 0, 0, Math.PI * 2); c.fill();
+      // Fachada con techo rojo y blanco
+      c.fillStyle = '#dc2626';
+      c.fillRect(-22, -18, 44, 16);
+      c.fillStyle = '#ffffff';
+      c.fillRect(-18, -18, 8, 16); c.fillRect(10, -18, 8, 16);
+      // Cartel de neón DOMI
+      c.fillStyle = '#fef08a';
+      c.fillRect(-12, -26, 24, 8);
+      c.fillStyle = '#b91c1c';
+      c.font = 'bold 6px monospace';
+      c.fillText('DOMI', 0, -20);
+    }
+  }
+
+  drawPanchoOnMap(c, t) {
+    const p = this.pancho;
+    c.save();
+    c.translate(p.x, p.y - 12);
+
+    // Sombra de Pancho
+    c.fillStyle = 'rgba(0,0,0,0.45)';
+    c.beginPath();
+    c.ellipse(0, 16, 12, 5, 0, 0, Math.PI * 2);
+    c.fill();
+
+    // Sprite de Pancho caminando con balanceo
+    const bob = p.moving ? Math.sin(t * 14) * 2 : 0;
+    drawFood(c, 'pancho', 0, bob, 0.65, p.moving ? t * 2 : 0);
+
+    // Partículas de polvo si se está moviendo
+    if (p.moving && Math.random() < 0.4) {
+      c.fillStyle = 'rgba(254, 240, 138, 0.6)';
+      c.beginPath();
+      c.arc(-8 + Math.random() * 4, 14 + Math.random() * 3, 2, 0, Math.PI * 2);
+      c.fill();
+    }
+
+    c.restore();
+  }
+
+  drawParticles(c) {
+    for (const p of this.particles) {
+      if (p.type === 'snow') {
+        c.fillStyle = '#ffffff';
+        c.beginPath();
+        c.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+        c.fill();
+      } else if (p.type === 'ember') {
+        c.fillStyle = p.life < 0.5 ? '#f97316' : '#facc15';
+        c.beginPath();
+        c.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+        c.fill();
+      } else if (p.type === 'sand') {
+        c.fillStyle = '#fde047';
+        c.fillRect(p.x, p.y, p.size, p.size);
+      }
     }
   }
 }

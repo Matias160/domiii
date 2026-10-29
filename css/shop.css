@@ -585,293 +585,300 @@
 :is(#shopScreen, #domiScreen) .shop-feedback:empty { display:none; }
 
 /* ==========================================================================
-   ATLAS DE CARTOGRAFÍA - ESTILOS ARCADE 16-BIT
+   ATLAS DE CARTOGRAFÍA - MUNDO PIXEL ART INTERACTIVO Y NAVEGABLE
    ========================================================================== */
-#atlasScreen {
-  padding: 30px clamp(16px, 4vw, 64px) 48px;
-  align-items: start;
-  scroll-behavior: smooth;
-  --atlas-accent: #38bdf8;
-}
-.atlas-panel {
+.atlas-screen {
+  position: absolute;
+  inset: 0;
   width: 100%;
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 0;
-  min-width: 0;
-}
-.atlas-layout {
-  display: grid;
-  grid-template-columns: 520px minmax(340px, 1fr);
-  gap: 24px;
-  align-items: start;
-  margin-top: 20px;
-}
-.atlas-map-wrapper {
-  background: #041726;
-  border: 3px solid #1e3a5f;
-  box-shadow: 4px 4px 0 #000, 0 0 16px rgba(14, 165, 233, 0.2);
-  border-radius: 4px;
+  height: 100%;
+  padding: 0 !important;
+  margin: 0 !important;
   overflow: hidden;
-  position: relative;
-}
-.atlas-map-wrapper canvas {
-  display: block;
-  width: 100%;
-  height: auto;
-  image-rendering: pixelated;
-}
-.atlas-map-hint {
-  padding: 10px 14px;
-  background: #020d18;
-  border-top: 2px solid #1e3a5f;
-  font: 11px/1.4 'Press Start 2P', monospace;
-  color: #7dd3fc;
-  text-align: center;
-}
-.atlas-map-hint kbd {
-  background: #0f2744;
-  border: 1px solid #38bdf8;
-  padding: 2px 5px;
-  border-radius: 2px;
-  color: #fef08a;
-}
-.atlas-detail {
-  background: #0b1520;
-  border: 3px solid #203a4f;
-  box-shadow: 4px 4px 0 #000;
-  padding: 20px;
+  background: #041424;
   display: flex;
   flex-direction: column;
+}
+
+.atlas-topbar {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   gap: 16px;
-  border-radius: 4px;
+  padding: 10px 20px;
+  background: rgba(4, 15, 26, 0.94);
+  border-bottom: 2px solid #1e3a5f;
+  z-index: 10;
 }
-.atlas-card-header {
-  padding: 10px 14px;
-  background: #112233;
+
+.atlas-top-center {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.atlas-title-text strong {
+  display: block;
+  font: 11px/1.3 'Press Start 2P', monospace;
+  color: #fef08a;
+  letter-spacing: 0.5px;
+}
+
+.atlas-title-text small {
+  display: block;
+  font: 9px/1 'Press Start 2P', monospace;
+  color: #38bdf8;
+  margin-top: 2px;
+}
+
+.atlas-quick-nav {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  overflow-x: auto;
+}
+
+.atlas-quick-btn {
+  background: #0f2338;
+  border: 1px solid #1e456b;
+  color: #cbd5e1;
+  font: 9px/1 'Press Start 2P', monospace;
+  padding: 6px 10px;
   border-radius: 2px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
 }
-.atlas-card-title-row {
+
+.atlas-quick-btn:hover {
+  background: #1e3a5f;
+  color: #fef08a;
+  border-color: #38bdf8;
+  transform: translateY(-1px);
+}
+
+.atlas-quick-btn.is-active {
+  background: #38bdf8;
+  color: #041424;
+  border-color: #7dd3fc;
+  box-shadow: 0 0 8px rgba(56, 189, 248, 0.6);
+}
+
+.atlas-stage {
+  flex: 1;
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: #03101c;
+}
+
+.atlas-stage canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  image-rendering: pixelated;
+  cursor: grab;
+}
+
+.atlas-stage canvas:active {
+  cursor: grabbing;
+}
+
+/* Floating Retro Card in the corner */
+.atlas-floating-card {
+  position: absolute;
+  bottom: 24px;
+  right: 24px;
+  width: 360px;
+  max-width: calc(100vw - 48px);
+  max-height: calc(100vh - 120px);
+  overflow-y: auto;
+  background: rgba(11, 21, 32, 0.94);
+  border: 3px solid #203a4f;
+  border-radius: 4px;
+  box-shadow: 6px 6px 0 #000, 0 0 24px rgba(0, 0, 0, 0.85);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  z-index: 20;
+  backdrop-filter: blur(4px);
+  animation: atlasCardPop 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes atlasCardPop {
+  from { opacity: 0; transform: translateY(16px) scale(0.96); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.atlas-card-top {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 6px;
+  border-bottom: 2px solid #1e3a53;
+  padding-bottom: 8px;
 }
-.atlas-region-badge {
-  font: 9px/1 'Press Start 2P', monospace;
-  padding: 4px 7px;
+
+.atlas-card-reg-name {
+  font: 13px/1.3 'Press Start 2P', monospace;
+  color: #f8fafc;
+  margin: 0;
+}
+
+.atlas-card-sub {
+  font: 11px/1.4 'Segoe UI', Arial, sans-serif;
+  color: #94a3b8;
+  margin: 2px 0 0;
+}
+
+.atlas-tag-badge {
+  font: 8px/1 'Press Start 2P', monospace;
+  padding: 3px 6px;
   border-radius: 2px;
 }
-.atlas-owned-badge {
-  font: 9px/1 'Press Start 2P', monospace;
-  padding: 4px 7px;
-  border-radius: 2px;
-}
-.atlas-owned-badge.is-owned {
-  background: rgba(74, 222, 128, 0.18);
+
+.atlas-tag-badge.is-owned {
+  background: rgba(74, 222, 128, 0.2);
   color: #4ade80;
   border: 1px solid #22c55e;
 }
-.atlas-owned-badge.is-locked {
-  background: rgba(239, 68, 68, 0.18);
+
+.atlas-tag-badge.is-locked {
+  background: rgba(239, 68, 68, 0.2);
   color: #f87171;
   border: 1px solid #ef4444;
 }
-.atlas-region-name {
-  font: 15px/1.3 'Press Start 2P', monospace;
-  color: #f8fafc;
-  margin: 4px 0 2px;
-}
-.atlas-region-sub {
-  font: 13px/1.4 'Segoe UI', Arial, sans-serif;
-  color: #94a3b8;
-  margin: 0;
-}
-.atlas-section {
+
+.atlas-card-row {
   display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-.atlas-section-title {
-  font: 10px/1.2 'Press Start 2P', monospace;
-  color: #7dd3fc;
-  margin: 0 0 4px;
-  display: flex;
+  gap: 10px;
   align-items: center;
-  gap: 6px;
-}
-.atlas-section-title svg {
-  width: 14px;
-  height: 14px;
-}
-.atlas-hazard-desc {
-  font: 13px/1.5 'Segoe UI', Arial, sans-serif;
-  color: #fca5a5;
-  background: rgba(153, 27, 27, 0.18);
-  border-left: 3px solid #ef4444;
-  padding: 8px 12px;
-  margin: 0;
-}
-.atlas-stats-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 8px;
-}
-.atlas-stat-box {
-  background: #11202e;
+  background: #0f1c29;
   border: 1px solid #1e3a53;
-  padding: 8px;
-  text-align: center;
+  padding: 8px 10px;
   border-radius: 2px;
 }
-.atlas-stat-box small {
-  display: block;
-  font: 8px/1 'Press Start 2P', monospace;
-  color: #64748b;
-  margin-bottom: 4px;
-}
-.atlas-stat-box strong {
-  font: 12px/1 'Press Start 2P', monospace;
-  color: #f8fafc;
-}
-.atlas-enemy-card {
-  display: flex;
-  gap: 12px;
-  align-items: center;
-  background: #101e2c;
-  border: 1px solid #1e3a53;
-  padding: 10px;
-  border-radius: 2px;
-}
-.atlas-enemy-preview canvas {
+
+.atlas-card-canvas-wrap {
+  width: 44px;
+  height: 44px;
   background: #08111a;
   border: 1px solid #1e3a53;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+}
+
+.atlas-card-canvas-wrap canvas {
   display: block;
   image-rendering: pixelated;
-  border-radius: 2px;
 }
-.atlas-enemy-info strong {
+
+.atlas-card-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.atlas-card-info strong {
   display: block;
-  font: 11px/1.2 'Press Start 2P', monospace;
-  color: #f8fafc;
+  font: 10px/1.2 'Press Start 2P', monospace;
+  color: #fef08a;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
-.atlas-enemy-role {
+
+.atlas-card-info small {
   display: block;
-  font: 9px/1.3 'Press Start 2P', monospace;
-  margin: 2px 0 4px;
+  font: 11px/1.3 'Segoe UI', Arial, sans-serif;
+  color: #cbd5e1;
+  margin-top: 2px;
 }
-.atlas-enemy-desc {
-  font: 12px/1.4 'Segoe UI', Arial, sans-serif;
-  color: #94a3b8;
-  margin: 0;
-}
-.atlas-mission-card {
-  background: #101e2c;
-  border: 1px solid #1e3a53;
-  padding: 12px;
-  border-radius: 2px;
+
+.atlas-mission-prog-wrap {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 4px;
+  background: #0f1c29;
+  border: 1px solid #1e3a53;
+  padding: 8px 10px;
+  border-radius: 2px;
 }
-.atlas-mission-header {
+
+.atlas-mission-prog-header {
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  font: 11px/1.2 'Press Start 2P', monospace;
+  font: 9px/1 'Press Start 2P', monospace;
 }
-.atlas-mission-header strong {
-  color: #fef08a;
-}
-.atlas-mission-status {
-  font-size: 9px;
-  color: #cbd5e1;
-}
-.atlas-mission-status.is-done {
-  color: #4ade80;
-}
-.atlas-mission-desc {
-  font: 12px/1.4 'Segoe UI', Arial, sans-serif;
-  color: #cbd5e1;
-  margin: 0;
-}
-.atlas-progress-track {
+
+.atlas-bar-track {
   height: 8px;
-  background: #0a131c;
+  background: #08111a;
   border: 1px solid #1e3a53;
   border-radius: 2px;
   overflow: hidden;
 }
-.atlas-progress-fill {
+
+.atlas-bar-fill {
   height: 100%;
   transition: width 0.3s ease;
 }
-.atlas-accessory-card {
-  display: flex;
-  gap: 12px;
-  align-items: center;
-  background: #101e2c;
-  border: 1px solid #1e3a53;
-  padding: 10px;
-  border-radius: 2px;
-}
-.atlas-accessory-preview {
-  position: relative;
-  background: #08111a;
-  border: 1px solid #1e3a53;
-  width: 48px;
-  height: 48px;
-  border-radius: 2px;
+
+.atlas-stats-mini {
   display: grid;
-  place-items: center;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
 }
-.atlas-accessory-preview canvas {
+
+.atlas-stat-mini-box {
+  background: #0f1c29;
+  border: 1px solid #1e3a53;
+  padding: 4px 6px;
+  text-align: center;
+}
+
+.atlas-stat-mini-box small {
   display: block;
-  image-rendering: pixelated;
+  font: 7px/1 'Press Start 2P', monospace;
+  color: #64748b;
+  margin-bottom: 2px;
 }
-.atlas-lock-overlay {
+
+.atlas-stat-mini-box strong {
+  font: 10px/1 'Press Start 2P', monospace;
+  color: #f8fafc;
+}
+
+.atlas-stage-hint {
   position: absolute;
-  inset: 0;
-  background: rgba(11, 15, 25, 0.75);
-  display: grid;
-  place-items: center;
-  color: #f87171;
+  bottom: 12px;
+  left: 20px;
+  padding: 8px 14px;
+  background: rgba(4, 15, 26, 0.88);
+  border: 1px solid #1e3a5f;
+  font: 10px/1.4 'Press Start 2P', monospace;
+  color: #7dd3fc;
+  border-radius: 3px;
+  pointer-events: none;
+  z-index: 10;
 }
-.atlas-lock-overlay svg {
-  width: 20px;
-  height: 20px;
-}
-.atlas-accessory-info strong {
-  display: block;
-  font: 11px/1.2 'Press Start 2P', monospace;
+
+.atlas-stage-hint kbd {
+  background: #0f2744;
+  border: 1px solid #38bdf8;
+  padding: 2px 4px;
   color: #fef08a;
+  border-radius: 2px;
 }
-.atlas-accessory-desc {
-  font: 12px/1.4 'Segoe UI', Arial, sans-serif;
-  color: #94a3b8;
-  margin: 2px 0 6px;
-}
-.atlas-locked-hint {
-  font: 11px/1.3 'Segoe UI', Arial, sans-serif;
-  color: #f87171;
-  display: block;
-}
-.pixel-button--sm {
-  padding: 6px 12px !important;
-  font-size: 10px !important;
-}
-.pixel-button--sm.is-active {
-  background: #22c55e !important;
-  color: #052e16 !important;
-  border-color: #4ade80 !important;
-}
-.atlas-actions {
-  margin-top: 8px;
-}
-@media (max-width: 960px) {
-  .atlas-layout {
-    grid-template-columns: minmax(0, 1fr);
-  }
+
+@media (max-width: 768px) {
+  .atlas-topbar { flex-wrap: wrap; padding: 8px 12px; }
+  .atlas-top-center { display: none; }
+  .atlas-floating-card { bottom: 12px; right: 12px; left: 12px; width: auto; max-width: none; }
+  .atlas-stage-hint { display: none; }
 }
 @media (max-width:1100px) { :is(#shopScreen, #domiScreen) .shop-grid { grid-template-columns:repeat(2,minmax(0,1fr)); } :is(#shopScreen, #domiScreen) .shop-heading h2 { font-size:18px; } }
 @media (max-width:760px) {

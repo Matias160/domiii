@@ -134,27 +134,34 @@
         </div>
       </section>
 
-      <section id="atlasScreen" class="screen shop-screen atlas-screen" aria-labelledby="atlasTitle">
-        <div class="screen__panel atlas-panel">
-          <header class="shop-heading">
-            <button id="atlasBackButton" class="icon-button" title="Volver al local" aria-label="Volver al local"><i data-lucide="arrow-left"></i></button>
-            <div class="shop-heading-copy">
-              <p class="eyebrow">DOMI 2 / CARTOGRAFÍA CULINARIA</p>
-              <h2 id="atlasTitle">Atlas de las Ocho Regiones</h2>
-              <p id="atlasSubtitle">Explorá el archipiélago, descubrí amenazas nativas, completá misiones temáticas y desbloqueá reliquias.</p>
+      <section id="atlasScreen" class="screen atlas-screen" aria-label="Atlas Interactivo de las Ocho Regiones">
+        <header class="atlas-topbar">
+          <button id="atlasBackButton" class="pixel-button pixel-button--secondary" title="Volver al local" aria-label="Volver al local">
+            ← VOLVER (ESC)
+          </button>
+          <div class="atlas-top-center">
+            <span class="brand-mark">D<span>2</span></span>
+            <div class="atlas-title-text">
+              <strong>ATLAS CARTOGRÁFICO</strong>
+              <small>ARCHIPIÉLAGO DE DON DOMI</small>
             </div>
-            <div class="shop-balance">
-              <small>TUS PUNTOS</small>
-              <span class="wallet"><i data-lucide="coins"></i><b id="atlasBank">0</b><small>PT</small></span>
-            </div>
-          </header>
+          </div>
+          <div id="atlasQuickNav" class="atlas-quick-nav" role="toolbar" aria-label="Selección rápida de mapas"></div>
+          <div class="atlas-balance">
+            <span class="wallet"><i data-lucide="coins"></i><b id="atlasBank">0</b><small>PT</small></span>
+          </div>
+        </header>
 
-          <div class="atlas-layout">
-            <div class="atlas-map-wrapper">
-              <canvas id="atlasCanvas" width="520" height="420" aria-label="Atlas interactivo"></canvas>
-              <div class="atlas-map-hint"><kbd>WASD</kbd> / Flechas: cambiar región · Clic: enfocar</div>
-            </div>
-            <aside id="atlasRegionDetail" class="atlas-detail" aria-label="Detalles de la región seleccionada"></aside>
+        <div class="atlas-stage">
+          <canvas id="atlasCanvas" width="960" height="540" aria-label="Mapa interactivo pixel art"></canvas>
+
+          <!-- Floating Region Info Card -->
+          <div id="atlasFloatingCard" class="atlas-floating-card">
+            <!-- Contenido dinámico renderizado por AtlasScreen -->
+          </div>
+
+          <div class="atlas-stage-hint">
+            <span>Arrastrá el mapa para explorar · Clic en una región para viajar · <kbd>WASD</kbd> / Flechas · <kbd>Espacio</kbd>: Jugar</span>
           </div>
         </div>
       </section>
