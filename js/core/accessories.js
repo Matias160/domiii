@@ -13,6 +13,34 @@ if (legendarySheet) legendarySheet.src = './accesorios legendarios.png';
 export const coronaSheet = typeof Image !== 'undefined' ? new Image() : null;
 if (coronaSheet) coronaSheet.src = './corona_sheet.png';
 
+export const mapAssets = typeof Image !== 'undefined' ? {
+  lentes: new Image(),
+  sheriff: new Image(),
+  guitarra: new Image(),
+  lampara: new Image(),
+  preview: new Image(),
+} : null;
+
+if (mapAssets) {
+  mapAssets.lentes.src = './accesorios por mapa/01_lentes_fiesta.png';
+  mapAssets.sheriff.src = './accesorios por mapa/02_estrella_sheriff.png';
+  mapAssets.guitarra.src = './accesorios por mapa/03_guitarra_temblor_x8.gif';
+  mapAssets.lampara.src = './accesorios por mapa/04_lampara_mano_x8.gif';
+  mapAssets.preview.src = './accesorios por mapa/preview_1.png';
+}
+
+function getMapAssetSource(sheetKey) {
+  if (!mapAssets) return null;
+  if (sheetKey === 'map_lentes') return { img: mapAssets.lentes, sx: 0, sy: 0, sw: 384, sh: 384 };
+  if (sheetKey === 'map_sheriff') return { img: mapAssets.sheriff, sx: 0, sy: 0, sw: 384, sh: 384 };
+  if (sheetKey === 'map_guitarra') return { img: mapAssets.guitarra, sx: 0, sy: 0, sw: 768, sh: 768 };
+  if (sheetKey === 'map_lampara') return { img: mapAssets.lampara, sx: 0, sy: 0, sw: 512, sh: 512 };
+  if (sheetKey === 'map_preview_pineapple') return { img: mapAssets.preview, sx: 0, sy: 0, sw: 400, sh: 400 };
+  if (sheetKey === 'map_preview_santa') return { img: mapAssets.preview, sx: 400, sy: 0, sw: 400, sh: 400 };
+  if (sheetKey === 'map_preview_skates') return { img: mapAssets.preview, sx: 800, sy: 0, sw: 400, sh: 400 };
+  return null;
+}
+
 export const ACCESSORIES = {
   // --- ACCESORIOS ESTÁNDAR (TIENDA Y ARMARIO - 8 ITEMS REALES DE accesorios.png) ---
   crown: {
@@ -315,94 +343,97 @@ export const ACCESSORIES = {
   // --- ACCESORIOS EXCLUSIVOS DE CARTOGRAFÍA (MISIONES DE MAPA) ---
   ticket_gold: {
     id: 'ticket_gold',
-    name: 'Ticket Dorado',
+    name: 'Lentes de Fiesta',
     tier: 'cartography',
-    category: 'Presea',
+    category: 'Lentes',
     layer: 'front',
     cost: 0,
-    icon: '🎟',
-    desc: 'Ticket de oro sellado: +10% puntos y monedas, +5% daño con combo x5 o superior.',
+    icon: '🕶',
+    desc: 'Lentes estrella de fiesta retro: +10% puntos y monedas, +5% daño con combo x5 o superior.',
     stats: { hp: '-', spd: '-', dmg: '+5% Combo', perk: '+10% Puntos +Daño' },
-    sheet: 'procedural_cartography',
-    dw: 28, dh: 16, ox: -14, oy: -4
+    sheet: 'map_lentes',
+    dw: 38, dh: 22, ox: -19, oy: -12
   },
   thermal_gloves: {
     id: 'thermal_gloves',
-    name: 'Guantes Térmicos',
+    name: 'Farol Gourmet',
     tier: 'cartography',
-    category: 'Manoplas',
+    category: 'Mano',
     layer: 'front',
     cost: 0,
-    icon: '🧤',
-    desc: 'Guantes de chef reforzados: Inmunidad total al resbalón por aceite y +7% cadencia de disparo.',
+    icon: '🏮',
+    desc: 'Farol de hornallas vivas: Inmunidad total al resbalón por aceite y +7% cadencia de disparo.',
     stats: { hp: '-', spd: '-', dmg: '+7% Cadencia', perk: 'Anti-Aceite +Cadencia' },
-    sheet: 'procedural_cartography',
-    dw: 46, dh: 18, ox: -23, oy: 4
+    sheet: 'map_lampara',
+    dw: 32, dh: 32, ox: 14, oy: 0
   },
   reflect_vest: {
     id: 'reflect_vest',
-    name: 'Chaleco Reflectante',
+    name: 'Patines de Delivery',
     tier: 'cartography',
-    category: 'Torso',
+    category: 'Calzado',
     layer: 'front',
     cost: 0,
-    icon: '🦺',
-    desc: 'Chaleco vial de alta visibilidad: +20% daño de embestida con dash y recarga de dash 12% más rápida.',
+    icon: '🛼',
+    desc: 'Patines veloces de asfalto: +20% daño de embestida con dash y recarga de dash 12% más rápida.',
     stats: { hp: '-', spd: '-', dmg: '+20% Dash', perk: '+Dash Dmg & -Recarga' },
-    sheet: 'procedural_cartography',
-    dw: 34, dh: 26, ox: -17, oy: -8
+    sheet: 'map_preview_skates',
+    sx: 800, sy: 0, sw: 400, sh: 400,
+    dw: 44, dh: 22, ox: -22, oy: 12
   },
   thermal_scarf: {
     id: 'thermal_scarf',
-    name: 'Bufanda Térmica',
+    name: 'Gorro Invernal',
     tier: 'cartography',
-    category: 'Cuello',
+    category: 'Gorro',
     layer: 'front',
     cost: 0,
-    icon: '🧣',
-    desc: 'Bufanda de lana montañesa: -60% reducción de velocidad por frío ambiental y +12 HP máx.',
+    icon: '🎅',
+    desc: 'Gorro festivo invernal con pompón: -60% reducción de velocidad por frío ambiental y +12 HP máx.',
     stats: { hp: '+12', spd: 'Anti-Frío', dmg: '-', perk: '+12 HP & Anti-Frío' },
-    sheet: 'procedural_cartography',
-    dw: 36, dh: 20, ox: -18, oy: -6
+    sheet: 'map_preview_santa',
+    sx: 400, sy: 0, sw: 400, sh: 400,
+    dw: 48, dh: 38, ox: -24, oy: -40
   },
   thorn_boots: {
     id: 'thorn_boots',
-    name: 'Botas Anti-Espinas',
+    name: 'Estrella de Sheriff',
     tier: 'cartography',
-    category: 'Calzado',
+    category: 'Insignia',
     layer: 'front',
     cost: 0,
-    icon: '🥾',
-    desc: 'Suela de caucho reforzada: Inmunidad total al daño de cactus y +8% velocidad en arena.',
+    icon: '⭐',
+    desc: 'Insignia dorada del sheriff: Inmunidad total al daño de cactus y +8% velocidad en arena.',
     stats: { hp: '-', spd: '+8% Arena', dmg: '-', perk: 'Inmune Espinas' },
-    sheet: 'procedural_cartography',
-    dw: 38, dh: 16, ox: -19, oy: 16
+    sheet: 'map_sheriff',
+    dw: 26, dh: 26, ox: -13, oy: 2
   },
   captain_cleats: {
     id: 'captain_cleats',
-    name: 'Botines de Capitán',
+    name: 'Guitarra de Tribuna',
     tier: 'cartography',
-    category: 'Calzado',
+    category: 'Espalda',
     layer: 'front',
     cost: 0,
-    icon: '👟',
-    desc: 'Botines con cinta dorada: +30% velocidad y daño al patear pelotas/cocos y +8% velocidad.',
+    icon: '🎸',
+    desc: 'Guitarra de aliento acústica: +30% velocidad y daño al patear pelotas/cocos y +8% velocidad.',
     stats: { hp: '-', spd: '+8%', dmg: '+30% Patadas', perk: '+Potencia Patadas' },
-    sheet: 'procedural_cartography',
-    dw: 40, dh: 16, ox: -20, oy: 16
+    sheet: 'map_guitarra',
+    dw: 40, dh: 40, ox: 6, oy: -8
   },
   tropical_visor: {
     id: 'tropical_visor',
-    name: 'Visera Tropical',
+    name: 'Sombrero de Piña',
     tier: 'cartography',
-    category: 'Visera',
+    category: 'Gorro',
     layer: 'front',
     cost: 0,
-    icon: '🧢',
-    desc: 'Visera playera turquesa: +12% radio de imán de pickups y +7% probabilidad de golpe crítico.',
-    stats: { hp: '-', spd: '-', dmg: '+7% Crítico', perk: '+Imán & +Crítico' },
-    sheet: 'procedural_cartography',
-    dw: 36, dh: 15, ox: -18, oy: -20
+    icon: '🍍',
+    desc: 'Casco de piña tropical: +15% duración de efectos de comida y +7% probabilidad de golpe crítico.',
+    stats: { hp: '-', spd: '-', dmg: '+7% Crítico', perk: '+Duración & +Crítico' },
+    sheet: 'map_preview_pineapple',
+    sx: 0, sy: 0, sw: 400, sh: 400,
+    dw: 44, dh: 44, ox: -22, oy: -46
   },
   pineapple_hat: {
     id: 'pineapple_hat',
@@ -412,10 +443,11 @@ export const ACCESSORIES = {
     layer: 'front',
     cost: 0,
     icon: '🍍',
-    desc: 'Fruto caribeño tallado: +15% duración de efectos de comida y +6% daño de combate.',
-    stats: { hp: '-', spd: '-', dmg: '+6%', perk: '+Duración Comida' },
-    sheet: 'procedural_cartography',
-    dw: 36, dh: 32, ox: -18, oy: -36
+    desc: 'Casco de piña tropical: +15% duración de efectos de comida y +7% probabilidad de golpe crítico.',
+    stats: { hp: '-', spd: '-', dmg: '+7% Crítico', perk: '+Duración & +Crítico' },
+    sheet: 'map_preview_pineapple',
+    sx: 0, sy: 0, sw: 400, sh: 400,
+    dw: 44, dh: 44, ox: -22, oy: -46
   }
 };
 
@@ -665,6 +697,17 @@ export function drawAccessory(ctx, id, x, y, scale = 1, layerFilter = null) {
     ctx.restore();
     return;
   }
+  if (acc.sheet && acc.sheet.startsWith('map_')) {
+    const src = getMapAssetSource(acc.sheet);
+    if (src && src.img && src.img.complete && src.img.naturalWidth > 0) {
+      ctx.imageSmoothingEnabled = false;
+      ctx.drawImage(src.img, src.sx, src.sy, src.sw, src.sh, acc.ox, acc.oy, acc.dw, acc.dh);
+    } else {
+      drawProceduralCartographyAccessory(ctx, acc.id, acc.ox, acc.oy, acc.dw, acc.dh);
+    }
+    ctx.restore();
+    return;
+  }
   if (acc.sheet === 'procedural_cartography') {
     drawProceduralCartographyAccessory(ctx, acc.id, acc.ox, acc.oy, acc.dw, acc.dh);
     ctx.restore();
@@ -727,6 +770,24 @@ export function drawAccessoryIcon(ctx, id, cx, cy, boxSize = 48) {
     ctx.scale(s, s);
     drawProceduralChefHat(ctx, -19, -28, 38, 32);
     ctx.restore();
+    return;
+  }
+  if (acc.sheet && acc.sheet.startsWith('map_')) {
+    const src = getMapAssetSource(acc.sheet);
+    if (src && src.img && src.img.complete && src.img.naturalWidth > 0) {
+      const pad = boxSize * 0.12;
+      const targetW = boxSize - pad * 2;
+      const targetH = boxSize - pad * 2;
+      ctx.imageSmoothingEnabled = false;
+      ctx.drawImage(src.img, src.sx, src.sy, src.sw, src.sh, cx - targetW / 2, cy - targetH / 2, targetW, targetH);
+    } else {
+      const s = boxSize / 48;
+      ctx.save();
+      ctx.translate(cx, cy + (acc.category === 'Calzado' ? 0 : 2 * s));
+      ctx.scale(s * 1.05, s * 1.05);
+      drawProceduralCartographyAccessory(ctx, acc.id, -acc.dw / 2, -acc.dh / 2, acc.dw, acc.dh);
+      ctx.restore();
+    }
     return;
   }
   if (acc.sheet === 'procedural_cartography') {

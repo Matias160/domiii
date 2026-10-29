@@ -25,8 +25,8 @@ export const REGIONS = [
     missionDesc: 'Derrotar a 10 enemigos con combo x10 o superior',
     target: 10,
     accessoryId: 'ticket_gold',
-    accessoryName: 'Ticket Dorado',
-    accessoryDesc: '+10% puntos/monedas y +5% daño con combo x5 o mayor.'
+    accessoryName: 'Lentes de Fiesta',
+    accessoryDesc: 'Lentes estrella de fiesta retro: +10% puntos/monedas y +5% daño con combo x5 o mayor.'
   },
   {
     id: 'kitchen',
@@ -47,8 +47,8 @@ export const REGIONS = [
     missionDesc: 'Derrotar a 10 enemigos mientras haya aceite activo',
     target: 10,
     accessoryId: 'thermal_gloves',
-    accessoryName: 'Guantes Térmicos',
-    accessoryDesc: 'Inmunidad total al aceite y +7% cadencia de disparo.'
+    accessoryName: 'Farol Gourmet',
+    accessoryDesc: 'Farol de hornallas vivas: Inmunidad total al aceite y +7% cadencia de disparo.'
   },
   {
     id: 'parking',
@@ -69,8 +69,8 @@ export const REGIONS = [
     missionDesc: 'Derribar a 12 enemigos con acelerón (dash)',
     target: 12,
     accessoryId: 'reflect_vest',
-    accessoryName: 'Chaleco Reflectante',
-    accessoryDesc: '+20% daño de embestida con dash y recarga -12%.'
+    accessoryName: 'Patines de Delivery',
+    accessoryDesc: 'Patines veloces de asfalto: +20% daño de embestida con dash y recarga -12%.'
   },
   {
     id: 'snow',
@@ -91,8 +91,8 @@ export const REGIONS = [
     missionDesc: 'Derrotar a 10 enemigos durante ventiscas activas',
     target: 10,
     accessoryId: 'thermal_scarf',
-    accessoryName: 'Bufanda Térmica',
-    accessoryDesc: '-60% ralentización por frío y +12 HP máx.'
+    accessoryName: 'Gorro Invernal',
+    accessoryDesc: 'Gorro festivo invernal con pompón: -60% ralentización por frío y +12 HP máx.'
   },
   {
     id: 'desert',
@@ -113,8 +113,8 @@ export const REGIONS = [
     missionDesc: 'Derrotar a 10 enemigos mediante explosiones de cactus',
     target: 10,
     accessoryId: 'thorn_boots',
-    accessoryName: 'Botas Anti-Espinas',
-    accessoryDesc: 'Inmunidad al daño de cactus y +8% velocidad en arena.'
+    accessoryName: 'Estrella de Sheriff',
+    accessoryDesc: 'Insignia dorada del sheriff: Inmunidad al daño de cactus y +8% velocidad en arena.'
   },
   {
     id: 'football',
@@ -135,8 +135,8 @@ export const REGIONS = [
     missionDesc: 'Golpear a 8 enemigos con pelotas pateadas',
     target: 8,
     accessoryId: 'captain_cleats',
-    accessoryName: 'Botines de Capitán',
-    accessoryDesc: '+30% velocidad y daño al patear pelotas/cocos, +8% velocidad.'
+    accessoryName: 'Guitarra de Tribuna',
+    accessoryDesc: 'Guitarra acústica de hinchada: +30% velocidad y daño al patear pelotas/cocos, +8% velocidad.'
   },
   {
     id: 'beach',
@@ -157,8 +157,8 @@ export const REGIONS = [
     missionDesc: 'Derribar a 8 enemigos con cocos pateados',
     target: 8,
     accessoryId: 'tropical_visor',
-    accessoryName: 'Visera Tropical',
-    accessoryDesc: '+12% radio de imán de pickups y +7% crítico.'
+    accessoryName: 'Sombrero de Piña',
+    accessoryDesc: 'Casco de piña tropical: +15% duración de comida y +7% golpe crítico.'
   },
   {
     id: 'lava',

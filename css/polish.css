@@ -457,287 +457,137 @@ button:focus-visible, input:focus-visible, select:focus-visible {
 }
 
 /* =========================================================================
-   BRIEFING DE ZONA DEL MAPA (ARMA TU COMBO - PASO 1)
+   ELEMENTO DE MISIÓN Y RECOMPENSA DE MAPA (ARMA TU COMBO - PASO 1)
+   Un solo elemento armonizado con el resto de la selección de mapa
    ========================================================================= */
 .setup-map-briefing {
-  background: #0d1519;
-  border: 3px solid #1e3842;
-  border-bottom: 5px solid #070d10;
-  box-shadow: 4px 4px 0 #000, inset 0 0 16px rgba(0, 0, 0, 0.6);
-  padding: 12px 16px;
   margin-bottom: 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
+  width: 100%;
 }
 
-.briefing-topbar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  padding-bottom: 8px;
-  border-bottom: 1px solid #16272e;
-}
-
-.briefing-title-zone {
+.setup-mission-card {
+  width: 100%;
+  box-sizing: border-box;
   display: flex;
   align-items: center;
-  gap: 10px;
-  flex-wrap: wrap;
+  gap: 16px;
+  padding: 12px 18px;
+  background: #0d1217;
+  border: 3px solid #000;
+  border-bottom: 5px solid #000;
+  outline: 3px solid var(--pixel-purple, #b844ff);
+  box-shadow: 4px 4px 0 #000, 0 0 14px rgba(184, 68, 255, 0.25);
+  user-select: none;
 }
 
-.briefing-badge {
-  font-family: 'Press Start 2P', monospace;
-  font-size: 9px;
-  letter-spacing: 0.5px;
-  padding: 4px 8px;
-  background: rgba(34, 211, 238, 0.1);
-  border: 1px solid #22d3ee;
-  border-radius: 2px;
-}
-
-.briefing-subtitle {
-  font-family: 'Trebuchet MS', Arial, sans-serif;
-  font-size: 11px;
-  color: #7d9ba6;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.briefing-map-selector {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.briefing-map-pill {
-  width: 28px;
-  height: 28px;
-  padding: 0;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  background: #111e24;
-  border: 2px solid #23404c;
-  cursor: pointer;
-  font-size: 14px;
-  transition: transform 0.1s, border-color 0.1s;
-}
-
-.briefing-map-pill:hover {
-  transform: translateY(-2px);
-  border-color: #38bdf8;
-}
-
-.briefing-map-pill.is-active {
-  border-color: #facc15;
-  background: #1d333d;
-  box-shadow: 0 0 8px rgba(250, 204, 21, 0.5);
-}
-
-.briefing-map-pill.is-locked {
-  opacity: 0.45;
-  filter: grayscale(0.8);
-}
-
-.briefing-panels {
-  display: grid;
-  grid-template-columns: 1fr 1.25fr 1.15fr;
-  gap: 12px;
-}
-
-.briefing-panel {
-  background: #080f12;
-  border: 2px solid #172a32;
-  border-bottom: 3px solid #04080a;
-  padding: 10px 12px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.briefing-panel-tag {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 6px;
-}
-
-.briefing-tag-label {
-  font-family: 'Press Start 2P', monospace;
-  font-size: 8px;
-  color: #67e8f9;
-  letter-spacing: 0.5px;
-}
-
-.briefing-chip {
-  font-family: 'Press Start 2P', monospace;
-  font-size: 7px;
-  padding: 2px 6px;
-  background: #1e293b;
-  color: #94a3b8;
-  border: 1px solid #334155;
-  border-radius: 2px;
-}
-
-.briefing-chip.is-done {
-  background: rgba(34, 197, 94, 0.18);
-  color: #4ade80;
-  border-color: #22c55e;
-}
-
-.briefing-panel-content {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.briefing-panel-content--col {
-  flex-direction: column;
-  align-items: stretch;
-  gap: 6px;
-}
-
-.briefing-canvas-frame {
+.setup-mission-card__icon {
   width: 48px;
   height: 48px;
   flex-shrink: 0;
-  background: #04080a;
-  border: 2px solid #1f3b45;
+  background: #17051f;
+  border: 3px solid var(--pixel-purple, #b844ff);
   box-shadow: inset 2px 2px 0 #000;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
-.briefing-canvas-frame canvas {
-  width: 48px;
-  height: 48px;
+.setup-mission-canvas {
+  width: 44px;
+  height: 44px;
   image-rendering: pixelated;
   image-rendering: crisp-edges;
   display: block;
 }
 
-.briefing-details {
+.setup-mission-card__content {
+  flex: 1;
+  min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: 3px;
-  min-width: 0;
-  flex: 1;
+  gap: 5px;
 }
 
-.briefing-name {
-  font-family: 'Press Start 2P', monospace;
-  font-size: 9px;
-  color: #facc15;
-  line-height: 1.3;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.briefing-role {
-  font-family: 'Trebuchet MS', Arial, sans-serif;
-  font-size: 11px;
-  font-weight: 700;
-  color: #38bdf8;
-}
-
-.briefing-text {
-  font-family: 'Trebuchet MS', Arial, sans-serif;
-  font-size: 11px;
-  color: #94a3b8;
-  line-height: 1.3;
-  margin: 0;
-}
-
-.briefing-text-hi {
-  color: #f87171;
-}
-
-.briefing-mission-goal {
-  font-family: 'Trebuchet MS', Arial, sans-serif;
-  font-size: 12px;
-  color: #cbd5e1;
-  line-height: 1.35;
-  margin: 0;
-}
-
-.briefing-meter-wrap {
+.setup-mission-topline {
   display: flex;
+  justify-content: space-between;
   align-items: center;
   gap: 8px;
-  margin-top: 4px;
 }
 
-.briefing-meter-bar {
-  flex: 1;
+.setup-mission-ratio {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 9px;
+  color: #c084fc;
+}
+
+.setup-mission-ratio.is-done {
+  color: #4ade80;
+}
+
+.setup-mission-goal {
+  font-family: 'Trebuchet MS', Arial, sans-serif !important;
+  font-size: 13px !important;
+  font-weight: 700 !important;
+  color: #f1f5f9 !important;
+  line-height: 1.35 !important;
+  white-space: normal !important;
+  text-shadow: 1px 1px 0 #000;
+}
+
+.setup-mission-meter {
   height: 8px;
   background: #050b0e;
-  border: 1px solid #1b353f;
+  border: 1px solid #3b1f52;
+  box-shadow: inset 1px 1px 0 #000;
   overflow: hidden;
+  width: 100%;
 }
 
-.briefing-meter-fill {
+.setup-mission-meter-fill {
   height: 100%;
-  background: linear-gradient(90deg, #06b6d4, #facc15);
+  background: linear-gradient(90deg, #9333ea, #c084fc);
   transition: width 0.3s ease;
 }
 
-.briefing-meter-num {
+.setup-mission-meter-fill.is-done {
+  background: linear-gradient(90deg, #16a34a, #4ade80);
+}
+
+.setup-mission-action {
+  flex-shrink: 0;
+  margin-left: 8px;
+}
+
+.setup-mission-equip-btn {
   font-family: 'Press Start 2P', monospace;
   font-size: 8px;
-  color: #67e8f9;
-}
-
-.briefing-text--perk {
-  color: #a7f3d0;
-  font-size: 10.5px;
-}
-
-.briefing-btn-row {
-  margin-top: 4px;
-}
-
-.briefing-action-btn {
-  font-family: 'Press Start 2P', monospace !important;
-  font-size: 8px !important;
-  padding: 6px 10px !important;
-  border-radius: 2px !important;
+  padding: 8px 12px;
+  background: #15803d;
+  color: #f0fdf4;
+  border: 2px solid #22c55e;
+  border-bottom: 4px solid #14532d;
+  box-shadow: 2px 2px 0 #000;
   cursor: pointer;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  width: 100%;
-  text-align: center;
+  transition: transform 0.1s;
 }
 
-.briefing-action-btn--equip {
-  background: #15803d !important;
-  color: #f0fdf4 !important;
-  border: 2px solid #22c55e !important;
-  box-shadow: 2px 2px 0 #000, 0 0 8px rgba(34, 197, 94, 0.4) !important;
-}
-
-.briefing-action-btn--equip:hover {
-  background: #16a34a !important;
+.setup-mission-equip-btn:hover {
+  background: #16a34a;
   transform: translateY(-1px);
 }
 
-.briefing-action-btn--equipped {
-  background: #064e3b !important;
-  color: #86efac !important;
-  border: 2px solid #10b981 !important;
-  cursor: default !important;
-  opacity: 0.9;
+.setup-mission-pill {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 8px;
+  padding: 6px 10px;
+  border-radius: 2px;
 }
 
-.briefing-action-btn--locked {
-  background: #1a2228 !important;
-  color: #64748b !important;
-  border: 1px dashed #334155 !important;
-  cursor: not-allowed !important;
-  font-size: 7px !important;
+.setup-mission-pill.is-equipped {
+  background: #064e3b;
+  color: #86efac;
+  border: 2px solid #10b981;
 }
 
 /* Subpestañas de Misiones en Don Domi */
@@ -3330,6 +3180,47 @@ kbd { display: inline-block; border: 1px solid #556771; border-bottom-width: 3px
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
+}
+
+.domi-mission-map-box {
+  width: 68px !important;
+  height: 46px !important;
+  border: 2px solid #38bdf8 !important;
+  box-shadow: 2px 2px 0 #000, 0 0 8px rgba(56, 189, 248, 0.25) !important;
+  overflow: hidden !important;
+  padding: 0 !important;
+  background: #000 !important;
+}
+
+.domi-mission-map-canvas {
+  width: 68px !important;
+  height: 46px !important;
+  display: block !important;
+  image-rendering: pixelated !important;
+  image-rendering: crisp-edges !important;
+}
+
+/* Recompensas y misiones por nivel con tono morado */
+.domi-mission-card--level {
+  border-left-color: #c084fc !important;
+}
+
+.domi-mission-card--level .domi-mission-icon-box {
+  background: #17051f !important;
+  border-color: #c084fc !important;
+  box-shadow: inset 2px 2px 0 #000, 0 0 8px rgba(192, 132, 252, 0.3) !important;
+}
+
+.domi-mission-card--level .domi-mission-title {
+  color: #c084fc !important;
+}
+
+.domi-mission-card--level .domi-mini-fill {
+  background: linear-gradient(90deg, #9333ea, #c084fc) !important;
+}
+
+.domi-mission-card--level .domi-mission-ratio {
+  color: #e9d5ff !important;
 }
 
 .domi-mission-center {

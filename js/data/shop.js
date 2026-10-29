@@ -40,14 +40,14 @@ export const shopItems = [
   {id:'leg_medallion',type:'accessory',name:'Medallón Rubí Sagrado',cost:0,domiExclusive:true,icon:'🎖',description:'Legendario Don Domi: +40 Vida Máxima y Defensa.'},
   {id:'leg_lava_crown',type:'accessory',name:'Corona Magmática Imperial',cost:0,domiExclusive:true,icon:'🌋',description:'Legendario Jefe Final: +50 Vida Máxima, +30% Daño Ígneo y Rastro de Magma.'},
   // Accesorios Exclusivos de Cartografía (Recompensa de Misiones de Mapa)
-  {id:'ticket_gold',type:'accessory',name:'Ticket Dorado',cost:0,cartographyExclusive:true,icon:'🎟',description:'Misión Local DOMI: +10% puntos/monedas y +5% daño con combo x5 o superior.'},
-  {id:'thermal_gloves',type:'accessory',name:'Guantes Térmicos',cost:0,cartographyExclusive:true,icon:'🧤',description:'Misión Cocina: Inmunidad al resbalón por aceite y +7% cadencia de disparo.'},
-  {id:'reflect_vest',type:'accessory',name:'Chaleco Reflectante',cost:0,cartographyExclusive:true,icon:'🦺',description:'Misión Estacionamiento: +20% daño de embestida con dash y -12% tiempo de recarga.'},
-  {id:'thermal_scarf',type:'accessory',name:'Bufanda Térmica',cost:0,cartographyExclusive:true,icon:'🧣',description:'Misión Nevado: -60% reducción de velocidad por frío ambiental y +12 HP máx.'},
-  {id:'thorn_boots',type:'accessory',name:'Botas Anti-Espinas',cost:0,cartographyExclusive:true,icon:'🥾',description:'Misión Desierto: Inmunidad al daño de espinas de cactus y +8% velocidad en arena.'},
-  {id:'captain_cleats',type:'accessory',name:'Botines de Capitán',cost:0,cartographyExclusive:true,icon:'👟',description:'Misión Cancha: +30% velocidad y daño al patear pelotas/cocos y +8% velocidad.'},
-  {id:'tropical_visor',type:'accessory',name:'Visera Tropical',cost:0,cartographyExclusive:true,icon:'🧢',description:'Misión Playa: +12% radio de imán de pickups y +7% probabilidad de crítico.'},
-  {id:'pineapple_hat',type:'accessory',name:'Sombrero de Piña',cost:0,cartographyExclusive:true,icon:'🍍',description:'Maestría Costera: +15% duración de efectos de comida y +6% daño.'},
+  {id:'ticket_gold',type:'accessory',name:'Lentes de Fiesta',cost:0,cartographyExclusive:true,icon:'🕶',description:'Misión Local DOMI: Lentes de fiesta retro (+10% puntos/monedas y +5% daño con combo x5 o superior).'},
+  {id:'thermal_gloves',type:'accessory',name:'Farol Gourmet',cost:0,cartographyExclusive:true,icon:'🏮',description:'Misión Cocina: Farol de hornallas (Inmunidad al aceite y +7% cadencia de disparo).'},
+  {id:'reflect_vest',type:'accessory',name:'Patines de Delivery',cost:0,cartographyExclusive:true,icon:'🛼',description:'Misión Estacionamiento: Patines de asfalto (+20% daño de embestida con dash y -12% recarga).'},
+  {id:'thermal_scarf',type:'accessory',name:'Gorro Invernal',cost:0,cartographyExclusive:true,icon:'🎅',description:'Misión Nevado: Gorro festivo con pompón (-60% ralentización por frío y +12 HP máx).'},
+  {id:'thorn_boots',type:'accessory',name:'Estrella de Sheriff',cost:0,cartographyExclusive:true,icon:'⭐',description:'Misión Desierto: Insignia dorada (Inmunidad al daño de cactus y +8% velocidad en arena).'},
+  {id:'captain_cleats',type:'accessory',name:'Guitarra de Tribuna',cost:0,cartographyExclusive:true,icon:'🎸',description:'Misión Cancha: Guitarra de aliento (+30% velocidad y daño al patear pelotas/cocos y +8% velocidad).'},
+  {id:'tropical_visor',type:'accessory',name:'Sombrero de Piña',cost:0,cartographyExclusive:true,icon:'🍍',description:'Misión Playa: Casco tropical (+15% duración de comida y +7% golpe crítico).'},
+  {id:'pineapple_hat',type:'accessory',name:'Sombrero de Piña',cost:0,cartographyExclusive:true,icon:'🍍',description:'Maestría Costera: Casco tropical (+15% duración de comida y +7% golpe crítico).'},
 ];
 
 const LEGACY_MAP = {

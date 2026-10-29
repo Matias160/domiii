@@ -781,7 +781,7 @@ export class Game {
       y: this.state.player.y - 36,
       text: `NV ${this.state.player.level} (+12 HP)`,
       life: 0.9,
-      color: '#86e3bf',
+      color: '#c084fc',
       scale: 1.1
     });
 

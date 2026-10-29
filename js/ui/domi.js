@@ -532,8 +532,9 @@ export class DomiScreen {
     list.className = 'domi-missions-list';
 
     for (const m of missions) {
+      const isLevelMission = m.unit === 'Nivel' || m.iconType === 'star';
       const card = document.createElement('div');
-      card.className = `domi-mission-card ${m.isClaimed ? 'is-claimed' : m.isDone ? 'is-done' : 'is-progress'}`;
+      card.className = `domi-mission-card ${m.isClaimed ? 'is-claimed' : m.isDone ? 'is-done' : 'is-progress'} ${isLevelMission ? 'domi-mission-card--level' : ''}`;
 
       const iconBox = document.createElement('div');
       iconBox.className = 'domi-mission-icon-box';
@@ -678,13 +679,27 @@ export class DomiScreen {
     list.className = 'domi-missions-list';
 
     for (const m of missions) {
+      const isLevelMission = m.unit === 'Nivel' || m.iconType === 'star';
       const card = document.createElement('div');
-      card.className = `domi-mission-card ${m.isClaimed ? 'is-claimed' : m.isDone ? 'is-done' : 'is-progress'}`;
+      card.className = `domi-mission-card ${m.isClaimed ? 'is-claimed' : m.isDone ? 'is-done' : 'is-progress'} ${isLevelMission ? 'domi-mission-card--level' : ''}`;
 
       const iconBox = document.createElement('div');
-      iconBox.className = 'domi-mission-icon-box';
-      iconBox.style.fontSize = '20px';
-      iconBox.textContent = m.icon;
+      iconBox.className = 'domi-mission-icon-box domi-mission-map-box';
+      const mapCanvas = document.createElement('canvas');
+      mapCanvas.width = 68;
+      mapCanvas.height = 46;
+      mapCanvas.className = 'domi-mission-map-canvas';
+      try {
+        drawItemPreview(mapCanvas, { type: 'map', id: m.id, name: m.regionName }, profile, 0);
+      } catch {
+        const c = mapCanvas.getContext('2d');
+        c.fillStyle = '#0f172a';
+        c.fillRect(0, 0, 68, 46);
+        c.font = '20px sans-serif';
+        c.textAlign = 'center';
+        c.fillText(m.icon || '🗺️', 34, 30);
+      }
+      iconBox.append(mapCanvas);
 
       const center = document.createElement('div');
       center.className = 'domi-mission-center';
@@ -771,7 +786,7 @@ export class DomiScreen {
 
   getMissionIcon(type) {
     if (type === 'star') {
-      return `<svg viewBox="0 0 16 16" width="24" height="24" shape-rendering="crispEdges"><rect x="7" y="1" width="2" height="3" fill="#ffe066"/><rect x="5" y="4" width="6" height="3" fill="#ffe066"/><rect x="1" y="6" width="14" height="3" fill="#ffd000"/><rect x="3" y="9" width="10" height="3" fill="#ffd000"/><rect x="2" y="12" width="4" height="3" fill="#e69900"/><rect x="10" y="12" width="4" height="3" fill="#e69900"/></svg>`;
+      return `<svg viewBox="0 0 16 16" width="24" height="24" shape-rendering="crispEdges"><rect x="7" y="1" width="2" height="3" fill="#f3e8ff"/><rect x="5" y="4" width="6" height="3" fill="#e9d5ff"/><rect x="1" y="6" width="14" height="3" fill="#c084fc"/><rect x="3" y="9" width="10" height="3" fill="#a855f7"/><rect x="2" y="12" width="4" height="3" fill="#7e22ce"/><rect x="10" y="12" width="4" height="3" fill="#581c87"/></svg>`;
     }
     if (type === 'skull') {
       return `<svg viewBox="0 0 16 16" width="24" height="24" shape-rendering="crispEdges"><rect x="4" y="2" width="8" height="8" fill="#e2e8f0"/><rect x="2" y="4" width="12" height="5" fill="#e2e8f0"/><rect x="4" y="5" width="2" height="3" fill="#0f172a"/><rect x="10" y="5" width="2" height="3" fill="#0f172a"/><rect x="5" y="11" width="6" height="3" fill="#cbd5e1"/><rect x="6" y="12" width="1" height="2" fill="#0f172a"/><rect x="8" y="12" width="1" height="2" fill="#0f172a"/></svg>`;

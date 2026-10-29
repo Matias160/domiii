@@ -313,128 +313,37 @@ export class MenuScreen {
     const isCompleted = m.completed || curr >= r.target;
 
     root.innerHTML = `
-      <div class="briefing-topbar">
-        <div class="briefing-title-zone">
-          <span class="briefing-badge" style="color: ${r.color}; border-color: ${r.color};">
-            ${r.icon} MAPA 0${r.index}: ${r.name.toUpperCase()}
-          </span>
-          <span class="briefing-subtitle">${r.sub}</span>
+      <div class="setup-card setup-card--purple setup-card--compact setup-mission-card">
+        <div class="setup-card__icon-box setup-mission-card__icon">
+          <canvas class="setup-mission-canvas" width="44" height="44" aria-hidden="true"></canvas>
         </div>
-        <div class="briefing-map-selector" role="group" aria-label="Cambiar mapa de juego">
-          ${REGIONS.map(reg => {
-            const active = reg.id === r.id;
-            const regOwned = isOwned(profile, 'map', reg.id);
-            return `<button type="button" class="briefing-map-pill ${active ? 'is-active' : ''} ${!regOwned ? 'is-locked' : ''}" data-briefing-map="${reg.id}" title="${reg.name}${!regOwned ? ' [BLOQUEADO]' : ''}" style="${active ? `border-color: ${reg.color}; box-shadow: 0 0 10px ${reg.color}88;` : ''}">
-              <span>${reg.icon}</span>
-            </button>`;
-          }).join('')}
-        </div>
-      </div>
-
-      <div class="briefing-panels">
-        <!-- 1. AMENAZA NATIVA -->
-        <div class="briefing-panel briefing-panel--threat">
-          <div class="briefing-panel-tag">
-            <span class="briefing-tag-icon">👾</span>
-            <span class="briefing-tag-label">AMENAZA NATIVA</span>
+        <div class="setup-card__content setup-mission-card__content">
+          <div class="setup-mission-topline">
+            <span class="setup-card__label">RECOMPENSA: ${r.accessoryName.toUpperCase()}</span>
+            <span class="setup-mission-ratio ${isCompleted ? 'is-done' : ''}">${isCompleted ? '✓ COMPLETADA' : `${curr} / ${r.target}`}</span>
           </div>
-          <div class="briefing-panel-content">
-            <div class="briefing-canvas-frame">
-              <canvas class="briefing-threat-canvas" width="48" height="48" aria-hidden="true"></canvas>
-            </div>
-            <div class="briefing-details">
-              <strong class="briefing-name">${r.enemyName}</strong>
-              <span class="briefing-role">${r.enemyRole}</span>
-              <p class="briefing-text"><b class="briefing-text-hi">Peligro:</b> ${r.hazard}</p>
-            </div>
+          <strong class="setup-card__value setup-mission-goal">${r.missionDesc}</strong>
+          <div class="setup-mission-meter" role="progressbar" aria-valuenow="${curr}" aria-valuemin="0" aria-valuemax="${r.target}">
+            <div class="setup-mission-meter-fill ${isCompleted ? 'is-done' : ''}" style="width: ${pct}%;"></div>
           </div>
         </div>
-
-        <!-- 2. MISIÓN ACUMULATIVA -->
-        <div class="briefing-panel briefing-panel--mission">
-          <div class="briefing-panel-tag">
-            <span class="briefing-tag-icon">🎯</span>
-            <span class="briefing-tag-label">MISIÓN DE ZONA</span>
-            <span class="briefing-chip ${isCompleted ? 'is-done' : ''}">${isCompleted ? '✓ COMPLETADA' : 'EN CURSO'}</span>
+        ${!guest && isOwnedAcc ? `
+          <div class="setup-mission-action">
+            ${isEquipped 
+              ? `<span class="setup-mission-pill is-equipped">✓ EQUIPADO</span>`
+              : `<button type="button" class="setup-mission-equip-btn" data-equip-acc="${r.accessoryId}">⚡ EQUIPAR</button>`
+            }
           </div>
-          <div class="briefing-panel-content briefing-panel-content--col">
-            <strong class="briefing-name">${r.missionName}</strong>
-            <p class="briefing-mission-goal">${r.missionDesc}</p>
-            <div class="briefing-meter-wrap">
-              <div class="briefing-meter-bar" role="progressbar" aria-valuenow="${curr}" aria-valuemin="0" aria-valuemax="${r.target}">
-                <div class="briefing-meter-fill" style="width: ${pct}%;"></div>
-              </div>
-              <span class="briefing-meter-num">${curr} / ${r.target}</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- 3. ACCESORIO EXCLUSIVO -->
-        <div class="briefing-panel briefing-panel--reward">
-          <div class="briefing-panel-tag">
-            <span class="briefing-tag-icon">🎁</span>
-            <span class="briefing-tag-label">ACCESORIO EXCLUSIVO</span>
-          </div>
-          <div class="briefing-panel-content">
-            <div class="briefing-canvas-frame">
-              <canvas class="briefing-reward-canvas" width="48" height="48" aria-hidden="true"></canvas>
-            </div>
-            <div class="briefing-details">
-              <strong class="briefing-name">${r.accessoryName}</strong>
-              <p class="briefing-text briefing-text--perk">${r.accessoryDesc}</p>
-              <div class="briefing-btn-row">
-                ${guest
-                  ? `<button type="button" class="briefing-action-btn briefing-action-btn--locked" data-briefing-guest="1">🔒 SOLO SOCIOS</button>`
-                  : isEquipped
-                    ? `<button type="button" class="briefing-action-btn briefing-action-btn--equipped" disabled>✓ EQUIPADO</button>`
-                    : isOwnedAcc
-                      ? `<button type="button" class="briefing-action-btn briefing-action-btn--equip" data-equip-acc="${r.accessoryId}">⚡ EQUIPAR</button>`
-                      : `<button type="button" class="briefing-action-btn briefing-action-btn--locked" disabled title="Completá la misión de este mapa para desbloquearlo">🔒 BLOQUEADO: Completa la misión</button>`
-                }
-              </div>
-            </div>
-          </div>
-        </div>
+        ` : ''}
       </div>
     `;
 
-    // Renderizar canvases pixel art
-    const enemyCv = root.querySelector('.briefing-threat-canvas');
-    if (enemyCv) {
-      const ectx = enemyCv.getContext('2d');
-      ectx.clearRect(0, 0, 48, 48);
-      drawFood(ectx, r.enemyId, 24, 24, 0.70, 0, true);
-    }
-
-    const accCv = root.querySelector('.briefing-reward-canvas');
+    const accCv = root.querySelector('.setup-mission-canvas');
     if (accCv) {
       const actx = accCv.getContext('2d');
-      actx.clearRect(0, 0, 48, 48);
-      drawAccessoryIcon(actx, r.accessoryId, 24, 24, 38);
+      actx.clearRect(0, 0, 44, 44);
+      drawAccessoryIcon(actx, r.accessoryId, 22, 22, 36);
     }
-
-    // Interacción con pills de mapa
-    root.querySelectorAll('.briefing-map-pill').forEach(pill => {
-      pill.addEventListener('click', () => {
-        const targetMap = pill.dataset.briefingMap;
-        if (!targetMap || !this.mapInput) return;
-        const opt = [...this.mapInput.options].find(o => o.value === targetMap);
-        if (opt && opt.disabled) {
-          this.game.audio?.play?.('error');
-          this.game.showToast?.('¡Este mapa aún está bloqueado en el local!');
-          return;
-        }
-        this.mapInput.value = targetMap;
-        this.mapInput.dispatchEvent(new Event('change', { bubbles: true }));
-        this.game.audio?.play?.('navigate');
-      });
-    });
-
-    // Interacción botón de invitado
-    root.querySelector('[data-briefing-guest]')?.addEventListener('click', () => {
-      this.game.audio?.play?.('error');
-      this.game.showToast?.('¡Solo para socios! Creá tu tarjeta en la recepción para desbloquear accesorios.');
-    });
 
     // Interacción botón equipar accesorio
     root.querySelector('[data-equip-acc]')?.addEventListener('click', (e) => {
