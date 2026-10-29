@@ -38,8 +38,10 @@ test('desert cactus explodes on dash, shooting needles and damaging enemies with
 
   // Cactus should be removed (exploded)
   assert.equal(state.mapObstacles.length, 0, 'cactus was destroyed');
-  // Needles (projectiles) spawned
+  // Needles (projectiles) spawned and are real Projectile instances
   assert.ok(state.projectiles.length >= 10, 'needles were ejected radial');
+  assert.equal(typeof state.projectiles[0].drawTrail, 'function', 'needles are valid Projectile instances with drawTrail');
+  assert.equal(typeof state.projectiles[0].update, 'function', 'needles have update method');
   // Enemy took explosion damage
   assert.ok(enemy.hp < initialEnemyHp, 'enemy took damage from cactus explosion');
   // Player took no damage
@@ -96,8 +98,8 @@ test('superwave event triggers boss-like cinematic intro and triples spawn rate'
   updateEnemies(state, 0.016, bounds);
   const countAfter = state.enemies.length;
 
-  // During superwave, batch spawns 3 enemies at once
-  assert.equal(countAfter - countBefore, 3, 'superwave spawns in batches of 3');
+  // During superwave, massive burst + batch of 6 spawns enemies (dense flood)
+  assert.ok(countAfter - countBefore >= 30, 'superwave floods the arena with massive burst and dense batches');
 });
 
 test('beach map initializes, is owned, spawns little crabs and interactive coconuts', () => {

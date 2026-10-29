@@ -75,7 +75,14 @@ export function updateProjectiles(state, delta, canvas) {
       projectile.vy = (dy / length) * 690;
       if (projectile.age > 1.45 || length < state.player.radius + 14) projectile.dead = true;
     }
-    projectile.update(delta);
+    if (typeof projectile.update === 'function') {
+      projectile.update(delta);
+    } else {
+      projectile.previousX = projectile.x; projectile.previousY = projectile.y;
+      projectile.x += (projectile.vx || 0) * delta;
+      projectile.y += (projectile.vy || 0) * delta;
+      projectile.dead = (projectile.life = (projectile.life || 1) - delta) <= 0;
+    }
 
     if (state.particles && !projectile.dead) {
       projectile.trailClock = (projectile.trailClock || 0) + delta * 30;

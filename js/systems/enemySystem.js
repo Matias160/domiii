@@ -24,9 +24,21 @@ export function updateEnemies(state, delta, canvas) {
   const isPicante = state.difficulty?.id === 'picante' || state.difficulty?.id === 'extra';
   const isLavaMode = state.modeId === 'boss_legendary' || state.mapId === 'lava';
 
+  // En la Super Oleada: ráfaga masiva inicial para inundar la arena de inmediato
+  const currentCap = isSuperwave ? Math.max(140, Math.round(enemyCap() * 2.4)) : enemyCap();
+  if (isSuperwave && !state.superwaveBursted && !hold) {
+    state.superwaveBursted = true;
+    const initialSwarm = Math.min(30, currentCap - state.enemies.length);
+    for (let s = 0; s < initialSwarm; s++) {
+      spawnEnemy(state, canvas, false, true);
+    }
+  } else if (!isSuperwave) {
+    state.superwaveBursted = false;
+  }
+
   const pressure = Math.max(0, 1 - state.time / 240);
   const baseSpawnEvery = state.difficulty.spawn * Math.max(0.32, 1.15 * pressure) * (state.activeEvent?.id === 'promo' ? .55 : 1);
-  const spawnEvery = isSuperwave ? (baseSpawnEvery * 0.33) : baseSpawnEvery;
+  const spawnEvery = isSuperwave ? 0.08 : baseSpawnEvery;
   let bossSpawned = false;
 
   // Un jefe cuenta desde que aparece hasta que resolveDeaths lo saca, aunque un cuadro quede en 0 HP
@@ -60,18 +72,17 @@ export function updateEnemies(state, delta, canvas) {
     state.modeId === 'waves' ? state.waveRest <= 0 && state.waveRemaining > 0 :
     state.modeId === 'rush' ? state.enemies.length < 18 : true;
 
-  const currentCap = isSuperwave ? Math.round(enemyCap() * 1.8) : enemyCap();
   const alive = isLavaMode ? 0 : state.enemies.reduce((n, e) => n + (!e.isBoss && e.hp > 0 ? 1 : 0), 0);
   const starving = !isLavaMode && canSpawn && alive < Math.min(currentCap, SPAWN_REFILL.max, SPAWN_REFILL.base + Math.floor(state.time / SPAWN_REFILL.growEvery));
   if (starving) state.spawnTimer = Math.min(state.spawnTimer, alive === 0 ? 0 : SPAWN_REFILL.interval);
   if (canSpawn && state.spawnTimer <= 0 && state.enemies.length < currentCap) {
-    const batch = isSuperwave ? 3 : (starving && alive === 0 && state.time > SPAWN_REFILL.graceTime ? SPAWN_REFILL.emptyBurst : 1);
+    const batch = isSuperwave ? 6 : (starving && alive === 0 && state.time > SPAWN_REFILL.graceTime ? SPAWN_REFILL.emptyBurst : 1);
     for (let i = 0; i < batch && state.enemies.length < currentCap; i++) {
       if (state.modeId === 'waves' && state.waveRemaining <= 0) break;
       spawnEnemy(state, canvas, false, starving || isSuperwave);
       if (state.modeId === 'waves') state.waveRemaining -= 1;
     }
-    state.spawnTimer = isLavaMode ? 18.0 : state.modeId === 'rush' ? 1.85 : isSuperwave ? (spawnEvery * 0.35) : starving ? SPAWN_REFILL.interval : spawnEvery;
+    state.spawnTimer = isLavaMode ? 18.0 : state.modeId === 'rush' ? 1.85 : isSuperwave ? 0.08 : starving ? SPAWN_REFILL.interval : spawnEvery;
   }
 
   for (const enemy of state.enemies) {

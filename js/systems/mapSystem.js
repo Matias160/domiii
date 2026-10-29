@@ -1,4 +1,5 @@
 import { damageEnemy, burst, impactRing } from './effectSystem.js';
+import { Projectile } from '../entities/Projectile.js';
 
 // Sprite sheets generadas a partir de todos los cuadros de animación de los GIFs originales (16 frames)
 export const cactusSheet = typeof Image !== 'undefined' ? new Image() : null;
@@ -178,17 +179,15 @@ export function updateMap(state, dt) {
       const spikeCount = 20;
       for (let i = 0; i < spikeCount; i++) {
         const angle = (i * Math.PI * 2) / spikeCount;
-        state.projectiles.push({
+        state.projectiles.push(new Projectile({
           x: o.x, y: o.y,
           vx: Math.cos(angle) * 520, vy: Math.sin(angle) * 520,
-          radius: 7,
+          size: 7,
           damage: 150 + state.player.level * 10,
-          life: 1.8,
           color: '#84cc16',
-          hitEnemies: new Set(),
           pierce: 5,
-          isThorn: true
-        });
+          kind: 'sauce'
+        }));
       }
 
       // Daño de área masivo inmediato a todos los enemigos cercanos

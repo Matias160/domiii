@@ -1131,8 +1131,12 @@ export class Game {
       const proj = state.projectiles[i];
       if (proj.x >= cam.x - 50 && proj.x <= cam.x + vw + 50 && proj.y >= cam.y - 50 && proj.y <= cam.y + vh + 50) visibleShots.push(proj);
     }
-    for (let i = 0; i < visibleShots.length; i++) visibleShots[i].drawTrail(this.ctx);
-    for (let i = 0; i < visibleShots.length; i++) visibleShots[i].drawBody(this.ctx);
+    for (let i = 0; i < visibleShots.length; i++) {
+      if (typeof visibleShots[i].drawTrail === 'function') visibleShots[i].drawTrail(this.ctx);
+    }
+    for (let i = 0; i < visibleShots.length; i++) {
+      if (typeof visibleShots[i].drawBody === 'function') visibleShots[i].drawBody(this.ctx);
+    }
     for (const shot of state.enemyProjectiles) {
       if (shot.x < cam.x - 60 || shot.x > cam.x + vw + 60 || shot.y < cam.y - 60 || shot.y > cam.y + vh + 60) continue;
       const speed=Math.hypot(shot.vx,shot.vy)||1;
