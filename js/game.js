@@ -1238,6 +1238,18 @@ export class Game {
     // 1. Parte fija (marco, fondo, cuadrícula y etiqueta) pre-dibujada una vez como imagen
     ctx.drawImage(this.minimapFrame(), mapX - 6, mapY - 16);
 
+    // Fondo temático sutil de terreno según mapa
+    if (state.mapId === 'beach') {
+      ctx.fillStyle = '#0284c755'; ctx.fillRect(mapX, mapY, mapW, mapH * 0.35);
+      ctx.fillStyle = '#eab30833'; ctx.fillRect(mapX, mapY + mapH * 0.35, mapW, mapH * 0.65);
+    } else if (state.mapId === 'desert') {
+      ctx.fillStyle = '#eab30833'; ctx.fillRect(mapX, mapY, mapW, mapH);
+    } else if (state.mapId === 'snow') {
+      ctx.fillStyle = '#38bdf82b'; ctx.fillRect(mapX, mapY, mapW, mapH);
+    } else if (state.mapId === 'lava') {
+      ctx.fillStyle = '#ef444433'; ctx.fillRect(mapX, mapY, mapW, mapH);
+    }
+
     // 2. Rectángulo de la cámara actual (Viewport activo)
     const camXRatio = cam.x / worldW;
     const camYRatio = cam.y / worldH;

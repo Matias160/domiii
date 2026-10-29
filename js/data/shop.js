@@ -9,6 +9,7 @@ export const shopItems = [
   {id:'desert',type:'map',name:'Desierto',cost:1000,icon:'✳',description:'Cactus rodantes que hacen daño.'},
   {id:'football',type:'map',name:'Cancha de futbol',cost:1200,icon:'⚽',description:'Pelotas peligrosas en juego.'},
   {id:'lava',type:'map',name:'Caldero de Lava',cost:0,domiExclusive:true,icon:'🌋',description:'Tierra volcánica y magma ardiente. El dominio del Coloso Final.'},
+  {id:'beach',type:'map',name:'Playa Tropical',cost:0,icon:'🏖️',description:'Mar turquesa con olas animadas, arena dorada, cangrejitos y cocos.'},
   {id:'ketchup',type:'pet',name:'Mini ketchup',cost:700,icon:'K',description:'Dispara salsa picante y deja charcos pegajosos.'},
   {id:'drone',type:'pet',name:'Dron delivery',cost:850,icon:'D',description:'Imán de ingredientes y descarga rayos relámpago.'},
   {id:'taco',type:'pet',name:'Taco Guardián',cost:950,icon:'T',description:'Otorga escudo al jugador y embiste enemigos cercanos.'},
@@ -59,7 +60,7 @@ const LEGACY_MAP = {
   leg_golden_chalice: 'leg_medallion'
 };
 
-export const freeItems = {skin:['pancho'],map:['diner','kitchen','parking'],pet:['none'],accessory:['none']};
+export const freeItems = {skin:['pancho'],map:['diner','kitchen','parking','beach'],pet:['none'],accessory:['none']};
 export function isOwned(profile,type,id){
   if (freeItems[type]?.includes(id)) return true;
   if (type === 'map' && id === 'lava' && profile?.unlockedLava) return true;

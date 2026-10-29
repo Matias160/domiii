@@ -56,6 +56,157 @@ function heatHaze(c, x, y, time) {
   c.restore();
 }
 
+function drawPalmTree(c, x, y, time = 0, flipped = false) {
+  c.save();
+  const dir = flipped ? -1 : 1;
+  // Sombra de contacto en la arena
+  c.save();
+  c.globalAlpha = 0.28;
+  c.fillStyle = '#071218';
+  c.beginPath();
+  c.ellipse(x, y + 12, 42, 14, 0, 0, Math.PI * 2);
+  c.fill();
+  c.restore();
+
+  // Cocos caídos en la arena cerca del tronco
+  const dropCoconut = (cx, cy) => {
+    rect(c, '#07121844', cx - 1, cy + 8, 12, 4);
+    rect(c, '#451a03', cx, cy, 10, 8);
+    rect(c, '#78350f', cx + 1, cy + 1, 8, 6);
+    rect(c, '#a16207', cx + 2, cy + 2, 4, 3);
+    rect(c, '#1c0a00', cx + 6, cy + 2, 2, 2); // hoyito
+  };
+  dropCoconut(x + dir * 26, y + 6);
+  dropCoconut(x - dir * 18, y + 10);
+
+  // Tronco curvado segmentado pixel art (12 segmentos)
+  const segments = 12;
+  const topX = x + dir * 42;
+  const topY = y - 115;
+  for (let i = 0; i < segments; i++) {
+    const t = i / segments;
+    const sx = x + dir * (Math.sin(t * Math.PI * 0.5) * 42);
+    const sy = y - t * 115;
+    const w = Math.round(18 - t * 6);
+    const h = 10;
+    // Anillo de corteza con textura
+    rect(c, '#1c0a00', sx - w / 2 - 1, sy - h / 2 - 1, w + 2, h + 2);
+    rect(c, i % 2 === 0 ? '#78350f' : '#92400e', sx - w / 2, sy - h / 2, w, h);
+    rect(c, '#b45309', sx - w / 2 + 2, sy - h / 2 + 1, w - 4, 3);
+    rect(c, '#451a03', sx - w / 2, sy + h / 2 - 3, w, 3);
+  }
+
+  // Racimo de 4 cocos en la copa (topX, topY)
+  const cocos = [
+    { ox: -10, oy: 2 },
+    { ox: 8, oy: 4 },
+    { ox: -2, oy: 12 },
+    { ox: 10, oy: 12 }
+  ];
+  for (const co of cocos) {
+    const cx = topX + co.ox * dir;
+    const cy = topY + co.oy;
+    rect(c, '#1c0a00', cx - 6, cy - 6, 13, 13);
+    rect(c, '#54392b', cx - 5, cy - 5, 11, 11);
+    rect(c, '#784c38', cx - 3, cy - 4, 7, 5);
+    rect(c, '#1c0a00', cx - 2, cy + 1, 2, 2);
+    rect(c, '#1c0a00', cx + 2, cy + 1, 2, 2);
+    rect(c, '#1c0a00', cx, cy + 3, 2, 2);
+  }
+
+  // Copa exuberante de palmera: 8 grandes hojas arqueadas
+  const leafAngles = [
+    -Math.PI * 0.85, -Math.PI * 0.65, -Math.PI * 0.45, -Math.PI * 0.25,
+    -Math.PI * 0.05, Math.PI * 0.15, Math.PI * 0.4, Math.PI * 0.75
+  ];
+  for (let l = 0; l < leafAngles.length; l++) {
+    const baseAngle = leafAngles[l];
+    const sway = Math.sin(time * 2 + l * 0.8) * 0.08;
+    const angle = baseAngle + sway;
+    const len = 52 + (l % 3) * 8;
+
+    // Tallo y frondas de la hoja
+    for (let step = 0; step < 7; step++) {
+      const st = step / 7;
+      const lx = topX + Math.cos(angle) * (st * len) * dir;
+      const ly = topY + Math.sin(angle) * (st * len) + Math.pow(st, 2) * 18; // arco hacia abajo
+      const leafW = Math.round(Math.sin(st * Math.PI) * 14);
+
+      // Frondas verdes con luz y sombra
+      rect(c, '#14532d', lx - leafW / 2 - 1, ly - 3, leafW + 2, 6);
+      rect(c, '#16a34a', lx - leafW / 2, ly - 2, leafW, 4);
+      rect(c, '#22c55e', lx - leafW / 4, ly - 2, leafW / 2, 2);
+      if (st > 0.4 && st < 0.8) {
+        rect(c, '#86efac', lx - 2, ly - 2, 4, 1); // brillo
+      }
+    }
+  }
+
+  c.restore();
+}
+
+function beachUmbrella(c, x, y, col1 = '#ef4444', col2 = '#ffffff') {
+  // Sombra amplia inclinada
+  shadow(c, x + 16, y + 26, 48, 14);
+  // Poste de madera clavado
+  rect(c, '#1c0a00', x - 2, y - 28, 6, 56);
+  rect(c, '#b45309', x - 1, y - 26, 4, 52);
+  rect(c, '#fef08a', x, y - 26, 2, 52);
+
+  // Toldo de sombrilla en ángulo (gajos alternados de colores vivos)
+  const segments = [col1, col2, col1, col2, col1, col2];
+  const w = 92, h = 34;
+  rect(c, '#101b20', x - w / 2 - 2, y - 48 - 2, w + 4, h + 4);
+  for (let i = 0; i < segments.length; i++) {
+    const sw = w / segments.length;
+    const sx = x - w / 2 + i * sw;
+    rect(c, segments[i], sx, y - 48, sw, h);
+    // Borde festoneado inferior
+    rect(c, segments[i], sx + 1, y - 14, sw - 2, 4);
+    rect(c, '#ffffff44', sx + 2, y - 46, sw - 4, 3);
+  }
+  // Puntera superior de la sombrilla
+  rect(c, '#101b20', x - 3, y - 56, 6, 9);
+  rect(c, '#fbbf24', x - 2, y - 55, 4, 7);
+}
+
+function beachTowel(c, x, y, col = '#38bdf8') {
+  // Toalla de playa tendida con perspectiva
+  shadow(c, x, y + 8, 36, 10);
+  rect(c, '#101b20', x - 28, y - 14, 56, 28);
+  rect(c, col, x - 26, y - 12, 52, 24);
+  // Rayas blancas de la toalla
+  rect(c, '#ffffff', x - 18, y - 12, 6, 24);
+  rect(c, '#ffffff', x + 12, y - 12, 6, 24);
+  // Flecos en los extremos
+  rect(c, '#ffffff', x - 30, y - 10, 4, 20);
+  rect(c, '#ffffff', x + 26, y - 10, 4, 20);
+
+  // Vaso de jugo tropical o coco con pajita
+  rect(c, '#101b20', x + 6, y - 6, 10, 14);
+  rect(c, '#f97316', x + 7, y - 5, 8, 12);
+  rect(c, '#fde047', x + 8, y - 2, 6, 8);
+  // Pajita roja
+  rect(c, '#ef4444', x + 10, y - 11, 2, 7);
+}
+
+function tropicalBush(c, x, y) {
+  // Arbusto tropical con flores de hibisco
+  shadow(c, x, y + 10, 24, 7);
+  rect(c, '#14532d', x - 20, y - 14, 40, 22);
+  rect(c, '#16a34a', x - 18, y - 12, 36, 18);
+  rect(c, '#22c55e', x - 12, y - 8, 24, 12);
+
+  // 2 flores de hibisco (rojo coral con centro amarillo)
+  const flower = (fx, fy) => {
+    rect(c, '#ef4444', fx - 4, fy - 4, 8, 8);
+    rect(c, '#f43f5e', fx - 3, fy - 3, 6, 6);
+    rect(c, '#facc15', fx - 1, fy - 1, 2, 2);
+  };
+  flower(x - 8, y - 6);
+  flower(x + 8, y - 2);
+}
+
 /** Decorative depth layer for expanded maps. */
 export function drawWorldProps(ctx, map = 'diner', time = 0, world = { width: 1920, height: 1080 }, cam = null) {
   ctx.save(); ctx.imageSmoothingEnabled = false; ctx.globalAlpha = .94; const shimmer = Math.sin(time * 1.6) * .5 + .5;
@@ -119,6 +270,28 @@ export function drawWorldProps(ctx, map = 'diner', time = 0, world = { width: 19
     if (isVisible(w - 340, 660)) steam(ctx, w - 340, 660, time + 1.1, '#ff007f');
   } else if (map === 'lava') {
     // El tablero pixel-art de lava ya contiene sus propios puentes, islotes, gemas, cráneos y espinas de obsidiana
+  } else if (map === 'beach') {
+    // Palmeras tropicales grandes en las 4 esquinas y bordes laterales
+    if (isVisible(180, 240, 160)) drawPalmTree(ctx, 180, 240, time, false);
+    if (isVisible(w - 180, 240, 160)) drawPalmTree(ctx, w - 180, 240, time, true);
+    if (isVisible(140, 720, 160)) drawPalmTree(ctx, 140, 720, time, false);
+    if (isVisible(w - 140, 720, 160)) drawPalmTree(ctx, w - 140, 720, time, true);
+    if (isVisible(420, h - 140, 160)) drawPalmTree(ctx, 420, h - 140, time, false);
+    if (isVisible(w - 420, h - 140, 160)) drawPalmTree(ctx, w - 420, h - 140, time, true);
+
+    // Sombrillas de playa retro con toallas
+    if (isVisible(w / 2 - 280, 620)) beachUmbrella(ctx, w / 2 - 280, 620, '#ef4444', '#ffffff');
+    if (isVisible(w / 2 + 280, 680)) beachUmbrella(ctx, w / 2 + 280, 680, '#06b6d4', '#facc15');
+
+    // Toallas de playa extendidas en la arena
+    if (isVisible(w / 2 - 240, 660)) beachTowel(ctx, w / 2 - 240, 660, '#38bdf8');
+    if (isVisible(w / 2 + 320, 720)) beachTowel(ctx, w / 2 + 320, 720, '#f43f5e');
+
+    // Arbustos tropicales con flores de hibisco
+    if (isVisible(210, 270)) tropicalBush(ctx, 210, 270);
+    if (isVisible(w - 210, 270)) tropicalBush(ctx, w - 210, 270);
+    if (isVisible(170, 750)) tropicalBush(ctx, 170, 750);
+    if (isVisible(w - 170, 750)) tropicalBush(ctx, w - 170, 750);
   } else {
     // Diner clásico: mobiliario con sombras de contacto profundas
     ctx.save();

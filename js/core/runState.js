@@ -29,7 +29,7 @@ export function createRunState(setup = {}, audio = null) {
     difficulty: setup.mapId === 'lava'
       ? { id: 'legendary', name: '???', hp: 1.35, speed: 1.15, damage: 1.0, spawn: 1, score: 2.0 }
       : (difficulties[setup.difficultyId] || difficulties.picante),
-    mapId: ['diner','kitchen','parking','snow','desert','football','lava'].includes(setup.mapId) ? setup.mapId : 'diner',
+    mapId: ['diner','kitchen','parking','snow','desert','football','lava','beach'].includes(setup.mapId) ? setup.mapId : 'diner',
     mapClock: 0, mapObstacles: [], wasFreezing: false, decoy: null, primeCooldowns: {q:0,e:0,r:0},
     modeId: setup.modeId,
     enemies: [], projectiles: [], enemyProjectiles: [], items: [], hazards: [], bossZones: [],

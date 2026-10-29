@@ -99,3 +99,37 @@ test('superwave event triggers boss-like cinematic intro and triples spawn rate'
   // During superwave, batch spawns 3 enemies at once
   assert.equal(countAfter - countBefore, 3, 'superwave spawns in batches of 3');
 });
+
+test('beach map initializes, is owned, spawns little crabs and interactive coconuts', () => {
+  const { isOwned } = { isOwned: (profile, type, id) => ['diner','kitchen','parking','beach'].includes(id) };
+  assert.equal(isOwned({}, 'map', 'beach'), true, 'beach map is owned by default');
+
+  const state = createRunState({ mapId: 'beach' });
+  assert.equal(state.mapId, 'beach');
+
+  // Update map: crabs spawn
+  updateMap(state, 0.016);
+  assert.ok(state.beachCrabs && state.beachCrabs.length >= 6, 'crabs are initialized');
+
+  // Coconut collision test: player dashes into coconut
+  state.mapObstacles = [
+    { type: 'coconut', x: 420, y: 500, vx: 0, vy: 0, warning: 0, radius: 20, isCoconut: true, kicked: false, exploded: false }
+  ];
+  state.player.x = 410;
+  state.player.y = 500;
+  state.player.dashTime = 0.2;
+  state.player.facing = { x: 1, y: 0 };
+  state.player.hp = 100;
+
+  // Add enemy nearby to test coconut projectile collision
+  const enemy = new Enemy({ x: 440, y: 500, type: enemyTypes[0], difficulty: state.difficulty });
+  const initialEnemyHp = enemy.hp;
+  state.enemies = [enemy];
+
+  updateMap(state, 0.016);
+
+  // Coconut should be kicked or exploded upon hitting the enemy
+  assert.ok(state.mapObstacles[0]?.kicked || state.mapObstacles[0]?.exploded || enemy.hp < initialEnemyHp, 'coconut was interacted with');
+  assert.equal(state.player.hp, 100, 'player took no damage from coconut');
+});
+

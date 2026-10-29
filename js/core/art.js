@@ -819,6 +819,169 @@ function desertFloor(c) {
   }
 }
 
+// Playa Tropical en pixel art: cielo tropical, mar en degradé con cáusticas,
+// costa curva, arena dorada con texturas, conchas marinas, estrellas de mar y dunas suaves.
+function beachFloor(c) {
+  const hash = (x, y) => { let h = (x * 374761393 + y * 668265263) | 0; h = (h ^ (h >>> 13)) * 1274126177; return ((h ^ (h >>> 16)) >>> 0) / 4294967295; };
+  const P = 4;
+
+  // 1. Cielo tropical despejado y horizonte en degradé (y: 0 a 88)
+  const skyColors = ['#38bdf8', '#7dd3fc', '#bae6fd', '#e0f2fe'];
+  for (let i = 0; i < skyColors.length; i++) rect(c, skyColors[i], 0, i * 22, 1920, 22);
+
+  // Sol radiante en el cielo (x: 1600, y: 14)
+  rect(c, '#fef08a', 1590, 8, 48, 48);
+  rect(c, '#fffbeb', 1596, 14, 36, 36);
+  rect(c, '#ffffff', 1602, 20, 24, 24);
+
+  // Nubes cúmulo pixeladas blancas
+  const drawCloud = (x0, y0, w0) => {
+    rect(c, '#ffffff', x0, y0 + 10, w0, 16);
+    rect(c, '#ffffff', x0 + 12, y0 + 2, w0 - 24, 28);
+    rect(c, '#e0f2fe', x0 + 4, y0 + 22, w0 - 8, 6);
+  };
+  drawCloud(120, 16, 110);
+  drawCloud(680, 24, 140);
+  drawCloud(1220, 12, 90);
+
+  // Barquitos veleros en el horizonte
+  const drawSailboat = (bx, by) => {
+    rect(c, '#78350f', bx, by + 8, 22, 6);
+    rect(c, '#92400e', bx + 2, by + 10, 18, 4);
+    rect(c, '#ffffff', bx + 8, by - 12, 2, 20); // mástil
+    rect(c, '#ffffff', bx + 10, by - 10, 8, 14); // vela
+    rect(c, '#ef4444', bx + 3, by - 6, 5, 10);
+  };
+  drawSailboat(480, 80);
+  drawSailboat(1360, 84);
+
+  // 2. Mar Tropical (y: 88 hasta la línea costera ~380)
+  // Océano profundo:
+  rect(c, '#0369a1', 0, 88, 1920, 56);
+  rect(c, '#0284c7', 0, 144, 1920, 64);
+  // Océano turquesa medio:
+  rect(c, '#0097a7', 0, 208, 1920, 68);
+  rect(c, '#00acc1', 0, 276, 1920, 60);
+  // Aguas costeras cristalinas:
+  rect(c, '#06b6d4', 0, 336, 1920, 50);
+
+  // Tramado de profundidad entre franjas de agua
+  for (let x = 0; x < 1920; x += P) {
+    if (hash(x, 1) < 0.4) rect(c, '#0284c7', x, 142, P, 4);
+    if (hash(x, 2) < 0.45) rect(c, '#0097a7', x, 206, P, 4);
+    if (hash(x, 3) < 0.5) rect(c, '#00acc1', x, 274, P, 4);
+    if (hash(x, 4) < 0.5) rect(c, '#06b6d4', x, 334, P, 4);
+  }
+
+  // Red de refracción de luz marina / cáusticas solares en el mar (líneas turquesas brillantes)
+  for (let cy = 110; cy < 370; cy += 24) {
+    for (let cx = 0; cx < 1920; cx += 56) {
+      const rx = cx + (hash(cx, cy) - 0.5) * 20;
+      const ry = cy + (hash(cy, cx) - 0.5) * 10;
+      rect(c, '#67e8f933', rx, ry, 28, 3);
+      rect(c, '#e0f7fa44', rx + 6, ry + 1, 16, 2);
+    }
+  }
+
+  // 3. Costa y Arena Dorada Cálida (desde ~380 hasta 1080)
+  // Arena base:
+  rect(c, '#f5d491', 0, 380, 1920, 700);
+
+  // La línea de costa curvada natural (transición de agua poco profunda a arena húmeda)
+  for (let x = 0; x < 1920; x += P) {
+    const coastY = Math.round((380 + Math.sin(x / 160) * 18 + Math.sin(x / 52) * 6) / P) * P;
+    // Agua poco profunda sobre arena:
+    rect(c, '#22d3ee', x, coastY - 16, P, 16);
+    rect(c, '#67e8f9', x, coastY - 8, P, 8);
+    rect(c, '#a5f3fc', x, coastY - 4, P, 4);
+    // Franja de arena húmeda oscura:
+    rect(c, '#c79d5e', x, coastY, P, 16);
+    rect(c, '#d9ab6a', x, coastY + 16, P, 12);
+  }
+
+  // Tramado y textura de arena dorada
+  for (let y = 420; y < 1080; y += P) {
+    for (let x = 0; x < 1920; x += P) {
+      const n = hash(x, y);
+      if (n < 0.05) rect(c, '#eab970', x, y, P, P); // grano oscuro
+      else if (n > 0.96) rect(c, '#fae6b2', x, y, P, P); // grano claro brillante
+      else if (n > 0.48 && n < 0.50) rect(c, '#f1cb85', x, y, P, P);
+    }
+  }
+
+  // Dunas suaves con ondas de viento sutiles
+  for (let row = 0; row < 14; row++) {
+    const baseY = 460 + row * 44;
+    for (let x = 0; x < 1920; x += P) {
+      const y = Math.round((baseY + Math.sin(x / 110 + row * 1.6) * 7) / P) * P;
+      if (hash(x, row * 9) < 0.15) continue;
+      rect(c, '#fae3ad', x, y, P, P);
+      rect(c, '#deb069', x, y + P, P, P);
+    }
+  }
+
+  // Conchas marinas esparcidas en la arena (pequeños espirales y abanicos en bloques de 4x4 px)
+  const drawShell = (sx, sy, col, shade) => {
+    rect(c, '#00000018', sx - 2, sy + 6, 12, 3);
+    rect(c, col, sx, sy, 8, 6);
+    rect(c, shade, sx + 2, sy + 2, 4, 3);
+    rect(c, '#ffffff', sx + 1, sy, 3, 2);
+  };
+  for (let i = 0; i < 35; i++) {
+    const sx = Math.round(hash(i, 41) * 1840 + 40);
+    const sy = Math.round(440 + hash(41, i) * 600);
+    const colorPair = [
+      ['#fbcfe8', '#f472b6'], // rosa nácar
+      ['#fed7aa', '#fb923c'], // melocotón
+      ['#fef08a', '#eab308'], // perla dorada
+      ['#e0e7ff', '#818cf8']  // lavanda suave
+    ][i % 4];
+    drawShell(sx, sy, colorPair[0], colorPair[1]);
+  }
+
+  // Estrellas de mar decorativas en la arena cerca de la orilla
+  const drawStarfish = (stx, sty, col, shade) => {
+    rect(c, '#00000022', stx - 1, sty + 10, 16, 4);
+    rect(c, col, stx + 5, sty + 4, 4, 4);
+    rect(c, col, stx + 5, sty, 4, 4);       // brazo superior
+    rect(c, col, stx + 5, sty + 8, 4, 4);   // brazo inferior
+    rect(c, col, stx, sty + 3, 5, 4);       // brazo izq
+    rect(c, col, stx + 9, sty + 3, 5, 4);   // brazo der
+    rect(c, shade, stx + 6, sty + 5, 2, 2); // centro
+  };
+  for (let i = 0; i < 12; i++) {
+    const stx = Math.round(hash(i, 77) * 1800 + 60);
+    const sty = Math.round(410 + hash(77, i) * 180);
+    drawStarfish(stx, sty, i % 2 ? '#f87171' : '#fb923c', '#b91c1c');
+  }
+
+  // Castillo de arena de Pancho & Don Domi con banderita
+  const drawSandCastle = (cx, cy) => {
+    rect(c, '#00000028', cx - 4, cy + 32, 68, 8);
+    // Base del castillo
+    rect(c, '#deb069', cx, cy + 12, 60, 22);
+    rect(c, '#ebd08f', cx + 4, cy + 14, 52, 18);
+    // Puerta de arco
+    rect(c, '#854d0e', cx + 24, cy + 22, 12, 12);
+    // 3 torrecitas con almenas
+    for (const tx of [cx + 2, cx + 22, cx + 42]) {
+      rect(c, '#deb069', tx, cy, 16, 14);
+      rect(c, '#ebd08f', tx + 2, cy + 2, 12, 12);
+      // Almenas
+      rect(c, '#deb069', tx, cy - 4, 4, 4);
+      rect(c, '#deb069', tx + 6, cy - 4, 4, 4);
+      rect(c, '#deb069', tx + 12, cy - 4, 4, 4);
+    }
+    // Banderita roja
+    rect(c, '#854d0e', cx + 29, cy - 14, 2, 12);
+    rect(c, '#ef4444', cx + 31, cy - 14, 10, 6);
+  };
+  drawSandCastle(1560, 740);
+
+  // Guiño del Señor Domi: sello Burgos tallado en la arena
+  drawBurgosMark(c, 1780, 980, 2, 0.22);
+}
+
 function dinerFloor(map = 'diner') {
   if (floors.has(map)) return floors.get(map);
   const canvas = document.createElement('canvas'); canvas.width = 1920; canvas.height = 1080;
@@ -826,6 +989,7 @@ function dinerFloor(map = 'diner') {
   if(map==='football'){footballFloor(c);return cacheSprite(floors,map,canvas);}
   if(map==='lava'){lavaFloor(c);return cacheSprite(floors,map,canvas);}
   if(map==='desert'){desertFloor(c);return cacheSprite(floors,map,canvas);}
+  if(map==='beach'){beachFloor(c);return cacheSprite(floors,map,canvas);}
   if(map==='snow'){
     const colors=['#275574','#35688a'];
     for(let y=0;y<1080;y+=32)for(let x=0;x<1920;x+=32){rect(c,colors[(x/32+y/32)%2],x,y,32,32);rect(c,'#7dd3fc1c',x+2,y+2,28,2);}
@@ -1130,6 +1294,80 @@ export function drawDiner(c, width, height, time, menu, map = 'diner') {
         c.fillStyle = col;
         c.globalAlpha = Math.max(0.12, alpha);
         c.fillRect(Math.round(px), Math.round(py), size, size);
+      }
+      c.restore();
+    } else if (map === 'beach') {
+      c.save();
+      // 1. OLAS ANIMADAS EN LA ORILLA (suben y bajan sobre la arena dorada)
+      const tide = Math.sin(time * 1.8);
+      const tideOffset = tide * 22; // Avance y retroceso de 22 px de la marea
+
+      // Capa de agua translúcida que cubre la arena mojada
+      for (let x = 0; x < width; x += 8) {
+        const coastBaseY = 380 + Math.sin(x / 140) * 18 + Math.sin(x / 45) * 6;
+        const waveFrontY = coastBaseY + tideOffset + Math.sin(x / 60 + time * 2.2) * 8;
+
+        // Lámina de agua poco profunda que se extiende sobre la arena
+        c.fillStyle = '#22d3ee55';
+        c.fillRect(x, 340, 8, Math.max(0, waveFrontY - 340));
+
+        // Franja de espuma blanca y cian en la rompiente
+        const foamWidth = 12 + Math.sin(x / 25 + time * 3) * 6;
+        c.fillStyle = '#ffffff';
+        c.fillRect(x, waveFrontY - foamWidth, 8, 5);
+        c.fillStyle = '#cffafe';
+        c.fillRect(x, waveFrontY - foamWidth + 5, 8, 4);
+        c.fillStyle = '#a5f3fc88';
+        c.fillRect(x, waveFrontY - foamWidth + 9, 8, 4);
+
+        // Burbujitas efímeras de espuma dejadas atrás cuando la ola retrocede
+        if (tide < 0) {
+          const recedeFade = -tide * 0.7;
+          c.fillStyle = `rgba(255, 255, 255, ${recedeFade})`;
+          if ((x / 8) % 3 === 0) {
+            c.fillRect(x + 2, coastBaseY + 12, 4, 3);
+            c.fillRect(x + 4, coastBaseY + 18, 3, 2);
+          }
+        }
+      }
+
+      // Olas secundarias ondeantes en el mar abierto
+      for (let w = 0; w < 4; w++) {
+        const waveY = 140 + w * 58 + ((time * (20 + w * 6)) % 70);
+        c.strokeStyle = 'rgba(255, 255, 255, 0.45)';
+        c.lineWidth = 2.5;
+        c.beginPath();
+        for (let x = 0; x < width; x += 20) {
+          const y = waveY + Math.sin(x / 80 + time * 2 + w) * 6;
+          if (x === 0) c.moveTo(x, y);
+          else c.lineTo(x, y);
+        }
+        c.stroke();
+      }
+
+      // 2. DESTELLOS DE SOL EN EL MAR (Sparkles titilantes sobre el agua turquesa)
+      for (let i = 0; i < 24; i++) {
+        const sx = ((i * 157 + time * 12) % width);
+        const sy = 95 + ((i * 67 + Math.sin(time + i) * 15) % 250);
+        const sparkle = Math.max(0, Math.sin(time * 4.5 + i * 2.1));
+        if (sparkle > 0.3) {
+          c.fillStyle = '#ffffff';
+          c.globalAlpha = sparkle * 0.85;
+          c.fillRect(Math.round(sx), Math.round(sy), 3, 3);
+          c.fillStyle = '#fef08a';
+          c.fillRect(Math.round(sx) - 1, Math.round(sy) + 1, 5, 1);
+          c.fillRect(Math.round(sx) + 1, Math.round(sy) - 1, 1, 5);
+        }
+      }
+
+      // 3. BRISA MARINA Y MOTAS DORADAS FLOTANDO EN LA ARENA
+      for (let i = 0; i < 30; i++) {
+        const bx = ((i * 127 + time * (55 + (i % 4) * 20)) % width);
+        const by = 120 + ((i * 83 + time * 14) % (height - 180));
+        const alpha = 0.35 + Math.sin(time * 2.5 + i) * 0.2;
+        c.globalAlpha = alpha;
+        c.fillStyle = (i % 3 === 0) ? '#ffffff' : (i % 3 === 1) ? '#67e8f9' : '#fde047';
+        c.fillRect(Math.round(bx), Math.round(by), (i % 2 === 0 ? 3 : 2), 2);
       }
       c.restore();
     } else {
