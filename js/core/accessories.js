@@ -417,7 +417,7 @@ export const ACCESSORIES = {
     desc: 'Botines con tapones de fútbol: +30% velocidad y daño al patear pelotas/cocos y +8% velocidad.',
     stats: { hp: '-', spd: '+8%', dmg: '+30% Patadas', perk: '+Potencia Patadas' },
     sheet: 'map_preview_skates',
-    dw: 42, dh: 17, ox: -21, oy: 7
+    dw: 42, dh: 17, ox: -21, oy: 13
   },
   tropical_visor: {
     id: 'tropical_visor',
@@ -619,19 +619,19 @@ function drawProceduralCartographyAccessory(ctx, id, ox, oy, dw, dh) {
     ctx.fillStyle = '#d97706';
     ctx.fillRect(6, -4, 8, 3);
   } else if (id === 'captain_cleats') {
-    // Botines de fútbol azules con franja amarilla y taco
+    // Botines de fútbol azules con franja amarilla y taco ajustados sobre el calzado
     ctx.fillStyle = '#2563eb';
-    ctx.fillRect(-17, -5, 13, 10);
+    ctx.fillRect(-17, 14, 13, 10);
     ctx.fillStyle = '#fbbf24';
-    ctx.fillRect(-17, -2, 13, 3);
+    ctx.fillRect(-17, 17, 13, 3);
     ctx.fillStyle = '#1e293b';
-    ctx.fillRect(-18, 3, 15, 3);
+    ctx.fillRect(-18, 22, 15, 3);
     ctx.fillStyle = '#2563eb';
-    ctx.fillRect(4, -5, 13, 10);
+    ctx.fillRect(4, 14, 13, 10);
     ctx.fillStyle = '#fbbf24';
-    ctx.fillRect(4, -2, 13, 3);
+    ctx.fillRect(4, 17, 13, 3);
     ctx.fillStyle = '#1e293b';
-    ctx.fillRect(3, 3, 15, 3);
+    ctx.fillRect(3, 22, 15, 3);
   } else if (id === 'tropical_visor') {
     // Visera playera turquesa
     ctx.fillStyle = '#0f172a';

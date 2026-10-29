@@ -166,6 +166,80 @@
         </div>
       </section>
 
+      <!-- MÁQUINA DE PREMIOS (PANCHOMÁTICA) -->
+      <section id="prizeScreen" class="screen prize-screen" aria-label="Máquina de Premios Arcade">
+        <div class="screen__panel prize-panel">
+          <header class="prize-header">
+            <button id="prizeBackButton" class="pixel-button pixel-button--secondary" title="Volver al local" aria-label="Volver al local">
+              ← VOLVER (ESC)
+            </button>
+            <div class="prize-title-wrap">
+              <span class="brand-mark">D<span>2</span></span>
+              <div>
+                <h2>PANCHOMÁTICA</h2>
+                <small>MÁQUINA DE PREMIOS Y SORPRESAS DE DON DOMI</small>
+              </div>
+            </div>
+            <div class="prize-wallet">
+              <span class="wallet"><i data-lucide="coins"></i><b id="prizeBank">0</b><small>PT</small></span>
+            </div>
+          </header>
+
+          <div class="prize-stage-layout">
+            <!-- Canvas interactivo de la máquina con física de cápsulas y animación fluida -->
+            <div class="prize-canvas-container">
+              <canvas id="prizeCanvas" width="560" height="480"></canvas>
+            </div>
+
+            <!-- Panel de control lateral -->
+            <div class="prize-control-panel">
+              <div class="prize-rules-card">
+                <div class="prize-badge-row">
+                  <span class="prize-chip prize-chip--skin">🎭 PERSONAJES</span>
+                  <span class="prize-chip prize-chip--acc">🎩 ACCESORIOS</span>
+                  <span class="prize-chip prize-chip--pet">🐾 MASCOTAS</span>
+                </div>
+                <p class="prize-rules-desc">
+                  ¡Probá tu suerte! Cada tirada extrae una cápsula que desbloquea un <strong>personaje</strong>, <strong>accesorio</strong> o <strong>mascota</strong> no adquirido. Si ya tenés todo, ¡te llevás un <strong>Bote de 300 Puntos</strong>!
+                </p>
+                <div class="prize-cost-box">
+                  <span class="prize-cost-label">COSTO POR TIRADA:</span>
+                  <span class="prize-cost-val"><i data-lucide="coins"></i> 150 <small>PT</small></span>
+                </div>
+              </div>
+
+              <!-- Botón principal para girar palanca -->
+              <div class="prize-actions">
+                <button id="prizePullBtn" class="pixel-button pixel-button--gold prize-pull-btn">
+                  <span class="prize-btn-text">🎰 ¡GIRAR PALANCA! (150 PT)</span>
+                </button>
+                <p id="prizeNotice" class="prize-notice"></p>
+              </div>
+
+              <!-- Tarjeta de Premio Revelado -->
+              <div id="prizeRevealCard" class="prize-reveal-card" hidden>
+                <div class="prize-reveal-header">
+                  <span id="prizeRarityPill" class="prize-rarity-pill">¡ÉPICO!</span>
+                  <h3 id="prizeItemName">Nombre del Ítem</h3>
+                </div>
+                <div class="prize-reveal-body">
+                  <canvas id="prizeItemCanvas" width="80" height="80"></canvas>
+                  <p id="prizeItemDesc">Descripción del premio desbloqueado.</p>
+                </div>
+                <div class="prize-reveal-actions">
+                  <button id="prizeEquipBtn" class="pixel-button pixel-button--green">
+                    ✓ EQUIPAR AHORA
+                  </button>
+                  <button id="prizeNextBtn" class="pixel-button pixel-button--secondary">
+                    CONTINUAR
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       <section id="domiScreen" class="screen shop-screen domi-screen" aria-labelledby="domiTitle">
         <div class="screen__panel shop-panel">
           <header class="shop-heading">

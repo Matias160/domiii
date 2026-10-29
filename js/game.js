@@ -30,6 +30,7 @@ import {Lobby} from './ui/lobby.js';
 import {Shop} from './ui/shop.js';
 import {DomiScreen} from './ui/domi.js';
 import {AtlasScreen} from './ui/atlasScreen.js';
+import {PrizeMachine} from './ui/prizeMachine.js';
 import {updateMap,drawMapObstacles} from './systems/mapSystem.js';
 import {primes,updatePrimes,activatePrime,drawPrimeEffects} from './systems/primeSystem.js';
 import {icon,refreshIcons,abilityIcons} from './ui/icons.js';
@@ -69,7 +70,7 @@ export class Game {
     this.audio = new AudioSystem();
     this.menu = new MenuScreen(this);
     this.gameOver = new GameOverScreen(this);
-    this.lobby=new Lobby(this);this.shop=new Shop(this);this.domi=new DomiScreen(this);this.atlas=new AtlasScreen(this);this.choice=null;
+    this.lobby=new Lobby(this);this.shop=new Shop(this);this.domi=new DomiScreen(this);this.atlas=new AtlasScreen(this);this.prizeMachine=new PrizeMachine(this);this.choice=null;
     this.renderSortBuffer = [];
     // Visor lógico de la partida: alto base 540, ancho según la proporción de la pantalla
     this.view = { w: 960, h: 540 };
@@ -389,6 +390,10 @@ export class Game {
 
   showAtlas() {
     this.atlas?.show();
+  }
+
+  showPrizeMachine() {
+    this.prizeMachine?.show();
   }
 
   skipEntrance() { if (this.entrance && this.running) skipBossEntrance(this.entrance); }

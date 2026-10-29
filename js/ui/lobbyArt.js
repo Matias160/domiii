@@ -353,71 +353,86 @@ export function drawStation(c,s,t,active){
     c.restore();
     box(c,-48,18,96,16,'#1a2928');
   }
-  else if(id==='atlas' || id==='desk'){
+  else if(id==='prize' || id==='atlas' || id==='desk'){
     // Si el jugador está cerca o pasa el mouse por encima, resaltar el puesto con borde neón
     if(active){
       c.save();
-      c.strokeStyle='#38bdf8';
+      c.strokeStyle='#f43f5e';
       c.lineWidth=2;
-      c.strokeRect(-78,-108,156,146);
+      c.strokeRect(-76,-110,152,148);
       c.restore();
     }
-    // Mesa de Cartografía: gran mueble de roble, mapas extendidos, globo terráqueo y brújula
-    box(c,-64,-104,128,24,'#0f2334');
-    const neonOn=Math.sin(t*3)>-0.6;
-    text(c,'CARTOGRAFÍA',0,-86,10,neonOn?'#38bdf8':'#1e405b');
-    c.fillStyle=neonOn?'#7dd3fc':'#15334a';c.fillRect(-58,-82,116,2);
 
-    // Globo terráqueo giratorio a la izquierda
-    box(c,-62,-44,32,32,'#1e293b');
-    c.fillStyle='#0284c7';c.beginPath();c.arc(-46,-28,12,0,Math.PI*2);c.fill();
-    const globePhase = (t * 1.5) % Math.PI;
-    c.fillStyle='#22c55e';
-    c.beginPath();c.ellipse(-46 + Math.cos(globePhase)*4, -28, 6, 9, 0.2, 0, Math.PI*2);c.fill();
-    c.strokeStyle='#fbbf24';c.lineWidth=2;c.beginPath();c.arc(-46,-28,14,0,Math.PI);c.stroke(); // soporte de latón
+    // --- MÁQUINA DE PREMIOS / GASHAPON ARCADE ---
+    // Cartel superior de Neón: "★ PREMIOS ★"
+    box(c,-60,-104,120,24,'#831843');
+    const neonOn=Math.sin(t*4)>-0.6;
+    text(c,'★ PREMIOS ★',0,-86,10,neonOn?'#f472b6':'#500724');
+    c.fillStyle=neonOn?'#fbcfe8':'#360416';c.fillRect(-54,-82,108,2);
 
-    // Escritorio de madera maciza
-    box(c,-74,-8,148,44,'#78350f');
-    c.fillStyle='#92400e';c.fillRect(-70,-8,140,6);
-    c.fillStyle='#451a03';for(let i=0;i<5;i++)c.fillRect(-66+i*30,4,22,2);
-    box(c,-44,12,88,16,'#fef3c7');text(c,'8 REGIONES',0,24,8,'#78350f');
-
-    // Gran pergamino de mapa desplegado sobre la mesa
-    box(c,-24,-16,68,20,'#fef08a');
-    c.fillStyle='#fde047';c.fillRect(-22,-14,64,16);
-    // Rutas punteadas y continentes dibujados en el pergamino
-    c.fillStyle='#b45309';
-    c.fillRect(-18,-11,10,5); c.fillRect(4,-12,12,6); c.fillRect(24,-9,14,7);
-    c.fillStyle='#dc2626';
-    c.fillRect(-6,-8,3,3); c.fillRect(18,-6,3,3); // cruces de tesoro
-    c.strokeStyle='#92400e';c.setLineDash([2,3]);
-    c.beginPath();c.moveTo(-12,-8);c.lineTo(-6,-8);c.lineTo(4,-9);c.lineTo(18,-6);c.stroke();
-    c.setLineDash([]);
-
-    // Brújula de latón dorada y lupa
-    c.fillStyle='#fbbf24';c.beginPath();c.arc(52,-14,8,0,Math.PI*2);c.fill();
-    c.fillStyle='#d97706';c.beginPath();c.arc(52,-14,6,0,Math.PI*2);c.fill();
-    c.fillStyle='#ef4444';c.fillRect(51,-17,2,4); // aguja norte
-    c.fillStyle='#ffffff';c.fillRect(51,-13,2,4); // aguja sur
-
-    // Rollos de mapas atados apilados a la derecha
-    for(let k=0;k<3;k++){
-      c.fillStyle='#fef3c7';c.fillRect(28+k*2,-32-k*4,22,6);
-      c.fillStyle='#ef4444';c.fillRect(37+k*2,-32-k*4,4,6); // cinta roja
+    // Bolitas de luz de marquesina animadas
+    for(let i=0;i<8;i++){
+      const lit=(Math.floor(t*6)+i)%2===0;
+      c.fillStyle=lit?'#facc15':'#4a044e';
+      c.beginPath();c.arc(-49+i*14,-100,3,0,Math.PI*2);c.fill();
     }
 
-    // Lámpara de mesa que parpadea
-    const lampGlow=(Math.sin(t*5)+1)*0.15;
-    c.fillStyle='#f59e0b';c.fillRect(-2,-36,8,22);
-    c.fillStyle=`rgba(254, 240, 138, ${0.75 + lampGlow})`;c.beginPath();c.arc(2,-36,10,0,Math.PI*2);c.fill();
+    // Gran Esfera de Cristal (Gashapon)
+    const globeY = -38;
+    const globeR = 36;
+    c.fillStyle='rgba(15, 23, 42, 0.9)';
+    c.beginPath();c.arc(0,globeY,globeR,0,Math.PI*2);c.fill();
 
-    // Globito flotante: invita a explorar el atlas
+    // Cápsulas de colores flotando adentro
+    const capColors = ['#ef4444', '#3b82f6', '#10b981', '#f59e0b', '#a855f7', '#ec4899'];
+    for(let k=0;k<6;k++){
+      const ang = k * 1.05 + Math.sin(t * 2 + k) * 0.4;
+      const d = 16 + Math.cos(t * 1.5 + k) * 8;
+      const cx = Math.cos(ang) * d;
+      const cy = globeY + Math.sin(ang) * d;
+      c.fillStyle = capColors[k % capColors.length];
+      c.beginPath();c.arc(cx,cy,7,Math.PI,0);c.fill();
+      c.fillStyle = '#ffffff';
+      c.beginPath();c.arc(cx,cy,7,0,Math.PI);c.fill();
+      c.fillStyle = '#0f172a';c.fillRect(cx-7,cy-1,14,2);
+    }
+
+    // Reflejo brillante en el cristal
+    c.fillStyle='rgba(255, 255, 255, 0.28)';
+    c.beginPath();c.ellipse(-14,globeY-14,16,7,-Math.PI/4,0,Math.PI*2);c.fill();
+    c.strokeStyle='#f472b6';c.lineWidth=3;c.beginPath();c.arc(0,globeY,globeR,0,Math.PI*2);c.stroke();
+
+    // Mueble inferior / Chasis arcade
+    box(c,-50,0,100,38,'#4c0519');
+    c.fillStyle='#831843';c.fillRect(-46,4,92,30);
+    c.fillStyle='#fbcfe8';c.fillRect(-50,0,100,3);c.fillRect(-50,35,100,3);
+
+    // Palanca / Manivela giratoria cromada
+    c.fillStyle='#374151';c.beginPath();c.arc(-22,18,10,0,Math.PI*2);c.fill();
+    const crankRot = t * 1.5;
+    c.save();c.translate(-22,18);c.rotate(crankRot);
+    c.fillStyle='#e5e7eb';c.fillRect(-3,-3,18,6);
+    c.fillStyle='#ef4444';c.beginPath();c.arc(14,0,5,0,Math.PI*2);c.fill();
+    c.restore();
+
+    // Rampa de entrega iluminada (Boca de salida)
+    c.fillStyle='#0f172a';c.fillRect(6,10,34,20);
+    c.strokeStyle='#f472b6';c.lineWidth=2;c.strokeRect(6,10,34,20);
+    const pulseChute = Math.sin(t*5)*0.25+0.5;
+    c.fillStyle=`rgba(236, 72, 153, ${pulseChute})`;
+    c.fillRect(8,12,30,16);
+
+    // Ranura de Moneda
+    c.fillStyle='#000';c.fillRect(-42,12,4,12);
+    c.fillStyle='#facc15';c.fillRect(-43,10,6,2);
+
+    // Globito flotante: invita a probar la máquina
     if(!active){
       const float=Math.sin(t*3)*3;
-      c.save();c.translate(-70,-142+float);
-      box(c,0,0,140,26,'#fff7e0');
-      c.fillStyle='#fff7e0';c.fillRect(62,26,10,6);c.fillRect(65,32,4,3);
-      text(c,'¡MAPAS Y MISIONES!',70,17,7,'#1e293b');
+      c.save();c.translate(-68,-142+float);
+      box(c,0,0,136,26,'#fff7e0');
+      c.fillStyle='#fff7e0';c.fillRect(60,26,10,6);c.fillRect(63,32,4,3);
+      text(c,'¡PREMIOS 150 PT!',68,17,7,'#831843');
       c.restore();
     }
   }

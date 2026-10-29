@@ -3204,6 +3204,12 @@ kbd { display: inline-block; border: 1px solid #556771; border-bottom-width: 3px
 .domi-mission-card--level {
   border-left-color: #c084fc !important;
 }
+.domi-mission-card--level:hover {
+  border-color: #a855f7 !important;
+  border-left-color: #c084fc !important;
+  box-shadow: 4px 4px 0 #000, 0 0 16px rgba(192, 132, 252, 0.45) !important;
+  background: #190924 !important;
+}
 
 .domi-mission-card--level .domi-mission-icon-box {
   background: #17051f !important;

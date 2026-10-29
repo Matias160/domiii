@@ -138,7 +138,7 @@ export async function resetPassword(name, _newPassword = ''){
   setSession(id);
   return data[id];
 }
-function mutate(change){const id=sessionStorage.getItem(SESSION),data=all(true);if(!id||!data[id])throw Error('Inicia sesión para continuar.');
+export function mutate(change){const id=sessionStorage.getItem(SESSION),data=all(true);if(!id||!data[id])throw Error('Inicia sesión para continuar.');
   const result=change(data[id]);write(data);return result;
 }
 export function purchase(type,id){const item=shopItems.find(x=>x.type===type&&x.id===id);if(!item)throw Error('Articulo desconocido.');
