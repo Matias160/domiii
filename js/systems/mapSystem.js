@@ -194,6 +194,10 @@ export function updateMap(state, dt) {
       for (const enemy of state.enemies) {
         if (enemy.hp > 0 && Math.hypot(enemy.x - o.x, enemy.y - o.y) < 320) {
           damageEnemy(state, enemy, 160 + state.player.level * 12, 'crit');
+          if (enemy.hp <= 0 && state.mapId === 'desert') {
+            state.cartographyProgress = state.cartographyProgress || {};
+            state.cartographyProgress.desert = (state.cartographyProgress.desert || 0) + 1;
+          }
         }
       }
     }
@@ -205,6 +209,13 @@ export function updateMap(state, dt) {
           if (enemy.hp > 0 && Math.hypot(enemy.x - o.x, enemy.y - o.y) < enemy.radius + o.radius + 6) {
             o.exploded = true;
             damageEnemy(state, enemy, 160 + state.player.level * 10, 'crit');
+            if (state.mapId === 'beach') {
+              state.cartographyProgress = state.cartographyProgress || {};
+              state.cartographyProgress.beach = (state.cartographyProgress.beach || 0) + 1;
+              if (enemy.hp <= 0) {
+                state.cartographyProgress.beach_alt = (state.cartographyProgress.beach_alt || 0) + 1;
+              }
+            }
             burst(state, o.x, o.y, '#ffffff', 18, 180);
             burst(state, o.x, o.y, '#78350f', 14, 150);
             impactRing(state, o.x, o.y, '#ffffff');
@@ -220,6 +231,10 @@ export function updateMap(state, dt) {
           if (enemy.hp > 0 && !o.hitEnemies.has(enemy) && Math.hypot(enemy.x - o.x, enemy.y - o.y) < enemy.radius + o.radius + 6) {
             o.hitEnemies.add(enemy);
             damageEnemy(state, enemy, 130 + state.player.level * 8, 'crit');
+            if (state.mapId === 'football') {
+              state.cartographyProgress = state.cartographyProgress || {};
+              state.cartographyProgress.football = (state.cartographyProgress.football || 0) + 1;
+            }
             state.shake = Math.max(state.shake || 0, 0.15);
             state.audio?.play('kill');
           }

@@ -196,6 +196,73 @@ function foodSprite(kind, enemy, flash = false) {
       rect(c, '#ff2200', px, 0, 4, 4);
       rect(c, '#ffbb00', px + 1, 1, 2, 2);
     }
+  } else if (kind === 'bill_collector') {
+    block(c, '#0284c7', 10, 16, 44, 40, 5);
+    rect(c, '#38bdf8', 14, 18, 36, 10);
+    rect(c, '#f8fafc', 26, 18, 12, 14);
+    rect(c, '#ef4444', 30, 20, 4, 10);
+    block(c, '#f59e0b', 42, 32, 14, 18, 2);
+    rect(c, '#fef08a', 44, 34, 10, 14);
+    rect(c, '#0369a1', 8, 32, 10, 12);
+  } else if (kind === 'frying_pan') {
+    block(c, '#1e293b', 8, 14, 48, 40, 6);
+    rect(c, '#334155', 12, 18, 40, 32);
+    block(c, '#0f172a', 2, 28, 10, 8, 2);
+    rect(c, '#ffffff', 20, 24, 24, 20);
+    rect(c, '#f8fafc', 18, 28, 28, 12);
+    block(c, '#f59e0b', 28, 28, 12, 12, 4);
+    rect(c, '#fbbf24', 30, 30, 8, 8);
+  } else if (kind === 'delivery_kart') {
+    block(c, '#eab308', 8, 20, 48, 28, 5);
+    rect(c, '#fde047', 12, 22, 40, 12);
+    rect(c, '#0f172a', 14, 46, 12, 10);
+    rect(c, '#0f172a', 38, 46, 12, 10);
+    rect(c, '#e2e8f0', 16, 48, 8, 6); rect(c, '#e2e8f0', 40, 48, 8, 6);
+    block(c, '#b45309', 22, 8, 20, 14, 2);
+    rect(c, '#d97706', 24, 10, 16, 10);
+    rect(c, '#ef4444', 30, 10, 4, 10);
+  } else if (kind === 'ice_pop') {
+    block(c, '#06b6d4', 14, 10, 36, 42, 6);
+    rect(c, '#22d3ee', 18, 12, 28, 36);
+    rect(c, '#67e8f9', 22, 14, 12, 30);
+    rect(c, '#ffffff', 24, 16, 4, 18);
+    block(c, '#d97706', 28, 52, 8, 14, 2);
+    rect(c, '#f59e0b', 30, 52, 4, 12);
+  } else if (kind === 'burrower_chili') {
+    block(c, '#ea580c', 14, 20, 36, 34, 6);
+    rect(c, '#f97316', 18, 22, 28, 28);
+    block(c, '#eab308', 18, 8, 28, 14, 3);
+    rect(c, '#fef08a', 28, 14, 8, 6);
+    rect(c, '#ffffff', 30, 15, 4, 4);
+    block(c, '#78350f', 6, 36, 10, 10, 2);
+    block(c, '#78350f', 48, 36, 10, 10, 2);
+  } else if (kind === 'goalie_bot') {
+    block(c, '#2563eb', 12, 16, 40, 36, 4);
+    rect(c, '#3b82f6', 16, 18, 32, 30);
+    rect(c, '#1d4ed8', 20, 24, 24, 8);
+    rect(c, '#22d3ee', 22, 26, 20, 4);
+    block(c, '#f59e0b', 2, 24, 14, 18, 3);
+    rect(c, '#fbbf24', 4, 26, 10, 14);
+    block(c, '#f59e0b', 48, 24, 14, 18, 3);
+    rect(c, '#fbbf24', 50, 26, 10, 14);
+  } else if (kind === 'armored_crab') {
+    block(c, '#dc2626', 10, 20, 44, 30, 6);
+    rect(c, '#ef4444', 14, 22, 36, 24);
+    rect(c, '#f87171', 18, 24, 28, 12);
+    block(c, '#b91c1c', 2, 12, 14, 16, 3); rect(c, '#ef4444', 4, 14, 8, 10);
+    block(c, '#b91c1c', 48, 12, 14, 16, 3); rect(c, '#ef4444', 52, 14, 8, 10);
+    for (let p = 0; p < 3; p++) {
+      rect(c, '#991b1b', 6, 38 + p * 6, 6, 3);
+      rect(c, '#991b1b', 52, 38 + p * 6, 6, 3);
+    }
+  } else if (kind === 'exotic_juice') {
+    block(c, '#f59e0b', 16, 16, 32, 38, 4);
+    rect(c, '#fbbf24', 18, 18, 28, 32);
+    rect(c, '#fef08a', 22, 20, 16, 26);
+    rect(c, '#ef4444', 36, 4, 5, 18);
+    rect(c, '#ffffff', 36, 8, 5, 4); rect(c, '#ffffff', 36, 16, 5, 4);
+    block(c, '#84cc16', 10, 12, 12, 12, 6);
+    rect(c, '#bef264', 12, 14, 8, 8);
   } else {
     block(c, kind === 'empanada' ? '#e7ba6e' : '#c68c44', 9, 17, 48, 40, 7);
     rect(c, '#f8d28b', 17, 20, 30, 5); rect(c, '#e4aa52', 14, 27, 6, 22);

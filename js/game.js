@@ -29,6 +29,7 @@ import {isOwned} from './data/shop.js';
 import {Lobby} from './ui/lobby.js';
 import {Shop} from './ui/shop.js';
 import {DomiScreen} from './ui/domi.js';
+import {AtlasScreen} from './ui/atlasScreen.js';
 import {updateMap,drawMapObstacles} from './systems/mapSystem.js';
 import {primes,updatePrimes,activatePrime,drawPrimeEffects} from './systems/primeSystem.js';
 import {icon,refreshIcons,abilityIcons} from './ui/icons.js';
@@ -68,7 +69,7 @@ export class Game {
     this.audio = new AudioSystem();
     this.menu = new MenuScreen(this);
     this.gameOver = new GameOverScreen(this);
-    this.lobby=new Lobby(this);this.shop=new Shop(this);this.domi=new DomiScreen(this);this.choice=null;
+    this.lobby=new Lobby(this);this.shop=new Shop(this);this.domi=new DomiScreen(this);this.atlas=new AtlasScreen(this);this.choice=null;
     this.renderSortBuffer = [];
     // Visor lógico de la partida: alto base 540, ancho según la proporción de la pantalla
     this.view = { w: 960, h: 540 };
@@ -384,6 +385,10 @@ export class Game {
 
   openRegistration() {
     this.openAuth?.(isGuest() || !currentAccount() ? 'register' : 'switch');
+  }
+
+  showAtlas() {
+    this.atlas?.show();
   }
 
   skipEntrance() { if (this.entrance && this.running) skipBossEntrance(this.entrance); }
@@ -1008,6 +1013,7 @@ export class Game {
       outcome,
       wave: this.state.wave,
       abilities: {...this.state.player.abilities},
+      cartographyProgress: this.state.cartographyProgress || {},
     };
     const previousUnlocks = new Set(unlockedAchievements().map(item=>item.id));
     result.newAchievements = recordRun(result).filter(item=>!previousUnlocks.has(item.id)).map(item=>item.name);

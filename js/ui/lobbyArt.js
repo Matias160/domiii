@@ -353,57 +353,71 @@ export function drawStation(c,s,t,active){
     c.restore();
     box(c,-48,18,96,16,'#1a2928');
   }
-  else if(id==='desk'){
+  else if(id==='atlas' || id==='desk'){
     // Si el jugador está cerca o pasa el mouse por encima, resaltar el puesto con borde neón
     if(active){
       c.save();
-      c.strokeStyle='#7dd3fc';
+      c.strokeStyle='#38bdf8';
       c.lineWidth=2;
       c.strokeRect(-78,-108,156,146);
       c.restore();
     }
-    // Mostrador de registro de socios: recepcionista tecleando, monitor vivo, timbre y carnets
-    box(c,-64,-104,128,24,'#14223a');
+    // Mesa de Cartografía: gran mueble de roble, mapas extendidos, globo terráqueo y brújula
+    box(c,-64,-104,128,24,'#0f2334');
     const neonOn=Math.sin(t*3)>-0.6;
-    text(c,'REGISTRO',0,-86,12,neonOn?'#7dd3fc':'#24425a');
-    c.fillStyle=neonOn?'#38bdf8':'#1a3346';c.fillRect(-58,-82,116,2);
-    // Recepcionista (papas fritas con auriculares) que se balancea mientras escribe
-    const sway=Math.round(Math.sin(t*2)*1.5);
-    drawFood(c,'papas',sway,-42,0.72,0);
-    c.fillStyle='#1f2937';c.fillRect(-17+sway,-70,34,3);c.fillRect(-19+sway,-68,4,12);c.fillRect(15+sway,-68,4,12);
-    c.fillStyle='#38bdf8';c.fillRect(-21+sway,-60,5,7);c.fillRect(16+sway,-60,5,7);
-    c.fillStyle='#e5e7eb';c.fillRect(16+sway,-54,2,8);c.fillRect(8+sway,-47,10,2); // micrófono
-    // Escritorio
-    box(c,-74,-8,148,44,'#7c4a2d');
-    c.fillStyle='#a8683f';c.fillRect(-70,-8,140,6);
-    c.fillStyle='#5b3520';for(let i=0;i<5;i++)c.fillRect(-66+i*30,4,22,2);
-    box(c,-34,12,68,16,'#f4e4c1');text(c,'SOCIOS',0,24,8,'#7c4a2d');
-    // Monitor con datos que se van escribiendo
-    box(c,-66,-40,40,30,'#1e293b');
-    c.fillStyle='#04121a';c.fillRect(-62,-36,32,20);
-    const typed=Math.floor(t*6)%24;
-    c.fillStyle='#4ade80';
-    for(let line=0;line<3;line++){const w=Math.max(0,Math.min(26,typed*3-line*26));if(w)c.fillRect(-60,-33+line*6,w,2);}
-    if(Math.floor(t*3)%2)c.fillRect(-60+Math.min(26,typed*3%27),-21,3,3); // cursor
-    c.fillStyle='#334155';c.fillRect(-50,-10,8,4);
-    // Teclado y manos que tipean
-    c.fillStyle='#cbd5e1';c.fillRect(-20,-14,40,6);
-    c.fillStyle='#94a3b8';for(let k=0;k<6;k++)c.fillRect(-18+k*6,-13,4,2);
-    const tap=Math.floor(t*10)%2;
-    c.fillStyle='#f5c26b';c.fillRect(-14,-18+(tap?2:0),7,5);c.fillRect(7,-18+(tap?0:2),7,5);
-    // Carnets de socio apilados y timbre que suena cada tanto
-    for(let k=0;k<3;k++){c.fillStyle=['#38bdf8','#ffd23f','#ff5c8a'][k];c.fillRect(28+k*2,-16-k*3,22,12);c.fillStyle='#fff';c.fillRect(31+k*2,-13-k*3,8,2);}
-    const ding=(t%4)<0.35;
-    c.fillStyle='#fbbf24';c.fillRect(56,-18-(ding?2:0),12,6);c.fillRect(60,-21-(ding?2:0),4,3);
-    c.fillStyle='#78350f';c.fillRect(54,-12,16,3);
-    if(ding){c.fillStyle='#fff7c2';c.fillRect(52,-30,3,3);c.fillRect(70,-30,3,3);c.fillRect(61,-34,3,3);}
-    // Globito: invita a registrarse cuando no estás cerca
+    text(c,'CARTOGRAFÍA',0,-86,10,neonOn?'#38bdf8':'#1e405b');
+    c.fillStyle=neonOn?'#7dd3fc':'#15334a';c.fillRect(-58,-82,116,2);
+
+    // Globo terráqueo giratorio a la izquierda
+    box(c,-62,-44,32,32,'#1e293b');
+    c.fillStyle='#0284c7';c.beginPath();c.arc(-46,-28,12,0,Math.PI*2);c.fill();
+    const globePhase = (t * 1.5) % Math.PI;
+    c.fillStyle='#22c55e';
+    c.beginPath();c.ellipse(-46 + Math.cos(globePhase)*4, -28, 6, 9, 0.2, 0, Math.PI*2);c.fill();
+    c.strokeStyle='#fbbf24';c.lineWidth=2;c.beginPath();c.arc(-46,-28,14,0,Math.PI);c.stroke(); // soporte de latón
+
+    // Escritorio de madera maciza
+    box(c,-74,-8,148,44,'#78350f');
+    c.fillStyle='#92400e';c.fillRect(-70,-8,140,6);
+    c.fillStyle='#451a03';for(let i=0;i<5;i++)c.fillRect(-66+i*30,4,22,2);
+    box(c,-44,12,88,16,'#fef3c7');text(c,'8 REGIONES',0,24,8,'#78350f');
+
+    // Gran pergamino de mapa desplegado sobre la mesa
+    box(c,-24,-16,68,20,'#fef08a');
+    c.fillStyle='#fde047';c.fillRect(-22,-14,64,16);
+    // Rutas punteadas y continentes dibujados en el pergamino
+    c.fillStyle='#b45309';
+    c.fillRect(-18,-11,10,5); c.fillRect(4,-12,12,6); c.fillRect(24,-9,14,7);
+    c.fillStyle='#dc2626';
+    c.fillRect(-6,-8,3,3); c.fillRect(18,-6,3,3); // cruces de tesoro
+    c.strokeStyle='#92400e';c.setLineDash([2,3]);
+    c.beginPath();c.moveTo(-12,-8);c.lineTo(-6,-8);c.lineTo(4,-9);c.lineTo(18,-6);c.stroke();
+    c.setLineDash([]);
+
+    // Brújula de latón dorada y lupa
+    c.fillStyle='#fbbf24';c.beginPath();c.arc(52,-14,8,0,Math.PI*2);c.fill();
+    c.fillStyle='#d97706';c.beginPath();c.arc(52,-14,6,0,Math.PI*2);c.fill();
+    c.fillStyle='#ef4444';c.fillRect(51,-17,2,4); // aguja norte
+    c.fillStyle='#ffffff';c.fillRect(51,-13,2,4); // aguja sur
+
+    // Rollos de mapas atados apilados a la derecha
+    for(let k=0;k<3;k++){
+      c.fillStyle='#fef3c7';c.fillRect(28+k*2,-32-k*4,22,6);
+      c.fillStyle='#ef4444';c.fillRect(37+k*2,-32-k*4,4,6); // cinta roja
+    }
+
+    // Lámpara de mesa que parpadea
+    const lampGlow=(Math.sin(t*5)+1)*0.15;
+    c.fillStyle='#f59e0b';c.fillRect(-2,-36,8,22);
+    c.fillStyle=`rgba(254, 240, 138, ${0.75 + lampGlow})`;c.beginPath();c.arc(2,-36,10,0,Math.PI*2);c.fill();
+
+    // Globito flotante: invita a explorar el atlas
     if(!active){
       const float=Math.sin(t*3)*3;
       c.save();c.translate(-70,-142+float);
       box(c,0,0,140,26,'#fff7e0');
       c.fillStyle='#fff7e0';c.fillRect(62,26,10,6);c.fillRect(65,32,4,3);
-      text(c,'¡HACETE SOCIO!',70,17,8,'#1e293b');
+      text(c,'¡MAPAS Y MISIONES!',70,17,7,'#1e293b');
       c.restore();
     }
   }

@@ -10,7 +10,7 @@ const stations=[
   {id:'pets',     x:1520, y:290, label:'MASCOTAS',        action:'MASCOTAS',  color:'#38ef7d'},
   {id:'npc',      x:400,  y:760, label:'SEÑOR DOMI',      action:'CONSEJOS',  color:'#5ce1e6'},
   {id:'ranking',  x:960,  y:820, label:'HISTORIAL',       action:'RECORDS',   color:'#c084fc'},
-  {id:'desk',     x:1520, y:760, label:'REGISTRO DE SOCIOS', action:'REGISTRO', color:'#7dd3fc'},
+  {id:'atlas',    x:1520, y:760, label:'MESA DE CARTOGRAFÍA', action:'ATLAS', color:'#38bdf8'},
 ];
 
 export class Lobby {
@@ -150,8 +150,8 @@ export class Lobby {
     this.near=stations.find(s=>Math.hypot(s.x-this.x,(s.y+40)-this.y)<95)||null;
     this.tip.hidden=!this.near;
     if(this.near) {
-      if (this.near.id === 'desk') {
-        this.tip.textContent = isGuest() ? 'E: Registrarse como socio' : 'E: Cabina de socios (Cambiar cuenta / Registro)';
+      if (this.near.id === 'atlas' || this.near.id === 'desk') {
+        this.tip.textContent = 'E: Explorar Atlas de Mapas y Misiones';
       } else {
         this.tip.textContent = this.near.label;
       }
@@ -167,7 +167,7 @@ export class Lobby {
     else if(id==='shop')this.game.shop.show();
     else if(id==='ranking')this.game.showRanking();
     else if(id==='npc')this.game.domi.show();
-    else if(id==='desk')this.game.openRegistration();
+    else if(id==='atlas'||id==='desk')this.game.showAtlas();
   }
   resizeView(){
     const stage=this.canvas.parentElement;

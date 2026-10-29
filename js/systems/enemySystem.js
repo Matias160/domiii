@@ -126,6 +126,10 @@ export function updateEnemies(state, delta, canvas) {
           ? (enemy.hp + 1) * (enemy.armor || 1) + 1
           : (18+player.level*1.35)*player.damageMultiplier;
         damageEnemy(state,enemy,dashDamage,'dash');
+        if (enemy.hp <= 0 && state.mapId === 'parking') {
+          state.cartographyProgress = state.cartographyProgress || {};
+          state.cartographyProgress.parking = (state.cartographyProgress.parking || 0) + 1;
+        }
         state.score+=15;state.shake=Math.max(state.shake,.12);
         state.floaters?.push({x:enemy.x,y:enemy.y-34,text:'CHOQUE +15',life:.8,color:'#9fffe0',scale:1.1,kind:'dash'});
         impactRing(state,enemy.x,enemy.y,'#9fffe0');burst(state,enemy.x,enemy.y,'#9fffe0',14,145);state.audio?.play('kill');
@@ -275,16 +279,30 @@ function spawnEnemy(state, canvas, boss = false, nearEdge = false, bossSlot = 0,
   px = Math.max(40, Math.min(worldW - 40, px));
   py = Math.max(130, Math.min(worldH - 40, py));
   const position = { x: px, y: py };
-  const normalTypes = enemyTypes.filter(type => !type.boss);
-  const maxType = state.time > 65 ? normalTypes.length : state.time > 35 ? 5 : state.time > 15 ? 4 : 2;
+  const currentMap = state.mapId || 'diner';
+  const nativeForMap = enemyTypes.filter(t => !t.boss && t.nativeMap === currentMap);
+  const globalNormals = enemyTypes.filter(t => !t.boss && !t.nativeMap);
+  const maxGlobal = state.time > 65 ? globalNormals.length : state.time > 35 ? 5 : state.time > 15 ? 4 : 2;
+  const availableGlobals = globalNormals.slice(0, maxGlobal);
+
   const bosses = enemyTypes.filter(record => record.boss);
   const spawnedBossIndex = state.bossIndexCursor || 0;
   if (boss) state.bossIndexCursor = spawnedBossIndex + 1;
   const colossusBoss = enemyTypes.find(t => t.id === 'lava_boss') || bosses[0];
   const regularBosses = bosses.filter(b => b.id !== 'lava_boss');
-  const type = boss
-    ? (state.mapId === 'lava' ? colossusBoss : regularBosses[spawnedBossIndex % regularBosses.length])
-    : normalTypes[Math.floor(Math.random() * maxType)];
+
+  let chosenType;
+  if (boss) {
+    chosenType = state.mapId === 'lava' ? colossusBoss : regularBosses[spawnedBossIndex % regularBosses.length];
+  } else {
+    // Si hay enemigos nativos exclusivos para este mapa, aparecen con un 32% de probabilidad
+    if (nativeForMap.length > 0 && Math.random() < 0.32) {
+      chosenType = nativeForMap[Math.floor(Math.random() * nativeForMap.length)];
+    } else {
+      chosenType = availableGlobals[Math.floor(Math.random() * availableGlobals.length)];
+    }
+  }
+  const type = chosenType;
   if (type.id === 'onion') {
     const angle = Math.random() * Math.PI * 2;
     position.x = Math.max(62, Math.min(worldW - 62, state.player.x + Math.cos(angle) * 165));

@@ -153,6 +153,18 @@ export function resolveDeaths(state, onLevelUp) {
     }
     state.peakCombo = Math.max(state.peakCombo || 0, state.combo);
     state.kills += 1;
+
+    // Seguimiento de misiones temáticas de cartografía en tiempo real
+    state.cartographyProgress = state.cartographyProgress || {};
+    if (state.mapId === 'diner' && (state.combo || 0) >= 10) {
+      state.cartographyProgress.diner = (state.cartographyProgress.diner || 0) + 1;
+    }
+    if (state.mapId === 'kitchen' && state.oilPuddles && state.oilPuddles.length > 0) {
+      state.cartographyProgress.kitchen = (state.cartographyProgress.kitchen || 0) + 1;
+    }
+    if (state.mapId === 'snow' && state.snowFreezeTimer !== undefined && state.snowFreezeTimer <= 0) {
+      state.cartographyProgress.snow = (state.cartographyProgress.snow || 0) + 1;
+    }
     if (enemy.isBoss) {
       if (state.mapId === 'lava' || enemy.type?.id === 'lava_boss') {
         // El Coloso Final: la victoria se cuenta al terminar su animación de muerte (game.js)

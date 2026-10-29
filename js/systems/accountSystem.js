@@ -167,6 +167,63 @@ export function awardRun(result){return mutate(p=>{
   p.stats.totalKills = (p.stats.totalKills || 0) + (result.kills || 0);
   p.stats.totalRuns = (p.stats.totalRuns || 0) + 1;
   p.stats.totalBosses = (p.stats.totalBosses || 0) + runBosses;
+
+  // Estadísticas permanentes por mapa (sin límite de historial de 40 partidas)
+  p.mapStats = p.mapStats || {};
+  const mapKey = result.map || 'diner';
+  if (!p.mapStats[mapKey]) {
+    p.mapStats[mapKey] = { runs: 0, victories: 0, defeats: 0, maxTime: 0, kills: 0, maxScore: 0 };
+  }
+  const ms = p.mapStats[mapKey];
+  ms.runs += 1;
+  const isVictory = result.outcome === 'victory' || result.victory || (mapKey === 'lava' && runBosses >= 1);
+  if (isVictory) ms.victories += 1;
+  else ms.defeats += 1;
+  ms.maxTime = Math.max(ms.maxTime, runTime);
+  ms.kills += (result.kills || 0);
+  ms.maxScore = Math.max(ms.maxScore, points);
+
+  // Misiones temáticas de cartografía acumulativas (y victoria en 1 partida para el Coloso)
+  const DEFAULT_MISSIONS = {
+    diner:    { progress: 0, target: 10, completed: false, accessory: 'ticket_gold' },
+    kitchen:  { progress: 0, target: 10, completed: false, accessory: 'thermal_gloves' },
+    parking:  { progress: 0, target: 12, completed: false, accessory: 'reflect_vest' },
+    snow:     { progress: 0, target: 10, completed: false, accessory: 'thermal_scarf' },
+    desert:   { progress: 0, target: 10, completed: false, accessory: 'thorn_boots' },
+    football: { progress: 0, target: 8,  completed: false, accessory: 'captain_cleats' },
+    beach:    { progress: 0, target: 8,  completed: false, accessory: 'tropical_visor' },
+    beach_alt:{ progress: 0, target: 30, completed: false, accessory: 'pineapple_hat' },
+    lava:     { progress: 0, target: 1,  completed: false, accessory: 'leg_lava_crown' }
+  };
+  p.cartographyMissions = p.cartographyMissions || {};
+  for (const [k, v] of Object.entries(DEFAULT_MISSIONS)) {
+    if (!p.cartographyMissions[k]) p.cartographyMissions[k] = { ...v };
+  }
+
+  const progressMap = Object.assign({}, result.cartographyProgress || {}, result.cartographyGains || {});
+  if (mapKey === 'lava' && isVictory) {
+    progressMap.lava = 1;
+  }
+
+  for (const [mId, amount] of Object.entries(progressMap)) {
+    if (p.cartographyMissions[mId]) {
+      const m = p.cartographyMissions[mId];
+      if (mId === 'lava') {
+        if (amount >= 1) m.progress = 1;
+      } else {
+        m.progress = Math.min(m.target, (m.progress || 0) + (amount || 0));
+      }
+      if (m.progress >= m.target && !m.completed) {
+        m.completed = true;
+        m.rewardedAt = Date.now();
+        if (m.accessory && !p.purchases.includes(`accessory:${m.accessory}`)) {
+          p.purchases.push(`accessory:${m.accessory}`);
+          p.newlyUnlockedAccessory = m.accessory;
+        }
+      }
+    }
+  }
+
   p.runs.unshift({
     id: result.id,
     name: result.name || p.name,
@@ -187,3 +244,43 @@ export function awardRun(result){return mutate(p=>{
   p.runs=p.runs.slice(0,40);return p;
 });}
 export function clearAccountRuns(){try{return mutate(p=>{p.runs=[];return p;});}catch{return null;}}
+
+export function getMapStats(mapId) {
+  const profile = currentAccount();
+  if (!profile || !profile.mapStats) return { runs: 0, victories: 0, defeats: 0, maxTime: 0, kills: 0, maxScore: 0 };
+  return profile.mapStats[mapId] || { runs: 0, victories: 0, defeats: 0, maxTime: 0, kills: 0, maxScore: 0 };
+}
+
+export function getCartographyMissions() {
+  const profile = currentAccount();
+  const DEFAULT_MISSIONS = {
+    diner:    { progress: 0, target: 10, completed: false, accessory: 'ticket_gold' },
+    kitchen:  { progress: 0, target: 10, completed: false, accessory: 'thermal_gloves' },
+    parking:  { progress: 0, target: 12, completed: false, accessory: 'reflect_vest' },
+    snow:     { progress: 0, target: 10, completed: false, accessory: 'thermal_scarf' },
+    desert:   { progress: 0, target: 10, completed: false, accessory: 'thorn_boots' },
+    football: { progress: 0, target: 8,  completed: false, accessory: 'captain_cleats' },
+    beach:    { progress: 0, target: 8,  completed: false, accessory: 'tropical_visor' },
+    beach_alt:{ progress: 0, target: 30, completed: false, accessory: 'pineapple_hat' },
+    lava:     { progress: 0, target: 1,  completed: false, accessory: 'leg_lava_crown' }
+  };
+  if (!profile) return DEFAULT_MISSIONS;
+  profile.cartographyMissions = profile.cartographyMissions || {};
+  const res = {};
+  for (const [k, v] of Object.entries(DEFAULT_MISSIONS)) {
+    res[k] = Object.assign({}, v, profile.cartographyMissions[k] || {});
+  }
+  return res;
+}
+
+export function clearNewUnlock() {
+  try {
+    return mutate(p => {
+      const acc = p.newlyUnlockedAccessory;
+      delete p.newlyUnlockedAccessory;
+      return acc;
+    });
+  } catch {
+    return null;
+  }
+}

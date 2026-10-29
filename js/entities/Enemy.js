@@ -828,6 +828,16 @@ export const enemyTypes = [
   { id: "mayo", name: "Mayonesa medica", hp: 52, speed: 57, damage: 9, score: 68, xp: 17, radius: 18, color: "#76e8a4", role: "healer" },
   { id: "chef", name: "Chef invocador", hp: 78, speed: 44, damage: 12, score: 92, xp: 22, radius: 22, color: "#be82ec", role: "summoner" },
   { id: "chili", name: "Aji kamikaze", hp: 18, speed: 118, damage: 24, score: 40, xp: 9, radius: 15, color: "#ff4b2b", kamikaze: true },
+  // --- Enemigos Nativos Exclusivos de Cartografía ---
+  { id: "bill_collector", name: "Cobrador de cuentas", hp: 44, speed: 110, damage: 14, score: 55, xp: 12, radius: 16, color: "#38bdf8", nativeMap: "diner" },
+  { id: "frying_pan", name: "Sartén poseída", hp: 68, speed: 58, damage: 16, score: 60, xp: 14, radius: 19, color: "#475569", role: "shield", armor: 1.6, nativeMap: "kitchen" },
+  { id: "delivery_kart", name: "Autito de reparto", hp: 75, speed: 95, damage: 18, score: 65, xp: 15, radius: 20, color: "#fbbf24", nativeMap: "parking" },
+  { id: "ice_pop", name: "Paleta congelante", hp: 36, speed: 78, damage: 13, score: 48, xp: 11, radius: 15, color: "#67e8f9", nativeMap: "snow" },
+  { id: "burrower_chili", name: "Chile excavador", hp: 35, speed: 115, damage: 20, score: 52, xp: 12, radius: 14, color: "#ea580c", nativeMap: "desert" },
+  { id: "goalie_bot", name: "Arquero mecánico", hp: 95, speed: 52, damage: 16, score: 70, xp: 16, radius: 22, color: "#3b82f6", nativeMap: "football" },
+  { id: "armored_crab", name: "Cangrejo acorazado", hp: 65, speed: 64, damage: 15, score: 62, xp: 13, radius: 18, color: "#ef4444", nativeMap: "beach" },
+  { id: "exotic_juice", name: "Zumo exótico", hp: 30, speed: 125, damage: 16, score: 50, xp: 11, radius: 14, color: "#f97316", nativeMap: "beach" },
+  // --- Jefes ---
   { id: "double", name: "Rey del mostrador", hp: 820, speed: 58, damage: 24, score: 650, xp: 48, radius: 48, color: "#ffd33d", boss: true },
   { id: "ketchup", name: "Senor Ketchup", hp: 960, speed: 78, damage: 25, score: 850, xp: 60, radius: 42, color: "#ff6e76", boss: true, bossStyle: 'ranged' },
   { id: "fries", name: "La Papota Suprema", hp: 1120, speed: 80, damage: 28, score: 1050, xp: 75, radius: 46, color: "#ffdd61", boss: true, bossStyle: 'fast' },

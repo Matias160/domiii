@@ -80,6 +80,16 @@ export function createRunState(setup = {}, audio = null) {
   if (a === 'leg_medallion') { player.maxHp += 40; player.hp += 40; player.defense = (player.defense || 1) + 0.1; }
   if (a === 'leg_lava_crown') { player.maxHp += 50; player.hp += 50; player.damageMultiplier *= 1.30; player.speed *= 1.10; player.hasLavaAura = true; }
 
+  // --- Bonificaciones de Accesorios de Cartografía (Recompensas de Misiones de Mapa) ---
+  if (a === 'ticket_gold') { player.scoreMultiplier = (player.scoreMultiplier || 1) * 1.10; player.goldTicketActive = true; }
+  if (a === 'thermal_gloves') { player.immuneToOil = true; player.fireRateMultiplier = (player.fireRateMultiplier || 1) * 0.93; }
+  if (a === 'reflect_vest') { player.dashDamageMultiplier = (player.dashDamageMultiplier || 1) * 1.20; player.dashCooldownMultiplier = (player.dashCooldownMultiplier || 1) * 0.88; }
+  if (a === 'thermal_scarf') { player.coldResistance = 0.60; player.maxHp += 12; player.hp += 12; }
+  if (a === 'thorn_boots') { player.thornImmunity = true; player.speed *= 1.05; }
+  if (a === 'captain_cleats') { player.kickPowerMultiplier = 1.30; player.speed *= 1.08; }
+  if (a === 'tropical_visor') { player.magnetRadius = (player.magnetRadius || 80) * 1.12; player.critChance = (player.critChance || 0) + 0.07; }
+  if (a === 'pineapple_hat') { player.foodBuffDurationMultiplier = 1.15; player.damageMultiplier *= 1.06; }
+
   // --- Sinergias Especiales Culinarias (Accesorios + Mascotas / Personajes) ---
   const pet = setup.companionId;
   const skin = setup.skinId;

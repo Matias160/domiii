@@ -310,6 +310,112 @@ export const ACCESSORIES = {
     stats: { hp: '+50', spd: '+10%', dmg: '+30%', perk: '+50 HP +30% Dmg +Magma' },
     sheet: 'animated_corona',
     dw: 52, dh: 63, ox: -26, oy: -55
+  },
+
+  // --- ACCESORIOS EXCLUSIVOS DE CARTOGRAFÍA (MISIONES DE MAPA) ---
+  ticket_gold: {
+    id: 'ticket_gold',
+    name: 'Ticket Dorado',
+    tier: 'cartography',
+    category: 'Presea',
+    layer: 'front',
+    cost: 0,
+    icon: '🎟',
+    desc: 'Ticket de oro sellado: +10% puntos y monedas, +5% daño con combo x5 o superior.',
+    stats: { hp: '-', spd: '-', dmg: '+5% Combo', perk: '+10% Puntos +Daño' },
+    sheet: 'procedural_cartography',
+    dw: 28, dh: 16, ox: -14, oy: -4
+  },
+  thermal_gloves: {
+    id: 'thermal_gloves',
+    name: 'Guantes Térmicos',
+    tier: 'cartography',
+    category: 'Manoplas',
+    layer: 'front',
+    cost: 0,
+    icon: '🧤',
+    desc: 'Guantes de chef reforzados: Inmunidad total al resbalón por aceite y +7% cadencia de disparo.',
+    stats: { hp: '-', spd: '-', dmg: '+7% Cadencia', perk: 'Anti-Aceite +Cadencia' },
+    sheet: 'procedural_cartography',
+    dw: 46, dh: 18, ox: -23, oy: 4
+  },
+  reflect_vest: {
+    id: 'reflect_vest',
+    name: 'Chaleco Reflectante',
+    tier: 'cartography',
+    category: 'Torso',
+    layer: 'front',
+    cost: 0,
+    icon: '🦺',
+    desc: 'Chaleco vial de alta visibilidad: +20% daño de embestida con dash y recarga de dash 12% más rápida.',
+    stats: { hp: '-', spd: '-', dmg: '+20% Dash', perk: '+Dash Dmg & -Recarga' },
+    sheet: 'procedural_cartography',
+    dw: 34, dh: 26, ox: -17, oy: -8
+  },
+  thermal_scarf: {
+    id: 'thermal_scarf',
+    name: 'Bufanda Térmica',
+    tier: 'cartography',
+    category: 'Cuello',
+    layer: 'front',
+    cost: 0,
+    icon: '🧣',
+    desc: 'Bufanda de lana montañesa: -60% reducción de velocidad por frío ambiental y +12 HP máx.',
+    stats: { hp: '+12', spd: 'Anti-Frío', dmg: '-', perk: '+12 HP & Anti-Frío' },
+    sheet: 'procedural_cartography',
+    dw: 36, dh: 20, ox: -18, oy: -6
+  },
+  thorn_boots: {
+    id: 'thorn_boots',
+    name: 'Botas Anti-Espinas',
+    tier: 'cartography',
+    category: 'Calzado',
+    layer: 'front',
+    cost: 0,
+    icon: '🥾',
+    desc: 'Suela de caucho reforzada: Inmunidad total al daño de cactus y +8% velocidad en arena.',
+    stats: { hp: '-', spd: '+8% Arena', dmg: '-', perk: 'Inmune Espinas' },
+    sheet: 'procedural_cartography',
+    dw: 38, dh: 16, ox: -19, oy: 16
+  },
+  captain_cleats: {
+    id: 'captain_cleats',
+    name: 'Botines de Capitán',
+    tier: 'cartography',
+    category: 'Calzado',
+    layer: 'front',
+    cost: 0,
+    icon: '👟',
+    desc: 'Botines con cinta dorada: +30% velocidad y daño al patear pelotas/cocos y +8% velocidad.',
+    stats: { hp: '-', spd: '+8%', dmg: '+30% Patadas', perk: '+Potencia Patadas' },
+    sheet: 'procedural_cartography',
+    dw: 40, dh: 16, ox: -20, oy: 16
+  },
+  tropical_visor: {
+    id: 'tropical_visor',
+    name: 'Visera Tropical',
+    tier: 'cartography',
+    category: 'Visera',
+    layer: 'front',
+    cost: 0,
+    icon: '🧢',
+    desc: 'Visera playera turquesa: +12% radio de imán de pickups y +7% probabilidad de golpe crítico.',
+    stats: { hp: '-', spd: '-', dmg: '+7% Crítico', perk: '+Imán & +Crítico' },
+    sheet: 'procedural_cartography',
+    dw: 36, dh: 15, ox: -18, oy: -20
+  },
+  pineapple_hat: {
+    id: 'pineapple_hat',
+    name: 'Sombrero de Piña',
+    tier: 'cartography',
+    category: 'Gorro',
+    layer: 'front',
+    cost: 0,
+    icon: '🍍',
+    desc: 'Fruto caribeño tallado: +15% duración de efectos de comida y +6% daño de combate.',
+    stats: { hp: '-', spd: '-', dmg: '+6%', perk: '+Duración Comida' },
+    sheet: 'procedural_cartography',
+    dw: 36, dh: 32, ox: -18, oy: -36
   }
 };
 
@@ -414,6 +520,127 @@ function drawProceduralChefHat(ctx, ox, oy, dw, dh) {
   ctx.restore();
 }
 
+function drawProceduralCartographyAccessory(ctx, id, ox, oy, dw, dh) {
+  ctx.save();
+  ctx.translate(ox + dw / 2, oy + dh / 2);
+
+  if (id === 'ticket_gold') {
+    // Ticket de oro con borde perforado y brillo de estrellas
+    ctx.fillStyle = '#b45309';
+    ctx.fillRect(-13, -7, 26, 14);
+    ctx.fillStyle = '#f59e0b';
+    ctx.fillRect(-12, -6, 24, 12);
+    ctx.fillStyle = '#fef08a';
+    ctx.fillRect(-10, -4, 20, 8);
+    ctx.fillStyle = '#b45309';
+    ctx.fillRect(-7, -2, 4, 4);
+    ctx.fillRect(-1, -2, 8, 2);
+    ctx.fillRect(-1, 1, 6, 2);
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(-9, -3, 2, 2);
+    ctx.fillRect(7, 2, 2, 2);
+  } else if (id === 'thermal_gloves') {
+    // Manoplas térmicas rojas acolchadas a ambos lados
+    ctx.fillStyle = '#dc2626';
+    ctx.fillRect(-22, -6, 10, 14);
+    ctx.fillStyle = '#f87171';
+    ctx.fillRect(-20, -5, 6, 11);
+    ctx.fillStyle = '#fef08a';
+    ctx.fillRect(-22, 5, 10, 3);
+    ctx.fillStyle = '#dc2626';
+    ctx.fillRect(12, -6, 10, 14);
+    ctx.fillStyle = '#f87171';
+    ctx.fillRect(14, -5, 6, 11);
+    ctx.fillStyle = '#fef08a';
+    ctx.fillRect(12, 5, 10, 3);
+  } else if (id === 'reflect_vest') {
+    // Chaleco vial verde flúor con franjas plateadas reflectantes
+    ctx.fillStyle = '#84cc16';
+    ctx.fillRect(-15, -11, 30, 22);
+    ctx.fillStyle = '#4d7c0f';
+    ctx.fillRect(-15, -11, 30, 2);
+    ctx.fillStyle = '#f1f5f9';
+    ctx.fillRect(-13, -4, 26, 4);
+    ctx.fillRect(-13, 4, 26, 3);
+    ctx.fillStyle = '#0f172a';
+    ctx.fillRect(-2, -10, 4, 20);
+  } else if (id === 'thermal_scarf') {
+    // Bufanda abrigada roja y blanca envuelta
+    ctx.fillStyle = '#dc2626';
+    ctx.fillRect(-16, -7, 32, 10);
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(-11, -7, 5, 10);
+    ctx.fillRect(0, -7, 5, 10);
+    ctx.fillRect(11, -7, 5, 10);
+    ctx.fillStyle = '#dc2626';
+    ctx.fillRect(8, 3, 6, 9);
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(8, 10, 6, 3);
+  } else if (id === 'thorn_boots') {
+    // Botas marrones acorazadas anti-espinas en los pies
+    ctx.fillStyle = '#78350f';
+    ctx.fillRect(-16, -6, 12, 12);
+    ctx.fillStyle = '#451a03';
+    ctx.fillRect(-17, 3, 14, 4);
+    ctx.fillStyle = '#d97706';
+    ctx.fillRect(-14, -4, 8, 3);
+    ctx.fillStyle = '#78350f';
+    ctx.fillRect(4, -6, 12, 12);
+    ctx.fillStyle = '#451a03';
+    ctx.fillRect(3, 3, 14, 4);
+    ctx.fillStyle = '#d97706';
+    ctx.fillRect(6, -4, 8, 3);
+  } else if (id === 'captain_cleats') {
+    // Botines de fútbol azules con franja amarilla y taco
+    ctx.fillStyle = '#2563eb';
+    ctx.fillRect(-17, -5, 13, 10);
+    ctx.fillStyle = '#fbbf24';
+    ctx.fillRect(-17, -2, 13, 3);
+    ctx.fillStyle = '#1e293b';
+    ctx.fillRect(-18, 3, 15, 3);
+    ctx.fillStyle = '#2563eb';
+    ctx.fillRect(4, -5, 13, 10);
+    ctx.fillStyle = '#fbbf24';
+    ctx.fillRect(4, -2, 13, 3);
+    ctx.fillStyle = '#1e293b';
+    ctx.fillRect(3, 3, 15, 3);
+  } else if (id === 'tropical_visor') {
+    // Visera playera turquesa
+    ctx.fillStyle = '#0f172a';
+    ctx.fillRect(-16, -4, 32, 5);
+    ctx.fillStyle = '#f8fafc';
+    ctx.fillRect(-15, -3, 30, 3);
+    ctx.fillStyle = '#06b6d4';
+    ctx.fillRect(-18, 0, 36, 5);
+    ctx.fillStyle = '#22d3ee';
+    ctx.fillRect(-16, 2, 32, 3);
+    ctx.fillStyle = '#a5f3fc';
+    ctx.fillRect(-12, 1, 10, 2);
+  } else if (id === 'pineapple_hat') {
+    // Sombrero de piña caribeño
+    ctx.fillStyle = '#15803d';
+    ctx.fillRect(-4, -15, 8, 6);
+    ctx.fillRect(-10, -12, 7, 5);
+    ctx.fillRect(3, -12, 7, 5);
+    ctx.fillStyle = '#4ade80';
+    ctx.fillRect(-3, -14, 6, 4);
+    ctx.fillStyle = '#b45309';
+    ctx.fillRect(-14, -7, 28, 18);
+    ctx.fillStyle = '#f59e0b';
+    ctx.fillRect(-13, -6, 26, 16);
+    ctx.fillStyle = '#fde047';
+    for (let rx = -10; rx <= 8; rx += 6) {
+      for (let ry = -4; ry <= 6; ry += 5) {
+        ctx.fillRect(rx, ry, 3, 3);
+      }
+    }
+    ctx.fillStyle = '#78350f';
+    ctx.fillRect(-15, 7, 30, 3);
+  }
+
+  ctx.restore();
+}
+
 /**
  * Dibuja un accesorio montado sobre Don Pancho o en vitrina.
  * @param {CanvasRenderingContext2D} ctx
@@ -435,6 +662,11 @@ export function drawAccessory(ctx, id, x, y, scale = 1, layerFilter = null) {
 
   if (acc.sheet === 'procedural') {
     drawProceduralChefHat(ctx, acc.ox, acc.oy, acc.dw, acc.dh);
+    ctx.restore();
+    return;
+  }
+  if (acc.sheet === 'procedural_cartography') {
+    drawProceduralCartographyAccessory(ctx, acc.id, acc.ox, acc.oy, acc.dw, acc.dh);
     ctx.restore();
     return;
   }
@@ -494,6 +726,15 @@ export function drawAccessoryIcon(ctx, id, cx, cy, boxSize = 48) {
     ctx.translate(cx, cy + 12 * s);
     ctx.scale(s, s);
     drawProceduralChefHat(ctx, -19, -28, 38, 32);
+    ctx.restore();
+    return;
+  }
+  if (acc.sheet === 'procedural_cartography') {
+    const s = boxSize / 48;
+    ctx.save();
+    ctx.translate(cx, cy + (acc.category === 'Calzado' ? 0 : 2 * s));
+    ctx.scale(s * 1.05, s * 1.05);
+    drawProceduralCartographyAccessory(ctx, acc.id, -acc.dw / 2, -acc.dh / 2, acc.dw, acc.dh);
     ctx.restore();
     return;
   }
