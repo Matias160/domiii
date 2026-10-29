@@ -31,13 +31,13 @@ if (mapAssets) {
 
 function getMapAssetSource(sheetKey) {
   if (!mapAssets) return null;
-  if (sheetKey === 'map_lentes') return { img: mapAssets.lentes, sx: 0, sy: 0, sw: 384, sh: 384 };
-  if (sheetKey === 'map_sheriff') return { img: mapAssets.sheriff, sx: 0, sy: 0, sw: 384, sh: 384 };
-  if (sheetKey === 'map_guitarra') return { img: mapAssets.guitarra, sx: 0, sy: 0, sw: 768, sh: 768 };
-  if (sheetKey === 'map_lampara') return { img: mapAssets.lampara, sx: 0, sy: 0, sw: 512, sh: 512 };
-  if (sheetKey === 'map_preview_pineapple') return { img: mapAssets.preview, sx: 0, sy: 0, sw: 400, sh: 400 };
-  if (sheetKey === 'map_preview_santa') return { img: mapAssets.preview, sx: 400, sy: 0, sw: 400, sh: 400 };
-  if (sheetKey === 'map_preview_skates') return { img: mapAssets.preview, sx: 800, sy: 0, sw: 400, sh: 400 };
+  if (sheetKey === 'map_lentes') return { img: mapAssets.lentes, sx: 0, sy: 32, sw: 384, sh: 328 };
+  if (sheetKey === 'map_sheriff') return { img: mapAssets.sheriff, sx: 32, sy: 8, sw: 320, sh: 368 };
+  if (sheetKey === 'map_guitarra') return { img: mapAssets.guitarra, sx: 32, sy: 128, sw: 640, sh: 600 };
+  if (sheetKey === 'map_lampara') return { img: mapAssets.lampara, sx: 8, sy: 0, sw: 497, sh: 509 };
+  if (sheetKey === 'map_preview_pineapple') return { img: mapAssets.preview, sx: 74, sy: 32, sw: 245, sh: 336 };
+  if (sheetKey === 'map_preview_santa') return { img: mapAssets.preview, sx: 432, sy: 60, sw: 336, sh: 294 };
+  if (sheetKey === 'map_preview_skates') return { img: mapAssets.preview, sx: 812, sy: 124, sw: 376, sh: 152 };
   return null;
 }
 
@@ -352,7 +352,7 @@ export const ACCESSORIES = {
     desc: 'Lentes estrella de fiesta retro: +10% puntos y monedas, +5% daño con combo x5 o superior.',
     stats: { hp: '-', spd: '-', dmg: '+5% Combo', perk: '+10% Puntos +Daño' },
     sheet: 'map_lentes',
-    dw: 38, dh: 22, ox: -19, oy: -12
+    dw: 38, dh: 32, ox: -19, oy: -23
   },
   thermal_gloves: {
     id: 'thermal_gloves',
@@ -365,21 +365,20 @@ export const ACCESSORIES = {
     desc: 'Farol de hornallas vivas: Inmunidad total al resbalón por aceite y +7% cadencia de disparo.',
     stats: { hp: '-', spd: '-', dmg: '+7% Cadencia', perk: 'Anti-Aceite +Cadencia' },
     sheet: 'map_lampara',
-    dw: 32, dh: 32, ox: 14, oy: 0
+    dw: 26, dh: 27, ox: 14, oy: -4
   },
   reflect_vest: {
     id: 'reflect_vest',
-    name: 'Patines de Delivery',
+    name: 'Guitarra Callejera',
     tier: 'cartography',
-    category: 'Calzado',
+    category: 'Espalda',
     layer: 'front',
     cost: 0,
-    icon: '🛼',
-    desc: 'Patines veloces de asfalto: +20% daño de embestida con dash y recarga de dash 12% más rápida.',
+    icon: '🎸',
+    desc: 'Guitarra acústica de reparto: +20% daño de embestida con dash y recarga de dash 12% más rápida.',
     stats: { hp: '-', spd: '-', dmg: '+20% Dash', perk: '+Dash Dmg & -Recarga' },
-    sheet: 'map_preview_skates',
-    sx: 800, sy: 0, sw: 400, sh: 400,
-    dw: 44, dh: 22, ox: -22, oy: 12
+    sheet: 'map_guitarra',
+    dw: 42, dh: 40, ox: -14, oy: -18
   },
   thermal_scarf: {
     id: 'thermal_scarf',
@@ -392,8 +391,7 @@ export const ACCESSORIES = {
     desc: 'Gorro festivo invernal con pompón: -60% reducción de velocidad por frío ambiental y +12 HP máx.',
     stats: { hp: '+12', spd: 'Anti-Frío', dmg: '-', perk: '+12 HP & Anti-Frío' },
     sheet: 'map_preview_santa',
-    sx: 400, sy: 0, sw: 400, sh: 400,
-    dw: 48, dh: 38, ox: -24, oy: -40
+    dw: 42, dh: 37, ox: -21, oy: -53
   },
   thorn_boots: {
     id: 'thorn_boots',
@@ -406,20 +404,20 @@ export const ACCESSORIES = {
     desc: 'Insignia dorada del sheriff: Inmunidad total al daño de cactus y +8% velocidad en arena.',
     stats: { hp: '-', spd: '+8% Arena', dmg: '-', perk: 'Inmune Espinas' },
     sheet: 'map_sheriff',
-    dw: 26, dh: 26, ox: -13, oy: 2
+    dw: 22, dh: 25, ox: -11, oy: -2
   },
   captain_cleats: {
     id: 'captain_cleats',
-    name: 'Guitarra de Tribuna',
+    name: 'Botines de Capitán',
     tier: 'cartography',
-    category: 'Espalda',
+    category: 'Calzado',
     layer: 'front',
     cost: 0,
-    icon: '🎸',
-    desc: 'Guitarra de aliento acústica: +30% velocidad y daño al patear pelotas/cocos y +8% velocidad.',
+    icon: '👟',
+    desc: 'Botines con tapones de fútbol: +30% velocidad y daño al patear pelotas/cocos y +8% velocidad.',
     stats: { hp: '-', spd: '+8%', dmg: '+30% Patadas', perk: '+Potencia Patadas' },
-    sheet: 'map_guitarra',
-    dw: 40, dh: 40, ox: 6, oy: -8
+    sheet: 'map_preview_skates',
+    dw: 42, dh: 17, ox: -21, oy: 7
   },
   tropical_visor: {
     id: 'tropical_visor',
@@ -432,8 +430,7 @@ export const ACCESSORIES = {
     desc: 'Casco de piña tropical: +15% duración de efectos de comida y +7% probabilidad de golpe crítico.',
     stats: { hp: '-', spd: '-', dmg: '+7% Crítico', perk: '+Duración & +Crítico' },
     sheet: 'map_preview_pineapple',
-    sx: 0, sy: 0, sw: 400, sh: 400,
-    dw: 44, dh: 44, ox: -22, oy: -46
+    dw: 36, dh: 49, ox: -18, oy: -63
   },
   pineapple_hat: {
     id: 'pineapple_hat',
@@ -446,8 +443,7 @@ export const ACCESSORIES = {
     desc: 'Casco de piña tropical: +15% duración de efectos de comida y +7% probabilidad de golpe crítico.',
     stats: { hp: '-', spd: '-', dmg: '+7% Crítico', perk: '+Duración & +Crítico' },
     sheet: 'map_preview_pineapple',
-    sx: 0, sy: 0, sw: 400, sh: 400,
-    dw: 44, dh: 44, ox: -22, oy: -46
+    dw: 36, dh: 49, ox: -18, oy: -63
   }
 };
 
@@ -775,11 +771,12 @@ export function drawAccessoryIcon(ctx, id, cx, cy, boxSize = 48) {
   if (acc.sheet && acc.sheet.startsWith('map_')) {
     const src = getMapAssetSource(acc.sheet);
     if (src && src.img && src.img.complete && src.img.naturalWidth > 0) {
-      const pad = boxSize * 0.12;
-      const targetW = boxSize - pad * 2;
-      const targetH = boxSize - pad * 2;
+      const maxDim = boxSize * 0.78;
+      const scale = Math.min(maxDim / src.sw, maxDim / src.sh);
+      const targetW = Math.round(src.sw * scale);
+      const targetH = Math.round(src.sh * scale);
       ctx.imageSmoothingEnabled = false;
-      ctx.drawImage(src.img, src.sx, src.sy, src.sw, src.sh, cx - targetW / 2, cy - targetH / 2, targetW, targetH);
+      ctx.drawImage(src.img, src.sx, src.sy, src.sw, src.sh, Math.round(cx - targetW / 2), Math.round(cy - targetH / 2), targetW, targetH);
     } else {
       const s = boxSize / 48;
       ctx.save();

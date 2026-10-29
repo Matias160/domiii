@@ -31,6 +31,58 @@
   box-shadow: 6px 6px 0 #000, 0 0 22px rgba(250, 204, 21, 0.65) !important;
 }
 
+/* Recuadros de selección con técnica legendaria: iluminación y contorno morado para accesorios de mapa */
+.catalog-item[data-cartography="true"],
+.catalog-item[data-tier="cartography"] {
+  border-color: #9333ea !important;
+  background: radial-gradient(circle at 50% 30%, #2f0d38 0%, #15061c 100%) !important;
+  box-shadow: 4px 4px 0 #000, 0 0 16px rgba(184, 68, 255, 0.35) !important;
+}
+.catalog-item[data-cartography="true"]:hover,
+.catalog-item[data-tier="cartography"]:hover {
+  border-color: #c084fc !important;
+  box-shadow: 6px 6px 0 #000, 0 0 22px rgba(192, 132, 252, 0.6) !important;
+}
+.catalog-item[data-cartography="true"][aria-pressed="true"],
+.catalog-item[data-tier="cartography"][aria-pressed="true"] {
+  border-color: #f3e8ff !important;
+  box-shadow: 6px 6px 0 #000, 0 0 26px rgba(216, 180, 254, 0.75) !important;
+}
+.catalog-item[data-cartography="true"] .catalog-status,
+.catalog-item[data-tier="cartography"] .catalog-status {
+  color: #c084fc !important;
+}
+.catalog-item[data-cartography="true"] .catalog-name,
+.catalog-item[data-tier="cartography"] .catalog-name {
+  color: #f3e8ff !important;
+}
+.catalog-item[data-cartography="true"] .catalog-lock svg,
+.catalog-item[data-tier="cartography"] .catalog-lock svg {
+  color: #c084fc !important;
+  border-color: #9333ea !important;
+  background: #170722e8 !important;
+  box-shadow: 4px 4px 0 #000, 0 0 10px rgba(184, 68, 255, 0.35) !important;
+}
+
+/* Detalle lateral de la tienda con técnica morada */
+.shop-detail--cartography {
+  border-top-color: #c084fc !important;
+  box-shadow: 8px 8px 0 #050a0d, 0 0 22px rgba(192, 132, 252, 0.35) !important;
+}
+.shop-detail--cartography .detail-top {
+  color: #c084fc !important;
+}
+.shop-detail--cartography .arcade-action {
+  background: #581c87 !important;
+  border-color: #a855f7 !important;
+  box-shadow: 2px 2px 0 #000, 0 0 12px rgba(184, 68, 255, 0.45) !important;
+}
+.shop-detail--cartography .arcade-action:hover {
+  background: #6b21a8 !important;
+  border-color: #c084fc !important;
+  box-shadow: 2px 2px 0 #000, 0 0 18px rgba(192, 132, 252, 0.65) !important;
+}
+
 /* Miniatura visual de recompensa en misiones del Señor Domi */
 .domi-reward-mini-canvas {
   width: 38px !important;

@@ -99,6 +99,12 @@ export class Shop{
       const displayDesc=isMysteryLava?'??? · ???':item.description;
       const statusText=equipped?'Equipado':owned?'Listo para equipar':isMysteryLava?'???':item.cartographyExclusive?'Misión de Mapa':item.domiExclusive?'Misión Don Domi':`${item.cost.toLocaleString('es-AR')} PT`;
       const button=node('button','catalog-item');button.type='button';button.dataset.item=item.id;button.dataset.type=item.type;button.dataset.owned=String(Boolean(owned));
+      if(item.cartographyExclusive){
+        button.dataset.cartography='true';
+        button.dataset.tier='cartography';
+      }else if(item.domiExclusive||String(item.id).startsWith('leg_')){
+        button.dataset.tier='legendary';
+      }
       button.setAttribute('aria-label',`${displayName}, ${statusText}. Ver detalle`);button.setAttribute('aria-pressed',String(this.selected?.id===item.id));button.setAttribute('aria-controls','shopDetail');
       const art=node('div','catalog-art');const canvas=document.createElement('canvas');canvas.width=280;canvas.height=180;canvas.setAttribute('aria-hidden','true');drawItemPreview(canvas,item,profile);
       art.append(canvas);
@@ -121,6 +127,7 @@ export class Shop{
   }
   renderDetail(){
     const root=document.querySelector('#shopDetail');root.replaceChildren();this.previewCanvas=null;const item=this.selected;
+    root.classList.toggle('shop-detail--cartography',Boolean(item?.cartographyExclusive));
     if(!item){root.append(node('p','detail-placeholder','Elegí un artículo para verlo en el probador.'));return;}
     const profile=this.account.currentAccount();if(!profile)return;
     const owned=isOwned(profile,item.type,item.id),equipped=profile.loadout[item.type]===item.id;

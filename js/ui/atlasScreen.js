@@ -69,8 +69,8 @@ export const REGIONS = [
     missionDesc: 'Derribar a 12 enemigos con acelerón (dash)',
     target: 12,
     accessoryId: 'reflect_vest',
-    accessoryName: 'Patines de Delivery',
-    accessoryDesc: 'Patines veloces de asfalto: +20% daño de embestida con dash y recarga -12%.'
+    accessoryName: 'Guitarra Callejera',
+    accessoryDesc: 'Guitarra acústica de asfalto: +20% daño de embestida con dash y recarga -12%.'
   },
   {
     id: 'snow',
@@ -135,8 +135,8 @@ export const REGIONS = [
     missionDesc: 'Golpear a 8 enemigos con pelotas pateadas',
     target: 8,
     accessoryId: 'captain_cleats',
-    accessoryName: 'Guitarra de Tribuna',
-    accessoryDesc: 'Guitarra acústica de hinchada: +30% velocidad y daño al patear pelotas/cocos, +8% velocidad.'
+    accessoryName: 'Botines de Capitán',
+    accessoryDesc: 'Botines con tapones de fútbol: +30% velocidad y daño al patear pelotas/cocos, +8% velocidad.'
   },
   {
     id: 'beach',

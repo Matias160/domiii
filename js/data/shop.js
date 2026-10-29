@@ -42,17 +42,17 @@ export const shopItems = [
   // Accesorios Exclusivos de Cartografía (Recompensa de Misiones de Mapa)
   {id:'ticket_gold',type:'accessory',name:'Lentes de Fiesta',cost:0,cartographyExclusive:true,icon:'🕶',description:'Misión Local DOMI: Lentes de fiesta retro (+10% puntos/monedas y +5% daño con combo x5 o superior).'},
   {id:'thermal_gloves',type:'accessory',name:'Farol Gourmet',cost:0,cartographyExclusive:true,icon:'🏮',description:'Misión Cocina: Farol de hornallas (Inmunidad al aceite y +7% cadencia de disparo).'},
-  {id:'reflect_vest',type:'accessory',name:'Patines de Delivery',cost:0,cartographyExclusive:true,icon:'🛼',description:'Misión Estacionamiento: Patines de asfalto (+20% daño de embestida con dash y -12% recarga).'},
+  {id:'reflect_vest',type:'accessory',name:'Guitarra Callejera',cost:0,cartographyExclusive:true,icon:'🎸',description:'Misión Estacionamiento: Guitarra acústica de reparto (+20% daño de embestida con dash y -12% recarga).'},
   {id:'thermal_scarf',type:'accessory',name:'Gorro Invernal',cost:0,cartographyExclusive:true,icon:'🎅',description:'Misión Nevado: Gorro festivo con pompón (-60% ralentización por frío y +12 HP máx).'},
   {id:'thorn_boots',type:'accessory',name:'Estrella de Sheriff',cost:0,cartographyExclusive:true,icon:'⭐',description:'Misión Desierto: Insignia dorada (Inmunidad al daño de cactus y +8% velocidad en arena).'},
-  {id:'captain_cleats',type:'accessory',name:'Guitarra de Tribuna',cost:0,cartographyExclusive:true,icon:'🎸',description:'Misión Cancha: Guitarra de aliento (+30% velocidad y daño al patear pelotas/cocos y +8% velocidad).'},
-  {id:'tropical_visor',type:'accessory',name:'Sombrero de Piña',cost:0,cartographyExclusive:true,icon:'🍍',description:'Misión Playa: Casco tropical (+15% duración de comida y +7% golpe crítico).'},
-  {id:'pineapple_hat',type:'accessory',name:'Sombrero de Piña',cost:0,cartographyExclusive:true,icon:'🍍',description:'Maestría Costera: Casco tropical (+15% duración de comida y +7% golpe crítico).'},
+  {id:'captain_cleats',type:'accessory',name:'Botines de Capitán',cost:0,cartographyExclusive:true,icon:'👟',description:'Misión Cancha: Botines con tapones de fútbol (+30% velocidad y daño al patear pelotas/cocos y +8% velocidad).'},
+  {id:'tropical_visor',type:'accessory',name:'Sombrero de Piña',cost:0,cartographyExclusive:true,icon:'🍍',description:'Misión Playa: Casco tropical (+15% duración de comida y +7% golpe crítico).'}
 ];
 
 const LEGACY_MAP = {
   cyber_shades: 'shades',
   headband: 'cap',
+  pineapple_hat: 'tropical_visor',
   red_bandana: 'party_hat',
   neon_cap: 'cap',
   magic_hat: 'wizard_hat',
