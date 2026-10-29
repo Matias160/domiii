@@ -2,6 +2,7 @@ import { Projectile } from "../entities/Projectile.js";
 import { sweptOverlap, distance } from "../core/collision.js";
 import { damageEnemy, explosionBurst, burst } from './effectSystem.js';
 import { gameEvents } from '../core/EventBus.js';
+import { openDeliveryChest } from './directorSystem.js';
 
 // Pre-allocated buffers for spatial queries
 const collisionCandidates = [];
@@ -99,6 +100,37 @@ export function updateProjectiles(state, delta, canvas) {
   for (let i = 0; i < projLen; i++) {
     const projectile = state.projectiles[i];
     if (projectile.dead) continue;
+
+    // Daño al Cofre Acorazado del Camión de Reparto
+    if (state.deliveryChest && !state.deliveryChest.opened && state.deliveryChest.hp > 0 && !projectile.dead) {
+      const chest = state.deliveryChest;
+      if (Math.hypot(projectile.x - chest.x, projectile.y - chest.y) < projectile.radius + chest.radius) {
+        chest.hp -= projectile.damage;
+        chest.hitFlash = 0.12;
+        state.audio?.play('hit');
+        burst(state, projectile.x, projectile.y, '#f59e0b', 8, 80);
+        if (state.floaters && state.floaters.length < 90) {
+          state.floaters.push({
+            x: chest.x,
+            y: chest.y - 15,
+            text: `-${Math.round(projectile.damage)}`,
+            life: 0.65,
+            color: '#f59e0b',
+            scale: 0.85,
+            kind: 'gain'
+          });
+        }
+        if (chest.hp <= 0) {
+          openDeliveryChest(state);
+        }
+        if (projectile.pierce > 0) {
+          projectile.pierce -= 1;
+        } else {
+          projectile.dead = true;
+          continue;
+        }
+      }
+    }
 
     // Use Spatial Grid if initialized with entities, fallback to linear check
     let candidates;
@@ -209,6 +241,12 @@ export function autoFire(state) {
           closestDist = d;
           target = enemy;
         }
+      }
+    }
+    if (state.deliveryChest && !state.deliveryChest.opened && state.deliveryChest.hp > 0) {
+      const dChest = distance(player, state.deliveryChest);
+      if (dChest < 260 && dChest < closestDist) {
+        target = state.deliveryChest;
       }
     }
   }

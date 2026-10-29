@@ -139,6 +139,7 @@ export class HudCanvas {
       return { name: state.wasFreezing ? 'VENTISCA / SUELO HELADO' : 'SE ACERCA UNA VENTISCA', time: Math.ceil((state.wasFreezing ? 34 : 28) - state.mapClock % 34) + 's', color: '#a2aaa4' };
     }
     if (event) return { name: event.name, time: Math.ceil(state.eventRemaining) + 's', color: event.color || '#a2aaa4' };
+    if (state.nightShift) return { name: `🌙 NOCTURNO 24HS (NV ${state.nightShiftLevel || 1})`, time: `x${((state.nightShiftLevel || 1) * 0.5 + 1).toFixed(1)}`, color: '#c084fc' };
     if (state.modeId === 'rush') return { name: `DUELO DE JEFES ${state.bossesKilled || 0}/${RUSH_BOSS_GOAL}`, time: '', color: '#a2aaa4' };
     return null;
   }

@@ -196,6 +196,26 @@ function foodSprite(kind, enemy, flash = false) {
       rect(c, '#ff2200', px, 0, 4, 4);
       rect(c, '#ffbb00', px + 1, 1, 2, 2);
     }
+  } else if (kind === 'inspector') {
+    // Delantal/bata blanca sanitaria de bromatología
+    block(c, '#0f172a', 12, 14, 40, 44, 5);
+    rect(c, '#f8fafc', 16, 16, 32, 40);
+    // Corbata roja formal
+    rect(c, '#dc2626', 30, 20, 4, 14);
+    // Gafas oscuras con reflejo cian
+    rect(c, '#0f172a', 18, 16, 28, 7);
+    rect(c, '#38bdf8', 21, 18, 9, 2);
+    rect(c, '#38bdf8', 34, 18, 9, 2);
+    // Placa dorada municipal de inspector en el pecho
+    rect(c, '#f59e0b', 19, 28, 7, 7);
+    rect(c, '#fef08a', 21, 30, 3, 3);
+    // Carpeta de madera con acta de clausura y checklist
+    block(c, '#78350f', 40, 26, 18, 24, 2);
+    rect(c, '#fef9c3', 42, 28, 14, 20);
+    // Renglones y tilde roja de clausura
+    rect(c, '#94a3b8', 44, 32, 10, 2);
+    rect(c, '#94a3b8', 44, 36, 10, 2);
+    rect(c, '#ef4444', 45, 40, 8, 4);
   } else if (kind === 'bill_collector') {
     block(c, '#0284c7', 10, 16, 44, 40, 5);
     rect(c, '#38bdf8', 14, 18, 36, 10);

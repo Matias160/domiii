@@ -2,6 +2,8 @@ import { damageEnemy, burst, impactRing, particlePool, particleRoom, scaledCount
 import { scoreMultiplier, RUSH_BOSS_GOAL, BOSS_GAP } from './directorSystem.js';
 import { gameEvents } from '../core/EventBus.js';
 import { spawnBossMinions } from './enemySystem.js';
+import { Item } from '../entities/Item.js';
+import { items, rarities } from '../data/items.js';
 
 const explosionCandidates = [];
 
@@ -156,14 +158,38 @@ export function resolveDeaths(state, onLevelUp) {
 
     // Seguimiento de misiones temáticas de cartografía en tiempo real
     state.cartographyProgress = state.cartographyProgress || {};
+    let gainedMission = null;
+    let gainedTarget = 10;
     if (state.mapId === 'diner' && (state.combo || 0) >= 10) {
       state.cartographyProgress.diner = (state.cartographyProgress.diner || 0) + 1;
+      gainedMission = 'diner'; gainedTarget = 10;
     }
-    if (state.mapId === 'kitchen' && state.oilPuddles && state.oilPuddles.length > 0) {
+    if (state.mapId === 'kitchen' && (state.hazards?.some(h => h.isOil) || (state.hazards && state.hazards.length > 0) || (state.oilPuddles && state.oilPuddles.length > 0))) {
       state.cartographyProgress.kitchen = (state.cartographyProgress.kitchen || 0) + 1;
+      gainedMission = 'kitchen'; gainedTarget = 10;
     }
-    if (state.mapId === 'snow' && state.snowFreezeTimer !== undefined && state.snowFreezeTimer <= 0) {
+    if (state.mapId === 'snow' && (state.wasFreezing || (state.snowFreezeTimer !== undefined && state.snowFreezeTimer <= 0))) {
       state.cartographyProgress.snow = (state.cartographyProgress.snow || 0) + 1;
+      gainedMission = 'snow'; gainedTarget = 10;
+    }
+    if (state.mapId === 'parking' && (enemy.hitByDash || enemy.lastDashSequence)) {
+      state.cartographyProgress.parking = (state.cartographyProgress.parking || 0) + 1;
+      gainedMission = 'parking'; gainedTarget = 12;
+    }
+
+    if (gainedMission && state.floaters) {
+      const cur = state.cartographyProgress[gainedMission];
+      if (cur <= gainedTarget) {
+        state.floaters.push({
+          x: enemy.x,
+          y: enemy.y - 48,
+          text: cur === gainedTarget ? '⭐ ¡MISIÓN DE MAPA COMPLETADA!' : `🎯 MISIÓN: ${cur}/${gainedTarget}`,
+          life: 1.2,
+          color: cur === gainedTarget ? '#facc15' : '#c084fc',
+          scale: cur === gainedTarget ? 1.3 : 1.0,
+          kind: 'combo'
+        });
+      }
     }
     if (enemy.isBoss) {
       if (state.mapId === 'lava' || enemy.type?.id === 'lava_boss') {
@@ -205,6 +231,32 @@ export function resolveDeaths(state, onLevelUp) {
 
     // EventBus hook: onEnemyKilled for mods and achievements
     gameEvents.emit('onEnemyKilled', { enemy, state, scoreGained: gained });
+
+    // Patrulla de Bromatología: derrotar inspectores otorga propinas gigantescas
+    if (enemy.type?.role === 'inspector' || enemy.type?.id === 'inspector') {
+      const tipBonus = Math.round(180 * (state.difficulty?.score || 1) * multiplier * scoreMultiplier(state));
+      state.score += tipBonus;
+      state.shake = Math.max(state.shake || 0, 0.3);
+      state.audio?.play('synergy');
+      state.rings?.push({ x: enemy.x, y: enemy.y, radius: 90, life: 0.55, maxLife: 0.55, color: '#38bdf8' });
+      burst(state, enemy.x, enemy.y, '#38bdf8', 22, 160);
+      burst(state, enemy.x, enemy.y, '#ffd700', 18, 140);
+      if (state.floaters) {
+        state.floaters.push({
+          x: enemy.x,
+          y: enemy.y - 36,
+          text: `📋 ¡PROPINAS GIGANTES! +${tipBonus} PTS`,
+          life: 1.5,
+          color: '#38bdf8',
+          scale: 1.35,
+          kind: 'combo'
+        });
+      }
+      if (state.items) {
+        state.items.push(new Item({ type: items.burger, rarity: rarities[2] || rarities[1], x: enemy.x - 16, y: enemy.y }));
+        state.items.push(new Item({ type: items.mayo, rarity: rarities[3] || rarities[2], x: enemy.x + 16, y: enemy.y }));
+      }
+    }
 
     if (state.player.explosionDamage > 0) {
       state.rings?.push({ x: enemy.x, y: enemy.y, radius: 72, life: .5, color: '#ff9965' });

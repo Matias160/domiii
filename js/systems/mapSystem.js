@@ -1,5 +1,6 @@
 import { damageEnemy, burst, impactRing } from './effectSystem.js';
 import { Projectile } from '../entities/Projectile.js';
+import { openDeliveryChest } from './directorSystem.js';
 
 // Sprite sheets generadas a partir de todos los cuadros de animación de los GIFs originales (16 frames)
 export const cactusSheet = typeof Image !== 'undefined' ? new Image() : null;
@@ -11,6 +12,36 @@ if (pelotaSheet) pelotaSheet.src = './pelota_sheet.png';
 export function updateMap(state, dt) {
   const worldW = state.world?.width || 1920;
   const worldH = state.world?.height || 1080;
+
+  // Interacción de embestida (Dash) contra el Cofre Acorazado del Camión de Reparto
+  if (state.deliveryChest && !state.deliveryChest.opened && state.player?.dashTime > 0) {
+    const chest = state.deliveryChest;
+    if (Math.hypot(chest.x - state.player.x, chest.y - state.player.y) < chest.radius + state.player.radius + 15) {
+      if (chest.lastDashSeq !== state.player.dashSequence) {
+        chest.lastDashSeq = state.player.dashSequence;
+        const dashDmg = (32 + state.player.level * 2) * (state.player.damageMultiplier || 1);
+        chest.hp -= dashDmg;
+        chest.hitFlash = 0.15;
+        state.shake = Math.max(state.shake || 0, 0.35);
+        state.audio?.play('hit');
+        burst(state, chest.x, chest.y, '#f59e0b', 16, 140);
+        if (state.floaters) {
+          state.floaters.push({
+            x: chest.x,
+            y: chest.y - 20,
+            text: `¡EMBESTIDA! -${Math.round(dashDmg)}`,
+            life: 0.8,
+            color: '#f59e0b',
+            scale: 1.1,
+            kind: 'gain'
+          });
+        }
+        if (chest.hp <= 0) {
+          openDeliveryChest(state);
+        }
+      }
+    }
+  }
 
   if (state.mapId === 'snow') {
     state.mapClock += dt;
@@ -197,6 +228,14 @@ export function updateMap(state, dt) {
           if (enemy.hp <= 0 && state.mapId === 'desert') {
             state.cartographyProgress = state.cartographyProgress || {};
             state.cartographyProgress.desert = (state.cartographyProgress.desert || 0) + 1;
+            const cur = state.cartographyProgress.desert;
+            if (cur <= 10 && state.floaters) {
+              state.floaters.push({
+                x: enemy.x, y: enemy.y - 48,
+                text: cur === 10 ? '⭐ ¡MISIÓN DE MAPA COMPLETADA!' : `🎯 MISIÓN: ${cur}/10`,
+                life: 1.2, color: cur === 10 ? '#facc15' : '#c084fc', scale: cur === 10 ? 1.3 : 1.0, kind: 'combo'
+              });
+            }
           }
         }
       }
@@ -214,6 +253,14 @@ export function updateMap(state, dt) {
               state.cartographyProgress.beach = (state.cartographyProgress.beach || 0) + 1;
               if (enemy.hp <= 0) {
                 state.cartographyProgress.beach_alt = (state.cartographyProgress.beach_alt || 0) + 1;
+              }
+              const cur = state.cartographyProgress.beach;
+              if (cur <= 8 && state.floaters) {
+                state.floaters.push({
+                  x: enemy.x, y: enemy.y - 48,
+                  text: cur === 8 ? '⭐ ¡MISIÓN DE MAPA COMPLETADA!' : `🎯 MISIÓN: ${cur}/8`,
+                  life: 1.2, color: cur === 8 ? '#facc15' : '#c084fc', scale: cur === 8 ? 1.3 : 1.0, kind: 'combo'
+                });
               }
             }
             burst(state, o.x, o.y, '#ffffff', 18, 180);
@@ -234,6 +281,14 @@ export function updateMap(state, dt) {
             if (state.mapId === 'football') {
               state.cartographyProgress = state.cartographyProgress || {};
               state.cartographyProgress.football = (state.cartographyProgress.football || 0) + 1;
+              const cur = state.cartographyProgress.football;
+              if (cur <= 8 && state.floaters) {
+                state.floaters.push({
+                  x: enemy.x, y: enemy.y - 48,
+                  text: cur === 8 ? '⭐ ¡MISIÓN DE MAPA COMPLETADA!' : `🎯 MISIÓN: ${cur}/8`,
+                  life: 1.2, color: cur === 8 ? '#facc15' : '#c084fc', scale: cur === 8 ? 1.3 : 1.0, kind: 'combo'
+                });
+              }
             }
             state.shake = Math.max(state.shake || 0, 0.15);
             state.audio?.play('kill');
@@ -415,6 +470,154 @@ export function drawMapObstacles(ctx, state) {
   if (state.mapId === 'beach') {
     drawBeachCrabs(ctx, state);
   }
+
+  // Dibujar Cofre Acorazado del Camión de Reparto
+  if (state.deliveryChest && !state.deliveryChest.opened) {
+    drawDeliveryChest(ctx, state.deliveryChest, state.time);
+  }
+
+  // Dibujar atmósfera de Turno Nocturno 24hs
+  if (state.nightShift) {
+    drawNightShiftAtmosphere(ctx, state);
+  }
+}
+
+export function drawDeliveryChest(ctx, chest, time = 0) {
+  if (!chest || chest.opened) return;
+  const x = Math.round(chest.x);
+  const y = Math.round(chest.y);
+  const hit = (chest.hitFlash || 0) > 0;
+
+  ctx.save();
+  ctx.translate(x, y);
+
+  // Sombra suave proyectada en el piso
+  ctx.fillStyle = 'rgba(7, 18, 24, 0.42)';
+  ctx.beginPath();
+  ctx.ellipse(0, 22, 34, 12, 0, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Halo de advertencia pulsante
+  const pulse = 0.5 + Math.sin(time * 6) * 0.5;
+  ctx.strokeStyle = `rgba(245, 158, 11, ${0.35 + pulse * 0.35})`;
+  ctx.lineWidth = 2;
+  ctx.setLineDash([6, 6]);
+  ctx.beginPath();
+  ctx.arc(0, 0, chest.radius + 6 + pulse * 4, 0, Math.PI * 2);
+  ctx.stroke();
+  ctx.setLineDash([]);
+
+  // Cuerpo metálico blindado (56 x 44 px)
+  const bodyColor = hit ? '#ffffff' : '#334155';
+  const rimColor = hit ? '#ffffff' : '#1e293b';
+  ctx.fillStyle = rimColor;
+  ctx.fillRect(-28, -22, 56, 44);
+  ctx.fillStyle = bodyColor;
+  ctx.fillRect(-26, -20, 52, 40);
+
+  // Franjas diagonales industriales de precaución
+  if (!hit) {
+    ctx.save();
+    ctx.beginPath();
+    ctx.rect(-24, -12, 48, 24);
+    ctx.clip();
+    ctx.fillStyle = '#f59e0b';
+    ctx.fillRect(-24, -12, 48, 24);
+    ctx.fillStyle = '#0f172a';
+    for (let s = -40; s < 40; s += 16) {
+      ctx.beginPath();
+      ctx.moveTo(s, -12);
+      ctx.lineTo(s + 10, -12);
+      ctx.lineTo(s + 2, 12);
+      ctx.lineTo(s - 8, 12);
+      ctx.closePath();
+      ctx.fill();
+    }
+    ctx.restore();
+  }
+
+  // Refuerzos y remaches de acero en las esquinas
+  const rivetColor = hit ? '#ffffff' : '#94a3b8';
+  ctx.fillStyle = rivetColor;
+  for (const [rx, ry] of [[-24, -18], [20, -18], [-24, 14], [20, 14]]) {
+    ctx.fillRect(rx, ry, 4, 4);
+  }
+
+  // Candado o cerradura dorada en el centro
+  ctx.fillStyle = '#0f172a';
+  ctx.fillRect(-8, -4, 16, 12);
+  ctx.fillStyle = '#fbbf24';
+  ctx.fillRect(-6, -2, 12, 8);
+  ctx.fillStyle = '#d97706';
+  ctx.fillRect(-2, 0, 4, 4);
+
+  // Baliza de emergencia en el techo con giro de luz ámbar
+  const beaconAngle = time * 8;
+  ctx.fillStyle = '#0f172a';
+  ctx.fillRect(-6, -26, 12, 5);
+  ctx.fillStyle = '#ef4444';
+  ctx.fillRect(-4, -28, 8, 4);
+  ctx.save();
+  ctx.globalAlpha = 0.55;
+  ctx.fillStyle = '#fde047';
+  ctx.beginPath();
+  ctx.arc(0, -26, 16, beaconAngle, beaconAngle + 0.9);
+  ctx.lineTo(0, -26);
+  ctx.closePath();
+  ctx.fill();
+  ctx.restore();
+
+  // Barra de resistencia (HP)
+  const barW = 48, barH = 5;
+  const barY = -35;
+  const hpRatio = Math.max(0, chest.hp / (chest.maxHp || 60));
+  ctx.fillStyle = '#0f172a';
+  ctx.fillRect(-barW / 2 - 1, barY - 1, barW + 2, barH + 2);
+  ctx.fillStyle = hpRatio > 0.5 ? '#22c55e' : hpRatio > 0.25 ? '#f59e0b' : '#ef4444';
+  ctx.fillRect(-barW / 2, barY, barW * hpRatio, barH);
+
+  // Temporizador de expiración
+  ctx.fillStyle = '#f8fafc';
+  ctx.font = '8px "Press Start 2P", monospace';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'bottom';
+  const sec = Math.ceil(chest.timer);
+  ctx.fillText(`⏱ ${sec}s`, 0, barY - 3);
+
+  ctx.restore();
+}
+
+export function drawNightShiftAtmosphere(ctx, state) {
+  if (!state.nightShift) return;
+  const p = state.player || { x: 500, y: 500 };
+  const worldW = state.world?.width || 1920;
+  const worldH = state.world?.height || 1080;
+  const time = state.time || 0;
+  const pulse = Math.sin(time * 3) * 8;
+  const lanternRadius = 185 + pulse;
+
+  ctx.save();
+  // Halo de luz linterna centrado en el jugador que ilumina la noche
+  const grad = ctx.createRadialGradient(p.x, p.y, 45, p.x, p.y, lanternRadius);
+  grad.addColorStop(0, 'rgba(15, 12, 38, 0.08)');
+  grad.addColorStop(0.5, 'rgba(14, 10, 36, 0.28)');
+  grad.addColorStop(0.82, 'rgba(12, 8, 32, 0.46)');
+  grad.addColorStop(1, 'rgba(10, 6, 28, 0.58)');
+
+  ctx.fillStyle = grad;
+  ctx.fillRect(0, 90, worldW, worldH - 90);
+
+  // Cartel de neón parpadeante "🌙 24HS ABIERTO" en la parte superior
+  const flicker = Math.sin(time * 12) > 0.88 ? 0.3 : 0.95;
+  ctx.globalAlpha = flicker;
+  ctx.fillStyle = '#f43f5e';
+  ctx.font = '10px "Press Start 2P", monospace';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'top';
+  ctx.shadowColor = '#f43f5e';
+  ctx.shadowBlur = 10;
+  ctx.fillText('🌙 ABIERTO 24HS · TURNO NOCTURNO', worldW / 2, 105);
+  ctx.restore();
 }
 
 export function drawBeachCrabs(ctx, state) {

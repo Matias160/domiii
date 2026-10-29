@@ -11,6 +11,11 @@
   --text: #f4f6f8;
   --muted: #8b9ea8;
 
+  /* Cursores Pixel Art Retro */
+  --pixel-cursor-default: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' shape-rendering='crispEdges'%3E%3Cpath fill='%23000000' d='M0,0 L0,18 L4,14 L7,21 L10,19 L7,13 L12,13 Z'/%3E%3Cpath fill='%23fbbf24' d='M1,2 L1,15 L4,12 L7,18 L8,17 L6,12 L10,12 Z'/%3E%3Cpath fill='%23ffffff' d='M2,3 L2,12 L3,12 L3,5 L7,9 L7,8 L3,4 L8,4 L8,3 Z'/%3E%3C/svg%3E") 0 0, default;
+  --pixel-cursor-pointer: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' shape-rendering='crispEdges'%3E%3Cpath fill='%23000000' d='M4,10 L8,6 L9,2 L12,2 L12,9 L14,7 L16,7 L16,10 L18,9 L20,9 L20,13 L19,17 L15,22 L8,22 L4,17 Z'/%3E%3Cpath fill='%23ffffff' d='M5,11 L8,8 L9,3 L11,3 L11,11 L13,8 L15,8 L15,11 L17,10 L19,10 L19,13 L18,17 L14,21 L9,21 L5,17 Z'/%3E%3Cpath fill='%23fef08a' d='M9,4 L10,4 L10,11 L9,11 Z'/%3E%3C/svg%3E") 8 2, pointer;
+  --pixel-cursor-crosshair: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='25' height='25' viewBox='0 0 25 25' shape-rendering='crispEdges'%3E%3Crect x='11' y='1' width='3' height='7' fill='%23000'/%3E%3Crect x='12' y='2' width='1' height='5' fill='%2322d3ee'/%3E%3Crect x='11' y='17' width='3' height='7' fill='%23000'/%3E%3Crect x='12' y='18' width='1' height='5' fill='%2322d3ee'/%3E%3Crect x='1' y='11' width='7' height='3' fill='%23000'/%3E%3Crect x='2' y='12' width='5' height='1' fill='%2322d3ee'/%3E%3Crect x='17' y='11' width='7' height='3' fill='%23000'/%3E%3Crect x='18' y='12' width='5' height='1' fill='%2322d3ee'/%3E%3Crect x='11' y='11' width='3' height='3' fill='%23000'/%3E%3Crect x='12' y='12' width='1' height='1' fill='%23facc15'/%3E%3C/svg%3E") 12 12, crosshair;
+
   /* 16-bit Retro Arcade Palette */
   --pixel-amber: #ffcc00;
   --pixel-amber-dark: #996600;
@@ -29,6 +34,18 @@
 
   font-family: 'Press Start 2P', 'VT323', 'Courier New', monospace;
   image-rendering: pixelated;
+}
+
+body, html, .screen {
+  cursor: var(--pixel-cursor-default) !important;
+}
+
+button, a, select, input[type="checkbox"], input[type="range"], .clickable, [role="button"], [data-station], [data-filter], [data-tab], .pixel-button, .icon-button, .lobby-station-btn, .catalog-item {
+  cursor: var(--pixel-cursor-pointer) !important;
+}
+
+#gameCanvas, .game-screen, #gameScreen {
+  cursor: var(--pixel-cursor-crosshair) !important;
 }
 
 * {

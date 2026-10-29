@@ -1261,8 +1261,8 @@
   gap: 16px;
   border: 5px solid var(--prize-accent);
   background: #162232;
-  box-shadow: 10px 10px 0 #05080d, 0 0 0 5px #435268, 0 0 54px color-mix(in srgb, var(--prize-accent) 36%, transparent);
-  animation: prizeCardPop 0.68s cubic-bezier(.16, .88, .28, 1) both;
+  box-shadow: 10px 10px 0 #05080d, 0 0 0 5px #435268, 0 0 70px rgba(244, 114, 182, 0.65), 0 0 120px rgba(250, 204, 21, 0.35);
+  animation: prizeCardPop 0.72s cubic-bezier(.16, .88, .28, 1) both;
 }
 .prize-reveal-card::before {
   content: '';
@@ -1279,10 +1279,11 @@
 }
 @keyframes prizePanelIn { from { opacity: 0; } to { opacity: 1; } }
 @keyframes prizeCardPop {
-  0% { transform: translateY(24px) scale(.58); opacity: 0; }
-  58% { transform: translateY(-8px) scale(1.08); opacity: 1; }
-  82% { transform: translateY(3px) scale(.985); }
-  100% { transform: translateY(0) scale(1); }
+  0% { transform: translateY(32px) scale(0.2) rotate(-8deg); opacity: 0; filter: brightness(2.8); }
+  45% { transform: translateY(-16px) scale(1.22) rotate(3deg); opacity: 1; filter: brightness(1.6); }
+  72% { transform: translateY(5px) scale(0.96) rotate(-1deg); }
+  88% { transform: translateY(-2px) scale(1.03); }
+  100% { transform: translateY(0) scale(1) rotate(0); filter: brightness(1); }
 }
 
 .prize-reveal-header {

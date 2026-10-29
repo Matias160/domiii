@@ -454,23 +454,23 @@ export class PrizeMachine {
   }
 
   spawnConfetti() {
-    const colors = ['#ffe17a', '#f472b6', '#7ce5ff', '#d7a4ff', '#82e8ae', '#fff7c3'];
-    this.spawnBurst(280, 405, 42, colors, 300);
-    for (let i = 0; i < 44; i++) {
-      const angle = Math.PI * 2 * i / 44 + (Math.random() - 0.5) * 0.3;
-      const speed = 120 + Math.random() * 230;
-      const life = 1.25 + Math.random() * 1.2;
+    const colors = ['#ffe17a', '#f472b6', '#7ce5ff', '#d7a4ff', '#82e8ae', '#fff7c3', '#facc15', '#ec4899', '#38bdf8', '#c084fc'];
+    this.spawnBurst(280, 405, 80, colors, 480);
+    for (let i = 0; i < 110; i++) {
+      const angle = (Math.PI * 2 * i / 110) + (Math.random() - 0.5) * 0.4;
+      const speed = 100 + Math.random() * 340;
+      const life = 1.4 + Math.random() * 1.6;
       this.particles.push({
-        x: 280,
-        y: 400,
+        x: 280 + (Math.random() - 0.5) * 40,
+        y: 400 + (Math.random() - 0.5) * 20,
         vx: Math.cos(angle) * speed,
-        vy: Math.sin(angle) * speed - 90,
-        gravity: 220,
-        size: 3 + Math.random() * 4,
+        vy: Math.sin(angle) * speed - 160,
+        gravity: 240,
+        size: 3 + Math.random() * 6,
         color: colors[i % colors.length],
         life, maxLife: life,
         rot: Math.random() * Math.PI,
-        vrot: (Math.random() - 0.5) * 10,
+        vrot: (Math.random() - 0.5) * 14,
         kind: 'confetti'
       });
     }

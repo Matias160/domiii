@@ -837,6 +837,7 @@ export const enemyTypes = [
   { id: "goalie_bot", name: "Arquero mecánico", hp: 95, speed: 52, damage: 16, score: 70, xp: 16, radius: 22, color: "#3b82f6", nativeMap: "football" },
   { id: "armored_crab", name: "Cangrejo acorazado", hp: 65, speed: 64, damage: 15, score: 62, xp: 13, radius: 18, color: "#ef4444", nativeMap: "beach" },
   { id: "exotic_juice", name: "Zumo exótico", hp: 30, speed: 125, damage: 16, score: 50, xp: 11, radius: 14, color: "#f97316", nativeMap: "beach" },
+  { id: "inspector", name: "Inspector Bromatológico", hp: 72, speed: 96, damage: 16, score: 140, xp: 24, radius: 18, color: "#0284c7", role: "inspector", eventOnly: true },
   // --- Jefes ---
   { id: "double", name: "Rey del mostrador", hp: 820, speed: 58, damage: 24, score: 650, xp: 48, radius: 48, color: "#ffd33d", boss: true },
   { id: "ketchup", name: "Senor Ketchup", hp: 960, speed: 78, damage: 25, score: 850, xp: 60, radius: 42, color: "#ff6e76", boss: true, bossStyle: 'ranged' },

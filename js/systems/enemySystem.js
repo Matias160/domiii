@@ -281,7 +281,7 @@ function spawnEnemy(state, canvas, boss = false, nearEdge = false, bossSlot = 0,
   const position = { x: px, y: py };
   const currentMap = state.mapId || 'diner';
   const nativeForMap = enemyTypes.filter(t => !t.boss && t.nativeMap === currentMap);
-  const globalNormals = enemyTypes.filter(t => !t.boss && !t.nativeMap);
+  const globalNormals = enemyTypes.filter(t => !t.boss && !t.nativeMap && !t.eventOnly);
   const maxGlobal = state.time > 65 ? globalNormals.length : state.time > 35 ? 5 : state.time > 15 ? 4 : 2;
   const availableGlobals = globalNormals.slice(0, maxGlobal);
 
@@ -314,10 +314,11 @@ function spawnEnemy(state, canvas, boss = false, nearEdge = false, bossSlot = 0,
     ? (2.45 + spawnedBossIndex * 0.48)
     : (boss ? (1.7 + (state.bossesKilled || 0) * 0.35) : 1);
   const rushBossSpdMult = (boss && state.modeId === 'rush') ? (1.06 + spawnedBossIndex * 0.03) : 1;
+  const nightSpdMult = state.nightShift ? (1.12 + ((state.nightShiftLevel || 1) - 1) * 0.06) : 1;
   const difficulty = {
     ...state.difficulty,
     hp: state.difficulty.hp * growth * rushBossHpMult,
-    speed: state.difficulty.speed * (state.mapId === 'kitchen' ? 1.08 : 1) * rushBossSpdMult
+    speed: state.difficulty.speed * (state.mapId === 'kitchen' ? 1.08 : 1) * rushBossSpdMult * nightSpdMult
   };
   const spawned = new Enemy({ ...position, type, difficulty });
   if (boss && state.modeId === 'rush') {
