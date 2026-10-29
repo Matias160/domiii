@@ -588,6 +588,10 @@
    ATLAS DE CARTOGRAFÍA - MUNDO PIXEL ART INTERACTIVO Y NAVEGABLE
    ========================================================================== */
 .atlas-screen {
+  display: none !important;
+}
+
+.atlas-screen.screen--active {
   position: absolute;
   inset: 0;
   width: 100%;
@@ -596,8 +600,9 @@
   margin: 0 !important;
   overflow: hidden;
   background: #041424;
-  display: flex;
+  display: flex !important;
   flex-direction: column;
+  z-index: 10;
 }
 
 .atlas-topbar {

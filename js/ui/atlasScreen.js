@@ -386,9 +386,9 @@ export class AtlasScreen {
   resizeView() {
     if (!this.canvas) return;
     const stage = this.canvas.parentElement;
-    const cw = stage?.clientWidth || 960;
-    const ch = stage?.clientHeight || 540;
-    const aspect = cw / ch;
+    const cw = stage?.clientWidth || window.innerWidth || 960;
+    const ch = stage?.clientHeight || window.innerHeight || 540;
+    const aspect = cw / (ch || 1);
 
     let w = 960, h = 540;
     if (aspect >= 16 / 9) {
@@ -396,8 +396,8 @@ export class AtlasScreen {
     } else {
       h = Math.round(960 / aspect);
     }
-    this.view.w = Math.min(this.world.w, w);
-    this.view.h = Math.min(this.world.h, h);
+    this.view.w = Math.min(this.world.w, Math.max(640, w));
+    this.view.h = Math.min(this.world.h, Math.max(360, h));
 
     if (this.canvas.width !== this.view.w || this.canvas.height !== this.view.h) {
       this.canvas.width = this.view.w;
@@ -430,6 +430,7 @@ export class AtlasScreen {
     this.cardVisible = true;
     this.renderFloatingCard();
     this.game.showScreen('atlasScreen');
+    this.resizeView();
     refreshIcons();
     this.startLoop();
   }
@@ -441,7 +442,7 @@ export class AtlasScreen {
 
     const tick = (now) => {
       const screen = document.querySelector('#atlasScreen');
-      if (!screen || screen.classList.contains('hidden') || screen.style.display === 'none') {
+      if (!screen || !screen.classList.contains('screen--active')) {
         this.loopRunning = false;
         return;
       }
