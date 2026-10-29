@@ -12,9 +12,10 @@ export const modes = {
 };
 
 const events = [
-  { id: 'sauces', name: 'LLUVIA DE ADEREZOS', duration: 14, color: '#ffcf4a' },
-  { id: 'promo', name: 'PROMO 2x1', duration: 18, color: '#ff8580' },
-  { id: 'happy', name: 'HORA FELIZ', duration: 16, color: '#86e3bf' },
+  { id: 'sauces', name: 'LLUVIA DE ADEREZOS', duration: 14, color: '#ffcf4a', subtitle: '¡BOTINES Y SALSAS ESPECIALES!' },
+  { id: 'promo', name: 'PROMO 2x1', duration: 18, color: '#ff8580', subtitle: '¡PUNTOS Y MULTIPLICADORES DOBLES!' },
+  { id: 'happy', name: 'HORA FELIZ', duration: 16, color: '#86e3bf', subtitle: '¡BONIFICACIÓN DE SCORE Y VELOCIDAD!' },
+  { id: 'superwave', name: '¡SUPER OLEADA!', duration: 14, color: '#ff1144', subtitle: '¡ENJAMBRE MASIVO: EL TRIPLE DE ENEMIGOS!' },
 ];
 
 export function initializeDirector(state) {
@@ -66,6 +67,15 @@ export function updateDirector(state, delta, bounds, random = Math.random) {
     state.eventRemaining = state.activeEvent.duration;
     state.eventItemTimer = 0;
     state.directorNotice = state.activeEvent.name;
+    // Notificación cinemática idéntica a la de los jefes para anunciar el evento
+    state.bossIntro = {
+      bossName: state.activeEvent.name,
+      eventSubtitle: state.activeEvent.subtitle || '¡EVENTO ESPECIAL EN CURSO!',
+      duration: 3.0,
+      timer: 3.0,
+      isEvent: true
+    };
+    state.shake = Math.max(state.shake || 0, 0.42);
   }
 }
 

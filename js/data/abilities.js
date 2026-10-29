@@ -15,7 +15,6 @@ export const abilities = [
   { id:'rapidFire',name:'Manos veloces',category:'Ataque',rarity:'rare',description:'Aumenta tu cadencia de disparo un 35%.',maxStacks:4,apply:player=>{player.fireRateMultiplier*=0.65;} },
   { id:'piercing',name:'Tenedor afilado',category:'Ataque',rarity:'rare',description:'Tus proyectiles perforan a +2 enemigos adicionales.',maxStacks:2,apply:player=>{player.pierceBonus+=2;} },
   { id:'grease',name:'Grasa resbalosa',category:'Control',rarity:'rare',description:'Aura que frena un 25% (hasta 44%) a los enemigos cercanos.',maxStacks:2,apply:player=>{player.auraLevel+=1;} },
-  { id:'regen',name:'Receta de la casa',category:'Defensa',rarity:'common',description:'Regenera 4.5 de vida por segundo.',maxStacks:3,apply:player=>{player.regen+=4.5;} },
   { id:'sneakers',name:'Zapatillas express',category:'Movimiento',rarity:'common',description:'Velocidad de movimiento +30%.',maxStacks:4,apply:player=>{player.speed*=1.30;} },
   { id:'extraPortion',name:'Porción extra',category:'Defensa',rarity:'common',description:'+50 de vida máxima y te cura 60 de vida al instante.',maxStacks:4,apply:player=>{player.maxHp+=50;player.hp=Math.min(player.maxHp,player.hp+60);} },
   { id:'longSauce',name:'Aderezo doble',category:'Especial',rarity:'common',description:'Los potenciadores duran el doble (+100%).',maxStacks:2,apply:player=>{player.itemDuration*=2.0;} },

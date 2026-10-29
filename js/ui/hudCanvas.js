@@ -97,14 +97,17 @@ export class HudCanvas {
     this.comboPop = Math.max(0, this.comboPop - delta);
     if (this.toast) { this.toast.t += delta; if (this.toast.t >= this.toast.life) this.toast = null; }
 
-    const boss = state.enemies.find(e => e.isBoss && e.hp > 0);
+    const activeBosses = state.enemies.filter(e => e.isBoss && e.hp > 0);
+    const boss = activeBosses[0];
     const event = state.activeEvent;
     const snowAlert = state.mapId === 'snow' && (state.mapWarning || state.wasFreezing);
     const buffs = this.buffText(state.player);
     const eventInfo = this.eventInfo(state, event, snowAlert);
-    const bossFill = boss ? Math.round(Math.max(0, boss.hp / boss.maxHp) * 200) : -1;
+    const totalHp = activeBosses.reduce((s, b) => s + b.hp, 0);
+    const totalMaxHp = activeBosses.reduce((s, b) => s + b.maxHp, 0) || 1;
+    const bossFill = boss ? Math.round(Math.max(0, totalHp / totalMaxHp) * 200) : -1;
     const signature = [this.w, this.h, layout.hudBottom, layout.minimapBottom, combo, (state.combo ? 1 : 0),
-      bossFill, boss?.type.name, boss?.enraged, boss?.bossRank, eventInfo?.text, buffs,
+      bossFill, activeBosses.length, boss?.type.name, boss?.enraged, boss?.bossRank, eventInfo?.text, buffs,
       this.toast?.text, this.comboPop > 0, this.toast && (this.toast.t < 0.22 || this.toast.t > this.toast.life - 0.3)].join('|');
     // Sin cambios ni animaciones en curso: el canvas queda como está
     if (signature === this.signature && !this.comboPop && !(this.toast && (this.toast.t < 0.22 || this.toast.t > this.toast.life - 0.3))) return;
@@ -119,7 +122,7 @@ export class HudCanvas {
     const left = narrow ? 8 : 24;
     this.drawCombo(ctx, combo, left, layout.minimapBottom + 12, narrow);
     if (eventInfo) this.drawEvent(ctx, eventInfo, left, layout.minimapBottom + (narrow ? 70 : 96));
-    if (boss) this.drawBossMeter(ctx, boss, narrow, layout.hudBottom);
+    if (boss) this.drawBossMeter(ctx, boss, narrow, layout.hudBottom, activeBosses);
     if (buffs) this.drawBuffs(ctx, buffs, narrow ? layout.hudBottom + 6 : 91);
     if (this.toast) this.drawToast(ctx, this.toast, narrow);
   }
@@ -207,13 +210,16 @@ export class HudCanvas {
     ctx.drawImage(sprite.canvas, x, y, sprite.w, sprite.h);
   }
 
-  drawBossMeter(ctx, boss, narrow, hudBottom) {
+  drawBossMeter(ctx, boss, narrow, hudBottom, activeBosses = [boss]) {
     const W = narrow ? 220 : Math.min(360, this.w * 0.9), H = 52;
     const x = narrow ? this.w - 8 - W : (this.w - W) / 2;
     const y = narrow ? hudBottom + 24 : Math.max(88, hudBottom + 22);
-    const base = boss.bossRank ? `#${boss.bossRank} ${boss.type.name.toUpperCase()}` : boss.type.name.toUpperCase();
-    const title = boss.enraged ? `${base} · ¡FURIOSO!` : `${base} · FASE 1/2`;
-    const border = boss.enraged ? '#ff2a44' : '#ff3344';
+    const count = activeBosses?.length || 1;
+    const base = count > 1
+      ? `¡${count} GRANDES JEFES!`
+      : (boss.bossRank ? `#${boss.bossRank} ${boss.type.name.toUpperCase()}` : boss.type.name.toUpperCase());
+    const title = count > 1 ? base : (boss.enraged ? `${base} · ¡FURIOSO!` : `${base} · FASE 1/2`);
+    const border = boss.enraged || count > 1 ? '#ff2a44' : '#ff3344';
     // El título se achica hasta entrar en la barra (nombres largos en pantallas angostas)
     let titleSize = 10;
     while (titleSize > 6 && this.measure(title, `${titleSize}px ${PIXEL_FONT}`) > W - 18) titleSize -= 1;
@@ -232,8 +238,10 @@ export class HudCanvas {
       c.fillStyle = '#180508'; c.fillRect(15, 29, W - 30, 12);
     });
     ctx.drawImage(frame.canvas, x - 10, y - 8, frame.w, frame.h);
-    // El relleno de vida se dibuja aparte: es lo único que cambia durante la pelea
-    const ratio = Math.max(0, boss.hp / boss.maxHp), fillW = Math.round((W - 30) * ratio);
+    // El relleno de vida se calcula con la suma de vida de todos los jefes activos
+    const totalHp = activeBosses.reduce((s, b) => s + b.hp, 0);
+    const totalMaxHp = activeBosses.reduce((s, b) => s + b.maxHp, 0) || 1;
+    const ratio = Math.max(0, totalHp / totalMaxHp), fillW = Math.round((W - 30) * ratio);
     if (fillW > 0) {
       const grad = ctx.createLinearGradient(x + 15, 0, x + W - 15, 0);
       grad.addColorStop(0, '#d00000'); grad.addColorStop(0.5, '#e85d04'); grad.addColorStop(1, '#ffba08');

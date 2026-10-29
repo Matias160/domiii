@@ -355,6 +355,7 @@ export class MenuScreen {
   }
 
   prepareAccount(){const p=currentAccount();if(!p)return;
+    this.setSetupStep(1);
     const guest = isGuest();
     this.nameInput.value=p.name;
     this.selectedSkin=p.loadout.skin;

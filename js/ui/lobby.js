@@ -162,7 +162,7 @@ export class Lobby {
   }
   activate(id){
     this.destination=null;this.game.audio.play('confirm');
-    if(id==='portal'){this.game.menu.prepareAccount();this.game.showScreen('setupScreen');}
+    if(id==='portal'){this.game.menu.setSetupStep(1);this.game.menu.prepareAccount();this.game.showScreen('setupScreen');}
     else if(id==='pets')this.game.shop.show('pet',true);
     else if(id==='shop')this.game.shop.show();
     else if(id==='ranking')this.game.showRanking();

@@ -20,47 +20,58 @@ export function updateEnemies(state, delta, canvas) {
   state.spawnTimer -= delta;
   // Durante el tutorial de inicio la arena queda vacía: no entran clientes ni jefes
   const hold = Boolean(state.holdSpawns);
+  const isSuperwave = state.activeEvent?.id === 'superwave';
+  const isPicante = state.difficulty?.id === 'picante' || state.difficulty?.id === 'extra';
+  const isLavaMode = state.modeId === 'boss_legendary' || state.mapId === 'lava';
+
   const pressure = Math.max(0, 1 - state.time / 240);
-  const spawnEvery = state.difficulty.spawn * Math.max(0.32, 1.15 * pressure) * (state.activeEvent?.id === 'promo' ? .55 : 1);
+  const baseSpawnEvery = state.difficulty.spawn * Math.max(0.32, 1.15 * pressure) * (state.activeEvent?.id === 'promo' ? .55 : 1);
+  const spawnEvery = isSuperwave ? (baseSpawnEvery * 0.33) : baseSpawnEvery;
   let bossSpawned = false;
 
   // Un jefe cuenta desde que aparece hasta que resolveDeaths lo saca, aunque un cuadro quede en 0 HP
-  // (si no, un charco que lo deja en 0 antes de esta revisión hacía aparecer un jefe duplicado)
-  const activeBossCount = state.enemies.filter(enemy => enemy.isBoss).length;
-  const maxConcurrentBosses = state.modeId === 'rush' && (state.bossesKilled || 0) >= 6 ? 2 : 1;
+  const activeBossCount = state.enemies.filter(enemy => enemy.isBoss && enemy.hp > 0).length;
   const waveBoss = state.modeId === 'waves' && state.waveRest <= 0 && state.waveBossPending;
 
-  if (!hold && (state.time >= state.nextBossAt || waveBoss) && activeBossCount < maxConcurrentBosses) {
-    if (state.modeId !== 'rush' || (state.bossesKilled || 0) + activeBossCount < RUSH_BOSS_GOAL) {
-      spawnEnemy(state, canvas, true);
+  // Ciclo de jefes:
+  // Ciclo 1 (rondas 0, 1, 2, 3): 1 jefe a la vez (Ketchup, Papota, Pizza, Subcero)
+  // Tras cumplir el primer ciclo (4 jefes): spawnean 2 a la vez (ronda 4), luego 3 (ronda 5), 4 (ronda 6), etc.
+  const round = state.bossWaveRound || 0;
+  const howManyBosses = isLavaMode ? 1 : (round < 4 ? 1 : 2 + (round - 4));
+
+  if (!hold && (state.time >= state.nextBossAt || waveBoss) && activeBossCount === 0) {
+    if (state.modeId !== 'rush' || (state.bossesKilled || 0) < RUSH_BOSS_GOAL) {
+      for (let b = 0; b < howManyBosses; b++) {
+        spawnEnemy(state, canvas, true, false, b, howManyBosses);
+      }
+      state.bossWaveRound = round + 1;
       state.waveBossPending = false;
-      // El próximo jefe se agenda cuando cae este (scoreSystem), con BOSS_GAP de respiro
+      // El próximo jefe se agenda cuando cae la tanda completa (scoreSystem), con BOSS_GAP de respiro
       state.nextBossAt = Infinity;
       bossSpawned = true;
     }
   }
 
-  // Con un jefe en la arena no entran clientes normales: es el jefe quien invoca ayudantes de a poco
+  // En modo Picante: los enemigos normales NO se detienen ni se reinician con cada jefe
   // En el Caldero de Lava el duelo es contra el Coloso: como mucho un ayudante a la vez
-  const isLavaMode = state.modeId === 'boss_legendary' || state.mapId === 'lava';
   const nonBossCount = isLavaMode ? state.enemies.filter(e => !e.isBoss && e.hp > 0).length : 0;
   const canSpawn = hold ? false : isLavaMode ? (activeBossCount > 0 && nonBossCount < 1 && state.time > 18) :
-    activeBossCount > 0 ? false :
+    (activeBossCount > 0 && !isPicante) ? false :
     state.modeId === 'waves' ? state.waveRest <= 0 && state.waveRemaining > 0 :
     state.modeId === 'rush' ? state.enemies.length < 18 : true;
-  // Relleno: si la arena quedó casi vacía (mataste al último), los clientes llegan enseguida
-  // y aparecen justo afuera del borde de la pantalla, no lejos (antes tardaban varios segundos en verse)
+
+  const currentCap = isSuperwave ? Math.round(enemyCap() * 1.8) : enemyCap();
   const alive = isLavaMode ? 0 : state.enemies.reduce((n, e) => n + (!e.isBoss && e.hp > 0 ? 1 : 0), 0);
-  const starving = !isLavaMode && canSpawn && alive < Math.min(enemyCap(), SPAWN_REFILL.max, SPAWN_REFILL.base + Math.floor(state.time / SPAWN_REFILL.growEvery));
+  const starving = !isLavaMode && canSpawn && alive < Math.min(currentCap, SPAWN_REFILL.max, SPAWN_REFILL.base + Math.floor(state.time / SPAWN_REFILL.growEvery));
   if (starving) state.spawnTimer = Math.min(state.spawnTimer, alive === 0 ? 0 : SPAWN_REFILL.interval);
-  if (canSpawn && state.spawnTimer <= 0 && state.enemies.length < enemyCap()) {
-    const batch = starving && alive === 0 && state.time > SPAWN_REFILL.graceTime ? SPAWN_REFILL.emptyBurst : 1;
-    for (let i = 0; i < batch && state.enemies.length < enemyCap(); i++) {
+  if (canSpawn && state.spawnTimer <= 0 && state.enemies.length < currentCap) {
+    const batch = isSuperwave ? 3 : (starving && alive === 0 && state.time > SPAWN_REFILL.graceTime ? SPAWN_REFILL.emptyBurst : 1);
+    for (let i = 0; i < batch && state.enemies.length < currentCap; i++) {
       if (state.modeId === 'waves' && state.waveRemaining <= 0) break;
-      spawnEnemy(state, canvas, false, starving);
+      spawnEnemy(state, canvas, false, starving || isSuperwave);
       if (state.modeId === 'waves') state.waveRemaining -= 1;
     }
-    state.spawnTimer = isLavaMode ? 18.0 : state.modeId === 'rush' ? 1.85 : starving ? SPAWN_REFILL.interval : spawnEvery;
+    state.spawnTimer = isLavaMode ? 18.0 : state.modeId === 'rush' ? 1.85 : isSuperwave ? (spawnEvery * 0.35) : starving ? SPAWN_REFILL.interval : spawnEvery;
   }
 
   for (const enemy of state.enemies) {
@@ -207,7 +218,7 @@ function updateBossZones(state,delta){
   }
 }
 
-function spawnEnemy(state, canvas, boss = false, nearEdge = false) {
+function spawnEnemy(state, canvas, boss = false, nearEdge = false, bossSlot = 0, totalBosses = 1) {
   const worldW = state.world?.width || 1920;
   const worldH = state.world?.height || 1080;
   const vw = state.view?.w || 960, vh = state.view?.h || 540;
@@ -216,10 +227,15 @@ function spawnEnemy(state, canvas, boss = false, nearEdge = false) {
 
   let px, py;
   if (boss) {
-    // Los jefes aparecen a una distancia épica frente a la cámara
-    px = Math.max(80, Math.min(worldW - 80, cam.x + vw / 2 + (Math.random() - 0.5) * 180));
-    // A un tercio de la pantalla: se ve bien la entrada y no queda tapado por el HUD
-    py = Math.max(170, Math.min(worldH - 120, cam.y + vh * 0.34));
+    if (totalBosses > 1) {
+      const spacing = Math.min(220, (vw - 160) / Math.max(1, totalBosses));
+      const startX = cam.x + vw / 2 - ((totalBosses - 1) * spacing) / 2;
+      px = startX + bossSlot * spacing;
+      py = Math.max(160, Math.min(worldH - 120, cam.y + vh * 0.32 + (bossSlot % 2 === 0 ? 0 : 25)));
+    } else {
+      px = Math.max(80, Math.min(worldW - 80, cam.x + vw / 2 + (Math.random() - 0.5) * 180));
+      py = Math.max(170, Math.min(worldH - 120, cam.y + vh * 0.34));
+    }
   } else {
     if (nearEdge || Math.random() < 0.7) {
       const side = Math.floor(Math.random() * 4);
@@ -251,7 +267,8 @@ function spawnEnemy(state, canvas, boss = false, nearEdge = false) {
   const normalTypes = enemyTypes.filter(type => !type.boss);
   const maxType = state.time > 65 ? normalTypes.length : state.time > 35 ? 5 : state.time > 15 ? 4 : 2;
   const bosses = enemyTypes.filter(record => record.boss);
-  const spawnedBossIndex = (state.bossesKilled || 0) + state.enemies.filter(e => e.isBoss && e.hp > 0).length;
+  const spawnedBossIndex = state.bossIndexCursor || 0;
+  if (boss) state.bossIndexCursor = spawnedBossIndex + 1;
   const colossusBoss = enemyTypes.find(t => t.id === 'lava_boss') || bosses[0];
   const regularBosses = bosses.filter(b => b.id !== 'lava_boss');
   const type = boss

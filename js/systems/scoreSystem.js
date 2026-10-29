@@ -171,8 +171,9 @@ export function resolveDeaths(state, onLevelUp) {
         state.bossDefeated = true;
         const finalRushBoss = state.modeId === 'rush' && state.bossesKilled >= RUSH_BOSS_GOAL;
         if (!finalRushBoss) spawnBossMinions(state, enemy);
-        // Respiro antes del próximo jefe (en Oleadas los jefes los decide cada cuarta oleada)
-        if (state.modeId !== 'waves') state.nextBossAt = state.time + BOSS_GAP;
+        // Respiro antes de la próxima tanda de jefes (solo cuando todos los jefes activos caen)
+        const remainingBosses = state.enemies.filter(e => e.isBoss && e.hp > 0 && e !== enemy).length;
+        if (remainingBosses === 0 && state.modeId !== 'waves') state.nextBossAt = state.time + BOSS_GAP;
       }
       state.shake = Math.max(state.shake || 0, 0.55);
       state.hitFreeze = 0.22; // Micro cámara lenta / freeze al derrotar un Gran Jefe

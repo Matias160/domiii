@@ -1,4 +1,4 @@
-import { damageEnemy } from './effectSystem.js';
+import { damageEnemy, burst, impactRing } from './effectSystem.js';
 
 // Sprite sheets generadas a partir de todos los cuadros de animación de los GIFs originales (16 frames)
 export const cactusSheet = typeof Image !== 'undefined' ? new Image() : null;
@@ -75,6 +75,41 @@ export function updateMap(state, dt) {
       state.floaters?.push({ x: o.x, y: o.y - 30, text: '¡BOMBAZO! ⚽', life: 1.1, color: '#00ffcc', scale: 1.35 });
     }
 
+    // Desierto: hacer Dash contra un cactus lo hace explotar en pinchos que dañan a los enemigos (al jugador no)
+    if (state.mapId === 'desert' && state.player.dashTime > 0 && !o.exploded && Math.hypot(o.x - state.player.x, o.y - state.player.y) < o.radius + state.player.radius + 20) {
+      o.exploded = true;
+      state.shake = Math.max(state.shake || 0, 0.38);
+      state.audio?.play('hit');
+      burst(state, o.x, o.y, '#84cc16', 32, 280);
+      burst(state, o.x, o.y, '#facc15', 24, 240);
+      impactRing(state, o.x, o.y, '#84cc16');
+      state.floaters?.push({ x: o.x, y: o.y - 30, text: '¡EXPLOSIÓN DE PINCHOS! 🌵', life: 1.25, color: '#84cc16', scale: 1.4 });
+
+      // Expulsar pinchos radiales veloces a 360° que perforan y aniquilan enemigos
+      const spikeCount = 20;
+      for (let i = 0; i < spikeCount; i++) {
+        const angle = (i * Math.PI * 2) / spikeCount;
+        state.projectiles.push({
+          x: o.x, y: o.y,
+          vx: Math.cos(angle) * 520, vy: Math.sin(angle) * 520,
+          radius: 7,
+          damage: 150 + state.player.level * 10,
+          life: 1.8,
+          color: '#84cc16',
+          hitEnemies: new Set(),
+          pierce: 5,
+          isThorn: true
+        });
+      }
+
+      // Daño de área masivo inmediato a todos los enemigos cercanos
+      for (const enemy of state.enemies) {
+        if (enemy.hp > 0 && Math.hypot(enemy.x - o.x, enemy.y - o.y) < 320) {
+          damageEnemy(state, enemy, 160 + state.player.level * 12, 'crit');
+        }
+      }
+    }
+
     if (o.kicked) {
       // Pelota pateada revienta enemigos a su paso
       for (const enemy of state.enemies) {
@@ -86,11 +121,11 @@ export function updateMap(state, dt) {
           state.audio?.play('kill');
         }
       }
-    } else if (Math.hypot(o.x - state.player.x, o.y - state.player.y) < o.radius + state.player.radius && state.player.takeDamage(state.mapId === 'football' ? 10 : 13)) {
+    } else if (!o.exploded && Math.hypot(o.x - state.player.x, o.y - state.player.y) < o.radius + state.player.radius && state.player.takeDamage(state.mapId === 'football' ? 10 : 13)) {
       state.shake = .16; state.audio?.play('damage');
     }
   }
-  state.mapObstacles = state.mapObstacles.filter(o => o.x > -80 && o.x < worldW + 80 && o.y > 60 && o.y < worldH + 60);
+  state.mapObstacles = state.mapObstacles.filter(o => !o.exploded && o.x > -80 && o.x < worldW + 80 && o.y > 60 && o.y < worldH + 60);
 }
 
 export function drawMapObstacles(ctx, state) {

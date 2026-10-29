@@ -229,7 +229,7 @@ test('regular spawning stops at the enemy cap',()=>{
 
 test('boss entrance clears the arena without rewards and the boss summons helpers gradually',async()=>{
   const { startBossEntrance, updateBossEntrance } = await import('../js/ui/bossEntrance.js');
-  const state=createRunState();state.player.hp=state.player.maxHp=1e6;
+  const state=createRunState({difficultyId:'suave'});state.player.hp=state.player.maxHp=1e6;
   const boss=enemy(state,600,true);boss.spawnTime=1.6;
   state.enemies=[boss,...Array.from({length:12},()=>enemy(state,300))];
   const kills=state.kills,score=state.score;

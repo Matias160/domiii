@@ -27,16 +27,19 @@ function playTone(audio, freq, duration, volume, type, end) {
   if (audio?.sfxEnabled && audio.context) audio.tone(freq, duration, volume, type, end);
 }
 
-// Vacía la arena (sin puntos ni XP: el local se despeja para el duelo) y arma la animación
+// Vacía la arena (salvo en modo Picante, donde los enemigos no se reinician) y arma la animación
 export function startBossEntrance(state, boss, camera, view) {
   const entrance = { boss, t: 0, parts: [], waves: [], slammed: false, dropped: false, rumbled: false, shake: 0, flash: 0, emberClock: 0, done: false };
-  for (const enemy of state.enemies) {
-    if (enemy === boss || enemy.isBoss) continue;
-    spray(entrance, enemy.x, enemy.y, POOF_COLORS, 7, 110, { gravity: -30, size: 5, life: 0.6 });
+  const isPicante = state.difficulty?.id === 'picante' || state.difficulty?.id === 'extra';
+  if (!isPicante) {
+    for (const enemy of state.enemies) {
+      if (enemy === boss || enemy.isBoss) continue;
+      spray(entrance, enemy.x, enemy.y, POOF_COLORS, 7, 110, { gravity: -30, size: 5, life: 0.6 });
+    }
+    state.enemies = state.enemies.filter(enemy => enemy.isBoss);
+    state.enemyProjectiles.length = 0;
+    state.bossZones = [];
   }
-  state.enemies = state.enemies.filter(enemy => enemy.isBoss);
-  state.enemyProjectiles.length = 0;
-  state.bossZones = [];
   boss.spawnTime = 0;
   entrance.skyY = camera.y - 40;                 // de dónde baja el pilar (arriba de la pantalla)
   entrance.fallHeight = Math.max(160, boss.y - entrance.skyY);

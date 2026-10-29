@@ -512,9 +512,8 @@ export class Game {
     this.lastSetup = setup;
     this.state = createRunState(setup, this.audio);
     this.lobby.centerNext = true; // al terminar la partida se vuelve al centro del local
-    let tutorialDone = false;
-    try { tutorialDone = localStorage.getItem('domi2pancho.tutorialDone') === 'true'; } catch {}
-    if (!tutorialDone) {
+    // El tutorial de partida aparece siempre (para practicar movimiento y dash al inicio)
+    if (setup.mapId !== 'lava') {
       this.startTutorial();
     } else {
       this.tutorial = null;
@@ -1360,7 +1359,7 @@ export class Game {
     const bannerY = Math.round(H * 0.444);
     const slideIn = Math.min(1, elapsed / 0.3);
     const scale = 0.8 + 0.2 * Math.sin(slideIn * Math.PI / 2);
-    const banner = this.bossBannerSprite(intro.bossName);
+    const banner = this.bossBannerSprite(intro.bossName, intro.eventSubtitle, intro.isEvent);
     ctx.save();
     ctx.translate(W / 2, bannerY);
     ctx.scale(scale, scale);
@@ -1368,10 +1367,11 @@ export class Game {
     ctx.restore();
   }
 
-  // Cartel de alerta de jefe: se arma una sola vez por nombre (fondo, borde, esquinas y textos)
-  bossBannerSprite(bossName) {
+  // Cartel de alerta de jefe/evento: se arma una sola vez por nombre (fondo, borde, esquinas y textos)
+  bossBannerSprite(bossName, subtitle, isEvent) {
     this.bossBanners ||= new Map();
-    const cached = this.bossBanners.get(bossName);
+    const key = bossName + (subtitle || '');
+    const cached = this.bossBanners.get(key);
     if (cached) return cached;
     const canvas = document.createElement('canvas');
     canvas.width = 776; canvas.height = 112;
@@ -1392,13 +1392,16 @@ export class Game {
     ctx.fillRect(-380, 36, 12, 12);
     ctx.fillRect(368, 36, 12, 12);
 
-    // Texto: WARNING / ALERTA DE JEFE
+    // Texto: WARNING / ALERTA DE JEFE O EVENTO
     ctx.textAlign = 'center';
     ctx.font = '900 13px "Press Start 2P", monospace';
     ctx.fillStyle = '#ffcc00';
-    ctx.fillText('⚠ ¡ALERTA DE PEDIDO ESPECIAL! ⚠', 0, -22);
+    const warningText = isEvent || bossName.includes('OLEADA') || bossName.includes('EVENTO') || bossName.includes('LLUVIA') || bossName.includes('PROMO') || bossName.includes('HORA')
+      ? '⚠ ¡ALERTA DE EVENTO ESPECIAL! ⚠'
+      : '⚠ ¡ALERTA DE PEDIDO ESPECIAL! ⚠';
+    ctx.fillText(warningText, 0, -22);
 
-    // Nombre gigante del Boss
+    // Nombre gigante del Boss / Evento
     ctx.font = '900 24px "Press Start 2P", monospace';
     // Sombra pixel
     ctx.fillStyle = '#660011';
@@ -1409,10 +1412,11 @@ export class Game {
     // Subtítulo temático
     ctx.font = 'bold 11px monospace';
     ctx.fillStyle = '#86e3bf';
-    ctx.fillText('NIVEL DE AMENAZA: EXTREMO · ¡PREPARATE!', 0, 36);
+    const sub = subtitle || (bossName.includes('OLEADA') ? '¡ENJAMBRE MASIVO: EL TRIPLE DE ENEMIGOS!' : 'NIVEL DE AMENAZA: EXTREMO · ¡PREPARATE!');
+    ctx.fillText(sub, 0, 36);
 
     // Solo se guarda si la fuente pixel ya cargó; si no, se reintenta en el próximo cuadro
-    if (!document.fonts || document.fonts.check('900 24px "Press Start 2P"')) this.bossBanners.set(bossName, canvas);
+    if (!document.fonts || document.fonts.check('900 24px "Press Start 2P"')) this.bossBanners.set(key, canvas);
     return canvas;
   }
 
@@ -1488,17 +1492,16 @@ export class Game {
 
   announceBoss() {
     this.audio.setScene('boss'); this.audio.play('boss');
-    const boss = this.state.enemies.find(enemy=>enemy.isBoss);
-    if (!boss) return;
-    const bossName = boss.type.name.toUpperCase();
+    const bosses = this.state.enemies.filter(enemy=>enemy.isBoss && enemy.hp > 0);
+    if (!bosses.length) return;
+    const boss = bosses[0];
+    const bossName = bosses.length > 1 ? `¡${bosses.length} GRANDES JEFES!` : boss.type.name.toUpperCase();
     this.showToast('JEFE: ' + bossName);
 
-    // Entrada épica con la partida en pausa: se despeja el local y el jefe cae por un pilar de luz
+    // Entrada épica con la partida en pausa: el jefe cae por un pilar de luz
     this.entrance = startBossEntrance(this.state, boss, this.state.camera || { x: 0, y: 0 }, this.view);
     this.state.bossIntro = null;
     this.input.clear();
-
-
   }
 
   formatTime(seconds) {
