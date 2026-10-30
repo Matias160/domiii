@@ -139,6 +139,7 @@ test('hud & pause: top-left portrait/weapon/abilities removed and streak moved t
   assert.ok(!indexHtml.includes('id="hudPortrait"'), 'hudPortrait canvas removed from index.html');
   assert.ok(!indexHtml.includes('id="hudWeapon"'), 'hudWeapon removed from index.html');
   assert.ok(!indexHtml.includes('id="weaponEvolutionStatus"'), 'weaponEvolutionStatus removed from index.html');
+  assert.ok(!indexHtml.includes('id="hudName"'), 'hudName removed from index.html');
 
   // Verify pause screen contains RACHA stat
   assert.match(indexHtml, /id="pauseCombo"/, 'pauseCombo element is in pause summary');

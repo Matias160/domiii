@@ -9,7 +9,7 @@ export class Hud {
     this.written = new Map();
     const stats = document.querySelector('#hudStats');
     stats.innerHTML = '<span>TIEMPO<b id="timeValue">00:00</b></span><span>KOs<b id="killsValue">0</b></span><span>PUNTOS<b id="scoreValue">000000</b></span>';
-    this.nodes = Object.fromEntries(['hpValue','levelValue','hudName','scoreValue','timeValue','killsValue','dashLabel','dashFill'].map(id=>[id,document.getElementById(id)]));
+    this.nodes = Object.fromEntries(['hpValue','levelValue','scoreValue','timeValue','killsValue','dashLabel','dashFill'].map(id=>[id,document.getElementById(id)]));
     this.root.addEventListener('animationend',()=>this.root.classList.remove('hud--hit'));
   }
   show(isPaused = false) {
@@ -39,7 +39,6 @@ export class Hud {
     this.style(this.hpFill,'width',`${Math.max(0,p.hp/p.maxHp*100).toFixed(1)}%`);
     this.style(this.xpFill,'width',`${(p.xp/p.xpToNext*100).toFixed(1)}%`);
     this.set('hpValue',`${Math.ceil(p.hp)} / ${p.maxHp}`); this.set('levelValue',`NV ${p.level}`);
-    this.set('hudName',p.skin.name);
     this.set('scoreValue',String(Math.floor(state.score)).padStart(6,'0'));
     this.set('timeValue',formatTime(state.time)); this.set('killsValue',String(state.kills));
     // Combo, jefe, evento y mejoras activas ahora son imágenes en el canvas de carteles (hudCanvas.js)
