@@ -9,7 +9,7 @@ import {drawWorldProps} from '../js/core/worldProps.js';
 import {drawCombatFeedback} from '../js/ui/combatFeedback.js';
 import {Projectile} from '../js/entities/Projectile.js';
 const room=document.querySelector('#room').getContext('2d'),combat=document.querySelector('#combat').getContext('2d'),floor=makeRoom();
-const stations=[{id:'portal',x:480,y:205,label:'ENTRAR AL TURNO',color:'#ffe068'},{id:'wardrobe',x:185,y:210,label:'ARMARIO',color:'#f49b9b'},{id:'pets',x:775,y:210,label:'MASCOTAS',color:'#a2e9bf'},{id:'shop',x:780,y:425,label:'TIENDA',color:'#ffd078'},{id:'npc',x:180,y:425,label:'DON DOMI',color:'#acd5e9'},{id:'ranking',x:480,y:449,label:'HISTORIAL',color:'#efb1c5'}];
+const stations=[{id:'portal',x:480,y:205,label:'JUGAR',color:'#ffe068'},{id:'wardrobe',x:185,y:210,label:'ARMARIO',color:'#f49b9b'},{id:'pets',x:775,y:210,label:'MASCOTAS',color:'#a2e9bf'},{id:'shop',x:780,y:425,label:'TIENDA',color:'#ffd078'},{id:'npc',x:180,y:425,label:'DON DOMI',color:'#acd5e9'},{id:'ranking',x:480,y:449,label:'HISTORIAL',color:'#efb1c5'}];
 let paused=false,t=0,last=0;
 document.querySelector('#motion').onclick=()=>{paused=!paused;document.querySelector('#motion').textContent=paused?'Reanudar':'Pausar';};
 const previewShots=Array.from({length:5},(_,i)=>new Projectile({x:510-i*34,y:405+i*13,vx:260+i*18,vy:0,size:4,color:i%2?'#f8d778':'#ff5d9e',kind:i%2?'fork':'sauce'}));

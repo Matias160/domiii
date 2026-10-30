@@ -246,15 +246,14 @@ export function drawRoomLight(c,t){
     c.beginPath();c.moveTo(lt.x-24,lt.y);c.lineTo(lt.x+24,lt.y);c.lineTo(lt.x+lt.radius*0.65,lt.y+260);c.lineTo(lt.x-lt.radius*0.65,lt.y+260);c.fill();
   }
 
-  // Portal motes at (960, 260)
-  for(let i=0;i<18;i++){
-    const phase=(t*0.2+i/18)%1;
-    const x=960+Math.sin(i*2.1+t*0.9)*(14+phase*48);
-    const y=290-phase*150;
+  // Portal motes at (960, 260) - 50% larger aura
+  for(let i=0;i<24;i++){
+    const phase=(t*0.2+i/24)%1;
+    const x=960+Math.sin(i*2.1+t*0.9)*(20+phase*72);
+    const y=300-phase*220;
     c.globalAlpha=Math.sin(phase*Math.PI)*0.85;
     c.fillStyle=i%3===0?'#00ffcc':i%3===1?'#ffe066':'#ff3b69';
-    const s=2+(i%3)*1.5;
-    // Halo como cuadrado translúcido (más barato que shadowBlur)
+    const s=3+(i%3)*2;
     const a=c.globalAlpha;c.globalAlpha=a*0.3;c.fillRect(Math.round(x-s),Math.round(y-s),s*3,s*3);c.globalAlpha=a;
     c.fillRect(Math.round(x),Math.round(y),s,s);
   }
@@ -266,25 +265,28 @@ export function drawStation(c,s,t,active){
   const {x,y,id,color,label,action='INTERACTUAR'}=s;
   c.save();c.translate(x,y);
   
-  // Floor cast shadow
+  // Floor cast shadow (portal +50%)
   c.fillStyle='rgba(0,0,0,0.45)';
   c.beginPath();
-  c.ellipse(0,44,id==='portal'?85:75,id==='portal'?22:18,0,0,7);
+  c.ellipse(0,48,id==='portal'?128:75,id==='portal'?33:18,0,0,7);
   c.fill();
 
-  // Active floor glowing ring
+  // Active floor glowing ring (portal +50%)
   if(active){
     c.save();
+    const ringW = id==='portal'?132:88;
+    const ringH = id==='portal'?39:26;
     c.fillStyle=color+'26';
-    c.beginPath();c.ellipse(0,42,88,26,0,0,7);c.fill();
+    c.beginPath();c.ellipse(0,46,ringW,ringH,0,0,7);c.fill();
     c.strokeStyle=color;c.lineWidth=3;
-    c.beginPath();c.ellipse(0,42,88+Math.sin(t*4)*3,26+Math.sin(t*4)*1.5,0,0,7);c.stroke();
+    c.beginPath();c.ellipse(0,46,ringW+Math.sin(t*4)*3,ringH+Math.sin(t*4)*1.5,0,0,7);c.stroke();
     // Inward pointing floor chevron pulses
     const pulse=Math.sin(t*5)*6;
     c.fillStyle=color;
+    const chevDist = id==='portal'?105:70;
     for(const side of [-1,1]){
       c.beginPath();
-      c.moveTo(side*(70+pulse),36);c.lineTo(side*(60+pulse),42);c.lineTo(side*(70+pulse),48);
+      c.moveTo(side*(chevDist+pulse),40);c.lineTo(side*(chevDist-12+pulse),46);c.lineTo(side*(chevDist+pulse),52);
       c.fill();
     }
     c.restore();
@@ -292,38 +294,38 @@ export function drawStation(c,s,t,active){
 
   // --- 1. STATION BODY ---
   if(id==='portal'){
-    // Sombra de vórtice en el piso
+    // Sombra de vórtice en el piso (+50%)
     c.save();
     c.fillStyle='rgba(0,0,0,0.45)';
-    c.beginPath();c.ellipse(0,34,74,20,0,0,7);c.fill();
+    c.beginPath();c.ellipse(0,38,111,30,0,0,7);c.fill();
     c.restore();
 
     if (portalGifImage && portalGifImage.complete && portalGifImage.naturalWidth > 0) {
       c.save();
       c.imageSmoothingEnabled = false;
-      const pw = 160, ph = 160;
-      const bob = Math.sin(t * 2.8) * 4;
-      c.drawImage(portalGifImage, -pw / 2, -pw / 2 - 28 + bob, pw, ph);
+      const pw = 240, ph = 240; // 160 * 1.5 = 240 (+50%)
+      const bob = Math.sin(t * 2.8) * 5;
+      c.drawImage(portalGifImage, -pw / 2, -pw / 2 - 32 + bob, pw, ph);
       c.restore();
     } else {
-      // Massive portal gate fallback
-      box(c,-65,-105,130,140,'#1a2a30');
-      box(c,-54,-95,108,124,'#09161a');
+      // Massive portal gate fallback (+50%)
+      box(c,-98,-158,195,210,'#1a2a30');
+      box(c,-81,-142,162,186,'#09161a');
       c.save();
-      c.shadowColor='#ffe066';c.shadowBlur=18+Math.sin(t*3)*8;
-      c.strokeStyle='#ffe066';c.lineWidth=5;
-      c.beginPath();c.ellipse(0,-32,34+Math.sin(t*2.5)*3,48,0,0,7);c.stroke();
-      c.strokeStyle='#00e5ff';c.lineWidth=3;
-      c.beginPath();c.ellipse(0,-32,24,38,Math.sin(t)*0.15,0,7);c.stroke();
+      c.shadowColor='#ffe066';c.shadowBlur=26+Math.sin(t*3)*12;
+      c.strokeStyle='#ffe066';c.lineWidth=7;
+      c.beginPath();c.ellipse(0,-48,51+Math.sin(t*2.5)*4,72,0,0,7);c.stroke();
+      c.strokeStyle='#00e5ff';c.lineWidth=4;
+      c.beginPath();c.ellipse(0,-48,36,57,Math.sin(t)*0.15,0,7);c.stroke();
       c.restore();
-      const riftGrad=c.createRadialGradient(0,-32,4,0,-32,32);
+      const riftGrad=c.createRadialGradient(0,-48,6,0,-48,48);
       riftGrad.addColorStop(0,'#ffffff');riftGrad.addColorStop(0.35,'#ffe066');riftGrad.addColorStop(0.7,'#00e5ff');riftGrad.addColorStop(1,'#04121a');
-      c.fillStyle=riftGrad;c.beginPath();c.ellipse(0,-32,20,34,0,0,7);c.fill();
+      c.fillStyle=riftGrad;c.beginPath();c.ellipse(0,-48,30,51,0,0,7);c.fill();
       for(let i=0;i<8;i++){
-        const ang=t*1.2+i*0.78;c.fillStyle=i%2?'#ffffff':'#ffe066';c.fillRect(Math.sin(ang)*34-2,-32+Math.cos(ang)*46-2,4,4);
+        const ang=t*1.2+i*0.78;c.fillStyle=i%2?'#ffffff':'#ffe066';c.fillRect(Math.sin(ang)*51-3,-48+Math.cos(ang)*69-3,6,6);
       }
-      box(c,-75,32,150,14,'#b2ba99');
-      c.fillStyle='#ff2a44';for(let i=0;i<7;i++)c.fillRect(-70+i*22,34,10,10);
+      box(c,-112,48,225,20,'#b2ba99');
+      c.fillStyle='#ff2a44';for(let i=0;i<7;i++)c.fillRect(-105+i*33,51,15,15);
     }
   }
   else if(id==='pets'){
@@ -478,22 +480,26 @@ export function drawStation(c,s,t,active){
   const signFloat=Math.sin(t*2.4+s.x*0.01)*3;
   c.save();c.translate(0,signFloat);
 
-  const signW=174,signH=42;
-  const signX=-signW/2,signY=54;
+  const isPortal = (id === 'portal');
+  // Cuadro del portal aumentado en un 50% (174 * 1.5 = 260, 42 * 1.5 = 63)
+  const signW = isPortal ? 260 : 174;
+  const signH = isPortal ? 63 : 42;
+  const signX = -signW / 2;
+  const signY = isPortal ? 70 : 54;
 
   // Sign Drop shadow
   c.fillStyle='rgba(0,0,0,0.6)';
-  c.fillRect(signX+5,signY+6,signW,signH);
+  c.fillRect(signX+(isPortal?7:5),signY+(isPortal?8:6),signW,signH);
 
   // Outer Casing (Dark steel with pixel border)
-  c.fillStyle='#071116';c.fillRect(signX-3,signY-3,signW+6,signH+6);
+  c.fillStyle='#071116';c.fillRect(signX-(isPortal?4:3),signY-(isPortal?4:3),signW+(isPortal?8:6),signH+(isPortal?8:6));
   c.fillStyle='#182730';c.fillRect(signX,signY,signW,signH);
 
   // Neon Frame
-  c.lineWidth=2;
+  c.lineWidth=isPortal?3:2;
   c.strokeStyle=active?color:'rgba(100,140,150,0.6)';
   if(active){
-    c.shadowColor=color;c.shadowBlur=14+Math.sin(t*4)*6;
+    c.shadowColor=color;c.shadowBlur=(isPortal?22:14)+Math.sin(t*4)*6;
   }
   c.strokeRect(signX+2,signY+2,signW-4,signH-4);
   c.shadowBlur=0;
@@ -504,39 +510,46 @@ export function drawStation(c,s,t,active){
 
   // Corner Pixel Accents
   c.fillStyle=color;
-  c.fillRect(signX,signY,4,4);
-  c.fillRect(signX+signW-4,signY,4,4);
-  c.fillRect(signX,signY+signH-4,4,4);
-  c.fillRect(signX+signW-4,signY+signH-4,4,4);
+  const cornerSize = isPortal ? 6 : 4;
+  c.fillRect(signX,signY,cornerSize,cornerSize);
+  c.fillRect(signX+signW-cornerSize,signY,cornerSize,cornerSize);
+  c.fillRect(signX,signY+signH-cornerSize,cornerSize,cornerSize);
+  c.fillRect(signX+signW-cornerSize,signY+signH-cornerSize,cornerSize,cornerSize);
 
   // Blinking Marquee Bulbs along the top/bottom rim
   const bulbCycle=Math.floor(t*6)%3;
-  for(let b=0;b<5;b++){
+  const bulbCount = isPortal ? 7 : 5;
+  const bulbStep = isPortal ? 36 : 34;
+  const bulbOffset = isPortal ? 18 : 12;
+  for(let b=0;b<bulbCount;b++){
     c.fillStyle=(b%3===bulbCycle)?color:'#2a4049';
-    c.fillRect(signX+12+b*34,signY+2,4,2);
-    c.fillRect(signX+12+b*34,signY+signH-4,4,2);
+    c.fillRect(signX+bulbOffset+b*bulbStep,signY+2,isPortal?5:4,isPortal?3:2);
+    c.fillRect(signX+bulbOffset+b*bulbStep,signY+signH-(isPortal?5:4),isPortal?5:4,isPortal?3:2);
   }
 
-  // Station Label
-  text(c,label,0,signY+24,10,active?'#ffffff':'#d5e4df');
+  // Station Label (tipografía aumentada 50% para el portal: 10 -> 16px)
+  text(c,label,0,signY+(isPortal?38:24),isPortal?16:10,active?'#ffffff':'#d5e4df');
 
-  // Interactive Prompt Badge [E] when player is near or active
+  // Interactive Prompt Badge [E] when player is near or active (+50% para el portal)
   if(active){
-    const promptW=130,promptH=22;
-    const promptX=-promptW/2,promptY=signY+signH+6;
+    const promptW = isPortal ? 195 : 130;
+    const promptH = isPortal ? 33 : 22;
+    const promptX = -promptW / 2, promptY = signY + signH + (isPortal ? 8 : 6);
     
     // Pixel key button
-    c.fillStyle='rgba(0,0,0,0.7)';c.fillRect(promptX+3,promptY+4,promptW,promptH);
+    c.fillStyle='rgba(0,0,0,0.7)';c.fillRect(promptX+4,promptY+5,promptW,promptH);
     box(c,promptX,promptY,promptW,promptH,'#ffe066');
     
-    c.fillStyle='#ad8141';c.fillRect(promptX,promptY+promptH-3,promptW,3);
+    c.fillStyle='#ad8141';c.fillRect(promptX,promptY+promptH-(isPortal?4:3),promptW,isPortal?4:3);
     
     // Key indicator [E]
-    c.fillStyle='#18232b';c.fillRect(promptX+5,promptY+4,18,14);
-    text(c,'E',promptX+14,promptY+15,9,'#ffe066');
+    const keyW = isPortal ? 26 : 18;
+    const keyH = isPortal ? 21 : 14;
+    c.fillStyle='#18232b';c.fillRect(promptX+(isPortal?8:5),promptY+(isPortal?6:4),keyW,keyH);
+    text(c,'E',promptX+(isPortal?21:14),promptY+(isPortal?22:15),isPortal?13:9,'#ffe066');
     
     // Action text
-    text(c,action.toUpperCase(),promptX+72,promptY+15,8,'#18232b');
+    text(c,action.toUpperCase(),promptX+(isPortal?108:72),promptY+(isPortal?22:15),isPortal?12:8,'#18232b');
   }
 
   c.restore();

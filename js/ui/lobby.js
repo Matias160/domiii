@@ -5,7 +5,7 @@ import {makeRoom,drawStation,drawRoomLight,drawLobbyLife,lobbyNpcLayers} from '.
 import {achievements,unlockedAchievements} from '../systems/achievementSystem.js';
 
 const stations=[
-  {id:'portal',   x:960,  y:240, label:'ENTRAR AL TURNO', action:'PARTIDA',   color:'#ffe068'},
+  {id:'portal',   x:960,  y:240, label:'JUGAR',           action:'JUGAR',     color:'#ffe068'},
   {id:'shop',     x:400,  y:290, label:'TIENDA ARCADE',   action:'TIENDA',    color:'#ffd000'},
   {id:'pets',     x:1520, y:290, label:'MASCOTAS',        action:'MASCOTAS',  color:'#38ef7d'},
   {id:'npc',      x:400,  y:760, label:'SEÑOR DOMI',      action:'CONSEJOS',  color:'#5ce1e6'},
@@ -32,18 +32,19 @@ export class Lobby {
     document.querySelector('#lobbyAchievements')?.addEventListener('click',()=>game.menu.showAchievements());
     this.canvas.addEventListener('pointermove',event=>{
       const point=this.point(event);
-      this.hover=point?stations.find(s=>Math.abs(s.x-point.x)<85&&point.y>s.y-90&&point.y<s.y+90):null;
+      this.hover=point?stations.find(s=>{const rx=(s.id==='portal')?135:85,ry=(s.id==='portal')?135:90;return Math.abs(s.x-point.x)<rx&&point.y>s.y-ry&&point.y<s.y+ry;}):null;
       this.canvas.style.cursor=this.hover?'pointer':'crosshair';
     });
     this.canvas.addEventListener('pointerleave',()=>{this.hover=null;});
     this.canvas.addEventListener('click',event=>{
       const point=this.point(event);if(!point)return;
-      const station=stations.find(s=>Math.abs(s.x-point.x)<85&&point.y>s.y-90&&point.y<s.y+90);
-      if(station && Math.hypot(station.x-this.x,(station.y+40)-this.y)<140){
+      const station=stations.find(s=>{const rx=(s.id==='portal')?135:85,ry=(s.id==='portal')?135:90;return Math.abs(s.x-point.x)<rx&&point.y>s.y-ry&&point.y<s.y+ry;});
+      const maxDist=(station?.id==='portal')?210:140,yOff=(station?.id==='portal')?60:40;
+      if(station && Math.hypot(station.x-this.x,(station.y+yOff)-this.y)<maxDist){
         this.activate(station.id);
         return;
       }
-      this.destination=station?{x:station.x,y:Math.min(990,station.y+80),station:station.id}:{x:Math.max(90,Math.min(1830,point.x)),y:Math.max(180,Math.min(1010,point.y))};
+      this.destination=station?{x:station.x,y:Math.min(990,station.y+(station.id==='portal'?110:80)),station:station.id}:{x:Math.max(90,Math.min(1830,point.x)),y:Math.max(180,Math.min(1010,point.y))};
       this.game.audio.play('navigate');
     });
   }
@@ -147,7 +148,7 @@ export class Lobby {
     this.camera.x=Math.max(0,Math.min(1920-this.view.w,this.camera.x));
     this.camera.y=Math.max(0,Math.min(1080-this.view.h,this.camera.y));
 
-    this.near=stations.find(s=>Math.hypot(s.x-this.x,(s.y+40)-this.y)<95)||null;
+    this.near=stations.find(s=>{const r=(s.id==='portal')?142:95,yOff=(s.id==='portal')?60:40;return Math.hypot(s.x-this.x,(s.y+yOff)-this.y)<r;})||null;
     this.tip.hidden=!this.near;
     if(this.near) {
       if (this.near.id === 'prize' || this.near.id === 'atlas' || this.near.id === 'desk') {

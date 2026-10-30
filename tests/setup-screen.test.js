@@ -105,3 +105,26 @@ test('setup menu: independent selection logic does not affect other categories',
   assert.equal(fakeInstance.companionInput.value, 'none');
   assert.equal(fakeInstance.difficultyInput.value, 'extra');
 });
+
+test('lobby portal: label and action say JUGAR and portal/cuadro size is increased by 50%', () => {
+  const lobbySrc = fs.readFileSync(path.resolve('js/ui/lobby.js'), 'utf8');
+  const lobbyArtSrc = fs.readFileSync(path.resolve('js/ui/lobbyArt.js'), 'utf8');
+
+  // Verify portal station says JUGAR
+  assert.match(lobbySrc, /id:\s*'portal',\s*x:\s*960,\s*y:\s*240,\s*label:\s*'JUGAR',\s*action:\s*'JUGAR'/, 'Portal station is configured as JUGAR');
+
+  // Verify expanded portal hitboxes (rx=135 vs 85, maxDist=210 vs 140)
+  assert.match(lobbySrc, /const rx=\(s\.id==='portal'\)\?135:85/, 'Portal click/hover radius expanded');
+  assert.match(lobbySrc, /maxDist=\(station\?\.id==='portal'\)\?210:140/, 'Portal interaction range expanded');
+
+  // Verify portal graphic is 240x240 (160 * 1.5)
+  assert.match(lobbyArtSrc, /pw\s*=\s*240,\s*ph\s*=\s*240/, 'Portal sprite graphic is 240x240 (50% larger than 160)');
+
+  // Verify marquee sign frame ("cuadro") is 260x63 (174 * 1.5 = 261, 42 * 1.5 = 63)
+  assert.match(lobbyArtSrc, /signW\s*=\s*isPortal\s*\?\s*260\s*:\s*174/, 'Cuadro width is 260 for portal (50% larger than 174)');
+  assert.match(lobbyArtSrc, /signH\s*=\s*isPortal\s*\?\s*63\s*:\s*42/, 'Cuadro height is 63 for portal (50% larger than 42)');
+
+  // Verify font size is 16px (10 * 1.5 = 15-16)
+  assert.match(lobbyArtSrc, /isPortal\?16:10/, 'Label font size is scaled up 50% for portal');
+});
+
