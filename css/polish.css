@@ -1,0 +1,4135 @@
+/* ========================================================
+   DOMI 2: PANCHO - PURE RETRO / PIXEL ART DESIGN SYSTEM
+   ======================================================== */
+/* Press Start 2P y VT323 se cargan una sola vez desde el <link> de index.html */
+
+:root {
+  --bg: #0c1013;
+  --surface: #141c20;
+  --surface-card: #182329;
+  --line: #2d3e47;
+  --text: #f4f6f8;
+  --muted: #8b9ea8;
+
+  /* Cursores Pixel Art Retro */
+  --pixel-cursor-default: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' shape-rendering='crispEdges'%3E%3Cpath fill='%23000000' d='M0,0 L0,18 L4,14 L7,21 L10,19 L7,13 L12,13 Z'/%3E%3Cpath fill='%23fbbf24' d='M1,2 L1,15 L4,12 L7,18 L8,17 L6,12 L10,12 Z'/%3E%3Cpath fill='%23ffffff' d='M2,3 L2,12 L3,12 L3,5 L7,9 L7,8 L3,4 L8,4 L8,3 Z'/%3E%3C/svg%3E") 0 0, default;
+  --pixel-cursor-pointer: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' shape-rendering='crispEdges'%3E%3Cpath fill='%23000000' d='M4,10 L8,6 L9,2 L12,2 L12,9 L14,7 L16,7 L16,10 L18,9 L20,9 L20,13 L19,17 L15,22 L8,22 L4,17 Z'/%3E%3Cpath fill='%23ffffff' d='M5,11 L8,8 L9,3 L11,3 L11,11 L13,8 L15,8 L15,11 L17,10 L19,10 L19,13 L18,17 L14,21 L9,21 L5,17 Z'/%3E%3Cpath fill='%23fef08a' d='M9,4 L10,4 L10,11 L9,11 Z'/%3E%3C/svg%3E") 8 2, pointer;
+  --pixel-cursor-crosshair: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='25' height='25' viewBox='0 0 25 25' shape-rendering='crispEdges'%3E%3Crect x='11' y='1' width='3' height='7' fill='%23000'/%3E%3Crect x='12' y='2' width='1' height='5' fill='%2322d3ee'/%3E%3Crect x='11' y='17' width='3' height='7' fill='%23000'/%3E%3Crect x='12' y='18' width='1' height='5' fill='%2322d3ee'/%3E%3Crect x='1' y='11' width='7' height='3' fill='%23000'/%3E%3Crect x='2' y='12' width='5' height='1' fill='%2322d3ee'/%3E%3Crect x='17' y='11' width='7' height='3' fill='%23000'/%3E%3Crect x='18' y='12' width='5' height='1' fill='%2322d3ee'/%3E%3Crect x='11' y='11' width='3' height='3' fill='%23000'/%3E%3Crect x='12' y='12' width='1' height='1' fill='%23facc15'/%3E%3C/svg%3E") 12 12, crosshair;
+
+  /* 16-bit Retro Arcade Palette */
+  --pixel-amber: #ffcc00;
+  --pixel-amber-dark: #996600;
+  --pixel-mint: #00ff88;
+  --pixel-mint-dark: #008844;
+  --pixel-cyan: #00e5ff;
+  --pixel-cyan-dark: #007788;
+  --pixel-red: #ff3344;
+  --pixel-red-dark: #991122;
+  --pixel-purple: #b844ff;
+  --pixel-purple-dark: #661199;
+
+  --yellow: var(--pixel-amber);
+  --mint: var(--pixel-mint);
+  --red: var(--pixel-red);
+
+  font-family: 'Press Start 2P', 'VT323', 'Courier New', monospace;
+  image-rendering: pixelated;
+}
+
+body, html, .screen {
+  cursor: var(--pixel-cursor-default) !important;
+}
+
+button, a, select, input[type="checkbox"], input[type="range"], .clickable, [role="button"], [data-station], [data-filter], [data-tab], .pixel-button, .icon-button, .lobby-station-btn, .catalog-item {
+  cursor: var(--pixel-cursor-pointer) !important;
+}
+
+#gameCanvas, .game-screen, #gameScreen {
+  cursor: var(--pixel-cursor-crosshair) !important;
+}
+
+* {
+  image-rendering: pixelated;
+  letter-spacing: 0;
+}
+
+button, input, select {
+  font-family: inherit;
+  border-radius: 0 !important; /* Pure sharp retro pixel corners */
+  transition: transform .08s, box-shadow .08s, background .08s;
+}
+
+button:focus-visible, input:focus-visible, select:focus-visible {
+  outline: 3px solid var(--pixel-amber);
+  outline-offset: 3px;
+}
+
+.ui-icon {
+  width: 20px;
+  height: 20px;
+  flex: none;
+  vertical-align: middle;
+  shape-rendering: crispEdges;
+}
+
+/* CRT Screen Base & Scanlines Effect */
+.screen:not(.lobby-screen):not(.ability-screen):not(.pause-screen) {
+  background-color: var(--bg) !important;
+  background-image: 
+    linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.35) 50%),
+    linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03)) !important;
+  background-size: 100% 4px, 6px 100% !important;
+}
+
+.screen--active:not(.lobby-screen):not(.ability-screen) {
+  animation: screen-enter .15s steps(3);
+}
+
+@keyframes screen-enter {
+  from { opacity: .5; transform: scale(0.99); }
+  to { opacity: 1; transform: none; }
+}
+
+.eyebrow {
+  color: var(--pixel-mint) !important;
+  text-shadow: 2px 2px 0 #000;
+  font: 800 10px 'Press Start 2P', monospace !important;
+  letter-spacing: 2px;
+}
+
+.live-dot {
+  width: 8px;
+  height: 8px;
+  background: var(--pixel-mint) !important;
+  border-radius: 0 !important;
+  box-shadow: 0 0 6px var(--pixel-mint);
+  display: inline-block;
+}
+
+/* ========================================================
+   CHUNKY PIXEL ARCADE BUTTONS
+   ======================================================== */
+.pixel-button {
+  border-radius: 0 !important;
+  background: var(--pixel-amber);
+  border: 3px solid #000;
+  color: #000;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 11px;
+  font-weight: 900;
+  padding: 14px 24px;
+  min-height: 48px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  box-shadow: 0 5px 0 var(--pixel-amber-dark), 0 8px 0 #000;
+  cursor: pointer;
+  text-transform: uppercase;
+}
+
+.pixel-button:hover {
+  background: #ffdb33;
+  transform: translateY(-2px);
+  box-shadow: 0 7px 0 var(--pixel-amber-dark), 0 10px 0 #000;
+}
+
+.pixel-button:active {
+  transform: translateY(5px);
+  box-shadow: 0 0 0 var(--pixel-amber-dark), 0 3px 0 #000;
+}
+
+.pixel-button--secondary {
+  background: #18262c;
+  border: 3px solid #000;
+  color: #e2e8f0;
+  box-shadow: 0 5px 0 #0b1114, 0 8px 0 #000;
+}
+
+.pixel-button--secondary:hover {
+  background: #243842;
+  color: #fff;
+  transform: translateY(-2px);
+  box-shadow: 0 7px 0 #0b1114, 0 10px 0 #000;
+}
+
+.pixel-button:disabled {
+  cursor: not-allowed;
+  transform: none !important;
+  box-shadow: none !important;
+  opacity: .45;
+  background: #333;
+  color: #777;
+}
+
+/* ========================================================
+   SETUP SCREEN: PURE RETRO / PIXEL ART
+   ======================================================== */
+.setup-panel {
+  gap: 20px;
+}
+
+.setup-panel h2 {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 28px;
+  font-weight: 900;
+  color: #ffffff;
+  text-shadow: 3px 3px 0 #000, 5px 5px 0 rgba(0, 255, 136, 0.35);
+  margin: 6px 0 0;
+  line-height: 1.25;
+}
+
+.setup-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 20px;
+  padding-bottom: 14px;
+  margin-bottom: 14px;
+  border-bottom: 3px solid #000;
+  box-shadow: 0 3px 0 #2d3e47;
+}
+
+.setup-profile-pill {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  align-items: flex-end;
+}
+
+.setup-badge-label {
+  font: 800 9px 'Press Start 2P', monospace;
+  color: var(--pixel-mint);
+  letter-spacing: 1px;
+  text-shadow: 1px 1px 0 #000;
+}
+
+.setup-badge-content {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #12191c;
+  border: 3px solid #000;
+  box-shadow: 3px 3px 0 #000, inset 0 2px 0 #283a42;
+  padding: 6px 12px;
+}
+.setup-badge-content .ui-icon {
+  width: 16px;
+  height: 16px;
+  color: var(--pixel-amber);
+}
+.setup-badge-content input {
+  border: 0;
+  background: transparent;
+  color: #fff;
+  font: 800 12px 'Press Start 2P', monospace;
+  padding: 0;
+  width: 110px;
+  cursor: default;
+}
+
+/* ========================================================
+   2x2 CATEGORIES GRID & 4 INDEPENDENT HORIZONTAL BARS
+   ======================================================== */
+#setupScreen {
+  background: 
+    radial-gradient(circle at 50% 35%, rgba(18, 28, 35, 0.94) 0%, rgba(7, 11, 14, 0.98) 100%),
+    repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.22) 0px, rgba(0, 0, 0, 0.22) 2px, transparent 2px, transparent 4px) !important;
+}
+
+#setupScreen .setup-panel {
+  position: relative;
+  background: rgba(11, 17, 21, 0.95);
+  border: 4px solid #000;
+  box-shadow: 
+    0 0 0 2px #1e2930,
+    0 0 32px rgba(0, 0, 0, 0.85),
+    inset 0 0 30px rgba(0, 0, 0, 0.7);
+  padding: 16px 20px 20px;
+}
+
+#setupScreen .setup-panel::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    to bottom,
+    transparent 0px,
+    transparent 2px,
+    rgba(0, 0, 0, 0.12) 2px,
+    rgba(0, 0, 0, 0.12) 4px
+  );
+  opacity: 0.75;
+  z-index: 1;
+}
+
+.setup-categories-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  margin-bottom: 14px;
+  position: relative;
+  z-index: 2;
+}
+
+/* Category Bars */
+.setup-category-bar {
+  background: #090e11;
+  border: 3px solid #000;
+  box-shadow: 3px 3px 0 #000;
+  padding: 8px 10px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  position: relative;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.setup-category-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 2px solid #141c22;
+  padding-bottom: 6px;
+  gap: 8px;
+}
+
+.setup-category-title-wrap {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.setup-category-dot {
+  width: 7px;
+  height: 7px;
+  display: inline-block;
+  background: currentColor;
+  box-shadow: 0 0 8px currentColor;
+  flex-shrink: 0;
+}
+
+.setup-category-title {
+  font: 800 9px 'Press Start 2P', monospace;
+  margin: 0;
+  letter-spacing: 1px;
+}
+
+.setup-category-badge {
+  font: 800 8px 'Press Start 2P', monospace;
+  padding: 3px 6px;
+  text-transform: uppercase;
+  white-space: nowrap;
+  max-width: 140px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  letter-spacing: 0.5px;
+}
+
+.setup-category-nav-wrap {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.setup-row-nav-btn {
+  background: #141f26;
+  border: 1px solid #293d4a;
+  color: #94a3b8;
+  font-size: 8px;
+  line-height: 1;
+  padding: 3px 6px;
+  cursor: pointer;
+  border-radius: 0;
+  transition: all 0.12s ease;
+}
+.setup-row-nav-btn:hover {
+  background: #233642;
+  color: #fff;
+  border-color: #486578;
+}
+.setup-row-nav-btn:active {
+  transform: scale(0.92);
+}
+
+/* Category 1: Modo (Ámbar) */
+.setup-category--amber {
+  outline: 2px solid rgba(255, 190, 59, 0.45);
+}
+.setup-category--amber .setup-category-dot,
+.setup-category--amber .setup-category-title {
+  color: var(--pixel-amber);
+  text-shadow: 0 0 8px rgba(255, 190, 59, 0.45);
+}
+.setup-category--amber .setup-category-badge {
+  background: rgba(255, 190, 59, 0.14);
+  border: 1px solid var(--pixel-amber);
+  color: var(--pixel-amber);
+}
+
+/* Category 2: Mapas (Menta) */
+.setup-category--mint {
+  outline: 2px solid rgba(0, 255, 136, 0.45);
+}
+.setup-category--mint .setup-category-dot,
+.setup-category--mint .setup-category-title {
+  color: var(--pixel-mint);
+  text-shadow: 0 0 8px rgba(0, 255, 136, 0.45);
+}
+.setup-category--mint .setup-category-badge {
+  background: rgba(0, 255, 136, 0.14);
+  border: 1px solid var(--pixel-mint);
+  color: var(--pixel-mint);
+}
+
+/* Category 3: Mascotas (Cian) */
+.setup-category--cyan {
+  outline: 2px solid rgba(0, 229, 255, 0.45);
+}
+.setup-category--cyan .setup-category-dot,
+.setup-category--cyan .setup-category-title {
+  color: var(--pixel-cyan);
+  text-shadow: 0 0 8px rgba(0, 229, 255, 0.45);
+}
+.setup-category--cyan .setup-category-badge {
+  background: rgba(0, 229, 255, 0.14);
+  border: 1px solid var(--pixel-cyan);
+  color: var(--pixel-cyan);
+}
+
+/* Category 4: Dificultad (Rojo) */
+.setup-category--red {
+  outline: 2px solid rgba(255, 51, 85, 0.45);
+}
+.setup-category--red .setup-category-dot,
+.setup-category--red .setup-category-title {
+  color: var(--pixel-red);
+  text-shadow: 0 0 8px rgba(255, 51, 85, 0.45);
+}
+.setup-category--red .setup-category-badge {
+  background: rgba(255, 51, 85, 0.14);
+  border: 1px solid var(--pixel-red);
+  color: var(--pixel-red);
+}
+
+/* Rows of square cards */
+.setup-cards-row {
+  display: flex;
+  gap: 8px;
+  align-items: stretch;
+}
+
+.setup-cards-row--mode .setup-option-card {
+  flex: 1 1 0;
+}
+
+.setup-cards-row--difficulty .setup-option-card {
+  flex: 1 1 0;
+}
+
+.setup-cards-row--scroll {
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-behavior: smooth;
+  scrollbar-width: thin;
+  padding-bottom: 4px;
+  scroll-snap-type: x mandatory;
+}
+.setup-cards-row--scroll::-webkit-scrollbar {
+  height: 4px;
+}
+.setup-cards-row--scroll::-webkit-scrollbar-track {
+  background: #080c0f;
+}
+.setup-cards-row--scroll::-webkit-scrollbar-thumb {
+  background: #253742;
+}
+.setup-cards-row--scroll .setup-option-card {
+  flex: 0 0 84px;
+  width: 84px;
+  scroll-snap-align: start;
+}
+
+/* Square Option Cards */
+.setup-option-card {
+  position: relative;
+  height: 86px;
+  background: #0d1317;
+  border: 2px solid #1a252c;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  padding: 4px;
+  cursor: pointer;
+  user-select: none;
+  opacity: 0.72;
+  box-sizing: border-box;
+  transition: transform 0.12s ease, opacity 0.12s ease, border-color 0.12s ease, box-shadow 0.12s ease, background 0.12s ease;
+}
+
+.setup-option-card:hover {
+  opacity: 0.95;
+  transform: translateY(-2px);
+  background: #141c22;
+}
+
+.setup-option-card:active {
+  transform: translateY(1px);
+}
+
+.setup-option-card__visual {
+  width: 100%;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  position: relative;
+}
+
+.setup-option-card__visual svg {
+  width: 40px;
+  height: 40px;
+  shape-rendering: crispEdges;
+  display: block;
+  margin: auto;
+}
+
+.setup-option-card__visual canvas {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+  display: block;
+}
+
+.setup-option-card__info {
+  width: 100%;
+  padding-top: 3px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  text-align: center;
+}
+
+.setup-option-card__name {
+  font: 800 7px 'Press Start 2P', monospace;
+  color: #b0bec5;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: block;
+  letter-spacing: 0.5px;
+}
+
+.setup-option-card__check {
+  display: none;
+  position: absolute;
+  top: 2px;
+  right: 3px;
+  font: 900 8px 'Press Start 2P', monospace;
+  line-height: 1;
+  z-index: 2;
+  text-shadow: 1px 1px 0 #000;
+}
+
+/* Category Selected States with Neon Borders & Glow */
+.setup-category--amber .setup-option-card--selected {
+  opacity: 1;
+  background: #1f1906;
+  border-color: var(--pixel-amber);
+  box-shadow: 0 0 14px rgba(255, 204, 0, 0.55), inset 0 0 8px rgba(255, 204, 0, 0.25);
+  transform: scale(1.02);
+}
+.setup-category--amber .setup-option-card--selected .setup-option-card__name {
+  color: var(--pixel-amber);
+}
+.setup-category--amber .setup-option-card--selected .setup-option-card__check {
+  display: block;
+  color: var(--pixel-amber);
+}
+
+.setup-category--mint .setup-option-card--selected {
+  opacity: 1;
+  background: #061e12;
+  border-color: var(--pixel-mint);
+  box-shadow: 0 0 14px rgba(0, 255, 136, 0.55), inset 0 0 8px rgba(0, 255, 136, 0.25);
+  transform: scale(1.02);
+}
+.setup-category--mint .setup-option-card--selected .setup-option-card__name {
+  color: var(--pixel-mint);
+}
+.setup-category--mint .setup-option-card--selected .setup-option-card__check {
+  display: block;
+  color: var(--pixel-mint);
+}
+
+.setup-category--cyan .setup-option-card--selected {
+  opacity: 1;
+  background: #051b24;
+  border-color: var(--pixel-cyan);
+  box-shadow: 0 0 14px rgba(0, 229, 255, 0.55), inset 0 0 8px rgba(0, 229, 255, 0.25);
+  transform: scale(1.02);
+}
+.setup-category--cyan .setup-option-card--selected .setup-option-card__name {
+  color: var(--pixel-cyan);
+}
+.setup-category--cyan .setup-option-card--selected .setup-option-card__check {
+  display: block;
+  color: var(--pixel-cyan);
+}
+
+.setup-category--red .setup-option-card--selected {
+  opacity: 1;
+  background: #24070c;
+  border-color: var(--pixel-red);
+  box-shadow: 0 0 14px rgba(255, 51, 85, 0.55), inset 0 0 8px rgba(255, 51, 85, 0.25);
+  transform: scale(1.02);
+}
+.setup-category--red .setup-option-card--selected .setup-option-card__name {
+  color: var(--pixel-red);
+}
+.setup-category--red .setup-option-card--selected .setup-option-card__check {
+  display: block;
+  color: var(--pixel-red);
+}
+
+/* Specific Difficulty colors on selection */
+.setup-option-card--diff-suave.setup-option-card--selected {
+  border-color: #22c55e !important;
+  box-shadow: 0 0 14px rgba(34, 197, 94, 0.55), inset 0 0 8px rgba(34, 197, 94, 0.25) !important;
+  background: #061f10 !important;
+}
+.setup-option-card--diff-suave.setup-option-card--selected .setup-option-card__name,
+.setup-option-card--diff-suave.setup-option-card--selected .setup-option-card__check {
+  color: #4ade80 !important;
+}
+
+.setup-option-card--diff-picante.setup-option-card--selected {
+  border-color: #facc15 !important;
+  box-shadow: 0 0 14px rgba(250, 204, 21, 0.55), inset 0 0 8px rgba(250, 204, 21, 0.25) !important;
+  background: #1f1b06 !important;
+}
+.setup-option-card--diff-picante.setup-option-card--selected .setup-option-card__name,
+.setup-option-card--diff-picante.setup-option-card--selected .setup-option-card__check {
+  color: #facc15 !important;
+}
+
+.setup-option-card--diff-extra.setup-option-card--selected {
+  border-color: #f97316 !important;
+  box-shadow: 0 0 14px rgba(249, 115, 22, 0.55), inset 0 0 8px rgba(249, 115, 22, 0.25) !important;
+  background: #241106 !important;
+}
+.setup-option-card--diff-extra.setup-option-card--selected .setup-option-card__name,
+.setup-option-card--diff-extra.setup-option-card--selected .setup-option-card__check {
+  color: #fb923c !important;
+}
+
+.setup-option-card--diff-quemado.setup-option-card--selected {
+  border-color: #ef4444 !important;
+  box-shadow: 0 0 16px rgba(239, 68, 68, 0.65), inset 0 0 8px rgba(239, 68, 68, 0.3) !important;
+  background: #2b060a !important;
+}
+.setup-option-card--diff-quemado.setup-option-card--selected .setup-option-card__name,
+.setup-option-card--diff-quemado.setup-option-card--selected .setup-option-card__check {
+  color: #ff3344 !important;
+}
+
+/* Locked Card Style */
+.setup-option-card--locked {
+  opacity: 0.38 !important;
+  filter: grayscale(0.5);
+}
+.setup-option-card--locked::after {
+  content: "🔒";
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  font-size: 8px;
+  z-index: 2;
+}
+
+/* Caldero de Lava & Modo Legendario Bloqueado */
+.setup-category--lava {
+  outline: 2px solid #ff3b00 !important;
+  box-shadow: 3px 3px 0 #000, 0 0 16px rgba(255, 60, 0, 0.4) !important;
+}
+.setup-category--locked-lava {
+  outline: 2px solid #ea580c !important;
+  box-shadow: 3px 3px 0 #000, 0 0 12px rgba(234, 88, 12, 0.35) !important;
+}
+.setup-option-card--lava {
+  border-color: #ff3b00 !important;
+  box-shadow: 0 0 16px rgba(255, 60, 0, 0.6) !important;
+  animation: lavaPulse 2s ease-in-out infinite alternate;
+}
+
+/* Accessory Bar */
+.setup-accessory-bar {
+  margin-bottom: 20px;
+}
+.setup-card--purple {
+  outline: 3px solid var(--pixel-purple);
+  box-shadow: 4px 4px 0 #000, 0 0 12px rgba(184, 68, 255, 0.25);
+}
+.setup-card--purple:hover {
+  box-shadow: 6px 6px 0 #000, 0 0 20px rgba(184, 68, 255, 0.45);
+}
+.setup-card--purple .setup-card__icon-box {
+  border-color: var(--pixel-purple);
+  background: #17051f;
+}
+.setup-card--purple .setup-card__value {
+  color: var(--pixel-purple);
+}
+
+/* Caldero de Lava & Modo Legendario Bloqueado */
+.setup-card--lava {
+  outline: 3px solid #ff3b00 !important;
+  box-shadow: 4px 4px 0 #000, 0 0 18px rgba(255, 60, 0, 0.5), inset 0 0 12px rgba(255, 60, 0, 0.2) !important;
+  animation: lavaPulse 2s ease-in-out infinite alternate;
+}
+.setup-card--lava .setup-card__icon-box {
+  border-color: #ff3b00 !important;
+  background: #24070a !important;
+}
+.setup-card--lava .setup-card__value {
+  color: #ff7700 !important;
+  text-shadow: 0 0 8px #ff2200, 2px 2px 0 #000;
+}
+.setup-card--locked-lava {
+  outline: 3px solid #ea580c !important;
+  box-shadow: 4px 4px 0 #000, 0 0 14px rgba(234, 88, 12, 0.4) !important;
+}
+.setup-card--locked-lava .setup-card__value {
+  color: #ff3300 !important;
+  letter-spacing: 2px;
+  text-shadow: 0 0 10px #ff0000;
+}
+
+@keyframes lavaPulse {
+  0% { box-shadow: 4px 4px 0 #000, 0 0 12px rgba(255, 59, 0, 0.35); }
+  100% { box-shadow: 4px 4px 0 #000, 0 0 24px rgba(255, 120, 0, 0.65), inset 0 0 16px rgba(255, 40, 0, 0.3); }
+}
+
+.setup-card--compact {
+  padding: 10px 16px;
+}
+.setup-card--compact .setup-card__icon-box {
+  width: 44px;
+  height: 44px;
+}
+.setup-card--compact .card-icon-pixel {
+  width: 32px;
+  height: 32px;
+}
+.setup-card--compact .setup-card__label {
+  font-size: 9px;
+}
+.setup-card--compact .setup-card__value {
+  font-size: 11px;
+}
+
+/* =========================================================================
+   ELEMENTO DE MISIÓN Y RECOMPENSA DE MAPA (ARMA TU COMBO - PASO 1)
+   Un solo elemento armonizado con el resto de la selección de mapa
+   ========================================================================= */
+.setup-map-briefing {
+  margin-bottom: 16px;
+  width: 100%;
+}
+
+.setup-mission-card {
+  width: 100%;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 12px 18px;
+  background: #0d1217;
+  border: 3px solid #000;
+  border-bottom: 5px solid #000;
+  outline: 3px solid var(--pixel-purple, #b844ff);
+  box-shadow: 4px 4px 0 #000, 0 0 14px rgba(184, 68, 255, 0.25);
+  user-select: none;
+}
+
+.setup-mission-card__icon {
+  width: 48px;
+  height: 48px;
+  flex-shrink: 0;
+  background: #17051f;
+  border: 3px solid var(--pixel-purple, #b844ff);
+  box-shadow: inset 2px 2px 0 #000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.setup-mission-canvas {
+  width: 44px;
+  height: 44px;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+  display: block;
+}
+
+.setup-mission-card__content {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.setup-mission-topline {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+
+.setup-mission-ratio {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 9px;
+  color: #c084fc;
+}
+
+.setup-mission-ratio.is-done {
+  color: #4ade80;
+}
+
+.setup-mission-goal {
+  font-family: 'Trebuchet MS', Arial, sans-serif !important;
+  font-size: 13px !important;
+  font-weight: 700 !important;
+  color: #f1f5f9 !important;
+  line-height: 1.35 !important;
+  white-space: normal !important;
+  text-shadow: 1px 1px 0 #000;
+}
+
+.setup-mission-meter {
+  height: 8px;
+  background: #050b0e;
+  border: 1px solid #3b1f52;
+  box-shadow: inset 1px 1px 0 #000;
+  overflow: hidden;
+  width: 100%;
+}
+
+.setup-mission-meter-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #9333ea, #c084fc);
+  transition: width 0.3s ease;
+}
+
+.setup-mission-meter-fill.is-done {
+  background: linear-gradient(90deg, #16a34a, #4ade80);
+}
+
+.setup-mission-action {
+  flex-shrink: 0;
+  margin-left: 8px;
+}
+
+.setup-mission-equip-btn {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 8px;
+  padding: 8px 12px;
+  background: #15803d;
+  color: #f0fdf4;
+  border: 2px solid #22c55e;
+  border-bottom: 4px solid #14532d;
+  box-shadow: 2px 2px 0 #000;
+  cursor: pointer;
+  transition: transform 0.1s;
+}
+
+.setup-mission-equip-btn:hover {
+  background: #16a34a;
+  transform: translateY(-1px);
+}
+
+.setup-mission-pill {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 8px;
+  padding: 6px 10px;
+  border-radius: 2px;
+}
+
+.setup-mission-pill.is-equipped {
+  background: #064e3b;
+  color: #86efac;
+  border: 2px solid #10b981;
+}
+
+/* Subpestañas de Misiones en Don Domi */
+.domi-missions-subtabs {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.domi-subtab-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 14px;
+  background: #0a1115;
+  border: 2px solid #1e3840;
+  border-bottom: 4px solid #060b0e;
+  color: #94a3b8;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 9px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.domi-subtab-btn:hover {
+  background: #101c22;
+  color: #e2e8f0;
+  border-color: #38bdf8;
+}
+
+.domi-subtab-btn.is-active {
+  background: #162a33;
+  border-color: #22d3ee;
+  border-bottom-color: #0c1a20;
+  color: #facc15;
+  box-shadow: 0 0 12px rgba(34, 211, 238, 0.25);
+}
+
+@media (max-width: 700px) {
+  .briefing-panels {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+  .briefing-topbar {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .briefing-map-selector {
+    flex-wrap: wrap;
+  }
+  .domi-missions-subtabs {
+    flex-direction: column;
+    gap: 8px;
+  }
+}
+
+/* ========================================================
+   3D PIXEL ART PEDESTALS (Characters & Weapons)
+   ======================================================== */
+.setup-panel h3 {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 12px;
+  font-weight: 800;
+  color: #cbd5e1;
+  margin: 18px 0 12px;
+  letter-spacing: 1px;
+  text-shadow: 2px 2px 0 #000;
+}
+.setup-panel h3 > span {
+  display: none;
+}
+
+.option-grid {
+  display: flex;
+  gap: 14px;
+  justify-content: space-between;
+  overflow-x: auto;
+  padding: 10px 4px 22px;
+}
+
+.option-card {
+  position: relative;
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  min-width: 120px;
+  flex: 1 1 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  cursor: pointer;
+  transition: transform 0.28s cubic-bezier(0.2, 0.8, 0.2, 1), filter 0.25s ease;
+  will-change: transform;
+}
+.option-card:focus-visible {
+  outline: none !important;
+}
+
+/* Transiciones suaves en los elementos de personajes y armas */
+.option-card .pedestal-stage {
+  transition: transform 0.28s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.option-card .option-portrait,
+.option-card .weapon-portrait {
+  position: relative;
+  z-index: 2;
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), filter 0.25s ease;
+  will-change: transform, filter;
+}
+
+.option-card .pedestal-beam {
+  transition: opacity 0.28s ease, transform 0.28s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.option-card .pedestal-base {
+  transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+}
+
+.option-card .pedestal-plate {
+  transition: background 0.22s ease, box-shadow 0.22s ease;
+}
+
+.option-card strong {
+  transition: transform 0.25s ease, color 0.25s ease, text-shadow 0.25s ease;
+}
+
+.option-card .item-stat {
+  transition: transform 0.25s ease, color 0.25s ease;
+}
+
+/* Movimiento suave y elevación al pasar el mouse por encima */
+.option-card:not(:disabled):not(.option-card--locked):hover {
+  transform: translateY(-8px) scale(1.02);
+}
+
+.option-card:not(:disabled):not(.option-card--locked):hover .option-portrait,
+.option-card:not(:disabled):not(.option-card--locked):hover .weapon-portrait {
+  transform: translateY(-6px) scale(1.08);
+  filter: drop-shadow(0 6px 0 #000) drop-shadow(0 0 10px rgba(255, 224, 102, 0.7));
+}
+
+.option-card:not(:disabled):not(.option-card--locked):hover .pedestal-beam {
+  opacity: 0.95;
+  transform: translateX(-50%) scaleY(1.1);
+}
+
+.option-card:not(:disabled):not(.option-card--locked):hover .pedestal-base {
+  box-shadow: 0 6px 0 #000, 0 0 14px rgba(255, 224, 102, 0.45);
+}
+
+.option-card:not(:disabled):not(.option-card--locked):hover strong {
+  color: var(--pixel-amber) !important;
+  transform: translateY(-2px);
+  text-shadow: 2px 2px 0 #000, 0 0 8px rgba(255, 204, 0, 0.6);
+}
+
+.option-card:not(:disabled):not(.option-card--locked):hover .item-stat {
+  color: #fff !important;
+  transform: translateY(-1px);
+}
+
+.option-card:not(:disabled):not(.option-card--locked):active {
+  transform: translateY(-2px) scale(0.97);
+  transition-duration: 0.08s;
+}
+
+/* Pedestal Stage */
+.pedestal-stage {
+  position: relative;
+  width: 100%;
+  height: 112px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.pedestal-stage--weapon {
+  height: 82px;
+}
+
+/* Pixel Scanline Light Beam */
+.pedestal-beam {
+  position: absolute;
+  bottom: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 78px;
+  height: 95px;
+  clip-path: polygon(15% 100%, 85% 100%, 100% 0%, 0% 0%);
+  background: repeating-linear-gradient(
+    to top,
+    rgba(0, 255, 136, 0.25) 0px,
+    rgba(0, 255, 136, 0.25) 4px,
+    transparent 4px,
+    transparent 8px
+  );
+  pointer-events: none;
+  opacity: 0.6;
+}
+.pedestal-stage--weapon .pedestal-beam {
+  height: 65px;
+  width: 58px;
+}
+
+/* Stepped Pixel Pedestal Base */
+.pedestal-base {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 84px;
+  height: 24px;
+  background: #151e22;
+  border: 3px solid #000;
+  box-shadow: 0 4px 0 #000, inset 0 2px 0 #3a535e;
+  pointer-events: none;
+}
+.pedestal-base--compact {
+  width: 66px;
+  height: 20px;
+}
+
+.pedestal-plate {
+  width: 100%;
+  height: 11px;
+  background: #24353d;
+  border-bottom: 2px solid #000;
+  box-shadow: inset 0 2px 0 #4f6e7c;
+}
+
+.pedestal-skirt {
+  width: 100%;
+  height: 8px;
+  background: #0f1619;
+}
+
+.option-portrait {
+  position: relative;
+  z-index: 2;
+  width: 88px;
+  height: 84px;
+  object-fit: contain;
+  margin-bottom: 12px;
+  filter: drop-shadow(0 4px 0 #000);
+}
+
+.weapon-portrait {
+  position: relative;
+  z-index: 2;
+  width: 48px;
+  height: 44px;
+  object-fit: contain;
+  margin-bottom: 8px;
+  filter: drop-shadow(0 3px 0 #000);
+}
+
+.option-card strong {
+  font: 800 10px 'Press Start 2P', monospace;
+  color: #e2e8f0;
+  margin: 6px 0 3px;
+  text-shadow: 2px 2px 0 #000;
+}
+
+.option-card .item-stat {
+  font: 800 8px 'Press Start 2P', monospace;
+  color: var(--pixel-mint);
+  margin-top: 2px;
+  text-shadow: 1px 1px 0 #000;
+  line-height: 1.4;
+}
+
+.option-card .pedestal-locked {
+  font: 700 8px 'Press Start 2P', monospace;
+  color: var(--muted);
+  margin-top: 2px;
+}
+
+/* SELECTED PEDESTAL (Gold 16-Bit Glow) */
+.option-card--selected .pedestal-beam {
+  background: repeating-linear-gradient(
+    to top,
+    rgba(255, 204, 0, 0.55) 0px,
+    rgba(255, 204, 0, 0.55) 4px,
+    transparent 4px,
+    transparent 8px
+  ) !important;
+  opacity: 1 !important;
+}
+
+.option-card--selected .pedestal-base {
+  border-color: #000 !important;
+  box-shadow: 0 4px 0 #000, 0 0 16px rgba(255, 204, 0, 0.5) !important;
+}
+
+.option-card--selected .pedestal-plate {
+  background: var(--pixel-amber) !important;
+  box-shadow: inset 0 2px 0 #ffffff, inset 0 -2px 0 #996600 !important;
+}
+
+.option-card--selected .pedestal-skirt {
+  background: #996600 !important;
+}
+
+.option-card--selected {
+  transform: translateY(-6px) scale(1.02);
+}
+
+.option-card--selected strong {
+  color: var(--pixel-amber) !important;
+  text-shadow: 2px 2px 0 #000, 0 0 10px rgba(255, 204, 0, 0.65);
+}
+
+.option-card--selected .option-portrait,
+.option-card--selected .weapon-portrait {
+  transform: translateY(-8px) scale(1.06);
+  filter: drop-shadow(0 4px 0 #000) drop-shadow(0 0 10px var(--pixel-amber));
+  animation: pedestal-portrait-hover 2.4s ease-in-out infinite alternate;
+}
+
+@keyframes pedestal-portrait-hover {
+  0% { transform: translateY(-7px) scale(1.06); }
+  50% { transform: translateY(-12px) scale(1.09); }
+  100% { transform: translateY(-7px) scale(1.06); }
+}
+
+.setup-panel > .menu-actions,
+.setup-step-actions {
+  position: sticky;
+  bottom: 0;
+  background: #0c1013f5;
+  z-index: 20;
+  padding: 14px 0;
+  margin-top: 16px;
+  border-top: 3px solid #000;
+  box-shadow: 0 -3px 0 #2d3e47;
+}
+
+/* ========================================================
+   LOBBY, SHOP, HUD & GAME IN PIXEL ART
+   ======================================================== */
+.auth-panel {
+  border: 4px solid var(--pixel-amber);
+  box-shadow: 6px 6px 0 #000, 0 0 20px rgba(255, 204, 0, 0.3);
+  padding: 32px;
+  border-radius: 0;
+  background: #141c20;
+}
+.auth-panel input {
+  background: #0a0e10;
+  border: 3px solid #000;
+  box-shadow: inset 2px 2px 0 #000;
+  color: #fff;
+  font: 800 12px 'Press Start 2P', monospace;
+  padding: 10px;
+}
+.auth-panel input:focus-visible {
+  border-color: var(--pixel-amber);
+}
+
+.wallet {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #1a1505;
+  border: 3px solid var(--pixel-amber);
+  box-shadow: 3px 3px 0 #000;
+  border-radius: 0;
+  padding: 6px 12px;
+}
+.wallet .ui-icon { color: var(--pixel-amber); }
+.wallet b {
+  font: 900 14px 'Press Start 2P', monospace;
+  color: var(--pixel-amber);
+}
+
+.lobby-header {
+  padding: 10px 24px;
+  background: #10161a;
+  border-bottom: 3px solid #000;
+  box-shadow: 0 3px 0 #263840;
+}
+.lobby-header .brand-mark {
+  font: 900 24px 'Press Start 2P', monospace;
+  color: #fff;
+}
+.lobby-header strong {
+  font: 800 11px 'Press Start 2P', monospace;
+}
+.lobby-header small {
+  font: 800 8px 'Press Start 2P', monospace;
+  color: var(--pixel-mint);
+}
+
+.lobby-nav {
+  background: #10161a;
+  border-top: 3px solid #000;
+  box-shadow: 0 -3px 0 #263840;
+}
+.lobby-nav button {
+  font: 800 9px 'Press Start 2P', monospace;
+  border: 0;
+  border-right: 2px solid #1a272c;
+  color: var(--muted);
+  padding: 14px 4px;
+}
+.lobby-nav button:hover, .lobby-nav button.is-near {
+  background: #1a272c;
+  color: var(--pixel-amber);
+  box-shadow: inset 0 -4px 0 var(--pixel-amber);
+}
+
+.lobby-dialogue {
+  position: absolute !important;
+  top: 50% !important;
+  left: 50% !important;
+  transform: translate(-50%, -50%) !important;
+  z-index: 100 !important;
+  pointer-events: auto !important;
+  border: 4px solid #ffcc00 !important;
+  border-bottom: 6px solid #000 !important;
+  box-shadow: 8px 8px 0 #000, 0 0 25px rgba(255, 204, 0, 0.3) !important;
+  background: #0d161cfc !important;
+  border-radius: 0 !important;
+  padding: 20px 24px !important;
+  max-width: 580px !important;
+  width: 92% !important;
+}
+.dialogue-header {
+  display: flex !important;
+  align-items: center !important;
+  gap: 16px !important;
+  margin-bottom: 16px !important;
+  border-bottom: 3px solid #1e333c !important;
+  padding-bottom: 14px !important;
+}
+.dialogue-portrait-wrap {
+  width: 60px !important;
+  height: 60px !important;
+  border: 3px solid #ffcc00 !important;
+  border-bottom: 5px solid #997a00 !important;
+  box-shadow: 3px 3px 0 #000 !important;
+  background: #000 !important;
+  flex-shrink: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  overflow: hidden !important;
+}
+.domi-portrait-canvas {
+  width: 60px !important;
+  height: 60px !important;
+  image-rendering: pixelated !important;
+}
+.dialogue-header-text {
+  flex: 1 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 5px !important;
+}
+.dialogue-speaker {
+  font: 900 13px 'Press Start 2P', monospace !important;
+  color: #ffcc00 !important;
+  text-shadow: 2px 2px 0 #000 !important;
+  letter-spacing: 1px !important;
+}
+.dialogue-subtitle {
+  font: 8px 'Press Start 2P', monospace !important;
+  color: #38bdf8 !important;
+  letter-spacing: 0.5px !important;
+}
+.dialogue-close-btn {
+  width: 34px !important;
+  height: 34px !important;
+  border: 2px solid #000 !important;
+  background: #ef4444 !important;
+  color: #fff !important;
+  box-shadow: 2px 2px 0 #000 !important;
+  border-radius: 0 !important;
+  cursor: pointer !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  transition: transform .1s, background .15s !important;
+}
+.dialogue-close-btn:hover {
+  background: #dc2626 !important;
+  transform: translateY(-2px) !important;
+}
+.dialogue-tabs {
+  display: flex !important;
+  gap: 8px !important;
+  margin-bottom: 14px !important;
+  border-bottom: 2px solid #1e333c !important;
+  padding-bottom: 8px !important;
+}
+.dialogue-tab {
+  background: #142228 !important;
+  border: 2px solid #283e47 !important;
+  border-bottom: 4px solid #0f181d !important;
+  color: #8da4a1 !important;
+  font: 800 8.5px 'Press Start 2P', monospace !important;
+  padding: 8px 12px !important;
+  cursor: pointer !important;
+  transition: all 0.15s ease !important;
+  border-radius: 0 !important;
+}
+.dialogue-tab:hover {
+  background: #20353d !important;
+  color: #fff !important;
+}
+.dialogue-tab.is-active {
+  background: #ffcc00 !important;
+  color: #000 !important;
+  border-color: #ffe066 !important;
+  border-bottom: 4px solid #b38f00 !important;
+  box-shadow: 2px 2px 0 #000 !important;
+}
+.dialogue-body {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 12px !important;
+}
+.dialogue-bubble {
+  background: #142127 !important;
+  border: 3px solid #293e47 !important;
+  border-bottom: 5px solid #000 !important;
+  box-shadow: 3px 3px 0 #000 !important;
+  padding: 16px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 10px !important;
+}
+.lobby-dialogue h3, #dialogueTitle {
+  font: 900 11px 'Press Start 2P', monospace !important;
+  color: #ffcc00 !important;
+  margin: 0 !important;
+  line-height: 1.4 !important;
+  text-shadow: 1px 1px 0 #000 !important;
+}
+.lobby-dialogue p, #dialogueText {
+  font: 9px/1.65 'Press Start 2P', monospace !important;
+  color: #e2e8f0 !important;
+  margin: 0 !important;
+}
+.dialogue-next-btn {
+  align-self: flex-start !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  font: 900 8.5px 'Press Start 2P', monospace !important;
+  padding: 9px 14px !important;
+  background: #0284c7 !important;
+  color: #fff !important;
+  border: 2px solid #38bdf8 !important;
+  border-bottom: 4px solid #0369a1 !important;
+  box-shadow: 3px 3px 0 #000 !important;
+  cursor: pointer !important;
+  border-radius: 0 !important;
+  transition: transform .12s, background .15s !important;
+}
+.dialogue-next-btn:hover {
+  background: #0369a1 !important;
+  transform: translateY(-2px) !important;
+}
+.domi-section-intro {
+  font: 8px 'Press Start 2P', monospace !important;
+  color: #94a3b8 !important;
+  line-height: 1.5 !important;
+  margin-bottom: 4px !important;
+}
+/* ========================================================
+   GLOBAL PIXEL KEYCAPS (ESTILO IMAGEN 1: 3D ARCADE RETRO)
+   ======================================================== */
+kbd,
+.pixel-key,
+.prime-key,
+.dash-key {
+  display: inline-grid !important;
+  place-items: center !important;
+  background: #fff0b6 !important;
+  color: #18232b !important;
+  border: 2px solid #fff7da !important;
+  border-bottom: 5px solid #ad8141 !important;
+  box-shadow: 3px 3px 0 #060c13 !important;
+  font-family: 'Press Start 2P', monospace !important;
+  font-weight: 900 !important;
+  border-radius: 0 !important;
+  text-align: center !important;
+  line-height: 1 !important;
+}
+
+.prime-slot .prime-key.pixel-key {
+  position: absolute !important;
+  top: 5px !important;
+  left: 5px !important;
+  width: 25px !important;
+  height: 27px !important;
+  font-size: 11px !important;
+  padding: 0 !important;
+}
+
+#dashControl .pixel-key.dash-key {
+  width: 38px !important;
+  height: 33px !important;
+  font-size: 8px !important;
+  padding: 0 !important;
+  flex: none !important;
+}
+
+.prime-slot[data-status="locked"] .pixel-key,
+.prime-slot[data-status="cooldown"] .pixel-key,
+#dashControl[data-status="cooldown"] .pixel-key,
+#dashControl:not([data-ready="true"]) .pixel-key {
+  background: #646c70 !important;
+  border-color: #899195 !important;
+  border-bottom-color: #343a3d !important;
+  color: #94a3b8 !important;
+  box-shadow: 2px 2px 0 #000 !important;
+}
+
+.prime-slot[data-status="ready"] .pixel-key,
+#dashControl[data-status="ready"] .pixel-key {
+  background: #fff0b6 !important;
+  border-color: #fff7da !important;
+  border-bottom-color: #ad8141 !important;
+  color: #18232b !important;
+  box-shadow: 3px 3px 0 #060c13 !important;
+}
+
+/* Shop in Pixel Art */
+.catalog-item {
+  border: 3px solid #000;
+  box-shadow: 4px 4px 0 #000;
+  background: #121a1e;
+  border-radius: 0;
+}
+.catalog-item:hover {
+  border-color: var(--pixel-mint);
+  transform: translate(-2px, -2px);
+  box-shadow: 6px 6px 0 #000;
+}
+.catalog-item[aria-pressed=true] {
+  border-color: var(--pixel-amber);
+  box-shadow: 6px 6px 0 #000, 0 0 16px rgba(255, 204, 0, 0.5);
+}
+.catalog-item > strong {
+  font: 800 10px 'Press Start 2P', monospace;
+}
+.catalog-status {
+  font: 800 8px 'Press Start 2P', monospace;
+  color: var(--pixel-mint);
+}
+
+/* HUD in Pixel Art */
+.hud {
+  background: #0f1619;
+  border-bottom: 3px solid #000;
+  box-shadow: 0 3px 0 #263840;
+}
+.hud__bar span {
+  font: 800 8px 'Press Start 2P', monospace;
+}
+.hud__bar .meter {
+  height: 10px;
+  border: 2px solid #000;
+  background: #162024;
+  border-radius: 0;
+}
+.hud__bar .meter__fill--hp {
+  background: linear-gradient(90deg, #ff0844 0%, #ff4e50 55%, #f9d423 100%) !important;
+  box-shadow: 0 0 10px rgba(255, 30, 80, 0.75), inset 0 2px 0 rgba(255, 255, 255, 0.4) !important;
+}
+.hud__bar .meter__fill--xp {
+  background: linear-gradient(90deg, #00c6ff 0%, #0072ff 45%, #00f2fe 100%) !important;
+  box-shadow: 0 0 10px rgba(0, 198, 255, 0.75), inset 0 2px 0 rgba(255, 255, 255, 0.45) !important;
+}
+.hud__stats b {
+  font: 900 14px 'Press Start 2P', monospace;
+  color: #fff;
+}
+
+.toast {
+  border: 3px solid #000;
+  box-shadow: 4px 4px 0 #000;
+  border-radius: 0;
+  background: var(--pixel-amber);
+  color: #000;
+  font: 900 11px 'Press Start 2P', monospace;
+}
+
+/* Responsive */
+@media (max-width: 1100px) {
+  .setup-card__label { font-size: 9px; }
+  .setup-card__value { font-size: 11px; }
+  .setup-card__icon-box { width: 56px; height: 56px; }
+  .card-icon-pixel { width: 40px; height: 40px; }
+}
+
+@media (max-width: 700px) {
+  .setup-cards-grid { grid-template-columns: 1fr; gap: 12px; }
+  .setup-card { padding: 12px 14px; gap: 14px; }
+  .setup-card__icon-box { width: 52px; height: 52px; }
+  .card-icon-pixel { width: 36px; height: 36px; }
+  .setup-card__label { font-size: 9px; }
+  .setup-card__value { font-size: 11px; }
+  .setup-panel h2 { font-size: 20px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .screen--active { animation: none !important; }
+  button:hover { transform: none !important; }
+}
+
+/* Readable forms and control hints, with the original arcade palette. */
+.auth-screen { gap: 5%; align-items: safe center; }
+.auth-panel { min-width: 0; gap: 16px; }
+.auth-panel h2 { font-size: clamp(24px, 3vw, 36px); line-height: 1.3; }
+.auth-brand .auth-intro { margin: 26px 0 18px; font: 20px/1.55 'Segoe UI', Arial, sans-serif; color: #c4d0d5; text-shadow: none; }
+.auth-brand .keyboard-note { display: inline-block; font: 12px/1.5 'Segoe UI', Arial, sans-serif; color: #b2c2ca; border: 1px solid var(--line); padding: 8px 12px; text-shadow: none; }
+.auth-panel .field { font-size: 11px; line-height: 1.6; gap: 8px; }
+.auth-panel input { width: 100%; min-width: 0; min-height: 48px; font: 16px/1.4 'Segoe UI', Arial, sans-serif; }
+.password-field { display: flex; align-items: stretch; background: #0a0e10; border: 2px solid var(--line); }
+.password-field input { flex: 1; width: 0; border: 0; box-shadow: none; }
+.password-field input:focus-visible { outline-offset: -3px; }
+.password-toggle { flex: none; min-width: 76px; min-height: 44px; padding: 8px; border: 0; border-left: 1px solid var(--line); background: #1c2a30; color: #ffe172; font: 600 13px 'Segoe UI', Arial, sans-serif; }
+.password-toggle:hover { background: #2a3d44; }
+.auth-panel .field-hint, .auth-panel .save-note { font: 13px/1.55 'Segoe UI', Arial, sans-serif; color: #b7c7cf; margin: -7px 0 0; }
+.auth-panel .save-note { margin-top: 3px; padding-top: 16px; border-top: 1px solid var(--line); }
+.auth-panel .caps-lock { color: #ffdc69; }
+.auth-panel .form-error { font: 14px/1.5 'Segoe UI', Arial, sans-serif; padding: 12px; color: #ffd8d3; background: #3b1d22; border-left: 3px solid #ff7f7f; }
+.auth-panel .text-button { white-space: normal; line-height: 1.7; min-height: 44px; font-size: 10px; }
+.auth-panel .pixel-button { font-size: 10px; line-height: 1.7; padding: 13px 10px; }
+.auth-panel button:disabled { opacity: .65; cursor: wait; transform: none; }
+.lobby-controls { position: absolute; top: 10px; left: 50%; transform: translateX(-50%); width: max-content; max-width: calc(100% - 24px); margin: 0; padding: 9px 13px; border: 1px solid #50616b; background: #0c1013eb; color: #d6e2e8; font: 12px/1.6 'Segoe UI', Arial, sans-serif; text-align: center; pointer-events: none; }
+.lobby-controls span { margin: 0 5px; color: var(--mint); }
+kbd { display: inline-block; border: 1px solid #556771; border-bottom-width: 3px; padding: 2px 6px; background: #1c2a30; color: #ffdf70; font: 600 12px/1.4 monospace; }
+.controls-guide { border: 1px solid var(--line); background: #141c20; padding: 18px; font: 14px/1.6 'Segoe UI', Arial, sans-serif; color: #c6d3da; transition: max-height 0.2s ease; }
+.controls-guide[open] { max-height: 180px; overflow-y: auto; }
+.controls-guide summary { cursor: pointer; color: var(--yellow); font-weight: 700; min-height: 28px; }
+.controls-guide summary:focus-visible { outline: 2px solid var(--yellow); outline-offset: 4px; }
+.controls-guide p { margin: 12px 0 0; }
+.controls-guide ul { display: flex; flex-wrap: wrap; gap: 12px 24px; list-style: none; padding: 0; margin: 16px 0; }
+.controls-guide li { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+@media (max-width: 900px) {
+  .app:has(.auth-screen.screen--active) { height: 100dvh; min-height: 100svh; }
+  .auth-screen { grid-template-columns: minmax(0, 1fr); align-content: start; gap: 28px; padding: 28px 22px 36px; }
+  .auth-brand, .auth-panel { width: 100%; max-width: 440px; margin: 0 auto; }
+  .auth-brand > span { font-size: 64px; }
+  .auth-brand > strong { font-size: 78px; }
+  .auth-brand .auth-intro { font-size: 16px; margin: 18px 0 12px; }
+  .auth-panel { padding: 24px; }
+}
+@media (max-width: 768px) {
+  .auth-panel { padding: 20px; }
+  .auth-brand small { font-size: 10px; line-height: 1.7; }
+  .lobby-header { gap: 6px; padding: 8px; flex-wrap: wrap; }
+  .lobby-header strong { font-size: 10px; max-width: 135px; overflow-wrap: anywhere; }
+  .lobby-header small { font: 10px/1.5 'Segoe UI', Arial, sans-serif; }
+  .lobby-header .brand-mark { font-size: 24px; margin: 0; }
+  .lobby-header .wallet { padding: 6px; }
+  .lobby-header .wallet b { font-size: 14px; }
+  .lobby-header .wallet .ui-icon { display: none; }
+  .lobby-screen.screen--active { grid-template-rows: auto minmax(0, 1fr) auto; }
+  .lobby-nav { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .lobby-nav button { min-height: 58px; font-size: 8px; }
+  .lobby-controls { font-size: 11px; }
+
+  /* Mobile Setup Screen (Armar combo) */
+  #setupScreen {
+    padding: 12px 10px 110px !important;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+  #setupScreen.screen--active {
+    display: block !important;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+  .setup-panel {
+    max-width: 100% !important;
+    padding: 0 0 90px 0 !important;
+    overflow: visible !important;
+  }
+  .setup-header { flex-wrap: wrap; gap: 8px; }
+  .setup-header h2 { font-size: 18px !important; }
+  .setup-card__value { overflow-wrap: anywhere; }
+  .controls-guide { padding: 14px; }
+
+  /* Barra de acciones de setup fija en móviles: botón JUGAR / INICIAR TURNO siempre visible y accesible */
+  .setup-step-actions {
+    position: fixed !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    z-index: 999 !important;
+    background: #090e12f8 !important;
+    backdrop-filter: blur(8px) !important;
+    -webkit-backdrop-filter: blur(8px) !important;
+    padding: 10px 14px 12px !important;
+    margin: 0 !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+    border-top: 3px solid #000 !important;
+    box-shadow: 0 -4px 16px rgba(0,0,0,0.9), inset 0 2px 0 #284452 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 8px !important;
+  }
+  .setup-step-actions .pixel-button {
+    width: 100% !important;
+    min-height: 48px !important;
+    font-size: 11px !important;
+  }
+
+  /* GameOver móvil */
+  #gameOverScreen {
+    padding: 12px 8px 36px !important;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+  #gameOverScreen .screen__panel {
+    padding: 8px 6px !important;
+  }
+  .result-stats-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 6px !important;
+  }
+  .result-stat-box {
+    min-height: 44px !important;
+    padding: 6px 4px !important;
+  }
+  .result-stat-box strong {
+    font-size: 7px !important;
+    margin-bottom: 3px !important;
+  }
+  .result-stat-box b {
+    font-size: 8.5px !important;
+  }
+  #gameOverScreen .menu-actions {
+    flex-direction: column !important;
+    width: 100% !important;
+    gap: 10px !important;
+  }
+  #gameOverScreen .pixel-button {
+    width: 100% !important;
+  }
+
+  /* Onboarding / Bienvenida móvil */
+  .onboarding-cards {
+    grid-template-columns: 1fr !important;
+    gap: 16px !important;
+  }
+  .onboarding-card {
+    padding: 14px 12px 18px !important;
+  }
+  .onboarding-art {
+    height: 125px !important;
+  }
+  .onboarding-enter-btn {
+    width: 100% !important;
+  }
+}
+
+/* ========================================================
+   ENHANCED RETRO PIXEL ART: GAME OVER, BOSS ALERTS & BANNERS
+   ======================================================== */
+
+.gameOver-panel-enhanced {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.pixel-button--green {
+  background: var(--pixel-mint) !important;
+  border-color: #fff !important;
+  color: #000 !important;
+  box-shadow: 0 4px 0 var(--pixel-mint-dark) !important;
+}
+.pixel-button--green:hover {
+  background: #66ffaa !important;
+  transform: translateY(-2px);
+}
+
+/* CARTELES DE JEFES RETRO PIXEL ART */
+.boss-alert {
+  border: 4px solid #000 !important;
+  background: #2a0b10 !important;
+  color: #ffcc00 !important;
+  font-family: 'Press Start 2P', monospace !important;
+  font-size: clamp(11px, 2vw, 15px) !important;
+  letter-spacing: 2px !important;
+  box-shadow: 0 0 0 3px #ff3344, 0 0 24px rgba(255, 51, 68, 0.7), 6px 6px 0 #000 !important;
+  text-shadow: 2px 2px 0 #880011 !important;
+  border-radius: 0 !important;
+  padding: 16px 24px !important;
+  animation: bossAlertPixelPulse .65s infinite alternate !important;
+}
+
+@keyframes bossAlertPixelPulse {
+  0% { transform: translateX(-50%) scale(1); box-shadow: 0 0 0 3px #ff3344, 0 0 16px rgba(255, 51, 68, 0.5), 6px 6px 0 #000; }
+  100% { transform: translateX(-50%) scale(1.04); box-shadow: 0 0 0 4px #ffcc00, 0 0 32px rgba(255, 204, 0, 0.8), 8px 8px 0 #000; }
+}
+
+/* EVENT BANNER CON VARIEDAD DE COLOR Y ESTILO RETRO */
+.event-banner {
+  border: 3px solid #000 !important;
+  border-left: 6px solid var(--event-color, var(--pixel-mint)) !important;
+  background: #0f171bfa !important;
+  box-shadow: 4px 4px 0 #000 !important;
+  font-family: 'Press Start 2P', monospace !important;
+  font-size: 9px !important;
+  color: var(--event-color, var(--pixel-mint)) !important;
+  border-radius: 0 !important;
+  padding: 10px 14px !important;
+}
+
+/* OCULTAR ELEMENTOS DE COMBATE EN PAUSA */
+.app[data-screen="pauseScreen"] #dashControl,
+.app[data-screen="pauseScreen"] #comboMilestones,
+.app[data-screen="pauseScreen"] #primeBar,
+.app[data-screen="pauseScreen"] #runBar,
+.app[data-screen="pauseScreen"] #combatRail,
+.app[data-screen="pauseScreen"] .combo-milestones {
+  display: none !important;
+}
+
+
+
+/* REGLAS GLOBALES PIXEL ART: FUENTES, BOTONES Y CARTELES */
+*, button, input, select, kbd, label, span, strong, h1, h2, h3, p, small, b {
+  font-family: 'Press Start 2P', monospace !important;
+  image-rendering: pixelated !important;
+}
+
+/* ========================================================
+   ENHANCED RETRO PIXEL ART: GAME OVER / FIN DEL TURNO
+   ======================================================== */
+#gameOverScreen {
+  overflow-y: auto !important;
+  -webkit-overflow-scrolling: touch;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 24px 16px 40px !important;
+}
+
+#gameOverScreen .screen__panel {
+  max-width: 820px !important;
+  width: 100% !important;
+  margin: auto !important;
+  padding: 16px 12px 24px !important;
+  overflow: visible !important;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: center !important;
+  align-items: center !important;
+  gap: 10px !important;
+}
+
+.gameover-pixel-banner {
+  font-family: 'Press Start 2P', Impact, monospace !important;
+  font-size: clamp(20px, 3.8vw, 36px) !important;
+  font-weight: 900 !important;
+  letter-spacing: 3px !important;
+  line-height: 1.2 !important;
+  margin: 0 0 8px 0 !important;
+  padding: 12px 24px !important;
+  border: 4px solid #000 !important;
+  background: #090e12 !important;
+  box-shadow: 6px 6px 0 #000 !important;
+  border-radius: 0 !important;
+  text-transform: uppercase !important;
+  display: inline-block !important;
+  image-rendering: pixelated !important;
+  animation: bannerPixelPop .45s cubic-bezier(0.18, 1.4, 0.4, 1) both;
+}
+
+.gameover-pixel-banner--loss {
+  color: #ff3b56 !important;
+  outline: 3px solid #ff3b56 !important;
+  outline-offset: -7px !important;
+  text-shadow: 3px 3px 0 #660018, 5px 5px 0 #000 !important;
+}
+
+.gameover-pixel-banner--win {
+  color: #22c55e !important;
+  outline: 3px solid #22c55e !important;
+  outline-offset: -7px !important;
+  text-shadow: 3px 3px 0 #0b4520, 5px 5px 0 #000 !important;
+}
+
+.gameover-pixel-banner--abandoned {
+  color: #ffcf4a !important;
+  outline: 3px solid #ffcf4a !important;
+  outline-offset: -7px !important;
+  text-shadow: 3px 3px 0 #7c4800, 5px 5px 0 #000 !important;
+}
+
+#resultTitle {
+  display: none !important;
+}
+
+#resultEyebrow {
+  margin: 0 !important;
+  font-family: 'Press Start 2P', monospace !important;
+  font-size: 10px !important;
+  color: var(--pixel-mint) !important;
+  letter-spacing: 2px !important;
+  text-shadow: 2px 2px 0 #000 !important;
+}
+
+#gameOverPhrase {
+  font-family: 'Press Start 2P', monospace !important;
+  font-size: 10px !important;
+  line-height: 1.8 !important;
+  margin: 4px 0 10px 0 !important;
+  max-width: 680px !important;
+  color: #cbd5e1 !important;
+  text-shadow: 2px 2px 0 #000 !important;
+  text-align: center !important;
+}
+
+#gameOverStats {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  width: 100% !important;
+  max-width: 820px !important;
+  margin: 0 auto !important;
+  gap: 10px !important;
+}
+
+#gameOverScreen .result-summary {
+  width: 100% !important;
+  max-width: 820px !important;
+  background: #0d1a16 !important;
+  border: 3px solid #000 !important;
+  outline: 2px solid #22c55e !important;
+  outline-offset: -5px !important;
+  box-shadow: 4px 4px 0 #000, inset 0 2px 0 #285444 !important;
+  border-radius: 0 !important;
+  padding: 14px 20px !important;
+  text-align: center !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  gap: 6px !important;
+  margin-bottom: 6px !important;
+  box-sizing: border-box !important;
+}
+
+#gameOverScreen .result-summary-label {
+  font-family: 'Press Start 2P', monospace !important;
+  font-size: 10px !important;
+  color: #86efac !important;
+  letter-spacing: 2px !important;
+  text-shadow: 2px 2px 0 #000 !important;
+}
+
+#gameOverScreen .result-points {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 12px !important;
+  margin: 4px 0 !important;
+}
+
+#gameOverScreen .result-points b {
+  font-family: 'Press Start 2P', monospace !important;
+  font-size: clamp(22px, 4vw, 30px) !important;
+  color: #ffcf4a !important;
+  text-shadow: 3px 3px 0 #7c4800, 5px 5px 0 #000 !important;
+}
+
+.result-coin {
+  width: 26px !important;
+  height: 26px !important;
+  border-radius: 0 !important;
+  background: #ffcf4a !important;
+  border: 3px solid #000 !important;
+  box-shadow: inset 2px 2px 0 #fff3a8, inset -2px -2px 0 #b37400, 2px 2px 0 #000 !important;
+  display: inline-grid !important;
+  place-items: center !important;
+  animation: none !important;
+  flex-shrink: 0 !important;
+}
+.result-coin em, .result-coin::before, .result-coin::after { display: none !important; }
+.result-coin-glyph {
+  font: 900 12px/1 'Press Start 2P', monospace !important;
+  color: #663d00 !important;
+}
+
+#gameOverScreen .result-summary-best {
+  font-family: 'Press Start 2P', monospace !important;
+  font-size: 9px !important;
+  color: #8198a5 !important;
+  letter-spacing: 1px !important;
+  text-shadow: 1px 1px 0 #000 !important;
+}
+
+.result-stats-grid {
+  display: grid !important;
+  grid-template-columns: repeat(4, 1fr) !important;
+  gap: 8px 10px !important;
+  width: 100% !important;
+  max-width: 820px !important;
+  margin: 4px auto 0 !important;
+  box-sizing: border-box !important;
+}
+
+.result-stat-box {
+  background: #0f1920 !important;
+  border: 3px solid #000 !important;
+  box-shadow: inset 0 2px 0 #283c48, inset 0 -2px 0 #090e12, 3px 3px 0 #000 !important;
+  border-radius: 0 !important;
+  padding: 8px 6px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  text-align: center !important;
+  justify-content: center !important;
+  min-height: 52px !important;
+  box-sizing: border-box !important;
+}
+
+.result-stat-box strong {
+  font-family: 'Press Start 2P', monospace !important;
+  font-size: 8px !important;
+  color: #7dd3fc !important;
+  margin-bottom: 6px !important;
+  letter-spacing: 0.5px !important;
+  text-transform: uppercase !important;
+  display: block !important;
+  text-shadow: 1px 1px 0 #000 !important;
+}
+
+.result-stat-box b {
+  font-family: 'Press Start 2P', monospace !important;
+  font-size: 9.5px !important;
+  font-weight: 700 !important;
+  color: #f8fafc !important;
+  text-shadow: 1px 1px 0 #000 !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  max-width: 100% !important;
+  display: block !important;
+}
+
+.result-unlock-wrapper {
+  border-radius: 0 !important;
+  border: 3px solid #000 !important;
+  outline: 2px solid #ffcf4a !important;
+  outline-offset: -5px !important;
+  background: #1c1608 !important;
+  box-shadow: 4px 4px 0 #000, inset 0 2px 0 #4f3d10 !important;
+  padding: 10px 18px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 12px !important;
+  margin: 6px auto 0 !important;
+  width: 100% !important;
+  max-width: 820px !important;
+  box-sizing: border-box !important;
+}
+
+.result-unlock-thumb {
+  border: 2px solid #ffcf4a !important;
+  box-shadow: 2px 2px 0 #000 !important;
+  background: #090e12 !important;
+  border-radius: 0 !important;
+  image-rendering: pixelated !important;
+  width: 36px !important;
+  height: 36px !important;
+  flex-shrink: 0 !important;
+}
+
+.result-unlock {
+  font-family: 'Press Start 2P', monospace !important;
+  font-size: 9px !important;
+  color: #fef08a !important;
+  text-shadow: 1px 1px 0 #000 !important;
+  margin: 0 !important;
+  line-height: 1.6 !important;
+}
+
+#gameOverScreen .menu-actions {
+  margin-top: 14px !important;
+  gap: 16px !important;
+  display: flex !important;
+  justify-content: center !important;
+  width: 100% !important;
+}
+
+#gameOverScreen .pixel-button {
+  font-family: 'Press Start 2P', monospace !important;
+  font-size: 11px !important;
+  font-weight: 900 !important;
+  border: 3px solid #000 !important;
+  border-radius: 0 !important;
+  min-height: 48px !important;
+  padding: 12px 24px !important;
+  cursor: pointer !important;
+  transition: transform 0.15s ease, background 0.15s ease !important;
+}
+
+#retryButton.pixel-button {
+  background: #22c55e !important;
+  color: #041f10 !important;
+  box-shadow: 0 4px 0 #15803d, 0 5px 0 #000 !important;
+}
+#retryButton.pixel-button:hover {
+  background: #4ade80 !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 6px 0 #15803d, 0 7px 0 #000 !important;
+}
+#retryButton.pixel-button:active {
+  transform: translateY(2px) !important;
+  box-shadow: 0 2px 0 #000 !important;
+}
+
+#gameOverMenuButton.pixel-button {
+  background: #1c2830 !important;
+  color: #e2e8f0 !important;
+  box-shadow: 0 4px 0 #0d151a, 0 5px 0 #000 !important;
+}
+#gameOverMenuButton.pixel-button:hover {
+  background: #283740 !important;
+  color: #ffcf4a !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 6px 0 #0d151a, 0 7px 0 #000 !important;
+}
+#gameOverMenuButton.pixel-button:active {
+  transform: translateY(2px) !important;
+  box-shadow: 0 2px 0 #000 !important;
+}
+
+/* OCULTAR TEXTO SUPERPUESTO DE MAPA Y DIFICULTAD QUE MOLESTABAN */
+#runBar, #runLocation, #runDifficulty {
+  display: none !important;
+}
+
+/* CENTRAR CARTELES Y NOTIFICACIONES */
+.toast {
+  position: absolute !important;
+  left: 50% !important;
+  top: 98px !important;
+  bottom: auto !important;
+  transform: translateX(-50%) !important;
+  border: 3px solid #000 !important;
+  box-shadow: 0 0 16px rgba(255, 204, 0, 0.4), 4px 4px 0 #000 !important;
+  font-size: 10px !important;
+  padding: 8px 18px !important;
+  text-align: center !important;
+  z-index: 100 !important;
+}
+
+/* REGLA MAESTRA DE VISIBILIDAD: Ocultar HUD, barra de jefes y acelerÃ³n en menÃºs y pantallas fuera de juego */
+[hidden],
+.app:not([data-playing="true"]) #bossMeter,
+.app:not([data-playing="true"]) #dashControl,
+.app:not([data-playing="true"]) #combatRail,
+.app:not([data-playing="true"]) #comboMilestones,
+.app:not([data-playing="true"]) #primeBar,
+.app:not([data-playing="true"]) #hud,
+.app[data-playing="true"] .scene-caption,
+.app[data-playing="true"] .menu-panel,
+.boss-meter[hidden],
+.dash-control[hidden],
+.combat-rail[hidden],
+.combo-milestones[hidden],
+.prime-bar[hidden],
+.hud[hidden],
+.lobby-dialogue[hidden] {
+  display: none !important;
+}
+
+/* ESTILO RETRO PIXEL PARA BARRA DE VIDA DE JEFES */
+.boss-meter {
+  position: absolute !important;
+  top: 88px !important;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+  width: 360px !important;
+  max-width: 90vw !important;
+  background: #0d161ae6 !important;
+  border: 3px solid #ff3344 !important;
+  border-bottom: 5px solid #000 !important;
+  box-shadow: 0 0 18px rgba(255, 51, 68, 0.45), 4px 4px 0 #000 !important;
+  padding: 8px 14px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  gap: 6px !important;
+  z-index: 25 !important;
+}
+
+#bossName {
+  font-size: 10px !important;
+  color: #ffcc00 !important;
+  text-shadow: 1px 1px 0 #000 !important;
+  letter-spacing: 1px !important;
+}
+
+.boss-meter .meter {
+  width: 100% !important;
+  height: 12px !important;
+  background: #180508 !important;
+  border: 2px solid #000 !important;
+  border-radius: 0 !important;
+  overflow: hidden !important;
+}
+
+.boss-meter .meter__fill {
+  background: linear-gradient(90deg, #d00000 0%, #e85d04 50%, #ffba08 100%) !important;
+  box-shadow: 0 0 12px rgba(232, 93, 4, 0.85), inset 0 2px 0 rgba(255,255,255,0.4) !important;
+}
+
+/* BOTÃ“N DE ACELERÃ“N RETRO: POSICIONADO AL LADO DE LA BARRA DE HABILIDADES Q, E, R */
+.dash-control {
+  position: absolute !important;
+  left: calc(50% + 72px) !important;
+  right: auto !important;
+  bottom: 9px !important;
+  width: 195px !important;
+  min-width: 195px !important;
+  height: 48px !important;
+  min-height: 48px !important;
+  background: #0d161a !important;
+  border: 3px solid #283b42 !important;
+  border-bottom: 5px solid #000 !important;
+  box-shadow: 4px 4px 0 #000 !important;
+  padding: 5px 10px !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+  z-index: 10 !important;
+  transform: none !important;
+  transition: border-color .15s, box-shadow .15s !important;
+}
+
+/* IluminaciÃ³n fija al activarse (sin vibraciÃ³n ni traslaciÃ³n) */
+.dash-control[data-ready="true"] {
+  border-color: #00ff88 !important;
+  box-shadow: 0 0 14px rgba(0, 255, 136, 0.45), 4px 4px 0 #000 !important;
+}
+
+.dash-control.dash-active {
+  border-color: #00e5ff !important;
+  box-shadow: 0 0 20px rgba(0, 229, 255, 0.85), 4px 4px 0 #000 !important;
+  transform: none !important;
+  animation: none !important;
+}
+
+/* Tecla oscurecida durante cooldown (SIN COLOR) */
+.dash-control:not([data-ready="true"]) kbd,
+.dash-control:not([data-ready="true"]) .dash-key,
+.dash-control.is-cooldown kbd,
+.dash-control.is-cooldown .dash-key {
+  background: #141f24 !important;
+  color: #556873 !important;
+  border: 2px solid #28373f !important;
+  border-bottom: 5px solid #0f161a !important;
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.8) !important;
+  filter: grayscale(1) brightness(0.6) !important;
+  text-shadow: none !important;
+  opacity: 0.65 !important;
+}
+
+/* Tecla ILUMINADA y con COLOR VIVO cuando estÃ¡ lista para usarse */
+.dash-control[data-ready="true"] kbd,
+.dash-control[data-ready="true"] .dash-key,
+.dash-control.is-ready kbd,
+.dash-control.is-ready .dash-key {
+  background: #00ff88 !important;
+  color: #012414 !important;
+  border: 2px solid #a8ffd7 !important;
+  border-bottom: 5px solid #00994d !important;
+  box-shadow: 0 0 16px rgba(0, 255, 136, 0.85), inset 0 2px 0 #ffffff !important;
+  text-shadow: 0 0 2px rgba(0, 255, 136, 0.5) !important;
+  filter: none !important;
+  opacity: 1 !important;
+}
+
+.dash-meter .meter__fill {
+  background: linear-gradient(90deg, #f72585 0%, #7209b7 50%, #4cc9f0 100%) !important;
+  box-shadow: 0 0 8px rgba(76, 201, 240, 0.65), inset 0 2px 0 rgba(255,255,255,0.4) !important;
+}
+
+/* ANIMACIÃ“N DE SUBIDA DE NIVEL EN BARRA DE XP */
+@keyframes xpLevelFlash {
+  0% { filter: brightness(2.2); box-shadow: 0 0 16px #00ff88; }
+  50% { filter: brightness(1.6); box-shadow: 0 0 8px #00e5ff; }
+  100% { filter: brightness(1); box-shadow: none; }
+}
+
+.xp-level-up {
+  animation: xpLevelFlash .6s ease-out !important;
+}
+
+/* QUITAR INDICADOR DE HABILIDADES PASIVAS DE LA PARTIDA (SE CONSULTA EN PAUSA) */
+#combatRail,
+.combat-rail {
+  display: none !important;
+}
+
+/* ESTILOS DE PAUSA: HABILIDADES PASIVAS Y ACTIVAS CON EXPLICACIÃ“N */
+.pause-panel-enhanced {
+  max-width: 760px !important;
+  width: 92% !important;
+  max-height: 88vh !important;
+  overflow-y: auto !important;
+  background: #0d161cfc !important;
+  border: 4px solid #ffcc00 !important;
+  border-bottom: 6px solid #000 !important;
+  box-shadow: 8px 8px 0 #000, 0 0 25px rgba(255, 204, 0, 0.25) !important;
+  padding: 24px 28px !important;
+}
+
+.pause-tabs {
+  display: flex !important;
+  gap: 10px !important;
+  margin: 14px 0 16px !important;
+  border-bottom: 2px solid #20353c !important;
+  padding-bottom: 8px !important;
+}
+
+.pause-tab {
+  font-family: 'Press Start 2P', monospace !important;
+  font-size: 8.5px !important;
+  padding: 8px 14px !important;
+  background: #142228 !important;
+  border: 2px solid #283e47 !important;
+  border-bottom: 4px solid #0f181d !important;
+  color: #8da4a1 !important;
+  cursor: pointer !important;
+  border-radius: 0 !important;
+  transition: all 0.15s ease !important;
+}
+
+.pause-tab:hover {
+  background: #20353d !important;
+  color: #fff !important;
+}
+
+.pause-tab.is-active {
+  background: #ffcc00 !important;
+  color: #000 !important;
+  border-color: #ffe066 !important;
+  border-bottom: 4px solid #b38f00 !important;
+  box-shadow: 2px 2px 0 #000 !important;
+  font-weight: 900 !important;
+}
+
+.pause-view {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 12px !important;
+  margin-bottom: 16px !important;
+}
+
+.pause-abilities-grid {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 10px !important;
+  max-height: 280px !important;
+  overflow-y: auto !important;
+  padding-right: 4px !important;
+}
+
+.pause-card {
+  background: #142127 !important;
+  border: 2px solid #283e47 !important;
+  border-bottom: 4px solid #000 !important;
+  padding: 12px 14px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 6px !important;
+}
+
+.pause-card--evo {
+  border-color: #a855f7 !important;
+  background: #1a1226 !important;
+}
+
+.pause-card-head {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  gap: 8px !important;
+}
+
+.pause-card-title {
+  font-family: 'Press Start 2P', monospace !important;
+  font-size: 10px !important;
+  color: #ffe066 !important;
+}
+
+.pause-card-badge {
+  font-family: 'Press Start 2P', monospace !important;
+  font-size: 7.5px !important;
+  color: #7dd3fc !important;
+}
+
+.pause-badge--evo {
+  color: #c084fc !important;
+}
+
+.pause-level {
+  font-family: 'Press Start 2P', monospace !important;
+  font-size: 8px !important;
+  color: #38ef7d !important;
+}
+
+.pause-level.is-max {
+  color: #ff3b30 !important;
+  font-weight: 900 !important;
+}
+
+.pause-card-desc {
+  font-family: 'Press Start 2P', monospace !important;
+  font-size: 8px !important;
+  line-height: 1.6 !important;
+  color: #94a3b8 !important;
+  margin: 0 !important;
+}
+
+.pause-empty-msg {
+  grid-column: 1 / -1 !important;
+  font-family: 'Press Start 2P', monospace !important;
+  font-size: 9px !important;
+  line-height: 1.7 !important;
+  color: #8da4a1 !important;
+  padding: 24px !important;
+  text-align: center !important;
+  background: #142127 !important;
+  border: 2px dashed #283e47 !important;
+}
+
+.pause-actives-grid {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 10px !important;
+  max-height: 290px !important;
+  overflow-y: auto !important;
+  padding-right: 4px !important;
+}
+
+.pause-active-card {
+  background: #142127 !important;
+  border: 2px solid #283e47 !important;
+  border-bottom: 4px solid #000 !important;
+  padding: 12px 14px !important;
+  display: grid !important;
+  grid-template-columns: 52px 1fr !important;
+  gap: 12px !important;
+  align-items: center !important;
+}
+
+.pause-active-card.is-unlocked {
+  border-left: 6px solid #00ff88 !important;
+}
+
+.pause-active-card.is-locked {
+  border-left: 6px solid #f59e0b !important;
+  opacity: 0.85 !important;
+}
+
+.pause-active-key kbd {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  min-width: 44px !important;
+  height: 34px !important;
+  font-family: 'Press Start 2P', monospace !important;
+  font-size: 10px !important;
+  font-weight: 900 !important;
+  background: #ffcc00 !important;
+  color: #000 !important;
+  border: 2px solid #000 !important;
+  border-bottom: 4px solid #996600 !important;
+  box-shadow: 2px 2px 0 #000 !important;
+  border-radius: 0 !important;
+  white-space: nowrap !important;
+}
+
+.pause-active-info {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 4px !important;
+}
+
+.pause-active-head {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  flex-wrap: wrap !important;
+  gap: 6px !important;
+}
+
+.pause-active-title {
+  font-family: 'Press Start 2P', monospace !important;
+  font-size: 10px !important;
+  color: #fff !important;
+}
+
+.pause-active-status.status--unlocked {
+  font-family: 'Press Start 2P', monospace !important;
+  font-size: 8px !important;
+  color: #00ff88 !important;
+}
+
+.pause-active-status.status--locked {
+  font-family: 'Press Start 2P', monospace !important;
+  font-size: 8px !important;
+  color: #f59e0b !important;
+}
+
+.pause-active-desc {
+  font-family: 'Press Start 2P', monospace !important;
+  font-size: 8px !important;
+  line-height: 1.55 !important;
+  color: #94a3b8 !important;
+  margin: 0 !important;
+}
+
+.build-token:hover, .build-token:focus {
+  transform: translateY(-2px) scale(1.05) !important;
+}
+
+.token-frame {
+  position: relative !important;
+  width: 100% !important;
+  height: 100% !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.token-icon {
+  width: 26px !important;
+  height: 26px !important;
+}
+
+.token-stack {
+  position: absolute !important;
+  right: 2px !important;
+  bottom: 2px !important;
+  font-family: 'Press Start 2P', monospace !important;
+  font-size: 7px !important;
+  font-weight: 900 !important;
+  padding: 2px 3px !important;
+  background: #000 !important;
+  color: #fff !important;
+  border: 1px solid #444 !important;
+  text-align: center !important;
+  line-height: 1 !important;
+}
+
+.token-rarity-gem {
+  position: absolute !important;
+  left: 3px !important;
+  top: 3px !important;
+  width: 6px !important;
+  height: 6px !important;
+  background: #fff !important;
+  box-shadow: 0 0 4px currentColor !important;
+}
+
+/* RAREZAS */
+.build-token--legendary {
+  border-color: #ffe066 !important;
+  border-bottom-color: #b38600 !important;
+  box-shadow: 0 0 10px rgba(255, 224, 102, 0.4), 3px 3px 0 #000 !important;
+  background: #252311 !important;
+}
+.build-token--legendary .token-icon { color: #ffe066 !important; }
+.build-token--legendary .token-rarity-gem { background: #ffe066 !important; color: #ffe066 !important; }
+.build-token--legendary .token-stack { background: #ffe066 !important; color: #1a1600 !important; border-color: #fff !important; }
+
+.build-token--epic {
+  border-color: #c084fc !important;
+  border-bottom-color: #6b21a8 !important;
+  box-shadow: 0 0 10px rgba(192, 132, 252, 0.4), 3px 3px 0 #000 !important;
+  background: #20132b !important;
+}
+.build-token--epic .token-icon { color: #d8b4fe !important; }
+.build-token--epic .token-rarity-gem { background: #c084fc !important; color: #c084fc !important; }
+.build-token--epic .token-stack { background: #c084fc !important; color: #1e0933 !important; border-color: #e9d5ff !important; }
+
+.build-token--rare {
+  border-color: #38bdf8 !important;
+  border-bottom-color: #0369a1 !important;
+  box-shadow: 0 0 8px rgba(56, 189, 248, 0.35), 3px 3px 0 #000 !important;
+  background: #0f1f2e !important;
+}
+.build-token--rare .token-icon { color: #7dd3fc !important; }
+.build-token--rare .token-rarity-gem { background: #38bdf8 !important; color: #38bdf8 !important; }
+.build-token--rare .token-stack { background: #38bdf8 !important; color: #082032 !important; border-color: #bae6fd !important; }
+
+.build-token--common {
+  border-color: #4ade80 !important;
+  border-bottom-color: #15803d !important;
+  box-shadow: 0 0 6px rgba(74, 222, 128, 0.3), 3px 3px 0 #000 !important;
+  background: #0e241b !important;
+}
+.build-token--common .token-icon { color: #86efac !important; }
+.build-token--common .token-rarity-gem { background: #4ade80 !important; color: #4ade80 !important; }
+.build-token--common .token-stack { background: #4ade80 !important; color: #042416 !important; border-color: #bbf7d0 !important; }
+
+.build-token--evolution {
+  border-color: #ff3b69 !important;
+  border-bottom-color: #990026 !important;
+  box-shadow: 0 0 14px rgba(255, 59, 105, 0.6), 3px 3px 0 #000 !important;
+  background: #2a0b16 !important;
+  animation: critPop .4s ease both !important;
+}
+.build-token--evolution .token-icon { color: #ff85a1 !important; }
+.build-token--evolution .token-rarity-gem { background: #ff3b69 !important; color: #ff3b69 !important; }
+.build-token--evolution .token-stack { background: #ff3b69 !important; color: #fff !important; border-color: #ffb3c1 !important; }
+
+/* TOOLTIP RETRO */
+.build-token .build-tooltip {
+  display: none !important;
+  position: absolute !important;
+  left: 72px !important;
+  top: 0 !important;
+  width: 220px !important;
+  padding: 10px 12px !important;
+  background: #0b151a !important;
+  border: 3px solid #2e4852 !important;
+  border-bottom: 5px solid #000 !important;
+  box-shadow: 5px 5px 0 #000 !important;
+  pointer-events: none !important;
+  z-index: 100 !important;
+  text-align: left !important;
+}
+
+.build-token:hover .build-tooltip,
+.build-token:focus .build-tooltip {
+  display: block !important;
+}
+
+.build-tooltip .tooltip-header {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 3px !important;
+  margin-bottom: 6px !important;
+  border-bottom: 2px solid #1e3037 !important;
+  padding-bottom: 5px !important;
+}
+
+.build-tooltip .tooltip-rarity {
+  font-family: 'Press Start 2P', monospace !important;
+  font-size: 7px !important;
+  letter-spacing: 1px !important;
+  color: #ffe066 !important;
+}
+.build-token--legendary .tooltip-rarity { color: #ffe066 !important; }
+.build-token--epic .tooltip-rarity { color: #c084fc !important; }
+.build-token--rare .tooltip-rarity { color: #38bdf8 !important; }
+.build-token--common .tooltip-rarity { color: #4ade80 !important; }
+.build-token--evolution .tooltip-rarity { color: #ff3b69 !important; }
+
+.build-tooltip strong {
+  font-family: 'Press Start 2P', monospace !important;
+  font-size: 9px !important;
+  color: #ffffff !important;
+  line-height: 1.3 !important;
+}
+
+.build-tooltip .tooltip-desc {
+  font-family: 'Segoe UI', system-ui, sans-serif !important;
+  font-size: 11px !important;
+  line-height: 1.4 !important;
+  color: #c9d8dc !important;
+  margin: 0 0 6px 0 !important;
+}
+
+.build-tooltip .tooltip-meta {
+  font-family: 'Press Start 2P', monospace !important;
+  font-size: 7px !important;
+  color: #00ff88 !important;
+}
+
+/* CARTELES TOAST RETRO PIXEL ART */
+.toast {
+  border: 3px solid #000 !important;
+  box-shadow: 5px 5px 0 #000 !important;
+  background: #141f24 !important;
+  color: #ffea75 !important;
+  border-left: 6px solid #ffcc00 !important;
+  font-family: 'Press Start 2P', monospace !important;
+  font-size: 9px !important;
+  letter-spacing: 1px !important;
+  text-shadow: 1px 1px 0 #000;
+  border-radius: 0 !important;
+}
+
+/* ============================================================================
+   PANEL DE MEJORAS DE NIVEL: MÃS GRANDE, DESTACADO Y LEGIBLE (ARCADE CARD STYLE)
+   ============================================================================ */
+.ability-screen {
+  z-index: 45 !important;
+  justify-content: flex-end !important;
+  padding-right: 28px !important;
+}
+
+.ability-panel {
+  width: min(380px, 36vw) !important;
+  max-width: 400px !important;
+  padding: 20px 22px !important;
+  background: #0f1c21fa !important;
+  border: 4px solid #00e5ff !important;
+  border-bottom: 6px solid #000 !important;
+  box-shadow: 6px 6px 0 #000, 0 0 24px rgba(0, 229, 255, 0.25) !important;
+  border-radius: 0 !important;
+}
+
+.ability-panel .eyebrow {
+  font-family: 'Press Start 2P', monospace !important;
+  font-size: 9px !important;
+  color: #38ef7d !important;
+  margin: 0 0 8px 0 !important;
+  letter-spacing: 1px !important;
+}
+
+.ability-panel h2, #abilityTitle {
+  font-family: 'Press Start 2P', monospace !important;
+  font-size: 16px !important;
+  line-height: 1.35 !important;
+  color: #fff !important;
+  margin: 0 0 8px 0 !important;
+  text-shadow: 2px 2px 0 #000 !important;
+}
+
+.ability-help {
+  font-family: 'Press Start 2P', monospace !important;
+  font-size: 8.5px !important;
+  line-height: 1.6 !important;
+  color: #9cb3ad !important;
+  margin-bottom: 14px !important;
+}
+
+.ability-grid {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 12px !important;
+}
+
+.ability-card {
+  position: relative !important;
+  border: 3px solid #20353c !important;
+  border-bottom: 5px solid #000 !important;
+  box-shadow: 4px 4px 0 #000 !important;
+  border-radius: 0 !important;
+  background: #142228 !important;
+  min-height: 95px !important;
+  padding: 14px 50px 14px 16px !important;
+  display: grid !important;
+  grid-template-columns: 36px 1fr !important;
+  gap: 4px 12px !important;
+  align-items: center !important;
+  transition: transform .12s, border-color .15s, box-shadow .15s, background .15s !important;
+  cursor: pointer !important;
+}
+
+.ability-card:hover {
+  transform: translateY(-3px) scale(1.02) !important;
+  border-color: #ffe066 !important;
+  background: #1a2d36 !important;
+  box-shadow: 6px 6px 0 #000, 0 0 16px rgba(255, 224, 102, 0.45) !important;
+}
+
+.ability-card:nth-child(1) { border-left: 6px solid #00e5ff !important; }
+.ability-card:nth-child(2) { border-left: 6px solid #ffd700 !important; }
+.ability-card:nth-child(3) { border-left: 6px solid #00ff88 !important; }
+
+.ability-icon {
+  grid-row: span 3 !important;
+  align-self: center !important;
+  font-size: 30px !important;
+  color: #ffe066 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.ability-card__top {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  font-family: 'Press Start 2P', monospace !important;
+  font-size: 8px !important;
+  color: #7dd3fc !important;
+}
+
+.ability-card strong {
+  font-family: 'Press Start 2P', monospace !important;
+  font-size: 12px !important;
+  line-height: 1.3 !important;
+  color: #fff !important;
+  margin: 3px 0 !important;
+}
+
+.ability-card__description {
+  font-family: 'Press Start 2P', monospace !important;
+  font-size: 9px !important;
+  line-height: 1.6 !important;
+  color: #a8c2b7 !important;
+}
+
+.choice-key {
+  position: absolute !important;
+  right: 14px !important;
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+  width: 32px !important;
+  height: 32px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-family: 'Press Start 2P', monospace !important;
+  font-size: 14px !important;
+  font-weight: 900 !important;
+  border: 2px solid #000 !important;
+  border-bottom: 4px solid #996600 !important;
+  background: #ffcc00 !important;
+  color: #000 !important;
+  box-shadow: 2px 2px 0 #000 !important;
+  border-radius: 0 !important;
+}
+
+/* ============================================================================
+   DEGRADADOS CON COLORES INTENSOS EN INDICADORES DE DAÃ‘O Y COMBOS
+   ============================================================================ */
+.combo-current strong, #comboMultiplier {
+  background: linear-gradient(180deg, #ffffff 0%, #ffe600 35%, #ff5500 70%, #d60036 100%) !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  filter: drop-shadow(0 0 8px rgba(255, 120, 0, 0.75)) drop-shadow(2px 2px 0 #050a0e) !important;
+}
+
+.combo-current span, #comboChain {
+  color: #00ffff !important;
+  text-shadow: 0 0 6px rgba(0, 255, 255, 0.65), 1px 1px 0 #000 !important;
+}
+
+#comboCount[data-active="true"] {
+  background: linear-gradient(180deg, #ffffff 0%, #00ffff 45%, #00e676 100%) !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  filter: drop-shadow(0 0 7px rgba(0, 255, 200, 0.75)) !important;
+}
+
+#comboCount[data-urgent="true"] {
+  background: linear-gradient(180deg, #ffffff 0%, #ffbb00 45%, #ff3b30 100%) !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  filter: drop-shadow(0 0 8px rgba(255, 60, 40, 0.85)) !important;
+}
+
+.combo-steps span[data-reached="true"] {
+  background: linear-gradient(180deg, #ffffff 0%, #38ffff 50%, #00e676 100%) !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  filter: drop-shadow(0 0 6px rgba(0, 230, 118, 0.85)) !important;
+}
+
+.combo-steps span[data-next="true"] {
+  background: linear-gradient(180deg, #ffffff 0%, #ffbe3b 40%, #ff5500 100%) !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  filter: drop-shadow(0 0 6px rgba(255, 110, 0, 0.75)) !important;
+}
+
+/* ============================================================================
+   PAUSA: MENÚ CLÁSICO RETRO CENTRADO (ORIGINAL)
+   ============================================================================ */
+.pause-screen {
+  background: rgba(10, 16, 20, 0.92) !important;
+  backdrop-filter: blur(6px) !important;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 24px !important;
+  z-index: 99;
+}
+
+.pause-screen.screen--active {
+  display: flex !important;
+}
+
+.pause-screen .pause-panel {
+  max-width: 580px !important;
+  width: 90% !important;
+  margin: auto !important;
+  background: #0d161cfc !important;
+  border: 4px solid var(--pause-border, #ffcc00) !important;
+  border-bottom: 6px solid #000 !important;
+  box-shadow: 8px 8px 0 #000, 0 0 38px var(--pause-glow, rgba(255, 204, 0, 0.45)), inset 0 0 20px rgba(0, 0, 0, 0.6) !important;
+  padding: 32px 36px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 16px !important;
+  text-align: left !important;
+  animation: pauseGlowPulse 2.5s ease-in-out infinite alternate !important;
+}
+
+@keyframes pauseGlowPulse {
+  0% {
+    box-shadow: 8px 8px 0 #000, 0 0 26px var(--pause-glow, rgba(255, 204, 0, 0.35)), inset 0 0 16px rgba(0, 0, 0, 0.6);
+  }
+  100% {
+    box-shadow: 8px 8px 0 #000, 0 0 46px var(--pause-glow, rgba(255, 204, 0, 0.65)), inset 0 0 24px rgba(0, 0, 0, 0.4);
+  }
+}
+
+.pause-screen .pause-panel .eyebrow {
+  color: #7dd3fc !important;
+  font-family: 'Press Start 2P', monospace !important;
+  font-size: 8.5px !important;
+  letter-spacing: 2px !important;
+  margin: 0 !important;
+}
+
+.pause-screen .pause-panel h2 {
+  font-family: 'Press Start 2P', monospace !important;
+  font-size: 26px !important;
+  line-height: 1.3 !important;
+  color: #fff !important;
+  text-shadow: 3px 3px 0 #000 !important;
+  margin: 0 !important;
+}
+
+.pause-screen .pause-panel .pause-goal {
+  color: #38ef7d !important;
+  font-family: 'Press Start 2P', monospace !important;
+  font-size: 9px !important;
+  line-height: 1.7 !important;
+  background: #142127 !important;
+  border: 2px solid #283e47 !important;
+  padding: 12px 14px !important;
+  margin: 0 !important;
+}
+
+.pause-screen .pause-panel h3 {
+  font-family: 'Press Start 2P', monospace !important;
+  font-size: 11px !important;
+  color: #ffe066 !important;
+  margin: 8px 0 0 !important;
+}
+
+.pause-screen .build-list {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 8px !important;
+  max-height: 160px !important;
+  overflow-y: auto !important;
+  padding: 6px 2px !important;
+}
+
+.pause-screen .build-list span {
+  font-family: 'Press Start 2P', monospace !important;
+  font-size: 8px !important;
+  padding: 8px 12px !important;
+  background: #142127 !important;
+  border: 2px solid #283e47 !important;
+  border-bottom: 3px solid #000 !important;
+  color: #cbd5e1 !important;
+}
+
+.pause-screen .build-list .build-evo {
+  color: #ffe066 !important;
+  border-color: #f59e0b !important;
+  background: #231b12 !important;
+}
+
+.pause-screen .pause-panel .menu-actions {
+  display: flex !important;
+  gap: 16px !important;
+  margin-top: 14px !important;
+  position: static !important;
+  background: transparent !important;
+  border: 0 !important;
+  padding: 0 !important;
+}
+
+.pause-screen .pause-panel .menu-actions button {
+  flex: 1 !important;
+  min-height: 48px !important;
+  font-size: 9.5px !important;
+}
+
+/* ============================================================================
+   LOBBY: ELIMINACIÓN DE BARRA DE OPCIONES INFERIOR (OBLIGAR MOVIMIENTO)
+   ============================================================================ */
+.lobby-screen {
+  grid-template-rows: 64px minmax(0, 1fr) !important;
+}
+
+.lobby-nav {
+  display: none !important;
+}
+
+/* ============================================================================
+   BOTONES PIXEL ART RETRO (ESTILO IMAGEN 2: VOLVER / ARCADE SLATE 3D SHADOW)
+   ============================================================================ */
+.pixel-button,
+.btn-arcade,
+.pause-screen .menu-actions button,
+.gameOver-panel-enhanced .menu-actions button,
+.menu-actions .pixel-button,
+.menu-links .pixel-button {
+  border-radius: 0 !important;
+  background: #172328 !important;
+  border: 2px solid #283e47 !important;
+  color: #ffffff !important;
+  font-family: 'Press Start 2P', monospace !important;
+  font-size: 9.5px !important;
+  font-weight: 900 !important;
+  letter-spacing: 0.5px !important;
+  padding: 13px 18px !important;
+  min-height: 46px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 10px !important;
+  box-shadow: 4px 4px 0 #000000 !important;
+  cursor: pointer !important;
+  text-transform: uppercase !important;
+  transition: transform 0.1s ease, background 0.15s ease, box-shadow 0.1s ease, border-color 0.15s ease !important;
+}
+
+.pixel-button:hover,
+.btn-arcade:hover,
+.pause-screen .menu-actions button:hover,
+.gameOver-panel-enhanced .menu-actions button:hover,
+.menu-actions .pixel-button:hover,
+.menu-links .pixel-button:hover {
+  background: #20353d !important;
+  color: #ffe066 !important;
+  border-color: #3f606e !important;
+  transform: translate(-1px, -1px) !important;
+  box-shadow: 5px 5px 0 #000000 !important;
+}
+
+.pixel-button:active,
+.btn-arcade:active,
+.pause-screen .menu-actions button:active,
+.gameOver-panel-enhanced .menu-actions button:active,
+.menu-actions .pixel-button:active,
+.menu-links .pixel-button:active {
+  transform: translate(2px, 2px) !important;
+  box-shadow: 2px 2px 0 #000000 !important;
+}
+
+.pause-screen #resumeButton,
+.pause-screen #abandonButton {
+  border-radius: 0 !important;
+  background: #172328 !important;
+  border: 2px solid #283e47 !important;
+  color: #ffffff !important;
+  font-family: 'Press Start 2P', monospace !important;
+  font-size: 9.5px !important;
+  font-weight: 900 !important;
+  letter-spacing: 0.5px !important;
+  padding: 13px 18px !important;
+  min-height: 48px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 10px !important;
+  box-shadow: 4px 4px 0 #000000 !important;
+  cursor: pointer !important;
+  text-transform: uppercase !important;
+  transition: transform 0.1s ease, background 0.15s ease, box-shadow 0.1s ease, border-color 0.15s ease !important;
+}
+
+.pause-screen #resumeButton:hover,
+.pause-screen #abandonButton:hover {
+  background: #20353d !important;
+  color: #ffe066 !important;
+  border-color: #3f606e !important;
+  transform: translate(-1px, -1px) !important;
+  box-shadow: 5px 5px 0 #000000 !important;
+}
+
+.pause-screen #resumeButton:active,
+.pause-screen #abandonButton:active {
+  transform: translate(2px, 2px) !important;
+  box-shadow: 2px 2px 0 #000000 !important;
+}
+
+.pause-screen #resumeButton span {
+  color: #ffe066 !important;
+  font-size: 11px !important;
+}
+
+.menu-links {
+  display: flex !important;
+  gap: 12px !important;
+  flex-wrap: wrap !important;
+  margin-top: 14px !important;
+}
+
+/* ============================================================================
+   BOTONES DESTACADOS: INICIAR PARTIDA Y COMPRAR EN TIENDA (DEGRADADO BRILLANTE PIXEL ART)
+   ============================================================================ */
+#playButton,
+#startRunButton {
+  background: linear-gradient(180deg, #ffe066 0%, #f59e0b 45%, #d97706 85%, #b45309 100%) !important;
+  border: 3px solid #000000 !important;
+  border-top: 3px solid #fef08a !important;
+  border-bottom: 5px solid #78350f !important;
+  color: #171203 !important;
+  font-family: 'Press Start 2P', monospace !important;
+  font-size: 11px !important;
+  font-weight: 900 !important;
+  letter-spacing: 0.5px !important;
+  text-shadow: 1px 1px 0 #fde68a !important;
+  box-shadow: 0 0 20px rgba(245, 158, 11, 0.55), 4px 4px 0 #000000 !important;
+  padding: 13px 22px !important;
+  min-height: 48px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 12px !important;
+  cursor: pointer !important;
+  text-transform: uppercase !important;
+  animation: playBtnPulse 3s ease-in-out infinite alternate !important;
+  transition: transform 0.1s ease, filter 0.15s ease, box-shadow 0.15s ease !important;
+}
+
+#playButton:hover,
+#startRunButton:hover {
+  filter: brightness(1.12) !important;
+  transform: translate(-1px, -1px) !important;
+  box-shadow: 0 0 28px rgba(251, 191, 36, 0.8), 5px 5px 0 #000000 !important;
+  color: #000000 !important;
+}
+
+#playButton:active,
+#startRunButton:active {
+  transform: translate(2px, 2px) !important;
+  box-shadow: 0 0 10px rgba(245, 158, 11, 0.4), 2px 2px 0 #000000 !important;
+}
+
+@keyframes playBtnPulse {
+  0% {
+    box-shadow: 0 0 14px rgba(245, 158, 11, 0.45), 4px 4px 0 #000000;
+  }
+  100% {
+    box-shadow: 0 0 26px rgba(245, 158, 11, 0.75), 4px 4px 0 #000000;
+  }
+}
+
+:is(#shopScreen, #domiScreen) .purchase-button:not(:disabled) {
+  background: linear-gradient(180deg, #34d399 0%, #10b981 45%, #059669 85%, #047857 100%) !important;
+  border: 3px solid #000000 !important;
+  border-top: 3px solid #a7f3d0 !important;
+  border-bottom: 5px solid #064e3b !important;
+  color: #022c22 !important;
+  font-family: 'Press Start 2P', monospace !important;
+  font-size: 9px !important;
+  font-weight: 900 !important;
+  letter-spacing: 0.5px !important;
+  text-shadow: 1px 1px 0 #6ee7b7 !important;
+  box-shadow: 0 0 20px rgba(16, 185, 129, 0.6), 4px 4px 0 #000000 !important;
+  padding: 13px 14px !important;
+  min-height: 48px !important;
+  cursor: pointer !important;
+  text-transform: uppercase !important;
+  transition: transform 0.1s ease, filter 0.15s ease, box-shadow 0.15s ease !important;
+}
+
+:is(#shopScreen, #domiScreen) .purchase-button:not(:disabled):hover {
+  filter: brightness(1.15) !important;
+  transform: translate(-1px, -1px) !important;
+  box-shadow: 0 0 28px rgba(16, 185, 129, 0.85), 5px 5px 0 #000000 !important;
+  color: #011f18 !important;
+}
+
+:is(#shopScreen, #domiScreen) .purchase-button:not(:disabled):active {
+  transform: translate(2px, 2px) !important;
+  box-shadow: 0 0 10px rgba(16, 185, 129, 0.4), 2px 2px 0 #000000 !important;
+}
+
+:is(#shopScreen, #domiScreen) .purchase-button:disabled {
+  background: #19272d !important;
+  border: 2px solid #283e47 !important;
+  border-bottom: 4px solid #10191c !important;
+  color: #64748b !important;
+  font-family: 'Press Start 2P', monospace !important;
+  font-size: 9px !important;
+  box-shadow: 3px 3px 0 #000000 !important;
+  opacity: 0.85 !important;
+}
+
+/* ============================================================================
+   ACELERÓN (ESPACIO): CASILLA METÁLICA OSCURA CON TECLA 3D (IMAGEN 1) Y RAYO CIAN/ORO
+   ============================================================================ */
+#dashControl[hidden],
+[hidden]#dashControl,
+.app:not([data-playing="true"]) #dashControl,
+.app[data-screen="pauseScreen"] #dashControl,
+.app:not([data-screen="playScreen"]) #dashControl {
+  display: none !important;
+}
+
+#dashControl.dash-control.prime-slot.dash-box-pixel:not([hidden]) {
+  position: absolute !important;
+  left: calc(50% + 115px) !important;
+  right: auto !important;
+  bottom: 8px !important;
+  transform: translateX(-50%) !important;
+  width: 96px !important;
+  height: 58px !important;
+  min-height: 58px !important;
+  padding: 4px !important;
+  box-sizing: border-box !important;
+  background: #0d1519 !important;
+  border: 3px solid #233c42 !important;
+  border-bottom: 4px solid #0d171a !important;
+  box-shadow: 4px 4px 0 #000, inset 0 0 0 1px #33565e !important;
+  cursor: pointer !important;
+  z-index: 3 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: space-between !important;
+  overflow: hidden !important;
+}
+
+.dash-inner-frame {
+  display: flex !important;
+  align-items: center !important;
+  gap: 5px !important;
+  width: 100% !important;
+  height: 42px !important;
+}
+
+/* Tecla estilo Imagen 1 dentro del acelerón */
+#dashControl .pixel-key.dash-key {
+  width: 38px !important;
+  height: 34px !important;
+  font-size: 8px !important;
+  line-height: 1 !important;
+  flex: none !important;
+}
+
+/* Lado derecho: icono de habilidad con rayo cian/amarillo en recuadro oscuro */
+.dash-icon-well {
+  flex: 1 !important;
+  height: 38px !important;
+  background: #080f13 !important;
+  border: 2px solid #163038 !important;
+  box-shadow: inset 2px 2px 0 #020507 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  position: relative !important;
+  overflow: hidden !important;
+}
+
+.dash-bolt-svg {
+  filter: drop-shadow(0 0 4px rgba(34, 211, 238, 0.75));
+  transition: transform 0.15s ease !important;
+}
+
+.dash-cd-timer {
+  position: absolute !important;
+  inset: 0 !important;
+  display: none !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-family: 'Press Start 2P', monospace !important;
+  font-size: 7px !important;
+  color: #ffe066 !important;
+  text-shadow: 1px 1px 0 #000, 0 0 3px #000 !important;
+  background: rgba(8, 15, 19, 0.82) !important;
+}
+
+/* Barra de carga en fondo inferior */
+#dashControl .dash-meter {
+  display: block !important;
+  height: 4px !important;
+  width: 100% !important;
+  background: #111d22 !important;
+  border-top: 1px solid #1c3238 !important;
+  position: relative !important;
+}
+
+#dashControl .dash-meter .meter {
+  display: block !important;
+  height: 100% !important;
+  width: 100% !important;
+  background: transparent !important;
+  position: relative !important;
+}
+
+#dashControl .dash-meter #dashFill {
+  position: absolute !important;
+  left: 0 !important;
+  top: 0 !important;
+  bottom: 0 !important;
+  background: linear-gradient(90deg, #38bdf8, #ffe066) !important;
+  box-shadow: 0 0 6px #38bdf8 !important;
+  transition: width 0.05s linear !important;
+}
+
+/* Estado Disponible (Ready) */
+#dashControl[data-status="ready"],
+#dashControl[data-ready="true"] {
+  border-color: #38bdf8 !important;
+  box-shadow: 4px 4px 0 #000, 0 0 14px rgba(56, 189, 248, 0.5), inset 0 0 0 1px #67e8f9 !important;
+}
+
+#dashControl[data-status="ready"] .dash-bolt-svg {
+  transform: scale(1.08) !important;
+}
+
+/* Estado Recarga (Cooldown) */
+#dashControl[data-status="cooldown"],
+#dashControl:not([data-ready="true"]) {
+  border-color: #233c42 !important;
+  opacity: 0.88 !important;
+}
+
+#dashControl[data-status="cooldown"] .dash-cd-timer,
+#dashControl:not([data-ready="true"]) .dash-cd-timer {
+  display: flex !important;
+}
+
+/* ============================================================================
+   SEÑOR DOMI: INTERFAZ PIXEL ART 2D RETRO (ESPACIOSA, IMAGEN 3 Y TOOLTIPS)
+   ============================================================================ */
+#domiScreen .shop-panel {
+  max-width: 1260px !important;
+  width: 95% !important;
+  margin: 0 auto !important;
+  padding: 10px 0 40px !important;
+}
+
+#domiScreen .shop-tabs {
+  display: flex !important;
+  gap: 12px !important;
+  margin: 0 0 20px !important;
+  border-bottom: 2px solid #233d45 !important;
+  padding-bottom: 12px !important;
+}
+
+#domiScreen .shop-tabs button {
+  padding: 10px 20px !important;
+  font-family: 'Press Start 2P', monospace !important;
+  font-size: 8.5px !important;
+  border: 2px solid #2d474e !important;
+  border-bottom: 4px solid #101c20 !important;
+  background: #111e24 !important;
+  color: #8da4a1 !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+  cursor: pointer !important;
+  box-shadow: 3px 3px 0 #000 !important;
+  transition: all 0.15s ease !important;
+}
+
+#domiScreen .shop-tabs button:hover {
+  background: #19313a !important;
+  color: #fff !important;
+  border-color: #486f7a !important;
+}
+
+#domiScreen .shop-tabs button.active {
+  background: #06b6d4 !important;
+  color: #06151a !important;
+  border-color: #67e8f9 !important;
+  border-bottom: 4px solid #0e7490 !important;
+  box-shadow: 3px 3px 0 #000, 0 0 14px rgba(6, 182, 212, 0.4) !important;
+  font-weight: 900 !important;
+}
+
+.domi-content-area {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 20px !important;
+  min-height: 560px !important;
+  width: 100% !important;
+}
+
+/* --------------------------------------------------------------------------
+   1. MISIONES (ESPACIOSAS EN HORIZONTAL, CON RECOMPENSA TOOLTIP PIXEL ART)
+   -------------------------------------------------------------------------- */
+.domi-missions-header {
+  background: #0f181d !important;
+  border: 2px solid #22424b !important;
+  border-bottom: 4px solid #0b1317 !important;
+  box-shadow: 4px 4px 0 #000 !important;
+  padding: 16px 22px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 10px !important;
+}
+
+.domi-progress-title-row {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+}
+
+.domi-progress-label {
+  font-family: 'Press Start 2P', monospace !important;
+  font-size: 10px !important;
+  color: #67e8f9 !important;
+  letter-spacing: 1px !important;
+}
+
+.domi-progress-count {
+  font-family: 'Press Start 2P', monospace !important;
+  font-size: 11px !important;
+  color: #ffe066 !important;
+}
+
+/* Barra de progreso gruesa en cian y dorado */
+.domi-progress-bar-thick {
+  height: 20px !important;
+  background: #070d10 !important;
+  border: 2px solid #1a343b !important;
+  box-shadow: inset 2px 2px 0 #000 !important;
+  position: relative !important;
+  overflow: hidden !important;
+}
+
+.domi-progress-fill-thick {
+  height: 100% !important;
+  background: linear-gradient(90deg, #06b6d4 0%, #22d3ee 60%, #fbbf24 100%) !important;
+  box-shadow: 0 0 10px rgba(34, 211, 238, 0.6) !important;
+  transition: width 0.3s ease !important;
+}
+
+.domi-missions-list {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 14px !important;
+  max-height: none !important;
+  overflow: visible !important;
+}
+
+.domi-mission-card {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 20px !important;
+  min-height: 78px !important;
+  background: #111a1f !important;
+  border: 2px solid #1e3840 !important;
+  border-left: 6px solid #22d3ee !important;
+  border-bottom: 4px solid #080e12 !important;
+  box-shadow: 4px 4px 0 #000 !important;
+  padding: 14px 22px !important;
+  box-sizing: border-box !important;
+  transition: transform 0.15s ease, border-color 0.15s ease !important;
+}
+
+.domi-mission-card.is-done {
+  border-color: #fbbf24 !important;
+  border-left-color: #facc15 !important;
+  box-shadow: 4px 4px 0 #000, 0 0 12px rgba(251, 191, 36, 0.25) !important;
+}
+
+.domi-mission-card.is-claimed {
+  opacity: 0.78 !important;
+  border-left-color: #4ade80 !important;
+}
+
+.domi-mission-icon-box {
+  flex: none !important;
+  width: 46px !important;
+  height: 46px !important;
+  background: #080f13 !important;
+  border: 2px solid #1c333a !important;
+  box-shadow: inset 2px 2px 0 #000 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.domi-mission-map-box {
+  width: 68px !important;
+  height: 46px !important;
+  border: 2px solid #38bdf8 !important;
+  box-shadow: 2px 2px 0 #000, 0 0 8px rgba(56, 189, 248, 0.25) !important;
+  overflow: hidden !important;
+  padding: 0 !important;
+  background: #000 !important;
+}
+
+.domi-mission-map-canvas {
+  width: 68px !important;
+  height: 46px !important;
+  display: block !important;
+  image-rendering: pixelated !important;
+  image-rendering: crisp-edges !important;
+}
+
+/* Recompensas y misiones por nivel con tono morado */
+.domi-mission-card--level {
+  border-left-color: #c084fc !important;
+}
+.domi-mission-card--level:hover {
+  border-color: #a855f7 !important;
+  border-left-color: #c084fc !important;
+  box-shadow: 4px 4px 0 #000, 0 0 16px rgba(192, 132, 252, 0.45) !important;
+  background: #190924 !important;
+}
+
+.domi-mission-card--level .domi-mission-icon-box {
+  background: #17051f !important;
+  border-color: #c084fc !important;
+  box-shadow: inset 2px 2px 0 #000, 0 0 8px rgba(192, 132, 252, 0.3) !important;
+}
+
+.domi-mission-card--level .domi-mission-title {
+  color: #c084fc !important;
+}
+
+.domi-mission-card--level .domi-mini-fill {
+  background: linear-gradient(90deg, #9333ea, #c084fc) !important;
+}
+
+.domi-mission-card--level .domi-mission-ratio {
+  color: #e9d5ff !important;
+}
+
+.domi-mission-center {
+  flex: 1 !important;
+  min-width: 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 6px !important;
+}
+
+.domi-mission-head {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 12px !important;
+}
+
+.domi-mission-title {
+  font-family: 'Press Start 2P', monospace !important;
+  font-size: 10px !important;
+  color: #ffe066 !important;
+  letter-spacing: 0.5px !important;
+}
+
+.domi-mission-ratio {
+  font-family: 'Press Start 2P', monospace !important;
+  font-size: 8px !important;
+  color: #67e8f9 !important;
+}
+
+.domi-mission-desc {
+  font-size: 12.5px !important;
+  line-height: 1.4 !important;
+  color: #9cb5be !important;
+  margin: 0 !important;
+}
+
+.domi-mission-mini-bar {
+  height: 8px !important;
+  background: #091216 !important;
+  border: 1px solid #193036 !important;
+  position: relative !important;
+  overflow: hidden !important;
+}
+
+.domi-mini-fill {
+  height: 100% !important;
+  background: linear-gradient(90deg, #06b6d4, #38bdf8) !important;
+  transition: width 0.25s ease !important;
+}
+
+.domi-mission-card.is-done .domi-mini-fill {
+  background: linear-gradient(90deg, #38bdf8, #fbbf24) !important;
+}
+
+.domi-mission-right {
+  flex: none !important;
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  gap: 14px !important;
+  min-width: 260px !important;
+  justify-content: flex-end !important;
+}
+
+/* Tooltip pixel art sobre la recompensa */
+.domi-reward-wrap {
+  position: relative !important;
+  display: inline-flex !important;
+  align-items: center !important;
+}
+
+.domi-reward-badge {
+  font-family: 'Press Start 2P', monospace !important;
+  font-size: 8px !important;
+  padding: 8px 12px !important;
+  background: #2a2010 !important;
+  color: #facc15 !important;
+  border: 2px solid #b48528 !important;
+  box-shadow: 3px 3px 0 #000 !important;
+  white-space: nowrap !important;
+  cursor: help !important;
+  transition: background 0.15s ease, border-color 0.15s ease !important;
+}
+
+.domi-reward-wrap:hover .domi-reward-badge {
+  background: #3b2e15 !important;
+  border-color: #ffd000 !important;
+}
+
+.domi-pixel-tooltip {
+  position: absolute !important;
+  bottom: calc(100% + 8px) !important;
+  right: 0 !important;
+  background: #080f13 !important;
+  border: 2px solid #ffe066 !important;
+  box-shadow: 4px 4px 0 #000 !important;
+  color: #ffe066 !important;
+  font-family: 'Press Start 2P', monospace !important;
+  font-size: 7.5px !important;
+  line-height: 1.6 !important;
+  padding: 8px 12px !important;
+  white-space: nowrap !important;
+  pointer-events: none !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+  transform: translateY(4px) !important;
+  transition: opacity 0.15s ease, transform 0.15s ease !important;
+  z-index: 30 !important;
+}
+
+.domi-reward-wrap:hover .domi-pixel-tooltip {
+  opacity: 1 !important;
+  visibility: visible !important;
+  transform: translateY(0) !important;
+}
+
+.domi-claim-btn {
+  font-size: 8.5px !important;
+  padding: 10px 14px !important;
+  min-width: 130px !important;
+}
+
+.pixel-button--claim {
+  background: #f59e0b !important;
+  color: #171003 !important;
+  border-color: #fde047 !important;
+  border-bottom-color: #b45309 !important;
+  box-shadow: 4px 4px 0 #000, 0 0 12px rgba(245, 158, 11, 0.45) !important;
+  animation: pulse-claim 1.2s infinite ease-in-out !important;
+}
+
+@keyframes pulse-claim {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.03); }
+}
+
+.btn-claimed {
+  background: #14241d !important;
+  color: #86efac !important;
+  border-color: #22543d !important;
+}
+
+.btn-locked {
+  background: #192329 !important;
+  color: #64748b !important;
+  border-color: #334155 !important;
+}
+
+/* --------------------------------------------------------------------------
+   2. CONSEJOS (TICKETS DE RECETA)
+   -------------------------------------------------------------------------- */
+.domi-advice-filters {
+  display: flex !important;
+  gap: 10px !important;
+  margin-bottom: 8px !important;
+}
+
+.domi-advice-filters .btn-filter {
+  font-size: 8px !important;
+  padding: 8px 16px !important;
+  background: #132026 !important;
+  color: #9cb3be !important;
+  border-color: #2b454e !important;
+}
+
+.domi-advice-filters .btn-filter.active {
+  background: #0284c7 !important;
+  color: #fff !important;
+  border-color: #38bdf8 !important;
+  border-bottom-color: #0369a1 !important;
+  box-shadow: 3px 3px 0 #000, 0 0 10px rgba(56, 189, 248, 0.4) !important;
+}
+
+.domi-tickets-list {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 14px !important;
+}
+
+.domi-recipe-ticket {
+  display: flex !important;
+  gap: 16px !important;
+  align-items: center !important;
+  background: #0e171b !important;
+  border: 2px solid #1c353c !important;
+  border-left: 6px solid #22d3ee !important;
+  border-bottom: 4px solid #060b0e !important;
+  box-shadow: 4px 4px 0 #000 !important;
+  padding: 16px 20px !important;
+  position: relative !important;
+}
+
+.domi-ticket-art {
+  flex: none !important;
+  width: 52px !important;
+  height: 52px !important;
+  background: #080e12 !important;
+  border: 2px solid #183036 !important;
+  box-shadow: inset 2px 2px 0 #000 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.domi-ticket-body {
+  flex: 1 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 6px !important;
+}
+
+.domi-ticket-badge-row {
+  display: flex !important;
+  gap: 8px !important;
+  align-items: center !important;
+}
+
+.ticket-tag {
+  font-family: 'Press Start 2P', monospace !important;
+  font-size: 7.5px !important;
+  color: #22d3ee !important;
+}
+
+.ticket-cat {
+  font-family: 'Press Start 2P', monospace !important;
+  font-size: 6.5px !important;
+  padding: 3px 6px !important;
+  background: #1b2f36 !important;
+  color: #ffe066 !important;
+  border: 1px solid #375963 !important;
+}
+
+.domi-ticket-title {
+  font-family: 'Press Start 2P', monospace !important;
+  font-size: 10px !important;
+  color: #f8fafc !important;
+  margin: 0 !important;
+}
+
+.domi-ticket-desc {
+  font-size: 13px !important;
+  line-height: 1.5 !important;
+  color: #94abb5 !important;
+  margin: 0 !important;
+}
+
+/* --------------------------------------------------------------------------
+   3. COLECCIÓN (GRILLA 4x3 + PEDESTAL DERECHO)
+   -------------------------------------------------------------------------- */
+.domi-collection-layout {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1.4fr) minmax(320px, 380px) !important;
+  gap: 28px !important;
+  align-items: start !important;
+}
+
+.domi-grid-4x3 {
+  display: grid !important;
+  grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+  gap: 12px !important;
+}
+
+.domi-slot {
+  aspect-ratio: 1 / 1 !important;
+  background: #0c1519 !important;
+  border: 3px solid #1c3238 !important;
+  border-bottom: 4px solid #060b0e !important;
+  box-shadow: 3px 3px 0 #000, inset 0 0 0 1px #050a0d !important;
+  cursor: pointer !important;
+  position: relative !important;
+  padding: 6px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  transition: all 0.15s ease !important;
+}
+
+.domi-slot-canvas {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: contain !important;
+}
+
+.domi-slot.is-unlocked {
+  border-color: #2b5159 !important;
+}
+
+.domi-slot.is-unlocked:hover {
+  border-color: #38bdf8 !important;
+  box-shadow: 3px 3px 0 #000, 0 0 10px rgba(56, 189, 248, 0.4) !important;
+  transform: translateY(-2px) !important;
+}
+
+.domi-slot.is-selected {
+  border-color: #facc15 !important;
+  border-bottom-color: #ca8a04 !important;
+  box-shadow: 3px 3px 0 #000, 0 0 14px rgba(250, 204, 21, 0.45) !important;
+  background: #14232a !important;
+}
+
+.domi-slot.is-locked {
+  opacity: 0.65 !important;
+  border-color: #162428 !important;
+}
+
+.domi-slot.is-locked:hover {
+  opacity: 0.85 !important;
+  border-color: #2a4148 !important;
+}
+
+.domi-slot-lock {
+  position: absolute !important;
+  inset: 0 !important;
+  background: rgba(6, 11, 14, 0.72) !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 4px !important;
+}
+
+.domi-lock-label {
+  font-family: 'Press Start 2P', monospace !important;
+  font-size: 6px !important;
+  color: #ffe066 !important;
+  background: #111e24 !important;
+  padding: 2px 4px !important;
+  border: 1px solid #334d56 !important;
+}
+
+/* Panel de pedestal derecho */
+.domi-pedestal-panel {
+  background: #0e171b !important;
+  border: 2px solid #24414a !important;
+  border-top: 4px solid #06b6d4 !important;
+  border-bottom: 5px solid #060b0e !important;
+  box-shadow: 6px 6px 0 #000 !important;
+  position: sticky !important;
+  top: 16px !important;
+  display: flex !important;
+  flex-direction: column !important;
+}
+
+.domi-pedestal-stage {
+  position: relative !important;
+  background: #080f13 !important;
+  border-bottom: 2px solid #1c3238 !important;
+}
+
+.domi-pedestal-stage canvas {
+  width: 100% !important;
+  max-height: 200px !important;
+  display: block !important;
+}
+
+.domi-pedestal-cat-badge {
+  position: absolute !important;
+  top: 8px !important;
+  right: 8px !important;
+  font-family: 'Press Start 2P', monospace !important;
+  font-size: 6.5px !important;
+  padding: 4px 8px !important;
+  background: #0e1e24 !important;
+  color: #67e8f9 !important;
+  border: 1px solid #234c56 !important;
+  box-shadow: 2px 2px 0 #000 !important;
+}
+
+.domi-pedestal-body {
+  padding: 18px 20px 10px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 10px !important;
+}
+
+.domi-pedestal-title {
+  font-family: 'Press Start 2P', monospace !important;
+  font-size: 12px !important;
+  color: #ffe066 !important;
+  letter-spacing: 0.5px !important;
+}
+
+.domi-pedestal-desc {
+  font-size: 13px !important;
+  line-height: 1.5 !important;
+  color: #9cb5be !important;
+  margin: 0 !important;
+}
+
+.domi-pedestal-stats {
+  display: grid !important;
+  grid-template-columns: repeat(3, 1fr) !important;
+  gap: 6px !important;
+  margin-top: 4px !important;
+}
+
+.stat-box {
+  background: #070e11 !important;
+  border: 1px solid #1c333a !important;
+  padding: 8px 4px !important;
+  text-align: center !important;
+}
+
+.stat-box small {
+  font-family: 'Press Start 2P', monospace !important;
+  font-size: 6px !important;
+  color: #64748b !important;
+  display: block !important;
+  margin-bottom: 4px !important;
+}
+
+.stat-box b {
+  font-family: 'Press Start 2P', monospace !important;
+  font-size: 9px !important;
+  color: #22d3ee !important;
+}
+
+.stat-perk {
+  background: #0a1317 !important;
+  border-left: 3px solid #fbbf24 !important;
+  padding: 8px 10px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 3px !important;
+}
+
+.stat-perk small {
+  font-family: 'Press Start 2P', monospace !important;
+  font-size: 6px !important;
+  color: #94a3b8 !important;
+}
+
+.stat-perk b {
+  font-family: 'Press Start 2P', monospace !important;
+  font-size: 8px !important;
+  color: #facc15 !important;
+}
+
+.domi-pedestal-action {
+  padding: 10px 20px 20px !important;
+}
+
+.domi-action-btn {
+  width: 100% !important;
+  font-size: 9px !important;
+  padding: 12px !important;
+}
+
+@media (max-width: 900px) {
+  .domi-collection-layout {
+    grid-template-columns: 1fr !important;
+  }
+  .domi-grid-4x3 {
+    grid-template-columns: repeat(3, 1fr) !important;
+  }
+}
+
+
+/* ============================================================================
+   SECCIÓN GANASTE CON FINAL.GIF Y RETRO TOASTS CON MINIATURA DE ITEM
+   ============================================================================ */
+
+/* Eliminación del elemento de combo en el HUD para despejar el espacio del minimapa */
+#comboMilestones,
+.combo-milestones,
+#comboCount {
+  display: none !important;
+}
+
+/* 1. SECCIÓN GANASTE (VICTORY CELEBRATION) - PIXEL ART PURO SIN LEDS */
+[hidden],
+#victoryCelebration[hidden],
+.victory-celebration[hidden] {
+  display: none !important;
+}
+
+#victoryCelebration,
+.victory-celebration {
+  display: none !important;
+}
+
+.gameOver-panel-enhanced.is-legendary-lava-victory #victoryCelebration,
+.gameOver-panel-enhanced.is-legendary-lava-victory .victory-celebration {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  margin: 10px auto 20px !important;
+  width: 100% !important;
+  max-width: 660px !important;
+  padding: 0 !important;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+.gameOver-panel-enhanced:not(.is-legendary-lava-victory) #victoryCelebration,
+.gameOver-panel-enhanced:not(.is-legendary-lava-victory) .victory-celebration {
+  display: none !important;
+}
+
+.gameOver-panel-enhanced.is-legendary-lava-victory #gameOverPixelBanner,
+.gameOver-panel-enhanced.is-legendary-lava-victory #resultEyebrow,
+.gameOver-panel-enhanced.is-legendary-lava-victory #resultTitle,
+.gameOver-panel-enhanced.is-legendary-lava-victory #gameOverPhrase,
+.gameOver-panel-enhanced.is-legendary-lava-victory #gameOverStats,
+.gameOver-panel-enhanced.is-legendary-lava-victory #newAchievements {
+  display: none !important;
+}
+
+.victory-gif-container {
+  width: 100% !important;
+  max-width: 640px !important;
+  aspect-ratio: 960 / 768;
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  background: transparent !important;
+  border: 6px solid #eab308 !important;
+  outline: 6px solid #000000 !important;
+  box-shadow: 8px 8px 0 #000000 !important;
+  border-radius: 0 !important;
+  overflow: hidden !important;
+}
+
+.victory-gif {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  image-rendering: pixelated !important;
+  display: block !important;
+  margin: 0 !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+.gameOver-panel-enhanced.is-legendary-lava-victory {
+  max-width: 720px !important;
+  padding: 24px 20px !important;
+  background: #0d1217 !important;
+  border: 4px solid #eab308 !important;
+  outline: 4px solid #000 !important;
+  box-shadow: 12px 12px 0 #000 !important;
+}
+
+/* 2. TOAST CON MINIATURA DE ITEM */
+.toast.toast--with-item {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 8px 16px !important;
+  border-left: 6px solid #ffd700 !important;
+  border-color: #ffd700 #332200 #332200 #ffd700 !important;
+  background: linear-gradient(180deg, #182329 0%, #0d1519 100%) !important;
+  box-shadow: 0 0 16px rgba(255, 215, 0, 0.35), 4px 4px 0 #000 !important;
+}
+
+.toast-inner-row {
+  display: flex !important;
+  align-items: center !important;
+  gap: 12px !important;
+}
+
+.toast-item-thumb {
+  width: 32px !important;
+  height: 32px !important;
+  border: 2px solid #ffd700 !important;
+  border-radius: 3px !important;
+  background: #081115 !important;
+  image-rendering: pixelated !important;
+  flex-shrink: 0 !important;
+  box-shadow: 0 0 8px rgba(255, 215, 0, 0.3) !important;
+}
+
+.toast-message-text {
+  font-family: 'Press Start 2P', monospace !important;
+  font-size: 9px !important;
+  color: #fff4bd !important;
+  line-height: 1.4 !important;
+  text-shadow: 1px 1px 0 #000 !important;
+}
+
+/* 3. MINIATURA DE ITEM EN GAME OVER (RESULT UNLOCK) */
+.result-unlock-wrapper {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 16px !important;
+  background: rgba(18, 32, 40, 0.96) !important;
+  border: 2px solid #ffd700 !important;
+  box-shadow: 0 0 20px rgba(255, 215, 0, 0.4), 3px 3px 0 #000 !important;
+  padding: 12px 24px !important;
+  margin: 16px auto 4px !important;
+  border-radius: 6px !important;
+  max-width: 620px !important;
+  width: 92% !important;
+}
+
+.result-unlock-thumb {
+  width: 44px !important;
+  height: 44px !important;
+  border: 2px solid #38bdf8 !important;
+  border-radius: 4px !important;
+  background: #091316 !important;
+  image-rendering: pixelated !important;
+  flex-shrink: 0 !important;
+  box-shadow: 0 0 10px rgba(56, 189, 248, 0.5) !important;
+}
+
+.result-unlock {
+  font-family: 'Press Start 2P', monospace !important;
+  font-size: 10px !important;
+  color: #fff2a8 !important;
+  line-height: 1.6 !important;
+  margin: 0 !important;
+  text-align: center !important;
+  text-shadow: 1px 1px 0 #000 !important;
+}
+
+.feedback-item-thumb {
+  width: 24px !important;
+  height: 24px !important;
+  border: 1px solid #ffd700 !important;
+  border-radius: 2px !important;
+  background: #091316 !important;
+  image-rendering: pixelated !important;
+  vertical-align: middle !important;
+  display: inline-block !important;
+  margin-right: 6px !important;
+}

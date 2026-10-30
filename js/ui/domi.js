@@ -1,0 +1,1203 @@
+import {domiGifImage} from '../core/art.js';
+import {currentAccount, grantItem, equip, isGuest, getCartographyMissions} from '../systems/accountSystem.js';
+import {shopItems, isOwned} from '../data/shop.js';
+import {drawItemPreview, drawAccessoryIcon} from '../core/presentation.js';
+import {drawFood} from '../core/art.js';
+import {icon, refreshIcons} from './icons.js';
+import {enemyTypes} from '../entities/Enemy.js';
+import {skins} from '../data/skins.js';
+import {REGIONS} from './atlasScreen.js';
+
+const tabs = [
+  ['missions', 'Misiones', 'Scroll'],
+  ['advice', 'Consejos', 'MessageSquare'],
+  ['collectibles', 'Almanaque', 'BookOpen']
+];
+
+export const adviceList = [
+  {
+    id: 'adv_dash',
+    category: 'movement',
+    title: 'Acelerón Gourmet',
+    badge: 'MOVIMIENTO',
+    description: 'Espacio activa la embestida invulnerable: atraviesa masas de clientes sin recibir daño y daña a todos los enemigos que cruce. Recarga en 2.8 s.'
+  },
+  {
+    id: 'adv_movement',
+    category: 'movement',
+    title: 'El Juego de Pies',
+    badge: 'MOVIMIENTO',
+    description: 'Mantenete siempre en círculos amplios. Nunca te arrincones contra mostradores ni paredes; juntá a los clientes en racimos.'
+  },
+  {
+    id: 'adv_lighting',
+    category: 'movement',
+    title: 'Visión y Derrapes',
+    badge: 'MOVIMIENTO',
+    description: 'En el estacionamiento la luz neón refleja sobre el asfalto húmedo y las manchas de aceite alteran la tracción.'
+  },
+  {
+    id: 'adv_skills',
+    category: 'combat',
+    title: 'Poderes Activos',
+    badge: 'COMBATE',
+    description: 'Se desbloquean por nivel de partida: Q al Nivel 5 (ráfaga radial), E al Nivel 10 (clon señuelo) y R al Nivel 15 (escudo de inmunidad).'
+  },
+  {
+    id: 'adv_evo',
+    category: 'combat',
+    title: 'Evolución de Armas',
+    badge: 'COMBATE',
+    description: 'Maximizá tu receta base para forjar su evolución definitiva dorada con disparos gigantes, charcos de salsa y ondas de choque.'
+  },
+  {
+    id: 'adv_combos',
+    category: 'combat',
+    title: 'Racha de Combos',
+    badge: 'COMBATE',
+    description: 'Bajas consecutivas elevan el multiplicador a x1.5, x2.0 y x3.0. A las 30 bajas seguidas se activa Fiebre Arcade con velocidad extrema.'
+  },
+  {
+    id: 'adv_pets',
+    category: 'combat',
+    title: 'Mascotas de Apoyo',
+    badge: 'COMBATE',
+    description: 'Equipá un compañero desde el lobby: atacan automáticamente, aplican salsa ralentizadora o generan zonas seguras para curarte.'
+  },
+  {
+    id: 'adv_synergies',
+    category: 'combat',
+    title: 'Sinergias de Reliquias',
+    badge: 'COMBATE',
+    description: 'Combiná accesorios legendarios con mascotas o trajes específicos (ej: Alas de Fénix + Mini Parrilla o Corona + Choripán) para activar potenciadores únicos.'
+  }
+];
+
+export class DomiScreen {
+  constructor(game) {
+    this.game = game;
+    this.type = 'missions';
+    this.missionFilter = 'founder'; // 'founder' | 'regions'
+    this.adviceFilter = 'all';
+    this.selectedSlot = null;
+    this.previewCanvas = null;
+
+    document.querySelector('#domiBackButton')?.addEventListener('click', () => {
+      this.game.showScreen('lobbyScreen');
+    });
+  }
+
+  openMissionsTab(filter = 'founder') {
+    this.type = 'missions';
+    this.missionFilter = filter;
+    this.show('missions');
+  }
+
+  show(tab = 'missions') {
+    this.type = tab;
+    this.selectedSlot = null;
+    const profile = currentAccount();
+    if (!profile) {
+      this.game.showScreen('authScreen');
+      return;
+    }
+    const feedback = document.querySelector('#domiFeedback');
+    if (feedback) feedback.textContent = '';
+    this.render();
+    this.game.showScreen('domiScreen');
+    const screen = document.querySelector('#domiScreen');
+    if (screen) screen.scrollTop = 0;
+  }
+
+  selectCategory(type) {
+    this.type = type;
+    this.selectedSlot = null;
+    this.render();
+    this.game.audio.play('navigate');
+    document.querySelector(`#domiTabs [data-type="${type}"]`)?.focus({preventScroll: true});
+  }
+
+  getMissions(profile) {
+    const runs = profile.runs || [];
+    const parseTime = t => { const [m, s] = String(t || '0:0').split(':').map(Number); return (m || 0) * 60 + (s || 0); };
+    const st = profile.stats || {};
+    const maxLevel = Math.max(st.maxLevel || 0, runs.reduce((m, r) => Math.max(m, r.level || 0), 0));
+    const maxKills = Math.max(st.maxKills || 0, runs.reduce((m, r) => Math.max(m, r.kills || 0), 0));
+    const maxCombo = Math.max(st.maxCombo || 0, runs.reduce((m, r) => Math.max(m, r.combo || r.peakCombo || 0), 0));
+    const maxTime = Math.max(st.maxTime || 0, runs.reduce((m, r) => Math.max(m, r.time ?? parseTime(r.timeText)), 0));
+    const totalKills = Math.max(profile.stats?.totalKills || 0, runs.reduce((sum, r) => sum + (r.kills || 0), 0));
+    const totalRuns = Math.max(st.totalRuns || 0, runs.length);
+    const totalBosses = Math.max(profile.stats?.totalBosses || 0, runs.reduce((sum, r) => sum + (r.bossesKilled || 0), 0));
+
+    const list = [
+      {
+        id: 'm_level5',
+        type: 'mission',
+        rewardType: 'accessory',
+        rewardId: 'chef_hat',
+        rewardName: 'Gorro de Chef',
+        rewardTooltip: 'GORRO DE CHEF: +12% de daño permanente en combate (Especial Don Domi)',
+        name: 'Prueba de Fuego',
+        iconType: 'star',
+        description: 'Sobrevive y alcanza el Nivel 5 en combate.',
+        current: Math.min(5, maxLevel),
+        target: 5,
+        unit: 'Nivel',
+        isDone: maxLevel >= 5,
+        isClaimed: isOwned(profile, 'accessory', 'chef_hat'),
+        claim: () => { grantItem('accessory', 'chef_hat'); }
+      },
+      {
+        id: 'm_kills50',
+        type: 'mission',
+        rewardType: 'pet',
+        rewardId: 'parrilla',
+        rewardName: 'Mini Parrilla',
+        rewardTooltip: 'MINI PARRILLA: Mascota ígnea que escupe ascuas a enemigos (Compañero)',
+        name: 'Maestro Asador',
+        iconType: 'skull',
+        description: 'Elimina 50 clientes molestos en una sola partida.',
+        current: Math.min(50, maxKills),
+        target: 50,
+        unit: 'KOs',
+        isDone: maxKills >= 50,
+        isClaimed: isOwned(profile, 'pet', 'parrilla'),
+        claim: () => { grantItem('pet', 'parrilla'); }
+      },
+      {
+        id: 'm_combo20',
+        type: 'mission',
+        rewardType: 'accessory',
+        rewardId: 'leg_crown',
+        rewardName: 'Corona Imperial',
+        rewardTooltip: 'CORONA IMPERIAL: +25 Vida Máx y +15% Daño total (Legendario Don Domi)',
+        name: 'Soberano del Local',
+        iconType: 'crown',
+        description: 'Encadena al menos 20 bajas seguidas en combo.',
+        current: Math.min(20, maxCombo),
+        target: 20,
+        unit: 'Combo',
+        isDone: maxCombo >= 20,
+        isClaimed: isOwned(profile, 'accessory', 'leg_crown'),
+        claim: () => { grantItem('accessory', 'leg_crown'); }
+      },
+      {
+        id: 'm_time3min',
+        type: 'mission',
+        rewardType: 'accessory',
+        rewardId: 'leg_halo',
+        rewardName: 'Aureola Celestial',
+        rewardTooltip: 'AUREOLA CELESTIAL: +15% Velocidad y Regeneración pasiva (Legendario Don Domi)',
+        name: 'Luz de Medianoche',
+        iconType: 'time',
+        description: 'Sobrevive más de 3 minutos (180 s) bajo asedio.',
+        current: Math.min(180, Math.floor(maxTime)),
+        target: 180,
+        unit: 'segundos',
+        isDone: maxTime >= 180,
+        isClaimed: isOwned(profile, 'accessory', 'leg_halo'),
+        claim: () => { grantItem('accessory', 'leg_halo'); }
+      },
+      {
+        id: 'm_kills100',
+        type: 'mission',
+        rewardType: 'accessory',
+        rewardId: 'leg_viking',
+        rewardName: 'Casco Vikingo',
+        rewardTooltip: 'CASCO VIKINGO: +20% Daño masivo y +20 Vida (Legendario Don Domi)',
+        name: 'Furia Nórdica',
+        iconType: 'skull',
+        description: 'Elimina 100 clientes molestos en una sola partida.',
+        current: Math.min(100, maxKills),
+        target: 100,
+        unit: 'KOs',
+        isDone: maxKills >= 100,
+        isClaimed: isOwned(profile, 'accessory', 'leg_viking'),
+        claim: () => { grantItem('accessory', 'leg_viking'); }
+      },
+      {
+        id: 'm_combo35',
+        type: 'mission',
+        rewardType: 'accessory',
+        rewardId: 'leg_horns',
+        rewardName: 'Cuernos Demoníacos',
+        rewardTooltip: 'CUERNOS DEMONÍACOS: +28% Daño puro y +8% Velocidad (Legendario Don Domi)',
+        name: 'Fiebre Infernal',
+        iconType: 'combo',
+        description: 'Alcanza una racha de 35 bajas seguidas en combo.',
+        current: Math.min(35, maxCombo),
+        target: 35,
+        unit: 'Combo',
+        isDone: maxCombo >= 35,
+        isClaimed: isOwned(profile, 'accessory', 'leg_horns'),
+        claim: () => { grantItem('accessory', 'leg_horns'); }
+      },
+      {
+        id: 'm_runs5',
+        type: 'mission',
+        rewardType: 'accessory',
+        rewardId: 'leg_visor',
+        rewardName: 'Visor Cibernético',
+        rewardTooltip: 'VISOR CIBERNÉTICO: +20% Crítico y Súper Imán de botín (Legendario Don Domi)',
+        name: 'Ojo de Halcón',
+        iconType: 'god',
+        description: 'Completa 5 turnos de servicio en cualquier modo.',
+        current: Math.min(5, totalRuns),
+        target: 5,
+        unit: 'Turnos',
+        isDone: totalRuns >= 5,
+        isClaimed: isOwned(profile, 'accessory', 'leg_visor'),
+        claim: () => { grantItem('accessory', 'leg_visor'); }
+      },
+      {
+        id: 'm_level10',
+        type: 'mission',
+        rewardType: 'accessory',
+        rewardId: 'leg_archmage',
+        rewardName: 'Sombrero Arquimago',
+        rewardTooltip: 'SOMBRERO DE ARQUIMAGO: +22% Daño y +15% Cadencia (Legendario Don Domi)',
+        name: 'Alquimia Suprema',
+        iconType: 'star',
+        description: 'Alcanza el Nivel 10 en una partida.',
+        current: Math.min(10, maxLevel),
+        target: 10,
+        unit: 'Nivel',
+        isDone: maxLevel >= 10,
+        isClaimed: isOwned(profile, 'accessory', 'leg_archmage'),
+        claim: () => { grantItem('accessory', 'leg_archmage'); }
+      },
+      {
+        id: 'm_totalkills300',
+        type: 'mission',
+        rewardType: 'accessory',
+        rewardId: 'leg_cape',
+        rewardName: 'Manto Real Carmesí',
+        rewardTooltip: 'MANTO REAL CARMESÍ: +30 Vida Máx y +12% Daño (Legendario Don Domi)',
+        name: 'Honor de la Casa',
+        iconType: 'skull',
+        description: 'Acumula 300 clientes atendidos entre todas tus partidas.',
+        current: Math.min(300, totalKills),
+        target: 300,
+        unit: 'KOs Totales',
+        isDone: totalKills >= 300,
+        isClaimed: isOwned(profile, 'accessory', 'leg_cape'),
+        claim: () => { grantItem('accessory', 'leg_cape'); }
+      },
+      {
+        id: 'm_time4min',
+        type: 'mission',
+        rewardType: 'accessory',
+        rewardId: 'leg_angel_wings',
+        rewardName: 'Alas de Ángel',
+        rewardTooltip: 'ALAS DE ÁNGEL: +22% Velocidad y recarga de acelerón reducida (Legendario Don Domi)',
+        name: 'Vuelo del Maestro',
+        iconType: 'time',
+        description: 'Sobrevive 4 minutos (240 s) continuos en el tablero.',
+        current: Math.min(240, Math.floor(maxTime)),
+        target: 240,
+        unit: 'segundos',
+        isDone: maxTime >= 240,
+        isClaimed: isOwned(profile, 'accessory', 'leg_angel_wings'),
+        claim: () => { grantItem('accessory', 'leg_angel_wings'); }
+      },
+      {
+        id: 'm_level8',
+        type: 'mission',
+        rewardType: 'accessory',
+        rewardId: 'leg_fire_wings',
+        rewardName: 'Alas de Fénix Ígneo',
+        rewardTooltip: 'ALAS DE FÉNIX ÍGNEO: +25% Daño y +12% Velocidad (Legendario Don Domi)',
+        name: 'Horno Solar',
+        iconType: 'star',
+        description: 'Alcanza el Nivel 8 en combate.',
+        current: Math.min(8, maxLevel),
+        target: 8,
+        unit: 'Nivel',
+        isDone: maxLevel >= 8,
+        isClaimed: isOwned(profile, 'accessory', 'leg_fire_wings'),
+        claim: () => { grantItem('accessory', 'leg_fire_wings'); }
+      },
+      {
+        id: 'm_boss1',
+        type: 'mission',
+        rewardType: 'accessory',
+        rewardId: 'leg_excalibur',
+        rewardName: 'Espada Excalibur',
+        rewardTooltip: 'ESPADA DORADA EXCALIBUR: +1 Proyectil Extra y +18% Daño (Legendario Don Domi)',
+        name: 'Mandato Culinario',
+        iconType: 'star',
+        description: 'Derrota a un Gran Jefe de la Cocina en turno.',
+        current: Math.min(1, totalBosses),
+        target: 1,
+        unit: 'Jefe',
+        isDone: totalBosses >= 1,
+        isClaimed: isOwned(profile, 'accessory', 'leg_excalibur'),
+        claim: () => { grantItem('accessory', 'leg_excalibur'); }
+      },
+      {
+        id: 'm_boss3',
+        type: 'mission',
+        rewardType: 'accessory',
+        rewardId: 'leg_medallion',
+        rewardName: 'Medallón Rubí Sagrado',
+        rewardTooltip: 'MEDALLÓN RUBÍ SAGRADO: +40 Vida Máxima y blindaje real (Legendario Don Domi)',
+        name: 'Campeón de Jefes',
+        iconType: 'god',
+        description: 'Derrota a 3 Grandes Jefes acumulados en tus partidas.',
+        current: Math.min(3, totalBosses),
+        target: 3,
+        unit: 'Jefes',
+        isDone: totalBosses >= 3,
+        isClaimed: isOwned(profile, 'accessory', 'leg_medallion'),
+        claim: () => { grantItem('accessory', 'leg_medallion'); }
+      }
+    ];
+
+    const prevDone = list.filter(m => m.isDone).length;
+    const lavaOwned = isOwned(profile, 'map', 'lava');
+    list.push({
+      id: 'm_legendary_lava',
+      type: 'mission',
+      rewardType: 'map',
+      rewardId: 'lava',
+      rewardName: lavaOwned ? 'Caldero de Lava' : '???',
+      rewardTooltip: lavaOwned ? 'MAPA LEGENDARIO: El núcleo volcánico donde aguarda el Coloso Final' : '??? ·Completá todas las misiones de Don Domi para revelar este misterio',
+      name: lavaOwned ? 'El Despertar del Caldero' : '??? · El Último Secreto',
+      iconType: 'skull',
+      description: 'Completa todas las 13 misiones anteriores del Señor Domi para romper el sello.',
+      current: Math.min(13, prevDone),
+      target: 13,
+      unit: 'Misiones',
+      isDone: prevDone >= 13,
+      isClaimed: lavaOwned,
+      claim: () => { grantItem('map', 'lava'); }
+    });
+
+    return list;
+  }
+
+  getCollectionSlots(profile) {
+    const runs = profile.runs || [];
+    const totalBosses = Math.max(profile.stats?.totalBosses || 0, runs.reduce((sum, r) => sum + (r.bossesKilled || 0), 0));
+    const totalKills = Math.max(profile.stats?.totalKills || 0, runs.reduce((sum, r) => sum + (r.kills || 0), 0));
+
+    return [
+      // --- PERSONAJES JUGABLES ---
+      { id: 'pancho', type: 'skin', name: 'Pancho Clásico', category: 'PERSONAJE', stats: { hp: '100', spd: '220', dmg: '100%', perk: 'Disparo Balanceado' }, desc: 'El héroe del mostrador. Equilibrado, preciso y fiel a la parrilla.', lockText: 'INICIAL', isUnlocked: true },
+      { id: 'nugget', type: 'skin', name: 'Nugget Veloz', category: 'PERSONAJE', stats: { hp: '78', spd: '270', dmg: '92%', perk: '+23% Velocidad' }, desc: 'Crujiente y escurridizo entre comandas apresuradas.', lockText: '450 PT', isUnlocked: isOwned(profile, 'skin', 'nugget') },
+      { id: 'papas', type: 'skin', name: 'Papas Fritas', category: 'PERSONAJE', stats: { hp: '86', spd: '235', dmg: '82%', perk: '+1 Proyectil Extra' }, desc: 'Dispara salvas dobles continuas de bastones dorados.', lockText: '650 PT', isUnlocked: isOwned(profile, 'skin', 'papas') },
+      { id: 'pizza', type: 'skin', name: 'Pizza Suprema', category: 'PERSONAJE', stats: { hp: '140', spd: '185', dmg: '112%', perk: '+40% Resistencia' }, desc: 'Masa gruesa horneada a la piedra. Absorbe castigo implacable.', lockText: '850 PT', isUnlocked: isOwned(profile, 'skin', 'pizza') },
+      { id: 'empanada', type: 'skin', name: 'Empanada Criolla', category: 'PERSONAJE', stats: { hp: '110', spd: '210', dmg: '105%', perk: 'Repulgue Defensivo' }, desc: 'Borde blindado de hojaldre y giros letales.', lockText: '950 PT', isUnlocked: isOwned(profile, 'skin', 'empanada') },
+      { id: 'choripan', type: 'skin', name: 'Choripán Bravo', category: 'PERSONAJE', stats: { hp: '120', spd: '200', dmg: '140%', perk: '+40% Daño a Jefes' }, desc: 'Asado al carbón con chimichurri casero. Destroza defensas enemigas.', lockText: '1600 PT', isUnlocked: isOwned(profile, 'skin', 'choripan') },
+
+      // --- CLIENTES Y ENEMIGOS REGULARES ---
+      { id: 'burger', type: 'enemy', name: 'Hamburguesa Común', category: 'ENEMIGO', stats: { hp: '28', spd: '92', dmg: '11', perk: 'Avance en Horda' }, desc: 'Cliente hambriento estándar. Solitario es inofensivo; en masa abruma.', lockText: 'Visto en Turno 1', isUnlocked: true },
+      { id: 'soda', type: 'enemy', name: 'Gaseosa Explosiva', category: 'ENEMIGO', stats: { hp: '20', spd: '132', dmg: '22', perk: 'Detonación de Gas' }, desc: 'Alta presión y velocidad. Al acercarse detona liberando gas ardiente.', lockText: '10 KOs Totales', isUnlocked: totalKills >= 10 },
+      { id: 'fries_enemy', type: 'enemy', enemyId: 'fries', name: 'Papas Mutantes', category: 'ENEMIGO', stats: { hp: '16', spd: '152', dmg: '8', perk: 'Embestida Rápida' }, desc: 'Extremadamente veloces y ligeras. Enjambran los flancos del jugador.', lockText: '25 KOs Totales', isUnlocked: totalKills >= 25 },
+      { id: 'ketchup_enemy', type: 'enemy', enemyId: 'ketchup', name: 'Ketchup Francotirador', category: 'ENEMIGO', stats: { hp: '30', spd: '48', dmg: '13', perk: 'Disparo a Distancia' }, desc: 'Se mantiene a distancia prudencial disparando chorros de salsa ácida.', lockText: '50 KOs Totales', isUnlocked: totalKills >= 50 },
+      { id: 'onion', type: 'enemy', name: 'Cebolla Sorpresa', category: 'ENEMIGO', stats: { hp: '23', spd: '168', dmg: '17', perk: 'Teletransporte' }, desc: 'Surge de la nada detrás de tu campo de visión buscando emboscadas.', lockText: '75 KOs Totales', isUnlocked: totalKills >= 75 },
+      { id: 'tray', type: 'enemy', name: 'Bandeja Blindada', category: 'ENEMIGO', stats: { hp: '105', spd: '48', dmg: '16', perk: 'Blindaje Pesado (x2)' }, desc: 'Cuerpo metálico que reduce el daño recibido un 50%. Bloquea pasajes.', lockText: '100 KOs Totales', isUnlocked: totalKills >= 100 },
+      { id: 'mayo', type: 'enemy', name: 'Mayonesa Médica', category: 'ENEMIGO', stats: { hp: '52', spd: '57', dmg: '9', perk: 'Aura Sanadora' }, desc: 'Unidad de apoyo. Regenera la salud de los clientes molestos cercanos.', lockText: '150 KOs Totales', isUnlocked: totalKills >= 150 },
+      { id: 'chef', type: 'enemy', name: 'Chef Invocador', category: 'ENEMIGO', stats: { hp: '78', spd: '44', dmg: '12', perk: 'Invoca Refuerzos' }, desc: 'Cocina nuevos pedidos sobre la marcha atrayendo hordas sin cesar.', lockText: '200 KOs Totales', isUnlocked: totalKills >= 200 },
+      { id: 'chili', type: 'enemy', name: 'Ají Kamikaze', category: 'ENEMIGO', stats: { hp: '18', spd: '118', dmg: '24', perk: 'Embestida Explosiva' }, desc: 'Se frena, tiembla y marca una línea roja antes de salir disparado. ¡Esquivalo y explota contra sus amigos!', lockText: '250 KOs Totales', isUnlocked: totalKills >= 250 },
+
+      // --- AMENAZAS NATIVAS DE CARTOGRAFÍA (LOS 8 MAPAS) ---
+      { id: 'bill_collector', type: 'enemy', name: 'Cobrador de cuentas', category: 'ENEMIGO NATIVO', stats: { hp: '44', spd: '110', dmg: '14', perk: 'Persecución Rápida' }, desc: 'Mozo con libreta del Local DOMI. Te persigue sin tregua para cobrarte el saldo pendiente.', lockText: 'Nativo de Local DOMI', isUnlocked: true },
+      { id: 'frying_pan', type: 'enemy', name: 'Sartén poseída', category: 'ENEMIGO NATIVO', stats: { hp: '68', spd: '58', dmg: '16', perk: 'Blindaje Frontal (x1.6)' }, desc: 'Sartén de hierro fundido de la Cocina Industrial. Absorbe y desvía impactos frontales.', lockText: 'Nativo de Cocina', isUnlocked: true },
+      { id: 'delivery_kart', type: 'enemy', name: 'Autito de reparto', category: 'ENEMIGO NATIVO', stats: { hp: '75', spd: '95', dmg: '18', perk: 'Embestida y Bocina' }, desc: 'Vehículo del Estacionamiento. Toca bocina y embiste a gran velocidad en línea recta.', lockText: 'Nativo de Estacionamiento', isUnlocked: true },
+      { id: 'ice_pop', type: 'enemy', name: 'Paleta congelante', category: 'ENEMIGO NATIVO', stats: { hp: '36', spd: '78', dmg: '13', perk: 'Esquirlas Gélidas' }, desc: 'Paleta helada del Nevado. Dispara esquirlas y desata escarcha fría que entorpece tus pasos.', lockText: 'Nativo de Nevado', isUnlocked: true },
+      { id: 'burrower_chili', type: 'enemy', name: 'Chile excavador', category: 'ENEMIGO NATIVO', stats: { hp: '35', spd: '115', dmg: '20', perk: 'Emboscada Subterránea' }, desc: 'Ají del Desierto que se entierra bajo las dunas y brota por sorpresa bajo tus pies.', lockText: 'Nativo de Desierto', isUnlocked: true },
+      { id: 'goalie_bot', type: 'enemy', name: 'Arquero mecánico', category: 'ENEMIGO NATIVO', stats: { hp: '95', spd: '52', dmg: '16', perk: 'Desvío de Tiros' }, desc: 'Autómata gigante de la Cancha de fútbol. Desvía disparos con sus manoplas blindadas.', lockText: 'Nativo de Cancha', isUnlocked: true },
+      { id: 'armored_crab', type: 'enemy', name: 'Cangrejo acorazado', category: 'ENEMIGO NATIVO', stats: { hp: '65', spd: '64', dmg: '15', perk: 'Caparazón Blindado' }, desc: 'Crustáceo de la Playa Tropical con pinzas afiladas. Camina de costado protegido por su concha.', lockText: 'Nativo de Playa Tropical', isUnlocked: true },
+      { id: 'exotic_juice', type: 'enemy', name: 'Zumo exótico', category: 'ENEMIGO NATIVO', stats: { hp: '30', spd: '125', dmg: '16', perk: 'Sorbete Metralla' }, desc: 'Bebida frutal costera con sorbete. Dispara ráfagas veloces de jugo a distancia.', lockText: 'Nativo de Playa', isUnlocked: true },
+
+      // --- GRANDES JEFES DE LA COCINA ---
+      { id: 'boss_double', type: 'boss', enemyId: 'double', name: 'Rey del Mostrador', category: 'GRAN JEFE', stats: { hp: '820', spd: '58', dmg: '24', perk: 'Salva Radial x10' }, desc: 'El soberano indiscutido del Local Domi. Furia desatada bajo el 50% de vida.', lockText: 'Vence 1 Jefe', isUnlocked: totalBosses >= 1 },
+      { id: 'boss_ketchup', type: 'boss', enemyId: 'ketchup', name: 'Señor Ketchup', category: 'GRAN JEFE', stats: { hp: '960', spd: '78', dmg: '25', perk: 'Triple Sniper' }, desc: 'Tirador implacable de la cocina industrial. Marca líneas rojas antes de disparar.', lockText: 'Vence 2 Jefes', isUnlocked: totalBosses >= 2 },
+      { id: 'boss_fries', type: 'boss', enemyId: 'fries', name: 'La Papota Suprema', category: 'GRAN JEFE', stats: { hp: '1120', spd: '80', dmg: '28', perk: 'Lluvia Dorada' }, desc: 'Cae en picada causando terremotos en el asfalto del estacionamiento.', lockText: 'Vence 3 Jefes', isUnlocked: totalBosses >= 3 },
+      { id: 'boss_pizza', type: 'boss', enemyId: 'pizza', name: 'Don Muzza el Padrino', category: 'GRAN JEFE', stats: { hp: '1350', spd: '60', dmg: '32', perk: 'Meteorito de Queso' }, desc: 'Pesado, blindado e implacable. Invocador de ondas de choque sísmicas.', lockText: 'Vence 4 Jefes', isUnlocked: totalBosses >= 4 },
+      { id: 'boss_icecream', type: 'boss', enemyId: 'icecream', name: 'Emperador Subcero', category: 'GRAN JEFE', stats: { hp: '1080', spd: '66', dmg: '24', perk: 'Ventisca Congelante' }, desc: 'Monarca de la estepa nevada. Desata ráfagas gélidas que entumecen el movimiento.', lockText: 'Vence 5 Jefes', isUnlocked: totalBosses >= 5 },
+      { id: 'boss_colossus', type: 'boss', enemyId: 'lava_boss', name: 'Domi Colosal', category: 'COLOSO FINAL', stats: { hp: '4600', spd: '52', dmg: '38', perk: 'Rayo Magmático y Furia' }, desc: 'El titán del Caldero de Lava. Emperador del fuego subterráneo y portador de la Plancha Negra.', lockText: 'Vence al Coloso', isUnlocked: isOwned(profile, 'accessory', 'leg_lava_crown') },
+      { id: 'domi', type: 'npc', name: 'Don Domi', category: 'LEYENDA', stats: { hp: '∞', spd: '∞', dmg: '∞', perk: 'Sabiduría Arcana' }, desc: 'El fundador original de la franquicia. Guarda las 11 reliquias legendarias sagradas.', lockText: 'SIEMPRE ACTIVO', isUnlocked: true }
+    ];
+  }
+
+  render() {
+    this.profile = currentAccount();
+    if (!this.profile) return;
+    const profile = this.profile;
+
+    const bankEl = document.querySelector('#domiBank');
+    if (bankEl) bankEl.textContent = profile.bank.toLocaleString('es-AR');
+
+    // Tabs
+    const tabsRoot = document.querySelector('#domiTabs');
+    if (tabsRoot) {
+      tabsRoot.replaceChildren();
+      for (const [id, label, symbol] of tabs) {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = id === this.type ? 'active' : '';
+        btn.dataset.type = id;
+        btn.innerHTML = `${icon(symbol)} <span>${label}</span>`;
+        btn.setAttribute('aria-pressed', String(id === this.type));
+        btn.onclick = () => this.selectCategory(id);
+        tabsRoot.append(btn);
+      }
+    }
+
+    const container = document.querySelector('#domiContent');
+    if (!container) return;
+    container.replaceChildren();
+
+    if (this.type === 'missions') {
+      this.renderMissions(container, profile);
+    } else if (this.type === 'advice') {
+      this.renderAdvice(container);
+    } else if (this.type === 'collectibles') {
+      this.renderCollectibles(container, profile);
+    }
+
+    refreshIcons();
+  }
+
+  /* =========================================================================
+     1. MISIONES: Barra gruesa cian/oro y lista vertical ordenada
+     ========================================================================= */
+  renderMissions(container, profile) {
+    this.previewCanvas = null;
+    if (isGuest()) {
+      const lockedBox = document.createElement('div');
+      lockedBox.className = 'domi-guest-locked-notice';
+      lockedBox.style.cssText = 'text-align:center;padding:48px 24px;background:#111a20;border:3px solid #284452;border-radius:4px;margin:20px auto;max-width:540px;box-shadow:0 0 30px rgba(0,0,0,0.8);';
+      lockedBox.innerHTML = `
+        <div style="font-size:36px;margin-bottom:16px;">📜🔒</div>
+        <h3 style="font-family:'Press Start 2P',monospace;font-size:13px;color:#facc15;margin:0 0 14px;line-height:1.5;">EXCLUSIVO PARA SOCIOS REGISTRADOS</h3>
+        <p style="font-family:'Trebuchet MS',Arial,sans-serif;font-size:14px;color:#cbd5e1;line-height:1.6;margin:0 0 24px;">Las misiones y reliquias exclusivas del Señor Domi solo están disponibles para socios del club. ¡Creá tu carnet en el mostrador para desbloquearlas y guardar tus trofeos!</p>
+        <button id="domiGuestDeskBtn" type="button" class="pixel-button pixel-button--green" style="padding:14px 28px;font-size:12px;">IR A LA CABINA DE REGISTRO</button>
+      `;
+      lockedBox.querySelector('#domiGuestDeskBtn')?.addEventListener('click', () => {
+        this.game.openRegistration();
+      });
+      container.append(lockedBox);
+      return;
+    }
+
+    // Subpestañas: Misiones del Fundador (14) vs Misiones de Región (8)
+    const subtabs = document.createElement('div');
+    subtabs.className = 'domi-missions-subtabs';
+    subtabs.innerHTML = `
+      <button type="button" class="domi-subtab-btn ${this.missionFilter === 'founder' ? 'is-active' : ''}" id="btnDomiFounder">
+        <i data-lucide="award"></i> <span>MISIONES DEL FUNDADOR (14)</span>
+      </button>
+      <button type="button" class="domi-subtab-btn ${this.missionFilter === 'regions' ? 'is-active' : ''}" id="btnDomiRegions">
+        <i data-lucide="map-pin"></i> <span>MISIONES DE REGIÓN (8)</span>
+      </button>
+    `;
+    subtabs.querySelector('#btnDomiFounder')?.addEventListener('click', () => {
+      this.missionFilter = 'founder';
+      this.game.audio?.play?.('navigate');
+      this.render();
+    });
+    subtabs.querySelector('#btnDomiRegions')?.addEventListener('click', () => {
+      this.missionFilter = 'regions';
+      this.game.audio?.play?.('navigate');
+      this.render();
+    });
+    container.append(subtabs);
+
+    if (this.missionFilter === 'regions') {
+      this.renderRegionMissions(container, profile);
+      return;
+    }
+
+    const missions = this.getMissions(profile);
+    const claimedCount = missions.filter(m => m.isClaimed).length;
+    const pct = Math.round((claimedCount / missions.length) * 100);
+
+    const header = document.createElement('div');
+    header.className = 'domi-missions-header';
+    header.innerHTML = `
+      <div class="domi-progress-title-row">
+        <span class="domi-progress-label">MISIONES DEL FUNDADOR</span>
+        <b class="domi-progress-count">(${claimedCount} / ${missions.length})</b>
+      </div>
+      <div class="domi-progress-bar-thick" role="progressbar" aria-valuenow="${claimedCount}" aria-valuemin="0" aria-valuemax="${missions.length}">
+        <div class="domi-progress-fill-thick" style="width: ${pct}%;"></div>
+      </div>
+    `;
+    container.append(header);
+
+    const list = document.createElement('div');
+    list.className = 'domi-missions-list';
+
+    for (const m of missions) {
+      const isLevelMission = m.unit === 'Nivel' || m.iconType === 'star';
+      const card = document.createElement('div');
+      card.className = `domi-mission-card ${m.isClaimed ? 'is-claimed' : m.isDone ? 'is-done' : 'is-progress'} ${isLevelMission ? 'domi-mission-card--level' : ''}`;
+
+      const iconBox = document.createElement('div');
+      iconBox.className = 'domi-mission-icon-box';
+      iconBox.innerHTML = this.getMissionIcon(m.iconType);
+
+      const center = document.createElement('div');
+      center.className = 'domi-mission-center';
+      const mPct = Math.min(100, Math.round((m.current / m.target) * 100));
+      center.innerHTML = `
+        <div class="domi-mission-head">
+          <strong class="domi-mission-title">${m.name}</strong>
+          <span class="domi-mission-ratio">${m.current}/${m.target} ${m.unit}</span>
+        </div>
+        <p class="domi-mission-desc">${m.description}</p>
+        <div class="domi-mission-mini-bar">
+          <div class="domi-mini-fill" style="width: ${mPct}%;"></div>
+        </div>
+      `;
+
+      const right = document.createElement('div');
+      right.className = 'domi-mission-right';
+
+      const rewardWrap = document.createElement('div');
+      rewardWrap.className = 'domi-reward-wrap';
+
+      // Miniaturita visual pixel-art del objeto / recompensa
+      const rewardCanvas = document.createElement('canvas');
+      rewardCanvas.width = 36;
+      rewardCanvas.height = 36;
+      rewardCanvas.className = 'domi-reward-mini-canvas';
+      rewardCanvas.title = m.rewardName;
+      this.drawSlotIcon(rewardCanvas, { type: m.rewardType, id: m.rewardId, name: m.rewardName, isUnlocked: true, category: 'LEGENDARIO' }, profile);
+
+      const tooltip = document.createElement('div');
+      tooltip.className = 'domi-pixel-tooltip';
+      tooltip.textContent = m.rewardTooltip || m.rewardName;
+
+      rewardWrap.append(rewardCanvas, tooltip);
+
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'pixel-button domi-claim-btn';
+
+      if (m.isClaimed) {
+        btn.disabled = true;
+        btn.classList.add('btn-claimed');
+        btn.textContent = '✓ RECLAMADA';
+      } else if (m.isDone) {
+        btn.classList.add('pixel-button--claim');
+        btn.textContent = '¡RECLAMAR!';
+        btn.onclick = () => {
+          btn.disabled = true;
+          try { m.claim(); } catch (err) { btn.disabled = false; this.game.showToast?.(err.message); return; }
+          this.game.audio.play('levelUp');
+          this.game.menu?.prepareAccount?.();
+          this.game.showToast?.(`¡RECOMPENSA OBTENIDA: ${m.rewardName}!`, { type: m.rewardType, id: m.rewardId, name: m.rewardName });
+          const fb = document.querySelector('#domiFeedback');
+          if (fb) {
+            fb.innerHTML = '';
+            const fbThumb = document.createElement('canvas');
+            fbThumb.width = 24;
+            fbThumb.height = 24;
+            fbThumb.className = 'feedback-item-thumb';
+            try {
+              drawItemPreview(fbThumb, { type: m.rewardType, id: m.rewardId, name: m.rewardName }, profile, 0);
+              fb.append(fbThumb);
+            } catch {}
+            const fbText = document.createElement('span');
+            fbText.textContent = ` ¡Excelente trabajo! Desbloqueaste: ${m.rewardName}.`;
+            fb.append(fbText);
+          }
+          this.render();
+        };
+      } else {
+        btn.disabled = true;
+        btn.classList.add('btn-locked');
+        btn.textContent = 'EN CURSO';
+      }
+
+      right.append(rewardWrap, btn);
+      card.append(iconBox, center, right);
+      list.append(card);
+    }
+
+    container.append(list);
+  }
+
+  getRegionMissions(profile) {
+    const missions = getCartographyMissions();
+    return REGIONS.map(r => {
+      const m = missions[r.missionId] || { progress: 0, target: r.target, completed: false };
+      const isOwnedAcc = isOwned(profile, 'accessory', r.accessoryId) || m.completed;
+      const isClaimed = isOwnedAcc;
+      const isDone = m.completed || ((m.progress || 0) >= r.target) || isClaimed;
+      const isEquipped = profile?.loadout?.accessory === r.accessoryId;
+      return {
+        id: r.id,
+        regionIndex: r.index,
+        regionName: r.name,
+        regionSub: r.sub,
+        icon: r.icon,
+        color: r.color,
+        name: r.missionName,
+        description: r.missionDesc,
+        current: Math.min(r.target, m.progress || 0),
+        target: r.target,
+        unit: 'derribos',
+        isDone,
+        isClaimed,
+        isEquipped,
+        enemyId: r.enemyId,
+        enemyName: r.enemyName,
+        enemyRole: r.enemyRole,
+        hazard: r.hazard,
+        rewardType: 'accessory',
+        rewardId: r.accessoryId,
+        rewardName: r.accessoryName,
+        rewardTooltip: `${r.accessoryName}: ${r.accessoryDesc}`
+      };
+    });
+  }
+
+  renderRegionMissions(container, profile) {
+    const missions = this.getRegionMissions(profile);
+    const claimedCount = missions.filter(m => m.isClaimed).length;
+    const pct = Math.round((claimedCount / missions.length) * 100);
+
+    const header = document.createElement('div');
+    header.className = 'domi-missions-header';
+    header.innerHTML = `
+      <div class="domi-progress-title-row">
+        <span class="domi-progress-label">MISIONES DE REGIÓN</span>
+        <b class="domi-progress-count">(${claimedCount} / ${missions.length})</b>
+      </div>
+      <div class="domi-progress-bar-thick" role="progressbar" aria-valuenow="${claimedCount}" aria-valuemin="0" aria-valuemax="${missions.length}">
+        <div class="domi-progress-fill-thick" style="width: ${pct}%;"></div>
+      </div>
+    `;
+    container.append(header);
+
+    const list = document.createElement('div');
+    list.className = 'domi-missions-list';
+
+    for (const m of missions) {
+      const isLevelMission = m.unit === 'Nivel' || m.iconType === 'star';
+      const card = document.createElement('div');
+      card.className = `domi-mission-card ${m.isClaimed ? 'is-claimed' : m.isDone ? 'is-done' : 'is-progress'} ${isLevelMission ? 'domi-mission-card--level' : ''}`;
+
+      const iconBox = document.createElement('div');
+      iconBox.className = 'domi-mission-icon-box domi-mission-map-box';
+      const mapCanvas = document.createElement('canvas');
+      mapCanvas.width = 68;
+      mapCanvas.height = 46;
+      mapCanvas.className = 'domi-mission-map-canvas';
+      try {
+        drawItemPreview(mapCanvas, { type: 'map', id: m.id, name: m.regionName }, profile, 0);
+      } catch {
+        const c = mapCanvas.getContext('2d');
+        c.fillStyle = '#0f172a';
+        c.fillRect(0, 0, 68, 46);
+        c.font = '20px sans-serif';
+        c.textAlign = 'center';
+        c.fillText(m.icon || '🗺️', 34, 30);
+      }
+      iconBox.append(mapCanvas);
+
+      const center = document.createElement('div');
+      center.className = 'domi-mission-center';
+      const mPct = Math.min(100, Math.round((m.current / m.target) * 100));
+      center.innerHTML = `
+        <div class="domi-mission-head">
+          <strong class="domi-mission-title">${m.regionName.toUpperCase()}: ${m.name}</strong>
+          <span class="domi-mission-ratio">${m.current}/${m.target} ${m.unit}</span>
+        </div>
+        <p class="domi-mission-desc">${m.description}</p>
+        <p style="font-size: 11px; color: #7dd3fc; margin: 2px 0 0;">
+          <b style="color: #f87171;">👾 Amenaza:</b> ${m.enemyName} (${m.enemyRole}) · <b style="color: #fbbf24;">Peligro:</b> ${m.hazard}
+        </p>
+        <div class="domi-mission-mini-bar">
+          <div class="domi-mini-fill" style="width: ${mPct}%;"></div>
+        </div>
+      `;
+
+      const right = document.createElement('div');
+      right.className = 'domi-mission-right';
+
+      const rewardWrap = document.createElement('div');
+      rewardWrap.className = 'domi-reward-wrap';
+
+      const rewardCanvas = document.createElement('canvas');
+      rewardCanvas.width = 36;
+      rewardCanvas.height = 36;
+      rewardCanvas.className = 'domi-reward-mini-canvas';
+      rewardCanvas.title = m.rewardName;
+      const rCtx = rewardCanvas.getContext('2d');
+      drawAccessoryIcon(rCtx, m.rewardId, 18, 18, 32);
+
+      const tooltip = document.createElement('div');
+      tooltip.className = 'domi-pixel-tooltip';
+      tooltip.textContent = m.rewardTooltip || m.rewardName;
+
+      rewardWrap.append(rewardCanvas, tooltip);
+
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'pixel-button domi-claim-btn';
+
+      if (m.isEquipped) {
+        btn.disabled = true;
+        btn.classList.add('btn-claimed');
+        btn.textContent = '✓ EQUIPADO';
+      } else if (m.isClaimed) {
+        btn.classList.add('pixel-button--claim');
+        btn.textContent = '⚡ EQUIPAR';
+        btn.onclick = () => {
+          equip('accessory', m.rewardId);
+          this.game.audio?.play?.('confirm');
+          this.game.menu?.prepareAccount?.();
+          this.game.showToast?.(`¡${m.rewardName} equipado!`);
+          this.render();
+        };
+      } else if (m.isDone) {
+        btn.classList.add('pixel-button--claim');
+        btn.textContent = '¡RECLAMAR!';
+        btn.onclick = () => {
+          btn.disabled = true;
+          try {
+            grantItem('accessory', m.rewardId);
+            equip('accessory', m.rewardId);
+          } catch {}
+          this.game.audio?.play?.('levelUp');
+          this.game.menu?.prepareAccount?.();
+          this.game.showToast?.(`¡RECOMPENSA OBTENIDA: ${m.rewardName}!`);
+          this.render();
+        };
+      } else {
+        btn.disabled = true;
+        btn.classList.add('btn-locked');
+        btn.textContent = 'EN CURSO';
+      }
+
+      right.append(rewardWrap, btn);
+      card.append(iconBox, center, right);
+      list.append(card);
+    }
+
+    container.append(list);
+  }
+
+  getMissionIcon(type) {
+    if (type === 'star') {
+      return `<svg viewBox="0 0 16 16" width="24" height="24" shape-rendering="crispEdges"><rect x="7" y="1" width="2" height="3" fill="#f3e8ff"/><rect x="5" y="4" width="6" height="3" fill="#e9d5ff"/><rect x="1" y="6" width="14" height="3" fill="#c084fc"/><rect x="3" y="9" width="10" height="3" fill="#a855f7"/><rect x="2" y="12" width="4" height="3" fill="#7e22ce"/><rect x="10" y="12" width="4" height="3" fill="#581c87"/></svg>`;
+    }
+    if (type === 'skull') {
+      return `<svg viewBox="0 0 16 16" width="24" height="24" shape-rendering="crispEdges"><rect x="4" y="2" width="8" height="8" fill="#e2e8f0"/><rect x="2" y="4" width="12" height="5" fill="#e2e8f0"/><rect x="4" y="5" width="2" height="3" fill="#0f172a"/><rect x="10" y="5" width="2" height="3" fill="#0f172a"/><rect x="5" y="11" width="6" height="3" fill="#cbd5e1"/><rect x="6" y="12" width="1" height="2" fill="#0f172a"/><rect x="8" y="12" width="1" height="2" fill="#0f172a"/></svg>`;
+    }
+    if (type === 'god') {
+      return `<svg viewBox="0 0 16 16" width="24" height="24" shape-rendering="crispEdges"><circle cx="8" cy="8" r="6" fill="#38bdf8" opacity="0.3"/><rect x="7" y="2" width="2" height="12" fill="#ffe066"/><rect x="2" y="7" width="12" height="2" fill="#ffe066"/><rect x="4" y="4" width="8" height="8" fill="#fff" opacity="0.8"/></svg>`;
+    }
+    if (type === 'combo') {
+      return `<svg viewBox="0 0 16 16" width="24" height="24" shape-rendering="crispEdges"><rect x="6" y="1" width="4" height="3" fill="#f97316"/><rect x="4" y="4" width="8" height="4" fill="#fbbf24"/><rect x="3" y="7" width="10" height="6" fill="#ef4444"/><rect x="6" y="9" width="4" height="4" fill="#fef08a"/></svg>`;
+    }
+    return `<svg viewBox="0 0 16 16" width="24" height="24" shape-rendering="crispEdges"><rect x="3" y="2" width="10" height="2" fill="#94a3b8"/><rect x="5" y="4" width="6" height="3" fill="#38bdf8"/><rect x="7" y="7" width="2" height="2" fill="#22d3ee"/><rect x="5" y="9" width="6" height="3" fill="#38bdf8"/><rect x="3" y="12" width="10" height="2" fill="#94a3b8"/></svg>`;
+  }
+
+  /* =========================================================================
+     2. CONSEJOS: Filtros superiores ("Todos", "Combate", "Movimientos") y tickets
+     ========================================================================= */
+  renderAdvice(container) {
+    this.previewCanvas = null;
+
+    const filtersBar = document.createElement('div');
+    filtersBar.className = 'domi-advice-filters';
+    filtersBar.innerHTML = `
+      <button type="button" class="pixel-button btn-filter ${this.adviceFilter === 'all' ? 'active' : ''}" data-filter="all">TODOS</button>
+      <button type="button" class="pixel-button btn-filter ${this.adviceFilter === 'combat' ? 'active' : ''}" data-filter="combat">COMBATE</button>
+      <button type="button" class="pixel-button btn-filter ${this.adviceFilter === 'movement' ? 'active' : ''}" data-filter="movement">MOVIMIENTOS</button>
+    `;
+
+    filtersBar.querySelectorAll('button').forEach(b => {
+      b.onclick = () => {
+        this.adviceFilter = b.dataset.filter;
+        this.game.audio.play('navigate');
+        this.render();
+      };
+    });
+    container.append(filtersBar);
+
+    const list = document.createElement('div');
+    list.className = 'domi-tickets-list';
+
+    const filtered = adviceList.filter(a => this.adviceFilter === 'all' || a.category === this.adviceFilter);
+
+    filtered.forEach((adv, idx) => {
+      const ticket = document.createElement('div');
+      ticket.className = 'domi-recipe-ticket';
+
+      const artBox = document.createElement('div');
+      artBox.className = 'domi-ticket-art';
+      artBox.innerHTML = adv.category === 'movement'
+        ? `<svg viewBox="0 0 24 24" width="32" height="32" shape-rendering="crispEdges"><rect x="3" y="11" width="5" height="2" fill="#38bdf8"/><polygon points="14,2 7,13 13,13 10,22 20,10 14,10" fill="#22d3ee"/><polygon points="14,4 9,12 13,12 11,19 18,11 14,11" fill="#ffe066"/></svg>`
+        : `<svg viewBox="0 0 24 24" width="32" height="32" shape-rendering="crispEdges"><rect x="10" y="2" width="4" height="2" fill="#fbbf24"/><rect x="8" y="4" width="8" height="4" fill="#f59e0b"/><rect x="4" y="8" width="16" height="5" fill="#ef4444"/><rect x="7" y="13" width="10" height="4" fill="#fbbf24"/><rect x="10" y="17" width="4" height="5" fill="#e2e8f0"/></svg>`;
+
+      const body = document.createElement('div');
+      body.className = 'domi-ticket-body';
+      body.innerHTML = `
+        <div class="domi-ticket-badge-row">
+          <span class="ticket-tag">RECETA #${idx + 1}</span>
+          <span class="ticket-cat">${adv.badge}</span>
+        </div>
+        <strong class="domi-ticket-title">${adv.title}</strong>
+        <p class="domi-ticket-desc">${adv.description}</p>
+      `;
+
+      ticket.append(artBox, body);
+      list.append(ticket);
+    });
+
+    container.append(list);
+  }
+
+  /* =========================================================================
+     3. COLECCIÓN: Grilla 4x3 de ranuras oscuras + Pedestal de exhibición
+     ========================================================================= */
+  renderCollectibles(container, profile) {
+    container.replaceChildren();
+    const slots = this.getCollectionSlots(profile);
+    if (!this.selectedSlot || !slots.some(s => s.id === this.selectedSlot.id)) {
+      this.selectedSlot = slots[0];
+    }
+
+    const layout = document.createElement('div');
+    layout.className = 'domi-collection-layout';
+
+    const grid = document.createElement('div');
+    grid.className = 'domi-grid-4x3';
+
+    const panel = document.createElement('aside');
+    panel.className = 'domi-pedestal-panel';
+
+    for (const slot of slots) {
+      const slotBtn = document.createElement('button');
+      slotBtn.type = 'button';
+      slotBtn.className = `domi-slot ${slot.isUnlocked ? 'is-unlocked' : 'is-locked'} ${this.selectedSlot.id === slot.id ? 'is-selected' : ''}`;
+      slotBtn.dataset.category = slot.category;
+      slotBtn.setAttribute('aria-pressed', String(this.selectedSlot.id === slot.id));
+      slotBtn.title = `${slot.name} (${slot.category})`;
+
+      const canvas = document.createElement('canvas');
+      canvas.width = 64;
+      canvas.height = 64;
+      canvas.className = 'domi-slot-canvas';
+      this.drawSlotIcon(canvas, slot, profile);
+      slotBtn.append(canvas);
+
+      if (!slot.isUnlocked) {
+        const lockOverlay = document.createElement('div');
+        lockOverlay.className = 'domi-slot-lock';
+        lockOverlay.innerHTML = `
+          <svg viewBox="0 0 16 16" width="16" height="16" shape-rendering="crispEdges">
+            <rect x="5" y="3" width="6" height="4" fill="#ffe066" opacity="0.8"/>
+            <rect x="4" y="6" width="8" height="7" fill="#f59e0b"/>
+            <rect x="7" y="8" width="2" height="3" fill="#0f172a"/>
+          </svg>
+          <span class="domi-lock-label">${slot.lockText}</span>
+        `;
+        slotBtn.append(lockOverlay);
+      }
+
+      slotBtn.onclick = () => {
+        this.selectedSlot = slot;
+        grid.querySelectorAll('.domi-slot').forEach(b => {
+          b.classList.remove('is-selected');
+          b.setAttribute('aria-pressed', 'false');
+        });
+        slotBtn.classList.add('is-selected');
+        slotBtn.setAttribute('aria-pressed', 'true');
+        this.renderPedestalPanel(panel, slot, profile);
+        this.game.audio.play('navigate');
+      };
+
+      grid.append(slotBtn);
+    }
+
+    layout.append(grid, panel);
+    container.append(layout);
+    this.renderPedestalPanel(panel, this.selectedSlot, profile);
+  }
+
+  renderPedestalPanel(panel, current, profile) {
+    panel.replaceChildren();
+
+    const stage = document.createElement('div');
+    stage.className = 'domi-pedestal-stage';
+    const previewCanvas = document.createElement('canvas');
+    previewCanvas.width = 320;
+    previewCanvas.height = 220;
+    previewCanvas.id = 'domiPreview';
+    this.previewCanvas = previewCanvas;
+    stage.append(previewCanvas);
+
+    const badge = document.createElement('span');
+    badge.className = 'domi-pedestal-cat-badge';
+    badge.textContent = `${current.category} · ${current.isUnlocked ? 'DESBLOQUEADO' : 'BLOQUEADO'}`;
+    stage.append(badge);
+
+    const body = document.createElement('div');
+    body.className = 'domi-pedestal-body';
+    body.innerHTML = `
+      <strong class="domi-pedestal-title">${current.name}</strong>
+      <p class="domi-pedestal-desc">${current.desc}</p>
+      <div class="domi-pedestal-stats">
+        <div class="stat-box"><small>VIDA</small><b>${current.stats.hp}</b></div>
+        <div class="stat-box"><small>VEL</small><b>${current.stats.spd}</b></div>
+        <div class="stat-box"><small>DAÑO</small><b>${current.stats.dmg}</b></div>
+      </div>
+      <div class="stat-perk">
+        <small>EFECTO ESPECIAL</small>
+        <b>${current.stats.perk}</b>
+      </div>
+    `;
+
+    const action = document.createElement('div');
+    action.className = 'domi-pedestal-action';
+    const actionBtn = document.createElement('button');
+    actionBtn.type = 'button';
+    actionBtn.className = 'pixel-button domi-action-btn';
+
+    if (current.isUnlocked) {
+      if (current.type === 'accessory') {
+        const isEquipped = profile.loadout?.accessory === current.id;
+        actionBtn.textContent = isEquipped ? '✓ EN USO' : 'EQUIPAR ACCESORIO';
+        actionBtn.disabled = isEquipped;
+        actionBtn.onclick = () => {
+          try { equip('accessory', current.id); } catch (err) { this.game.showToast?.(err.message); return; }
+          this.game.menu?.prepareAccount?.();
+          this.game.audio.play('purchase');
+          this.render();
+        };
+      } else if (current.type === 'skin') {
+        actionBtn.textContent = 'VER EN ARMARIO';
+        actionBtn.onclick = () => this.game.shop.show('skin', true);
+      } else if (current.type === 'pet') {
+        actionBtn.textContent = 'VER MASCOTAS';
+        actionBtn.onclick = () => this.game.shop.show('pet', true);
+      } else if (current.type === 'boss') {
+        actionBtn.textContent = '⚔ DUELO DE JEFES';
+        actionBtn.onclick = () => {
+          this.game.menu.prepareAccount();
+          this.game.showScreen('setupScreen');
+          const modeSelect = document.querySelector('#modeSelect');
+          if (modeSelect) { modeSelect.value = 'rush'; this.game.menu?.syncCards?.(); }
+        };
+      } else {
+        actionBtn.textContent = 'INICIAR PARTIDA';
+        actionBtn.onclick = () => {
+          this.game.menu.prepareAccount();
+          this.game.showScreen('setupScreen');
+        };
+      }
+    } else {
+      actionBtn.disabled = true;
+      actionBtn.textContent = `BLOQUEADO (${current.lockText})`;
+    }
+    action.append(actionBtn);
+
+    panel.append(stage, body, action);
+    this.drawPedestalPreview(previewCanvas, current, profile);
+  }
+
+  drawSlotIcon(canvas, slot, profile) {
+    const c = canvas.getContext('2d');
+    const w = canvas.width, h = canvas.height;
+    c.clearRect(0, 0, w, h);
+    c.imageSmoothingEnabled = false;
+
+    // Fondo oscuro con gradiente según categoría
+    const bg = c.createRadialGradient(w / 2, h / 2, 4, w / 2, h / 2, w * 0.55);
+    if (slot.category === 'GRAN JEFE' || slot.category === 'COLOSO FINAL') {
+      bg.addColorStop(0, '#36151c');
+      bg.addColorStop(1, '#0e0508');
+    } else if (slot.category === 'ENEMIGO' || slot.category === 'ENEMIGO NATIVO') {
+      bg.addColorStop(0, '#1d261e');
+      bg.addColorStop(1, '#09100a');
+    } else if (slot.category === 'LEYENDA') {
+      bg.addColorStop(0, '#3a2b0e');
+      bg.addColorStop(1, '#0e0b04');
+    } else {
+      bg.addColorStop(0, '#152933');
+      bg.addColorStop(1, '#081115');
+    }
+    c.fillStyle = bg;
+    c.fillRect(0, 0, w, h);
+
+    if (!slot.isUnlocked) {
+      c.save();
+      c.filter = 'brightness(0.22) contrast(1.2)';
+    }
+
+    if (slot.type === 'enemy' || slot.type === 'boss') {
+      const enemyKind = slot.enemyId || slot.id;
+      const isBoss = slot.type === 'boss';
+      drawFood(c, enemyKind, w / 2, h * 0.54, isBoss ? 0.72 : 0.62, 0);
+    } else if (slot.type === 'skin') {
+      drawFood(c, slot.id, w / 2, h * 0.54, 0.68, 0);
+    } else if (slot.id === 'domi') {
+      this.drawDomiCharacter(c, w / 2, h * 0.65, 0.75, 0);
+    } else if (slot.type === 'accessory') {
+      drawAccessoryIcon(c, slot.id, w / 2, h / 2, 48);
+    } else {
+      drawItemPreview(canvas, { type: slot.type, id: slot.id, name: slot.name }, profile, 0);
+    }
+
+    if (!slot.isUnlocked) {
+      c.restore();
+    }
+  }
+
+  drawPedestalPreview(canvas, item, profile, time = 0) {
+    const c = canvas.getContext('2d');
+    const w = canvas.width, h = canvas.height;
+    c.clearRect(0, 0, w, h);
+
+    // Fondo vitrina con atmósfera por categoría
+    const isBoss = item.category === 'GRAN JEFE' || item.category === 'COLOSO FINAL';
+    const isEnemy = item.category === 'ENEMIGO' || item.category === 'ENEMIGO NATIVO';
+    const isLegend = item.category === 'LEYENDA';
+
+    const bgGrad = c.createRadialGradient(w/2, h*0.5, 10, w/2, h*0.5, w*0.7);
+    if (isBoss) {
+      bgGrad.addColorStop(0, '#3c141d');
+      bgGrad.addColorStop(0.6, '#1f090f');
+      bgGrad.addColorStop(1, '#0c0406');
+    } else if (isEnemy) {
+      bgGrad.addColorStop(0, '#1b3024');
+      bgGrad.addColorStop(0.6, '#0f1f16');
+      bgGrad.addColorStop(1, '#060d09');
+    } else if (isLegend) {
+      bgGrad.addColorStop(0, '#3f2d0e');
+      bgGrad.addColorStop(0.6, '#241a08');
+      bgGrad.addColorStop(1, '#0e0a03');
+    } else {
+      bgGrad.addColorStop(0, '#1a333a');
+      bgGrad.addColorStop(0.6, '#102227');
+      bgGrad.addColorStop(1, '#091316');
+    }
+    c.fillStyle = bgGrad;
+    c.fillRect(0, 0, w, h);
+
+    // Pedestal
+    const pedGlow = c.createRadialGradient(w/2, h*.78, 5, w/2, h*.78, w*.35);
+    const glowColor = isBoss ? 'rgba(255, 75, 100, 0.35)' : isLegend ? 'rgba(251, 191, 36, 0.45)' : isEnemy ? 'rgba(56, 239, 125, 0.25)' : 'rgba(56, 189, 248, 0.25)';
+    pedGlow.addColorStop(0, glowColor);
+    pedGlow.addColorStop(0.6, '#0a1014');
+    pedGlow.addColorStop(1, 'transparent');
+    c.fillStyle = pedGlow;
+    c.beginPath();
+    c.ellipse(w/2, h*.78, w*.33, h*.13, 0, 0, Math.PI * 2);
+    c.fill();
+    c.strokeStyle = isBoss ? '#ff4f75' : isLegend ? '#fbbf24' : isEnemy ? '#34d399' : '#38bdf8';
+    c.lineWidth = 2;
+    c.stroke();
+
+    c.save();
+    if (!item.isUnlocked) {
+      c.filter = 'brightness(0.3) saturate(0.2)';
+    }
+
+    if (item.id === 'domi') {
+      this.drawDomiCharacter(c, w / 2, h * 0.65, 2.2, time);
+    } else if (item.type === 'enemy' || item.type === 'boss') {
+      const enemyKind = item.enemyId || item.id;
+      const bob = Math.round(Math.sin(time * 5) * 2);
+      const scale = item.type === 'boss' ? 1.4 : 1.1;
+      drawFood(c, enemyKind, w / 2, h * 0.54 + bob, scale, time);
+    } else {
+      drawItemPreview(canvas, { type: item.type, id: item.id, name: item.name }, profile, time);
+    }
+    c.restore();
+  }
+
+  drawDomiCharacter(c, cx, cy, scale = 2, time = 0) {
+    if (domiGifImage && domiGifImage.complete && domiGifImage.naturalWidth > 0) {
+      c.save();
+      const bob = Math.sin(time * 3) * 3;
+      const w = 48 * scale;
+      const h = 50 * scale;
+      c.drawImage(domiGifImage, cx - w / 2, cy - h / 2 + bob, w, h);
+      c.restore();
+      return;
+    }
+    c.save();
+    c.translate(cx, cy + Math.sin(time * 3) * 3);
+    c.scale(scale, scale);
+
+    c.fillStyle = 'rgba(0,0,0,0.3)';
+    c.beginPath();
+    c.ellipse(0, 10, 18, 5, 0, 0, Math.PI * 2);
+    c.fill();
+
+    c.fillStyle = '#f59e0b';
+    c.beginPath();
+    c.arc(0, 4, 18, Math.PI, 0, false);
+    c.closePath();
+    c.fill();
+    c.strokeStyle = '#92400e';
+    c.lineWidth = 2;
+    c.stroke();
+
+    c.fillStyle = '#fde68a';
+    for (let a = Math.PI; a <= 0.05; a += Math.PI / 6.5) {
+      const rx = Math.cos(a) * 18;
+      const ry = 4 - Math.sin(a) * 18;
+      c.fillRect(rx - 1.5, ry - 1.5, 3, 3);
+    }
+
+    c.fillStyle = '#f43f5e';
+    c.fillRect(-11, 4, 4, 2);
+    c.fillRect(7, 4, 4, 2);
+
+    const blink = Math.sin(time * 1.5) > 0.96;
+    c.fillStyle = '#0a0f14';
+    if (blink) {
+      c.fillRect(-8, 1, 3, 1);
+      c.fillRect(5, 1, 3, 1);
+    } else {
+      c.fillRect(-8, 0, 3, 4);
+      c.fillRect(5, 0, 3, 4);
+      c.fillStyle = '#ffffff';
+      c.fillRect(-8, 0, 1, 1);
+      c.fillRect(5, 0, 1, 1);
+    }
+
+    c.fillStyle = '#78350f';
+    c.fillRect(-5, 6, 10, 2);
+    c.fillRect(-2, 8, 4, 2);
+
+    c.fillStyle = '#ffffff';
+    c.fillRect(-13, -18, 26, 7);
+    c.fillRect(-17, -27, 34, 10);
+    c.fillRect(-11, -33, 22, 7);
+    c.strokeStyle = '#cbd5e1';
+    c.lineWidth = 1;
+    c.strokeRect(-17, -27, 34, 10);
+    c.fillStyle = '#94a3b8';
+    c.fillRect(-8, -24, 2, 7);
+    c.fillRect(0, -25, 2, 8);
+    c.fillRect(7, -24, 2, 7);
+
+    const steamY = -36 - ((time * 20) % 18);
+    const steamAlpha = Math.max(0, 1 - ((time * 20) % 18) / 18);
+    c.fillStyle = `rgba(255, 255, 255, ${steamAlpha * 0.7})`;
+    c.beginPath();
+    c.arc(-4 + Math.sin(time * 4) * 3, steamY, 3, 0, Math.PI * 2);
+    c.arc(4 + Math.cos(time * 4) * 3, steamY - 4, 2.5, 0, Math.PI * 2);
+    c.fill();
+
+    c.restore();
+  }
+
+  update(time) {
+    if (this.previewCanvas && this.type === 'collectibles' && this.selectedSlot) {
+      this.drawPedestalPreview(this.previewCanvas, this.selectedSlot, this.profile, this.game.reducedMotion ? 0 : time);
+    }
+  }
+}

@@ -1,0 +1,1437 @@
+/* Shared arcade surfaces, scoped to avoid changing the account and shop views. */
+.pause-screen .pause-panel-enhanced, #lobbyDialogue {
+  background: #101718 !important;
+  border: 2px solid #80a99b !important;
+  border-top: 4px solid #ffe066 !important;
+  box-shadow: 6px 6px #030707, inset 0 1px #ffffff18 !important;
+  letter-spacing: 0 !important;
+}
+#lobbyDialogue { max-height: calc(100% - 24px); overflow-y: auto; padding: 20px !important; }
+#lobbyDialogue .dialogue-header-text { min-width: 0; }
+#lobbyDialogue .domi-portrait-canvas { position: static !important; transform: none !important; margin: 0 !important; }
+#lobbyDialogue .dialogue-speaker, #lobbyDialogue .dialogue-subtitle { letter-spacing: 0 !important; line-height: 1.7; overflow-wrap: anywhere; }
+#lobbyDialogue .dialogue-subtitle { color: #a6bbb0 !important; font: 11px monospace !important; }
+#lobbyDialogue .dialogue-tabs, .pause-screen .pause-tabs { display: grid !important; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 6px !important; }
+.pause-screen .pause-tabs { grid-template-columns: repeat(2,minmax(0,1fr)); }
+#lobbyDialogue .dialogue-tab, .pause-screen .pause-tab { padding: 12px 6px !important; font: bold 11px monospace !important; letter-spacing: 0 !important; }
+#lobbyDialogue .dialogue-tab.is-active, .pause-screen .pause-tab.is-active { background: #a4f3d1 !important; border-color: #c9ffe6 !important; border-bottom-color: #487e69 !important; }
+#lobbyDialogue .dialogue-bubble { background: transparent !important; border: 0 !important; border-left: 3px solid #ffe066 !important; box-shadow: none !important; padding: 14px !important; }
+#lobbyDialogue p { font: 16px/1.6 'VT323', monospace !important; color: #e0eee5 !important; }
+#lobbyDialogue .domi-section-intro { font: 13px/1.5 monospace; }
+#lobbyDialogue .domi-missions-list, #lobbyDialogue .domi-collectibles-list { max-height: none; }
+#lobbyDialogue .dialogue-body[hidden], .pause-screen .pause-view[hidden] { display: none !important; }
+#lobbyDialogue .dialogue-next-btn { width: 100%; font: bold 11px monospace !important; }
+.pause-screen .pause-panel-enhanced { max-width: 820px !important; padding: 22px !important; }
+.pause-screen h2 { font-size: 26px; margin: 8px 0 20px; line-height: 1.4; }
+.pause-summary { display: grid; grid-template-columns: repeat(5,minmax(0,1fr)); gap: 8px; }
+.pause-summary > div { background: #1c2825; border: 1px solid #496358; border-bottom: 3px solid #050a08; padding: 12px 10px; min-width: 0; }
+.pause-summary span { display: block; font: 10px monospace; color: #a8bcb2; margin-bottom: 8px; }
+.pause-summary strong { font: bold 18px monospace !important; color: #ffe066; overflow-wrap: anywhere; }
+.pause-summary > div:first-child strong { color: #8bf1bc; }
+.pause-screen .pause-goal { padding: 12px 0; border-bottom: 1px solid #3e554b; color: #b5c7be; font: 13px/1.5 monospace; }
+.pause-screen .pause-card-head, .pause-screen .pause-active-head { flex-wrap: wrap; }
+.pause-screen .pause-card-title { line-height: 1.6 !important; }
+.pause-screen .pause-card-desc, .pause-screen .pause-active-desc { font: 13px/1.5 monospace !important; color: #c1d0c7 !important; }
+.pause-screen .pause-abilities-grid, .pause-screen .pause-actives-grid { max-height: none !important; overflow: visible !important; }
+.pause-screen .menu-actions { position: sticky; bottom: -22px; padding: 14px 0; background: #101718; border-top: 1px solid #496358; display: grid; grid-template-columns: 1fr 1fr; }
+.pause-screen .menu-actions button { font-size: 10px; min-height: 48px; white-space: normal; }
+.pause-screen button:focus-visible, #lobbyDialogue button:focus-visible, #dashControl:focus-visible { outline: 3px solid #fff; outline-offset: 3px; }
+#dashControl { display: grid; grid-template-columns: 22px minmax(0,1fr); width: 190px; height: 72px; gap: 2px 8px; padding: 7px 10px; cursor: pointer; border: 2px solid #6b8b7d; border-bottom: 4px solid #284e40; border-radius: 2px; color: #a4f3d1; transition: background .15s, border-color .15s; }
+#dashControl[hidden] { display: none; }
+#dashControl > svg { width: 22px; height: 22px; grid-row: 1 / 3; }
+#dashControl .dash-meter { display: grid; gap: 3px; min-width: 0; grid-template-columns: 1fr; font: 9px monospace; text-align: left; }
+#dashControl .dash-meter strong { font: bold 11px monospace; }
+#dashControl .meter { display: block; width: 100%; height: 6px; }
+#dashControl .meter__fill { display: block; height: 100%; background: #9cf6ce; }
+#dashControl kbd { grid-column: 2; justify-self: start; min-width: 0; padding: 1px 5px; font: bold 8px monospace; border-width: 1px 1px 2px; }
+#dashControl[data-ready="true"] { border-color: #a4f3d1; background: #162e25; box-shadow: 3px 3px #020609, inset 0 0 12px #72ffc018; }
+#dashControl[data-ready="true"]:hover { background: #244b3c; }
+#dashControl[aria-disabled="true"] { color: #a9b6b1; border-color: #56645f; cursor: default; }
+#dashControl[data-active="true"] { background: #60471b; border-color: #ffe066; color: #fff2bd; }
+#dashControl.dash-refilled { animation: dash-refill .35s ease-out; }
+@keyframes dash-refill { from { box-shadow: 0 0 0 3px white, 0 0 18px #9cf6ce; } to { box-shadow: 3px 3px #020609; } }
+@media(max-width: 700px) {
+  #dashControl { width: 112px; height: 62px; grid-template-columns: 12px minmax(0,1fr); padding: 5px; gap: 2px 4px; }
+  #dashControl > svg { width: 12px; }
+  #dashControl .dash-meter { font-size: 7px; }
+  #dashControl .dash-meter strong { font-size: 9px; }
+  .pause-summary { grid-template-columns: repeat(3,minmax(0,1fr)); }
+  .pause-summary strong { font-size: 14px; }
+  .pause-screen .pause-abilities-grid { grid-template-columns: 1fr !important; }
+  .pause-screen .menu-actions { grid-template-columns: 1fr; }
+  #lobbyDialogue { padding: 12px !important; }
+  #lobbyDialogue .dialogue-speaker { font-size: 10px !important; }
+}
+@media(prefers-reduced-motion: reduce) { #dashControl { animation: none !important; transition: none; } }
+
+/* Explicitly retire legacy fixed-height/flex overrides on the dash control. */
+#dashControl {
+  display: grid !important; grid-template-columns: 20px minmax(0,1fr) 58px !important;
+  width: 212px !important; min-width: 0 !important; height: 56px !important; min-height: 0 !important;
+  padding: 7px 8px !important; gap: 8px !important; overflow: hidden;
+  background: #111b19 !important; border: 1px solid #658579 !important;
+  border-bottom: 3px solid #324c41 !important; box-shadow: 2px 3px #0008 !important;
+}
+#dashControl > svg { grid-row: auto; width: 20px; height: 20px; }
+#dashControl .dash-meter { gap: 3px !important; }
+#dashControl .dash-meter strong { font: bold 10px/1 monospace !important; letter-spacing: 0 !important; white-space: nowrap; }
+#dashControl #dashLabel { font: bold 10px/1 monospace !important; letter-spacing: 0 !important; white-space: nowrap; color: #a4f3d1; }
+#dashControl .meter { height: 3px !important; border: 0 !important; background: #35443d !important; }
+#dashControl .meter__fill { background: #a4f3d1 !important; box-shadow: none !important; }
+#dashControl kbd { grid-column: 3; width: 58px !important; height: 25px !important; min-width: 0 !important; display: grid; place-items: center; padding: 0 !important; font: bold 10px/1 monospace !important; letter-spacing: 0 !important; background: #273d33 !important; color: #e2f5e8 !important; border: 1px solid #6c8e7c !important; border-bottom: 3px solid #405c4e !important; box-shadow: none !important; text-shadow: none !important; filter: none !important; opacity: 1 !important; }
+#dashControl[data-ready="true"] { border-color: #9fe9c0 !important; }
+#dashControl[data-active="true"] { border-color: #ffe066 !important; background: #39331c !important; }
+#pauseScreen { padding: 16px !important; }
+#pauseScreen .pause-panel-enhanced {
+  width: min(720px,100%) !important; max-height: calc(100dvh - 32px) !important;
+  display: flex; flex-direction: column; padding: 20px !important; overflow: hidden !important;
+  border: 1px solid #587165 !important; border-top: 3px solid #ffe066 !important;
+}
+#pauseScreen .eyebrow { font: bold 10px monospace !important; margin: 0 0 8px !important; }
+#pauseScreen h2 { font: 18px/1.5 'Press Start 2P', monospace !important; margin: 0 0 16px !important; }
+#pauseScreen .pause-summary { gap: 0; background: #1a2520; border-block: 1px solid #384b40; }
+#pauseScreen .pause-summary > div { background: none; border: 0; border-right: 1px solid #384b40; padding: 10px; }
+#pauseScreen .pause-summary > div:last-child { border: 0; }
+#pauseScreen .pause-summary span { font: 9px monospace !important; margin-bottom: 6px; }
+#pauseScreen .pause-summary strong { font: bold 17px monospace !important; }
+#pauseScreen .pause-goal { margin: 8px 0 0; padding: 0; border: 0; font: 11px/1.4 monospace !important; }
+#pauseScreen .pause-tabs { display: flex !important; gap: 20px !important; margin: 12px 0 !important; padding: 0 !important; flex-shrink: 0; }
+#pauseScreen .pause-tab { display: flex; align-items: center; gap: 6px; background: transparent !important; border: 0 !important; border-bottom: 2px solid transparent !important; box-shadow: none !important; padding: 8px 0 !important; color: #9cae9f !important; }
+#pauseScreen .pause-tab.is-active { color: #ffe066 !important; border-bottom-color: #ffe066 !important; }
+#pauseScreen .pause-tab svg { width: 14px; height: 14px; }
+#pauseScreen .pause-view { min-height: 0; overflow-y: auto; margin: 0 !important; padding: 0 2px 2px; }
+#pauseScreen .pause-actives-grid { display: grid !important; grid-template-columns: repeat(2,minmax(0,1fr)) !important; gap: 8px !important; padding: 0 !important; }
+#pauseScreen .pause-active-card { grid-template-columns: 48px minmax(0,1fr) !important; gap: 10px !important; padding: 12px !important; border: 1px solid #405347 !important; border-left: 3px solid #9fe9c0 !important; background: #19241f !important; min-height: 100px; }
+#pauseScreen .pause-active-card.is-locked { border-left-color: #667469 !important; background: #151d19 !important; opacity: 1 !important; }
+#pauseScreen .pause-active-key kbd { width: 46px !important; min-width: 0 !important; height: 36px !important; font: bold 10px monospace !important; color: #b6c4b9 !important; background: #233027 !important; border: 1px solid #506052 !important; box-shadow: 0 3px #090d0a !important; }
+#pauseScreen .pause-active-card.is-unlocked kbd { color: #ffe066 !important; }
+#pauseScreen .pause-active-head { display: flex !important; flex-direction: column; align-items: flex-start !important; gap: 4px !important; }
+#pauseScreen .pause-active-title { font: bold 13px/1.2 monospace !important; color: #e0e9df !important; }
+#pauseScreen .pause-active-status { font: 9px/1.2 monospace !important; color: #9da99c !important; }
+#pauseScreen .pause-active-desc { margin: 6px 0 0 !important; font: 11px/1.4 monospace !important; color: #a9b7ac !important; }
+#pauseScreen .menu-actions { flex-shrink: 0; position: static; margin: 14px 0 0 !important; padding: 12px 0 0 !important; gap: 12px; }
+#pauseScreen .menu-actions button { display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 40px !important; padding: 10px !important; font: bold 12px monospace !important; border: 1px solid #516458 !important; box-shadow: none !important; }
+#pauseScreen #resumeButton { background: #a5e9bb !important; color: #112519 !important; }
+#pauseScreen #abandonButton { background: transparent !important; color: #b7c1b6 !important; }
+#pauseScreen .menu-actions svg { width: 16px; height: 16px; }
+@media(max-width:700px) {
+  #dashControl { left: calc(50% + 28px) !important; width: 166px !important; grid-template-columns: minmax(0,1fr) 54px !important; }
+  #dashControl > svg { display: none; }
+  #dashControl kbd { grid-column: 2; width: 54px !important; }
+  #pauseScreen .pause-panel-enhanced { padding: 14px !important; }
+  #pauseScreen .pause-summary { grid-template-columns: repeat(5,minmax(0,1fr)); }
+  #pauseScreen .pause-summary > div { padding: 8px 4px; }
+  #pauseScreen .pause-summary strong { font-size: 12px !important; }
+  #pauseScreen .menu-actions { grid-template-columns: 1fr 1fr; }
+}
+@media(max-width:460px) { #pauseScreen .pause-actives-grid { grid-template-columns: 1fr !important; } }
+
+/* Shared physical pixel buttons: shop, start and pause. */
+:is(#shopScreen, #domiScreen) .purchase-button,
+#startRunButton, #playButton, #pauseScreen .menu-actions .pixel-button {
+  --button-face: #ffdc68; --button-edge: #9a662c; --button-ink: #21190c;
+  position: relative; display: flex !important; justify-content: center; align-items: center;
+  gap: 12px !important; min-height: 56px !important; padding: 14px 18px !important;
+  font: 9px/1.8 'Press Start 2P', monospace !important; letter-spacing: 0 !important;
+  color: var(--button-ink) !important; background: var(--button-face) !important;
+  border: 3px solid #080e10 !important; border-radius: 0 !important;
+  box-shadow: inset 0 3px #ffffff90, inset 3px 0 #ffffff40, inset 0 -5px var(--button-edge), 4px 4px #030708 !important;
+  text-shadow: none !important; white-space: normal; overflow-wrap: anywhere;
+  clip-path: polygon(4px 0,calc(100% - 4px) 0,calc(100% - 4px) 4px,100% 4px,100% calc(100% - 4px),calc(100% - 4px) calc(100% - 4px),calc(100% - 4px) 100%,4px 100%,4px calc(100% - 4px),0 calc(100% - 4px),0 4px,4px 4px);
+  transition: filter .1s, translate .1s !important;
+}
+#startRunButton, #playButton, #pauseScreen #resumeButton { --button-face: #94edb5; --button-edge: #397f59; --button-ink: #10271b; }
+#pauseScreen #abandonButton { --button-face: #273b40; --button-edge: #142328; --button-ink: #d5e2dc; }
+:is(#shopScreen,#domiScreen) .purchase-button:not(:disabled):hover,
+#startRunButton:hover, #playButton:hover, #pauseScreen .menu-actions button:hover { filter: brightness(1.12); translate: 0 -2px; }
+:is(#shopScreen,#domiScreen) .purchase-button:not(:disabled):active,
+#startRunButton:active, #playButton:active, #pauseScreen .menu-actions button:active { translate: 0 2px; filter: brightness(.95); }
+:is(#shopScreen,#domiScreen) .purchase-button:focus-visible,
+#startRunButton:focus-visible, #playButton:focus-visible, #pauseScreen .menu-actions button:focus-visible { outline: none; box-shadow: inset 0 0 0 3px #fff, inset 0 -6px var(--button-edge) !important; }
+:is(#shopScreen,#domiScreen) .purchase-button:disabled { --button-face: #33413d; --button-edge: #202b28; --button-ink: #a8b8ae; opacity: 1; cursor: not-allowed; }
+.purchase-copy { display: grid; gap: 5px; min-width: 0; text-align: center; }
+.purchase-label { font: inherit !important; }
+.purchase-price { font: 9px/1.5 'Press Start 2P',monospace !important; opacity: .8; }
+:is(#shopScreen,#domiScreen) .purchase-button svg, #startRunButton svg, #playButton svg, #pauseScreen .menu-actions svg { width: 18px; height: 18px; flex: 0 0 18px; stroke-width: 3; }
+#pauseScreen .pause-panel {
+  max-width: 700px !important; max-height: calc(100dvh - 40px) !important; overflow-y: auto;
+  padding: 24px !important; border: 3px solid #738d81 !important; border-top: 5px solid #ffdc68 !important;
+  border-radius: 0 !important; background: #101b1b !important;
+  box-shadow: 8px 8px #040909, inset 0 3px #ffffff12 !important;
+}
+#pauseScreen .pause-panel .eyebrow { font: 9px/1.8 'Press Start 2P',monospace !important; color: #ffdc68 !important; }
+#pauseScreen .pause-panel h2 { font: 20px/1.6 'Press Start 2P',monospace !important; text-shadow: 3px 3px #000; margin: 12px 0 16px !important; }
+#pauseScreen .pause-panel h3 { font: 10px/1.8 'Press Start 2P',monospace !important; color: #94edb5; margin: 20px 0 10px; }
+#pauseScreen .pause-panel .pause-goal { font: 20px/1.4 'VT323',monospace !important; color: #c5d5cb; border-left: 3px solid #ffdc68; padding: 6px 12px; }
+#pauseScreen .build-list { display: grid !important; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 8px; max-height: 200px; overflow-y: auto; padding: 2px 4px 6px; }
+#pauseScreen .build-list span { font: 9px/1.9 'Press Start 2P',monospace !important; padding: 12px !important; border: 2px solid #3b554b; border-left: 4px solid #94edb5; border-radius: 0; background: #1b2b27; color: #dae8dd; overflow-wrap: anywhere; }
+#pauseScreen .build-list span:only-child { grid-column: 1/-1; }
+#pauseScreen .pause-panel .menu-actions { display: grid !important; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 20px !important; padding-top: 16px !important; border-top: 2px dashed #425b50; }
+@media(max-width:600px) {
+  #pauseScreen .pause-panel { padding: 16px !important; }
+  #pauseScreen .pause-panel h2 { font-size: 16px !important; }
+  #pauseScreen .pause-panel .menu-actions { grid-template-columns: 1fr; }
+  #pauseScreen .build-list { grid-template-columns: 1fr; }
+}
+@media(prefers-reduced-motion:reduce) {
+  :is(#shopScreen,#domiScreen) .purchase-button, #startRunButton, #playButton, #pauseScreen .menu-actions button { transition: none !important; translate: none !important; }
+}
+
+/* Final shared arcade action finish. */
+#playButton.arcade-action,
+#startRunButton.arcade-action,
+#setupBackButton.arcade-action,
+#pauseScreen #resumeButton.arcade-action,
+#pauseScreen #abandonButton.arcade-action,
+:is(#shopScreen,#domiScreen) .purchase-button.arcade-action {
+  --arcade-face: #ffdc68;
+  --arcade-top: #fff0aa;
+  --arcade-lip: #946329;
+  --arcade-ink: #251707;
+  box-sizing: border-box;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 10px !important;
+  min-height: 56px !important;
+  min-width: 0;
+  padding: 11px 18px !important;
+  font: 10px/1.55 'Press Start 2P', monospace !important;
+  letter-spacing: 0 !important;
+  text-align: center;
+  color: var(--arcade-ink) !important;
+  background: var(--arcade-face) !important;
+  border: 2px solid #050c0d !important;
+  border-top: 3px solid var(--arcade-top) !important;
+  border-bottom: 5px solid var(--arcade-lip) !important;
+  border-radius: 0 !important;
+  box-shadow: 4px 4px 0 #030708, inset 2px 2px #ffffff55 !important;
+  clip-path: none !important;
+  text-shadow: none !important;
+  animation: none !important;
+  transform: none !important;
+  translate: none !important;
+  transition: filter .12s steps(2,end), transform .12s steps(2,end), box-shadow .12s steps(2,end) !important;
+}
+#playButton.arcade-action,
+#startRunButton.arcade-action { min-width: 240px; }
+#setupBackButton.arcade-action,
+#pauseScreen #abandonButton.arcade-action {
+  --arcade-face: #25383e;
+  --arcade-top: #68808a;
+  --arcade-lip: #112025;
+  --arcade-ink: #edf3ee;
+}
+#pauseScreen #resumeButton.arcade-action {
+  --arcade-face: #a2edbd;
+  --arcade-top: #dcffe4;
+  --arcade-lip: #458d61;
+  --arcade-ink: #102d1a;
+}
+:is(#shopScreen,#domiScreen) .purchase-button.arcade-action {
+  width: 100%;
+  --arcade-face: #a2edbd;
+  --arcade-top: #dcffe4;
+  --arcade-lip: #458d61;
+  --arcade-ink: #102d1a;
+}
+:is(#shopScreen,#domiScreen) .purchase-button.arcade-action:disabled {
+  --arcade-face: #2d3e3e;
+  --arcade-top: #586b68;
+  --arcade-lip: #182627;
+  --arcade-ink: #c8d4cd;
+  opacity: 1 !important;
+  cursor: not-allowed !important;
+  filter: none !important;
+}
+:is(#shopScreen,#domiScreen) .purchase-button.arcade-action .purchase-copy {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+:is(#shopScreen,#domiScreen) .purchase-button.arcade-action .purchase-label {
+  font: 9px/1.5 'Press Start 2P', monospace !important;
+}
+:is(#shopScreen,#domiScreen) .purchase-button.arcade-action .purchase-price {
+  font: 10px/1.5 'VT323', monospace !important;
+  color: inherit;
+  opacity: .8;
+}
+#playButton.arcade-action svg,
+#startRunButton.arcade-action svg,
+#setupBackButton.arcade-action svg,
+#pauseScreen .arcade-action svg,
+:is(#shopScreen,#domiScreen) .purchase-button.arcade-action svg {
+  width: 18px;
+  height: 18px;
+  flex: 0 0 18px;
+  stroke-width: 2.8;
+}
+#playButton.arcade-action:hover:not(:disabled),
+#startRunButton.arcade-action:hover:not(:disabled),
+#setupBackButton.arcade-action:hover:not(:disabled),
+#pauseScreen .arcade-action:hover:not(:disabled),
+:is(#shopScreen,#domiScreen) .purchase-button.arcade-action:hover:not(:disabled) {
+  color: var(--arcade-ink) !important;
+  background: var(--arcade-face) !important;
+  filter: brightness(1.08) !important;
+  transform: translate(-2px,-2px) !important;
+  box-shadow: 6px 6px 0 #030708, inset 2px 2px #ffffff55 !important;
+}
+#playButton.arcade-action:active:not(:disabled),
+#startRunButton.arcade-action:active:not(:disabled),
+#setupBackButton.arcade-action:active:not(:disabled),
+#pauseScreen .arcade-action:active:not(:disabled),
+:is(#shopScreen,#domiScreen) .purchase-button.arcade-action:active:not(:disabled) {
+  filter: brightness(.95) !important;
+  transform: translate(2px,2px) !important;
+  box-shadow: 2px 2px 0 #030708, inset 2px 2px #ffffff33 !important;
+}
+#playButton.arcade-action:focus-visible,
+#startRunButton.arcade-action:focus-visible,
+#setupBackButton.arcade-action:focus-visible,
+#pauseScreen .arcade-action:focus-visible,
+:is(#shopScreen,#domiScreen) .purchase-button.arcade-action:focus-visible {
+  outline: 3px solid #fff !important;
+  outline-offset: 4px;
+}
+#setupScreen .setup-fields.sr-hidden {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0,0,0,0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+  pointer-events: none;
+}
+@media(max-width:560px) {
+  #startRunButton.arcade-action,
+  #setupBackButton.arcade-action { width: 100%; }
+  :is(#shopScreen,#domiScreen) .purchase-button.arcade-action { padding-inline: 10px !important; }
+}
+@media(prefers-reduced-motion:reduce) {
+  #playButton.arcade-action, #startRunButton.arcade-action, #setupBackButton.arcade-action,
+  #pauseScreen .arcade-action, :is(#shopScreen,#domiScreen) .purchase-button.arcade-action {
+    transition: none !important;
+  }
+}
+
+/* Pause reads as a compact order ticket over the game. */
+#pauseScreen.screen--active {
+  padding: 20px !important;
+  background: rgba(5,11,14,.86) !important;
+}
+#pauseScreen .pause-panel {
+  box-sizing: border-box;
+  width: min(840px,100%) !important;
+  max-width: 840px !important;
+  max-height: calc(100dvh - 40px) !important;
+  margin: auto !important;
+  padding: 22px !important;
+  display: grid !important;
+  gap: 14px !important;
+  overflow-y: auto !important;
+  background: #111d1e !important;
+  border: 2px solid #6f8d82 !important;
+  border-top: 5px solid var(--pause-border,#ffdc68) !important;
+  border-bottom: 5px solid #050a0b !important;
+  box-shadow: 7px 7px 0 #020607, 0 0 20px var(--pause-glow,#ffdc6833) !important;
+  animation: pause-entrance .18s steps(3,end) both !important;
+}
+@keyframes pause-entrance {
+  from { opacity: .5; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+#pauseScreen .pause-header {
+  display: grid;
+  grid-template-columns: 48px minmax(0,1fr) auto;
+  align-items: center;
+  gap: 14px;
+  min-width: 0;
+}
+#pauseScreen .pause-emblem {
+  width: 48px;
+  height: 48px;
+  display: grid;
+  place-items: center;
+  color: #2a1809;
+  background: #ffdc68;
+  border: 2px solid #ffefaa;
+  box-shadow: 3px 3px #070a09, inset 0 -4px #b17b32;
+}
+#pauseScreen .pause-emblem svg { width: 27px; height: 27px; stroke-width: 2.5; }
+#pauseScreen .pause-header-copy { min-width: 0; }
+#pauseScreen .pause-header .eyebrow {
+  margin: 0 0 8px !important;
+  font: 8px/1.6 'Press Start 2P',monospace !important;
+  letter-spacing: 0 !important;
+  color: #ffdc68 !important;
+}
+#pauseScreen .pause-header h2 {
+  margin: 0 !important;
+  font: 17px/1.55 'Press Start 2P',monospace !important;
+  color: #f6f5e9 !important;
+  text-shadow: 2px 2px #000 !important;
+  overflow-wrap: anywhere;
+}
+#pauseScreen .pause-stamp {
+  padding: 8px 9px;
+  color: #ffb3b5;
+  border: 1px solid #bd6770;
+  background: #382227;
+  font: 8px/1.4 'Press Start 2P',monospace;
+  white-space: nowrap;
+}
+#pauseScreen .pause-summary {
+  display: grid !important;
+  grid-template-columns: repeat(6,minmax(0,1fr)) !important;
+  gap: 7px !important;
+  background: transparent !important;
+  border: 0 !important;
+}
+#pauseScreen .pause-summary .pause-stat {
+  min-width: 0;
+  padding: 10px 11px !important;
+  background: #1f2d2b !important;
+  border: 1px solid #425f56 !important;
+  border-bottom: 3px solid #080d0c !important;
+}
+#pauseScreen .pause-stat span {
+  display: block;
+  margin-bottom: 7px !important;
+  color: #acc4b8;
+  font: 8px/1.4 'Press Start 2P',monospace !important;
+}
+#pauseScreen .pause-stat strong {
+  display: block;
+  color: #ffdc68;
+  font: 24px/1 'VT323',monospace !important;
+  overflow-wrap: anywhere;
+}
+#pauseScreen .pause-stat:first-child strong { color: #a2edbd; }
+#pauseScreen[data-danger="true"] .pause-stat:first-child {
+  border-color: #e96775 !important;
+  background: #3b2429 !important;
+}
+#pauseScreen[data-danger="true"] .pause-stat:first-child strong { color: #ffb5b5; }
+#pauseScreen .pause-objective {
+  min-width: 0;
+  border-left: 4px solid #ffdc68;
+  background: #25312b;
+  padding: 8px 13px;
+}
+#pauseScreen .pause-objective > span {
+  display: block;
+  color: #ffdc68;
+  font: 8px/1.5 'Press Start 2P',monospace;
+}
+#pauseScreen .pause-objective .pause-goal {
+  margin: 5px 0 0 !important;
+  padding: 0 !important;
+  color: #e4efe3 !important;
+  border: 0 !important;
+  background: none !important;
+  font: 19px/1.2 'VT323',monospace !important;
+}
+#pauseScreen .pause-columns {
+  min-height: 0;
+  display: grid;
+  grid-template-columns: repeat(2,minmax(0,1fr));
+  gap: 20px;
+}
+#pauseScreen .pause-section {
+  min-width: 0;
+  padding-top: 11px;
+  border-top: 2px solid #425b52;
+}
+#pauseScreen .pause-section h3 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 9px !important;
+  color: #ffdc68 !important;
+  font: 10px/1.5 'Press Start 2P',monospace !important;
+}
+#pauseScreen .pause-section h3 svg { width: 16px; height: 16px; flex: 0 0 16px; }
+#pauseScreen .pause-loadout {
+  margin: 0 0 8px;
+  color: #a2edbd;
+  font: 19px/1.15 'VT323',monospace;
+  overflow-wrap: anywhere;
+}
+#pauseScreen .pause-panel .build-list {
+  display: grid !important;
+  grid-template-columns: repeat(2,minmax(0,1fr)) !important;
+  align-content: start;
+  gap: 7px !important;
+  max-height: 216px !important;
+  overflow-y: auto !important;
+  padding: 2px 5px 5px 1px !important;
+}
+#pauseScreen .pause-recipe-item {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  padding: 7px 9px;
+  background: #1d2b2a;
+  border-left: 3px solid #a2edbd;
+  border-bottom: 2px solid #080d0c;
+}
+#pauseScreen .pause-recipe-item.is-evolved { border-left-color: #d6a2ff; }
+#pauseScreen .pause-recipe-item strong {
+  color: #e6f1e9;
+  font: 16px/1.15 'VT323',monospace;
+  overflow-wrap: anywhere;
+}
+#pauseScreen .pause-recipe-item small {
+  flex: 0 0 auto;
+  color: #a2edbd;
+  font: 8px/1.4 'VT323',monospace;
+  white-space: nowrap;
+}
+#pauseScreen .pause-recipe-item.is-evolved small { color: #d6a2ff; }
+#pauseScreen .pause-powers {
+  display: grid;
+  gap: 6px;
+}
+#pauseScreen .pause-power {
+  min-width: 0;
+  min-height: 40px;
+  display: grid;
+  grid-template-columns: 60px minmax(0,1fr) auto;
+  align-items: center;
+  gap: 10px;
+  padding: 4px 8px 5px 4px;
+  border-bottom: 1px solid #395349;
+  background: #1b2a28;
+}
+#pauseScreen .pause-power kbd {
+  min-width: 0;
+  display: grid;
+  place-items: center;
+  height: 27px;
+  color: #d9e6da;
+  background: #2b3d36;
+  border: 1px solid #6c8878;
+  border-bottom: 3px solid #112017;
+  font: 11px/1 'VT323',monospace;
+}
+#pauseScreen .pause-power strong {
+  min-width: 0;
+  color: #edf4eb;
+  font: 17px/1.1 'VT323',monospace;
+  overflow-wrap: anywhere;
+}
+#pauseScreen .pause-power span {
+  color: #a2edbd;
+  font: 8px/1.2 'Press Start 2P',monospace;
+  white-space: nowrap;
+}
+#pauseScreen .pause-power.is-locked { background: #182123; }
+#pauseScreen .pause-power.is-locked strong,
+#pauseScreen .pause-power.is-locked span { color: #94a49d; }
+#pauseScreen .pause-power.is-cooling span { color: #ffdc68; }
+#pauseScreen .pause-panel .menu-actions {
+  display: grid !important;
+  grid-template-columns: repeat(2,minmax(0,1fr));
+  align-items: stretch;
+  gap: 12px !important;
+  margin: 2px 0 0 !important;
+  padding: 14px 0 0 !important;
+  border: 0 !important;
+  border-top: 2px dashed #4b6758 !important;
+  background: transparent !important;
+}
+#pauseScreen .pause-panel .menu-actions .arcade-action {
+  width: 100%;
+  flex: none !important;
+  min-height: 52px !important;
+}
+@media(max-width:700px) {
+  #pauseScreen .pause-panel { padding: 16px !important; }
+  #pauseScreen .pause-columns { gap: 12px; }
+  #pauseScreen .pause-panel .build-list { grid-template-columns: 1fr !important; }
+}
+@media(max-width:620px) {
+  #pauseScreen .pause-columns { grid-template-columns: 1fr; }
+  #pauseScreen .pause-panel .build-list { grid-template-columns: repeat(2,minmax(0,1fr)) !important; max-height: 150px !important; }
+  #pauseScreen .pause-stamp { display: none; }
+}
+@media(max-width:520px) {
+  #pauseScreen.screen--active { padding: 8px !important; }
+  #pauseScreen .pause-panel { max-height: calc(100dvh - 16px) !important; padding: 13px !important; gap: 10px !important; }
+  #pauseScreen .pause-header { grid-template-columns: 38px minmax(0,1fr); gap: 10px; }
+  #pauseScreen .pause-emblem { width: 38px; height: 38px; }
+  #pauseScreen .pause-emblem svg { width: 22px; height: 22px; }
+  #pauseScreen .pause-header h2 { font-size: 12px !important; }
+  #pauseScreen .pause-header .eyebrow { font-size: 7px !important; }
+  #pauseScreen .pause-summary { grid-template-columns: repeat(2,minmax(0,1fr)) !important; gap: 5px !important; }
+  #pauseScreen .pause-summary .pause-stat { padding: 7px 8px !important; }
+  #pauseScreen .pause-summary .pause-stat:last-child { grid-column: 1/-1; }
+  #pauseScreen .pause-stat strong { font-size: 21px !important; }
+  #pauseScreen .pause-panel .menu-actions { grid-template-columns: 1fr; }
+  #pauseScreen .pause-panel .build-list { grid-template-columns: 1fr !important; }
+}
+@media(prefers-reduced-motion:reduce) {
+  #pauseScreen .pause-panel { animation: none !important; }
+}
+
+/* Account entry: one clear action per mode, with room for the wordmark. */
+#authScreen.auth-screen {
+  grid-template-columns: minmax(0,570px) minmax(320px,370px);
+  justify-content: center;
+  align-content: center;
+  align-items: center;
+  gap: 60px;
+  padding: 28px 5%;
+  background: #0c1216f7;
+}
+#authScreen .auth-brand {
+  min-width: 0;
+  width: 100%;
+  line-height: 1;
+}
+#authScreen .auth-brand > span {
+  font-size: 86px;
+  white-space: nowrap;
+}
+#authScreen .auth-brand > strong {
+  font-size: 90px;
+  white-space: nowrap;
+}
+#authScreen .auth-brand small {
+  margin-top: 18px;
+  color: #7df0bd;
+  font: 10px/1.5 'Press Start 2P',monospace;
+}
+#authScreen .auth-brand .auth-intro {
+  max-width: 480px;
+  margin: 20px 0 0;
+  color: #d2e0da;
+  font-size: 15px;
+  line-height: 1.6;
+}
+#authScreen .auth-panel {
+  width: 100%;
+  max-width: 370px;
+  min-width: 0;
+  padding: 24px !important;
+  gap: 12px;
+  border: 3px solid #ffdc68;
+  background: #121e20;
+  box-shadow: 6px 6px #030809, 0 0 18px #ffdc682a;
+}
+#authScreen .auth-panel .eyebrow {
+  margin: 0;
+  color: #89f0bf;
+  font: 8px/1.5 'Press Start 2P',monospace;
+}
+#authScreen .auth-panel h2 {
+  margin: 1px 0 4px;
+  color: #f5f5e9;
+  font: 15px/1.5 'Press Start 2P',monospace;
+  overflow-wrap: anywhere;
+}
+#authScreen .auth-panel .field {
+  gap: 6px;
+  color: #c0d1cd;
+  font: 11px/1.3 'Press Start 2P',monospace;
+}
+#authScreen .auth-panel input {
+  min-height: 43px;
+  padding: 8px 10px;
+  font: 17px/1.2 'VT323',monospace;
+  border: 2px solid #49655d;
+  background: #090f12;
+}
+#authScreen .auth-panel input:focus-visible {
+  outline-offset: 1px;
+  border-color: #ffdc68;
+}
+#authScreen .password-field {
+  border: 0;
+  background: transparent;
+}
+#authScreen .password-field input { border-right: 0; }
+#authScreen .password-toggle {
+  min-width: 76px;
+  min-height: 43px;
+  border: 2px solid #49655d;
+  color: #ffdc68;
+  background: #203139;
+  font: 17px/1 'VT323',monospace;
+}
+#authScreen .auth-panel .pixel-button {
+  min-height: 48px !important;
+  padding: 10px 14px !important;
+  border: 2px solid #0a1112 !important;
+  border-radius: 0;
+  background: #ffdc68 !important;
+  color: #171b16 !important;
+  box-shadow: inset 0 -4px #bc8a39, 3px 3px #030809 !important;
+  font-size: 9px !important;
+  line-height: 1.6 !important;
+}
+#authScreen .auth-panel .pixel-button--guest {
+  background: #20352f !important;
+  color: #a8f1ce !important;
+  box-shadow: inset 0 -4px #335f4b, 3px 3px #030809 !important;
+}
+#authScreen #authGuest[hidden] { display: none !important; }
+#authScreen .auth-panel .pixel-button:hover {
+  background: #ffeb9a !important;
+  color: #171b16 !important;
+  filter: brightness(1.04);
+}
+#authScreen .auth-panel .pixel-button--guest:hover {
+  background: #2f5445 !important;
+  color: #c7ffde !important;
+}
+#authScreen .auth-links {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+#authScreen .auth-panel .auth-links .text-button {
+  min-height: 34px;
+  padding: 4px 0;
+  color: #8ef4c3;
+  font-size: 8px;
+  line-height: 1.5;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+#authScreen .auth-panel .auth-links #authReset { color: #ffd982; }
+#authScreen .auth-panel .save-note {
+  margin: 0;
+  padding: 10px 0 0;
+  color: #a8bbb4;
+  border-top: 1px solid #40554d;
+  font-size: 9px;
+  line-height: 1.5;
+}
+#authScreen .auth-panel .field-hint {
+  margin: -4px 0 0;
+  font-size: 9px;
+  line-height: 1.5;
+}
+.setup-panel > .menu-actions {
+  z-index: 20 !important;
+  isolation: isolate;
+}
+@media (max-width:1100px) {
+  #authScreen.auth-screen {
+    grid-template-columns: minmax(0,440px);
+    align-content: center;
+    gap: 20px;
+    padding: 26px 20px;
+  }
+  #authScreen .auth-brand,
+  #authScreen .auth-panel { max-width: 440px; margin-inline: auto; }
+  #authScreen .auth-brand > span { font-size: 61px; }
+  #authScreen .auth-brand > strong { font-size: 67px; }
+  #authScreen .auth-brand small { margin-top: 10px; }
+  #authScreen .auth-brand .auth-intro { margin-top: 10px; font-size: 13px; }
+}
+@media (max-width:600px) {
+  #authScreen.auth-screen { align-content: start; gap: 16px; padding: 25px 18px 30px; }
+  #authScreen .auth-brand > span { font-size: 44px; }
+  #authScreen .auth-brand > strong { font-size: 48px; }
+  #authScreen .auth-brand small { font-size: 7px; }
+  #authScreen .auth-brand .auth-intro { font-size: 11px; }
+  #authScreen .auth-panel { padding: 18px !important; gap: 10px; }
+  #authScreen .auth-panel h2 { font-size: 13px; }
+  #authScreen .auth-panel .field { font-size: 9px; }
+}
+@media (max-height:600px) {
+  #authScreen.auth-screen { align-content: start; }
+}
+
+/* Keep pause labels readable despite the global pixel-font override. */
+#pauseScreen .pause-loadout {
+  font-family: 'VT323',monospace !important;
+  font-size: 25px !important;
+}
+#pauseScreen .pause-panel .build-list .pause-recipe-item:only-child {
+  grid-column: 1 / -1;
+}
+#pauseScreen .pause-recipe-item strong {
+  font-family: 'VT323',monospace !important;
+  font-size: 22px !important;
+  line-height: 1.1 !important;
+}
+#pauseScreen .pause-recipe-item small {
+  font-size: 8px !important;
+}
+#pauseScreen .pause-power {
+  grid-template-columns: 68px minmax(0,1fr) auto;
+}
+#pauseScreen .pause-power kbd {
+  font-size: 8px !important;
+}
+#pauseScreen .pause-power strong {
+  font-family: 'VT323',monospace !important;
+  font-size: 23px !important;
+  line-height: 1 !important;
+}
+#pauseScreen .pause-panel .menu-actions #resumeButton span {
+  color: #10271b !important;
+  font-size: 9px !important;
+}
+@media (max-width:520px) {
+  #pauseScreen .pause-panel .menu-actions {
+    grid-template-columns: repeat(2,minmax(0,1fr)) !important;
+    gap: 6px !important;
+    padding-top: 10px !important;
+  }
+  #pauseScreen .pause-panel .menu-actions .arcade-action {
+    min-height: 48px !important;
+    padding: 8px 4px !important;
+    gap: 5px !important;
+  }
+  #pauseScreen .pause-panel .menu-actions svg {
+    width: 13px !important;
+    height: 13px !important;
+    flex-basis: 13px !important;
+  }
+  #pauseScreen .pause-panel .menu-actions span {
+    font-size: 7px !important;
+  }
+}
+
+/* ============================================================================
+   PARTIDA A PANTALLA COMPLETA: el canvas ocupa todo el viewport y el HUD flota encima
+   ============================================================================ */
+.app[data-playing="true"] #gameCanvas {
+  inset: 0 !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: contain;
+}
+/* HUD flotante: sin franja de fondo, solo los indicadores sobre el juego */
+.app[data-playing="true"] .hud,
+.app[data-playing="true"] .run-bar {
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+}
+.app[data-playing="true"] .hud { pointer-events: none; }
+.app[data-playing="true"] .hud button,
+.app[data-playing="true"] .hud a { pointer-events: auto; }
+.app[data-playing="true"] .hud__stats {
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+.app[data-playing="true"] .hud,
+.app[data-playing="true"] .run-bar { text-shadow: 2px 2px 0 #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000; }
+
+/* ============================================================================
+   CARTAS DE MEJORA: partida en pausa y tres cartas centradas (estilo pick-a-card)
+   ============================================================================ */
+#abilityScreen.ability-screen {
+  z-index: 45 !important;
+  display: none;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 24px 16px !important;
+  pointer-events: auto !important;
+  background:
+    linear-gradient(rgba(0, 0, 0, 0) 50%, rgba(0, 0, 0, 0.28) 50%),
+    radial-gradient(circle at center, #0f1c21d9 0%, #05090cf2 75%) !important;
+  background-size: 100% 4px, 100% 100% !important;
+  backdrop-filter: none !important;
+}
+#abilityScreen.ability-screen.screen--active { display: flex !important; }
+
+#abilityScreen .ability-panel {
+  width: min(1000px, 100%) !important;
+  max-width: none !important;
+  max-height: 100% !important;
+  overflow: auto !important;
+  margin: auto !important;
+  padding: 0 !important;
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  text-align: center !important;
+}
+#abilityScreen .ability-panel .eyebrow {
+  display: inline-block !important;
+  padding: 6px 10px !important;
+  margin: 0 0 14px !important;
+  font-size: 10px !important;
+  color: #0f1c21 !important;
+  background: #38ef7d !important;
+  box-shadow: 3px 3px 0 #000 !important;
+}
+#abilityScreen #abilityTitle {
+  font-size: clamp(18px, 2.6vw, 28px) !important;
+  color: #ffe066 !important;
+  text-shadow: 3px 3px 0 #000, 0 0 18px rgba(255, 224, 102, 0.35) !important;
+  margin: 0 0 10px !important;
+}
+#abilityScreen .ability-help { margin: 0 0 26px !important; font-size: 9px !important; }
+#abilityScreen .ability-timer { display: none !important; }
+
+#abilityScreen .ability-grid {
+  display: flex !important;
+  flex-direction: row !important;
+  justify-content: center !important;
+  align-items: stretch !important;
+  gap: clamp(12px, 2vw, 26px) !important;
+}
+
+#abilityScreen .ability-card {
+  flex: 1 1 0 !important;
+  max-width: 290px !important;
+  min-width: 0 !important;
+  min-height: 340px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  gap: 12px !important;
+  padding: 58px 18px 22px !important;
+  text-align: center !important;
+  border: 4px solid #20353c !important;
+  border-bottom: 8px solid #000 !important;
+  border-left-width: 4px !important;
+  background:
+    linear-gradient(180deg, var(--card-tint, #00e5ff) 0 6px, transparent 6px),
+    linear-gradient(180deg, #172a31 0%, #0f1c21 100%) !important;
+  box-shadow: 6px 6px 0 #000 !important;
+  animation: ability-card-deal .35s steps(5) both !important;
+}
+#abilityScreen .ability-card:nth-child(1) { --card-tint: #00e5ff; border-color: #00e5ff !important; border-bottom-color: #000 !important; }
+#abilityScreen .ability-card:nth-child(2) { --card-tint: #ffd700; border-color: #ffd700 !important; border-bottom-color: #000 !important; animation-delay: .08s !important; }
+#abilityScreen .ability-card:nth-child(3) { --card-tint: #00ff88; border-color: #00ff88 !important; border-bottom-color: #000 !important; animation-delay: .16s !important; }
+
+#abilityScreen .ability-card:hover,
+#abilityScreen .ability-card:focus-visible {
+  transform: translateY(-10px) !important;
+  background:
+    linear-gradient(180deg, var(--card-tint) 0 6px, transparent 6px),
+    linear-gradient(180deg, #1e3640 0%, #13252b 100%) !important;
+  box-shadow: 8px 10px 0 #000, 0 0 22px var(--card-tint) !important;
+  outline: none !important;
+}
+
+#abilityScreen .choice-key {
+  top: 14px !important;
+  left: 50% !important;
+  right: auto !important;
+  transform: translateX(-50%) !important;
+}
+#abilityScreen .ability-icon {
+  flex-shrink: 0 !important;
+  width: 84px !important;
+  height: 84px !important;
+  font-size: 44px !important;
+  color: var(--card-tint) !important;
+  background: #0a1418 !important;
+  border: 3px solid var(--card-tint) !important;
+  box-shadow: 4px 4px 0 #000, inset 0 0 0 3px #000 !important;
+}
+/* Respaldo si la librería de íconos no está disponible */
+#abilityScreen .ability-icon:empty::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  background: #fff;
+  box-shadow:
+    0px -12px 0 var(--card-tint),
+    0px -6px 0 var(--card-tint),
+    0px 6px 0 var(--card-tint),
+    0px 12px 0 var(--card-tint),
+    -12px 0px 0 var(--card-tint),
+    -6px 0px 0 var(--card-tint),
+    6px 0px 0 var(--card-tint),
+    12px 0px 0 var(--card-tint),
+    -6px -6px 0 #ffffff55,
+    6px -6px 0 #ffffff55,
+    -6px 6px 0 #ffffff55,
+    6px 6px 0 #ffffff55;
+}
+#abilityScreen .ability-icon svg { width: 44px !important; height: 44px !important; }
+#abilityScreen .ability-card__top {
+  width: 100% !important;
+  justify-content: space-between !important;
+  padding: 6px 0 !important;
+  border-top: 2px dashed #2d424b !important;
+  border-bottom: 2px dashed #2d424b !important;
+}
+#abilityScreen .ability-card strong {
+  font-size: clamp(11px, 1.2vw, 14px) !important;
+  color: #fff !important;
+  text-shadow: 2px 2px 0 #000 !important;
+}
+#abilityScreen .ability-card__description { font-size: 9px !important; line-height: 1.8 !important; }
+
+@keyframes ability-card-deal {
+  from { opacity: 0; transform: translateY(60px) scale(.85); }
+  to { opacity: 1; transform: none; }
+}
+
+@media (max-width: 700px) {
+  #abilityScreen .ability-grid { flex-direction: column !important; align-items: center !important; }
+  #abilityScreen .ability-card { flex: 0 0 auto !important; width: 100% !important; max-width: 420px !important; min-height: 0 !important; padding: 50px 14px 16px !important; }
+  #abilityScreen .ability-icon { width: 56px !important; height: 56px !important; }
+  #abilityScreen .ability-icon svg { width: 30px !important; height: 30px !important; }
+}
+@media (prefers-reduced-motion: reduce) {
+  #abilityScreen .ability-card { animation: none !important; }
+  #abilityScreen .ability-card:hover { transform: none !important; }
+}
+
+/* ============================================================================
+   LOBBY A PANTALLA COMPLETA: el local ocupa todo y la cabecera flota encima
+   ============================================================================ */
+#lobbyScreen.lobby-screen.screen--active { display: block !important; padding: 0 !important; }
+#lobbyScreen .lobby-stage { position: absolute !important; inset: 0 !important; }
+#lobbyScreen .lobby-stage canvas { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; }
+#lobbyScreen .lobby-header {
+  position: absolute !important;
+  top: 0; left: 0; right: 0;
+  z-index: 2;
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  text-shadow: 2px 2px 0 #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000;
+}
+/* La app siempre entra justo en la ventana (sin scroll en el local ni en la partida) */
+.app { min-height: 0 !important; height: 100vh; height: 100svh; }
+/* En pantallas angostas el bloque del nombre no debe meterse debajo de la barra de vida */
+@media (max-width: 700px) {
+  .app[data-playing="true"] .hud-identity { min-width: 0 !important; max-width: 100% !important; overflow: hidden; }
+  .app[data-playing="true"] .hud-identity > div { min-width: 0; }
+  .app[data-playing="true"] :is(#hudName, #hudWeapon, #weaponEvolutionStatus) {
+    display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+}
+
+/* ============================================================================
+   CARTELES SIN ENCIMARSE: columna izquierda minimapa -> combo -> evento,
+   barra de jefe arriba al centro y avisos abajo al centro sobre los poderes
+   ============================================================================ */
+.app[data-playing="true"] #comboMilestones {
+  top: calc(var(--minimap-bottom, 210px) + 12px) !important;
+  left: 24px !important;
+}
+.app[data-playing="true"] #eventBanner {
+  top: calc(var(--minimap-bottom, 210px) + 96px) !important;
+  left: 24px !important;
+  max-width: 260px !important;
+}
+.app[data-playing="true"] #toast {
+  top: auto !important;
+  bottom: 104px !important;
+  z-index: 6;
+}
+@media (max-width: 700px) {
+  .app[data-playing="true"] #comboMilestones { left: 8px !important; }
+  .app[data-playing="true"] #eventBanner { top: calc(var(--minimap-bottom, 210px) + 70px) !important; left: 8px !important; }
+  .app[data-playing="true"] #toast { bottom: 80px !important; }
+}
+@media (max-width: 700px) {
+  .app[data-playing="true"] #activeBuffs { top: calc(var(--hud-bottom, 110px) + 6px) !important; }
+  .app[data-playing="true"] #bossMeter { top: calc(var(--hud-bottom, 110px) + 24px) !important; }
+}
+
+/* ============================================================================
+   GAME OVER SIEMPRE ENTERO: el panel ya no recorta arriba/abajo, las estadísticas
+   se compactan y los botones quedan fijos y legibles al pie del panel
+   ============================================================================ */
+#gameOverScreen.screen--active {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 12px !important;
+  overflow: hidden !important;
+}
+#gameOverScreen .screen__panel {
+  width: min(1000px, 100%) !important;
+  max-height: 100% !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  justify-content: flex-start !important;
+  margin: 0 auto !important;
+  padding: 14px 20px 0 !important;
+  scrollbar-width: thin;
+}
+#gameOverScreen .gameover-pixel-banner {
+  flex-shrink: 0;
+  max-width: 100%;
+  margin: 6px 0 6px !important;
+  font-size: clamp(20px, 3.4vw, 40px) !important;
+  overflow-wrap: anywhere;
+}
+#gameOverScreen #gameOverPhrase { margin: 2px 0 6px !important; }
+#gameOverScreen #gameOverStats {
+  grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+  gap: 4px 12px !important;
+  max-width: 920px !important;
+  flex-shrink: 0;
+}
+#gameOverScreen #gameOverStats p { padding: 5px 0 !important; margin: 0 !important; overflow-wrap: anywhere; }
+#gameOverScreen .result-summary { padding: 12px !important; }
+#gameOverScreen .result-summary b { font-size: clamp(16px, 2.2vw, 22px) !important; }
+#gameOverScreen .result-unlock { font-size: 13px !important; margin: 4px 0 0 !important; }
+#gameOverScreen .menu-actions {
+  position: sticky;
+  bottom: 0;
+  z-index: 2;
+  flex-shrink: 0;
+  width: calc(100% + 40px);
+  margin: 10px -20px 0 !important;
+  padding: 12px 16px 14px !important;
+  display: flex !important;
+  flex-wrap: wrap !important;
+  justify-content: center !important;
+  gap: 12px !important;
+  background: linear-gradient(180deg, #0f171ccc 0%, #0f171c 35%) !important;
+  border-top: 2px solid #283e47;
+}
+#gameOverScreen .menu-actions .pixel-button {
+  min-width: 0 !important;
+  max-width: 100%;
+  white-space: normal !important;
+  line-height: 1.4 !important;
+  font-size: 11px !important;
+}
+@media (max-width: 760px) {
+  #gameOverScreen #gameOverStats { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+  #gameOverScreen .screen__panel { padding: 10px 12px 0 !important; }
+  #gameOverScreen .menu-actions { width: calc(100% + 24px); margin: 8px -12px 0 !important; }
+  #gameOverScreen .menu-actions .pixel-button { flex: 1 1 160px; }
+}
+
+/* ============================================================================
+   PAUSA A LA ALTURA DE LA PANTALLA: nunca se desplaza; los botones siempre se ven
+   y solo la lista de la receta (si es larga) tiene su propio desplazamiento
+   ============================================================================ */
+#pauseScreen.screen--active {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 12px !important;
+  overflow: hidden !important;
+}
+#pauseScreen .pause-panel {
+  max-height: 100% !important;
+  height: auto !important;
+  overflow: hidden !important;
+  display: flex !important;
+  flex-direction: column !important;
+  margin: 0 auto !important;
+}
+#pauseScreen .pause-panel > * { flex-shrink: 0; }
+#pauseScreen .pause-columns {
+  flex: 1 1 auto !important;
+  flex-shrink: 1 !important;
+  min-height: 0 !important;
+  overflow: hidden !important;
+}
+#pauseScreen .pause-section {
+  min-height: 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  overflow: hidden !important;
+}
+#pauseScreen .pause-section > * { flex-shrink: 0; }
+#pauseScreen .build-list,
+#pauseScreen .pause-powers {
+  flex: 1 1 auto !important;
+  flex-shrink: 1 !important;
+  min-height: 0 !important;
+  max-height: none !important;
+  overflow-y: auto !important;
+}
+#pauseScreen .menu-actions { margin-top: 10px !important; }
+
+/* Ventanas bajas: todo más compacto para que entre sin desplazar */
+@media (max-height: 720px) {
+  #pauseScreen .pause-panel { padding: 10px 14px !important; gap: 8px !important; }
+  #pauseScreen .pause-header h2, #pauseScreen #pauseTitle { font-size: 16px !important; margin: 0 !important; }
+  #pauseScreen .pause-summary { gap: 6px !important; }
+  #pauseScreen .pause-stat { padding: 6px 8px !important; }
+  #pauseScreen .pause-stat strong { font-size: 14px !important; }
+  #pauseScreen .pause-objective { padding: 6px 10px !important; }
+  #pauseScreen .pause-section h3 { margin: 0 0 4px !important; }
+  #pauseScreen .menu-actions { margin-top: 6px !important; }
+  #pauseScreen .menu-actions .pixel-button { min-height: 38px !important; padding: 8px 14px !important; }
+}
+@media (max-height: 560px) {
+  #pauseScreen .pause-objective { display: none !important; }
+  #pauseScreen .pause-emblem { width: 30px !important; height: 30px !important; }
+  #pauseScreen .pause-summary { grid-template-columns: repeat(6, minmax(0, 1fr)) !important; }
+  #pauseScreen .pause-stat span { font-size: 7px !important; }
+}
+
+/* ============================================================================
+   CANVAS DE CARTELES: transparente, sobre el juego y debajo de menús y botones
+   ============================================================================ */
+#hudCanvas { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 2; pointer-events: none; image-rendering: auto; }
+.app:not([data-playing="true"]) #hudCanvas { display: none; }
+.sr-only { position: absolute !important; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+
+/* Selector en dos pasos: sin barra horizontal (los pedestales animados sobresalen unos píxeles) */
+#setupScreen { overflow-x: hidden; }
+
+/* ============================================================================
+   CARTAS DE MEJORA: color por rareza, chispas que suben y un brillo que barre la carta
+   ============================================================================ */
+#abilityScreen .ability-card[data-rarity] { border-color: var(--card-tint) !important; border-bottom-color: #000 !important; overflow: hidden; isolation: isolate; }
+#abilityScreen .ability-card[data-rarity] > :not(.card-fx) { position: relative; z-index: 1; }
+#abilityScreen .ability-card .choice-key { z-index: 2 !important; }
+.card-fx { position: absolute !important; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
+.card-fx::after { /* brillo diagonal que pasa cada tanto */
+  content: ""; position: absolute; top: -20%; bottom: -20%; width: 34%; left: -50%;
+  background: linear-gradient(100deg, transparent, color-mix(in srgb, var(--card-tint) 28%, transparent), transparent);
+  transform: skewX(-18deg); animation: card-shine 3.2s steps(16) infinite;
+}
+.card-fx i {
+  position: absolute; left: var(--x); bottom: -8px; width: var(--size); height: var(--size);
+  background: var(--card-tint); box-shadow: 0 0 0 2px color-mix(in srgb, var(--card-tint) 35%, transparent);
+  opacity: 0; animation: card-spark var(--dur) linear var(--delay) infinite;
+}
+.card-fx i:nth-child(3n) { background: #fff; }
+@keyframes card-spark {
+  0% { transform: translate(0, 0); opacity: 0; }
+  15% { opacity: .9; }
+  70% { opacity: .6; }
+  100% { transform: translate(var(--drift), -360px); opacity: 0; }
+}
+@keyframes card-shine { 0%, 55% { left: -50%; } 100% { left: 130%; } }
+#abilityScreen .ability-card .ability-icon { animation: card-icon-bob 1.6s steps(4) infinite; }
+@keyframes card-icon-bob { 50% { transform: translateY(-4px); } }
+.ability-rarity {
+  margin-top: auto; padding: 4px 8px; font: bold 8px/1 'Press Start 2P', monospace; letter-spacing: 1px;
+  color: #071014; background: var(--card-tint); box-shadow: 3px 3px 0 #000;
+}
+/* Legendarias: rayos de luz girando detrás del ícono */
+#abilityScreen .ability-card[data-rarity="legendary"] .ability-icon::after {
+  content: ""; position: absolute; inset: -26px; z-index: -1;
+  background: repeating-conic-gradient(color-mix(in srgb, var(--card-tint) 45%, transparent) 0 10deg, transparent 10deg 30deg);
+  animation: card-rays 6s linear infinite; border-radius: 50%;
+}
+#abilityScreen .ability-card[data-rarity="legendary"] .ability-icon { position: relative; }
+#abilityScreen .ability-card[data-rarity="legendary"] { box-shadow: 6px 6px 0 #000, 0 0 18px color-mix(in srgb, var(--card-tint) 55%, transparent) !important; }
+@keyframes card-rays { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) {
+  .card-fx, #abilityScreen .ability-card .ability-icon, #abilityScreen .ability-card .ability-icon::after { animation: none !important; }
+  .card-fx i { display: none; }
+}
+
+/* ============================================================================
+   TOP 10: nombre de arcade de 5 letras para invitados (fin de partida)
+   ============================================================================ */
+.topten-entry { display: grid; gap: 8px; justify-items: center; margin: 6px auto 10px; padding: 12px 16px; max-width: 420px; border: 3px solid #ffd23f; background: #1a1606; box-shadow: 4px 4px 0 #000; }
+.topten-entry[hidden] { display: none !important; }
+.topten-title { margin: 0; font: 12px/1.4 'Press Start 2P', monospace; color: #ffd23f; text-shadow: 2px 2px 0 #000; animation: topten-blink 1s steps(2) infinite; }
+.topten-label { font: 9px/1.6 'Press Start 2P', monospace; color: #fff3c4; text-align: center; }
+.topten-row { display: flex; gap: 10px; align-items: center; }
+.topten-input {
+  width: 9.2ch; padding: 6px 4px 8px 12px; font: 22px/1 'Press Start 2P', monospace; letter-spacing: .5ch; text-transform: uppercase;
+  color: #fff; background: #050b10 repeating-linear-gradient(90deg, transparent 0 calc(1.5ch - 4px), #ffd23f calc(1.5ch - 4px) 1.5ch) bottom 4px left 12px / calc(100% - 16px) 3px no-repeat;
+  border: 3px solid #ffd23f; caret-color: #ffd23f;
+}
+.topten-input:focus-visible { outline: 3px solid #fff; outline-offset: 2px; }
+.topten-status { margin: 0; min-height: 1.4em; font: 9px/1.6 'Press Start 2P', monospace; color: #a7f3d0; text-align: center; }
+.topten-entry.is-saved .topten-title { animation: none; color: #4ade80; }
+@keyframes topten-blink { 50% { opacity: .45; } }
+@media (prefers-reduced-motion: reduce) { .topten-title { animation: none; } }
+
+/* Cartas con las puntas redondeadas (también el brillo y el ícono acompañan la curva) */
+#abilityScreen .ability-card { border-radius: 16px !important; }
+#abilityScreen .ability-card .card-fx { border-radius: 12px; }
+#abilityScreen .ability-icon { border-radius: 12px !important; }
+#abilityScreen .ability-rarity, #abilityScreen .choice-key { border-radius: 6px !important; }
+
+/* ============================================================================
+   MINI TUTORIAL DE INICIO (moverse y dash): cartel flotante abajo, no tapa la acción
+   ============================================================================ */
+.run-tutorial {
+  position: absolute; left: 50%; top: 92px; z-index: 12; transform: translateX(-50%);
+  display: flex; align-items: center; gap: 12px; max-width: min(640px, calc(100% - 32px));
+  padding: 10px 16px; border: 3px solid #4df8dc; border-radius: 10px; background: #081a1fe8;
+  box-shadow: 4px 4px 0 #000, 0 0 18px #4df8dc44; pointer-events: none;
+  animation: tutorial-pop .3s steps(4) both;
+}
+.run-tutorial[hidden] { display: none; }
+.run-tutorial[data-step="dash"] { border-color: #ffd23f; box-shadow: 4px 4px 0 #000, 0 0 18px #ffd23f44; }
+.run-tutorial[data-step="done"] { border-color: #4ade80; }
+.run-tutorial__step { font: 10px/1 'Press Start 2P', monospace; color: #071014; background: #4df8dc; padding: 5px 6px; border-radius: 4px; }
+.run-tutorial[data-step="dash"] .run-tutorial__step { background: #ffd23f; }
+.run-tutorial[data-step="done"] .run-tutorial__step { background: #4ade80; }
+.run-tutorial__keys { display: flex; gap: 4px; }
+.run-tutorial__keys kbd { animation: tutorial-key 1.2s steps(2) infinite; }
+.run-tutorial__keys kbd:nth-child(2) { animation-delay: .3s; } .run-tutorial__keys kbd:nth-child(3) { animation-delay: .6s; } .run-tutorial__keys kbd:nth-child(4) { animation-delay: .9s; }
+.run-tutorial__text { font: 9px/1.7 'Press Start 2P', monospace; color: #eafff9; }
+@keyframes tutorial-pop { from { opacity: 0; transform: translate(-50%, -20px); } }
+@keyframes tutorial-key { 50% { transform: translateY(2px); filter: brightness(1.4); } }
+
+/* ============================================================================
+   ANUNCIO DE PODER NUEVO: la partida queda en pausa hasta que lo usás
+   ============================================================================ */
+.prime-intro { position: absolute; inset: 0; z-index: 40; display: grid; place-items: center; background: #02080bcc; }
+.prime-intro[hidden] { display: none; }
+.prime-intro__card {
+  display: grid; justify-items: center; gap: 12px; width: min(440px, calc(100% - 32px)); padding: 22px 22px 20px;
+  text-align: center; border: 4px solid #c084fc; border-radius: 16px; background: linear-gradient(180deg, #240a33, #0f0517);
+  box-shadow: 6px 6px 0 #000, 0 0 32px rgba(192, 132, 252, 0.45); animation: ability-card-deal .35s steps(5) both;
+}
+.prime-intro__eyebrow { margin: 0; font: 10px/1.4 'Press Start 2P', monospace; color: #e9d5ff; animation: topten-blink 1s steps(2) infinite; }
+.prime-intro__key {
+  display: grid; place-items: center; width: 78px; height: 78px; font: 34px/1 'Press Start 2P', monospace; color: #ffffff;
+  background: #b844ff; border: 4px solid #e9d5ff; border-bottom-width: 9px; border-radius: 10px; box-shadow: 4px 4px 0 #000;
+  animation: prime-key-press 1s steps(2) infinite;
+}
+.prime-intro__name { margin: 0; font: 16px/1.4 'Press Start 2P', monospace; color: #fff; text-shadow: 3px 3px 0 #000; }
+.prime-intro__info { margin: 0; font: 10px/1.8 'Press Start 2P', monospace; color: #e9d5ff; }
+.prime-intro__hint { margin: 0; font: 9px/1.8 'Press Start 2P', monospace; color: #c084fc; }
+@keyframes prime-key-press { 50% { transform: translateY(4px); border-bottom-width: 5px; } }
+@media (prefers-reduced-motion: reduce) {
+  .run-tutorial, .run-tutorial__keys kbd, .prime-intro__card, .prime-intro__key, .prime-intro__eyebrow { animation: none !important; }
+}
+
+/* Botón de registro y cuenta en la cabecera del local */
+.lobby-register {
+  border: 2px solid #3aa8d8 !important;
+  background: #10283a !important;
+  color: #7dd3fc !important;
+  min-width: 0 !important;
+  cursor: pointer !important;
+  transition: transform 0.18s cubic-bezier(0.2, 0.8, 0.2, 1), border-color 0.18s, background 0.18s, box-shadow 0.18s !important;
+}
+.lobby-register[hidden] { display: none !important; }
+.lobby-register > span { font: bold 8px monospace; }
+.lobby-register:hover {
+  border-color: #38bdf8 !important;
+  background: #173b5c !important;
+  color: #f0f9ff !important;
+  box-shadow: 0 0 14px rgba(56, 189, 248, 0.65), 0 2px 0 #000 !important;
+  transform: translateY(-2px) !important;
+}
+.lobby-register:active {
+  transform: translateY(1px) !important;
+  box-shadow: 0 0 6px rgba(56, 189, 248, 0.35) !important;
+}
+
+.lobby-achievements {
+  border: 2px solid #8b7d48 !important;
+  background: #28281d !important;
+  color: #ffe078 !important;
+  cursor: pointer !important;
+  transition: transform 0.18s cubic-bezier(0.2, 0.8, 0.2, 1), border-color 0.18s, background 0.18s, box-shadow 0.18s !important;
+}
+.lobby-achievements:hover {
+  border-color: #ffd000 !important;
+  background: #3c3822 !important;
+  color: #fffde6 !important;
+  box-shadow: 0 0 14px rgba(255, 208, 0, 0.55), 0 2px 0 #000 !important;
+  transform: translateY(-2px) !important;
+}
+.lobby-achievements:active {
+  transform: translateY(1px) !important;
+  box-shadow: 0 0 6px rgba(255, 208, 0, 0.25) !important;
+}
+
+/* Tutorial más visible: tarjeta grande arriba al centro, con título, teclas grandes y barra de progreso */
+.run-tutorial {
+  top: 18% !important; display: grid !important; grid-template-columns: auto; justify-items: center; gap: 12px !important;
+  min-width: min(560px, calc(100% - 32px)); padding: 18px 26px 16px !important; border-width: 4px !important; border-radius: 14px !important;
+  background: #06161bf2 !important; animation: tutorial-pop .3s steps(4) both, tutorial-glow 1.2s steps(2) infinite !important;
+}
+.run-tutorial[hidden] { display: none !important; }
+.run-tutorial__title { display: flex; align-items: center; gap: 10px; font: 12px/1 'Press Start 2P', monospace; color: #4df8dc; letter-spacing: 2px; }
+.run-tutorial[data-step="dash"] .run-tutorial__title { color: #ffd23f; }
+.run-tutorial[data-step="done"] .run-tutorial__title { color: #4ade80; }
+.run-tutorial__step { font: 11px/1 'Press Start 2P', monospace !important; padding: 6px 8px !important; }
+.run-tutorial__keys { gap: 8px !important; }
+.run-tutorial__keys kbd { min-width: 44px; height: 44px; display: grid; place-items: center; padding: 0 10px; font: 14px/1 'Press Start 2P', monospace; border-radius: 8px; }
+.run-tutorial__text { font: 12px/1.7 'Press Start 2P', monospace !important; text-align: center; color: #ffffff !important; text-shadow: 2px 2px 0 #000; }
+.run-tutorial__bar { width: 100%; height: 8px; background: #0f2b31; border: 2px solid #000; border-radius: 4px; overflow: hidden; }
+.run-tutorial__bar i { display: block; height: 100%; width: 0; background: #4df8dc; transition: width .12s steps(3); }
+.run-tutorial[data-step="dash"] .run-tutorial__bar i { background: #ffd23f; }
+.run-tutorial[data-step="done"] .run-tutorial__bar i { background: #4ade80; }
+@keyframes tutorial-glow { 50% { box-shadow: 4px 4px 0 #000, 0 0 30px currentColor; } }
+.run-tutorial { color: #4df8dc; }
+.run-tutorial[data-step="dash"] { color: #ffd23f; }
+.run-tutorial[data-step="done"] { color: #4ade80; }
+/* Pantallas bajas: tarjeta compacta pegada al HUD para no tapar al jugador (que está en el centro) */
+@media (max-height: 700px) {
+  .run-tutorial { top: 70px !important; gap: 6px !important; padding: 8px 14px 10px !important; }
+  .run-tutorial__keys kbd { min-width: 32px; height: 32px; font-size: 11px; }
+  .run-tutorial__text { font-size: 9px !important; }
+}
+@media (prefers-reduced-motion: reduce) { .run-tutorial { animation: none !important; } }
+
+/* ============================================================================
+   PRESENTACIÓN AL ABRIR: PanchOS x BurgosCorp (lienzo pixel art a pantalla completa)
+   ============================================================================ */
+.splash-screen { position: fixed; inset: 0; z-index: 100000; display: grid; place-items: center; background: #05070c; cursor: pointer; transition: opacity .35s steps(5); }
+.splash-screen[hidden] { display: none; }
+.splash-screen.splash--out { opacity: 0; pointer-events: none; }
+.splash-screen canvas { image-rendering: pixelated; image-rendering: crisp-edges; max-width: 100vw; max-height: 100vh; }
+.splash-skip { position: absolute; bottom: 14px; left: 0; right: 0; margin: 0; text-align: center; font: 8px/1 'Press Start 2P', monospace; color: #5b6b84; animation: topten-blink 1.2s steps(2) infinite; }
+@media (prefers-reduced-motion: reduce) { .splash-skip { animation: none; } .splash-screen { transition: none; } }
+
+/* Marca BurgosCorp en la presentación: isologo y tipografías del proyecto RN3, en alta definición sobre el lienzo pixel art */
+.splash-stage { position: relative; display: block; line-height: 0; }
+.splash-stage canvas { display: block; }
+.splash-burgos {
+  position: absolute; left: calc(var(--u, 3px) * 230); top: calc(var(--u, 3px) * 20); transform: translateX(-50%);
+  display: grid; justify-items: center; gap: calc(var(--u, 3px) * 6); line-height: 1; pointer-events: none;
+  opacity: 0; transition: opacity .2s ease;
+}
+.splash-burgos__logo { width: calc(var(--u, 3px) * 64); height: calc(var(--u, 3px) * 64); overflow: visible; filter: drop-shadow(0 0 calc(var(--u, 3px) * 4) rgba(225, 29, 46, .45)); }
+.splash-burgos__border { stroke-dasharray: 1; stroke-dashoffset: 1; }
+.splash-burgos__monogram { opacity: 0; font-family: Georgia, "Times New Roman", serif !important; font-weight: 700 !important; }
+/* Nombre como en BrandLogo.tsx: fuente del sistema, peso 800, "Corp" en el rojo del tema oscuro */
+.splash-burgos__name, .splash-burgos__name span { font-family: system-ui, "Segoe UI", sans-serif !important; font-weight: 800 !important; }
+.splash-burgos__name { font-size: calc(var(--u, 3px) * 18); letter-spacing: .02em; color: #e4e4e7; white-space: nowrap; opacity: 0; transform: translateY(calc(var(--u, 3px) * 6)); }
+.splash-burgos__corp { color: #ef3b4f; }
+/* Entra el escudo: cae con un rebote, se traza el borde rojo, aparece el monograma y después el nombre */
+.splash-screen[data-phase="burgos"] .splash-burgos, .splash-screen[data-phase="together"] .splash-burgos { opacity: 1; }
+.splash-screen[data-phase="burgos"] .splash-burgos__logo, .splash-screen[data-phase="together"] .splash-burgos__logo { animation: burgos-drop .45s cubic-bezier(.2, 1.4, .4, 1) both; }
+.splash-screen[data-phase="burgos"] .splash-burgos__border, .splash-screen[data-phase="together"] .splash-burgos__border { animation: burgos-draw .6s ease-out .15s forwards; }
+.splash-screen[data-phase="burgos"] .splash-burgos__monogram, .splash-screen[data-phase="together"] .splash-burgos__monogram { transition: opacity .3s ease .6s; opacity: 1; }
+.splash-screen[data-phase="burgos"] .splash-burgos__name, .splash-screen[data-phase="together"] .splash-burgos__name { transition: opacity .35s ease .75s, transform .35s ease .75s; opacity: 1; transform: none; }
+@keyframes burgos-drop { from { transform: translateY(calc(var(--u, 3px) * -50)) scale(.6); opacity: 0; } to { transform: none; opacity: 1; } }
+@keyframes burgos-draw { to { stroke-dashoffset: 0; } }
+@media (prefers-reduced-motion: reduce) {
+  .splash-burgos, .splash-burgos__name, .splash-burgos__monogram { transition: none !important; }
+  .splash-burgos__logo, .splash-burgos__border { animation: none !important; }
+  .splash-burgos__border { stroke-dashoffset: 0; }
+}
+
+/* Selector "Arma tu combo": scrollable en móviles y centrado en pantallas grandes */
+#setupScreen {
+  overflow-y: auto !important;
+  -webkit-overflow-scrolling: touch;
+}
+#setupScreen.screen--active {
+  overflow-y: auto !important;
+  -webkit-overflow-scrolling: touch;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+}
+#setupScreen .setup-panel { max-height: none !important; overflow: visible !important; }
+/* El rótulo "ORDEN / NUEVA PARTIDA" tenía margen negativo y se encimaba con el título */
+#setupScreen .setup-header .eyebrow { margin-bottom: 8px !important; }
+
+/* Teclas del tutorial: el ancho se adapta al texto ("ESPACIO", "JOYSTICK", "DASH"); .pixel-key traía 30px fijos */
+.run-tutorial__keys kbd.pixel-key { width: auto !important; min-width: 44px; padding: 0 14px !important; white-space: nowrap; box-sizing: border-box; }
+@media (max-height: 700px) { .run-tutorial__keys kbd.pixel-key { min-width: 32px; padding: 0 10px !important; } }

@@ -1,0 +1,673 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <title>DOMI 2: PANCHO</title>
+    <link rel="icon" href="data:," />
+    <meta name="theme-color" content="#0c1013" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="./css/arcade.css" />
+    <link rel="stylesheet" href="./css/polish.css" />
+    <link rel="stylesheet" href="./css/shop.css" />
+    <link rel="stylesheet" href="./css/gameplay.css" />
+    <link rel="stylesheet" href="./css/interface.css" />
+    <link rel="stylesheet" href="./css/mobile.css" />
+    <!-- Última: su Ñ tiene que declararse después de Press Start 2P para ganarle solo en esa letra -->
+    <link rel="stylesheet" href="./css/enye-font.css" />
+  </head>
+  <body>
+    <main id="app" class="app">
+      <!-- Presentación al abrir el juego (se ve desde el primer instante, sin parpadeo del login) -->
+      <div id="splashScreen" class="splash-screen" role="img" aria-label="PanchOS por BurgosCorp presentan DOMI 2: Pancho">
+        <div class="splash-stage" id="splashStage">
+          <canvas id="splashCanvas" width="320" height="180"></canvas>
+          <!-- Marca BurgosCorp: el mismo isologo y tipografías del proyecto RN3 (BrandLogo.tsx), sin pixel art -->
+          <div class="splash-burgos" aria-hidden="true">
+            <svg class="splash-burgos__logo" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+              <defs>
+                <linearGradient id="bcShieldSplash" x1="0" y1="0" x2="1" y2="1">
+                  <stop offset="0" stop-color="#2e2e33" />
+                  <stop offset="1" stop-color="#050505" />
+                </linearGradient>
+              </defs>
+              <path class="splash-burgos__shield" d="M24 2 43 9v14c0 11.5-8 19.8-19 23C13 42.8 5 34.5 5 23V9Z" fill="url(#bcShieldSplash)" />
+              <path class="splash-burgos__border" pathLength="1" d="M24 5.5 40 11.4V23c0 9.7-6.6 16.8-16 19.8C14.6 39.8 8 32.7 8 23V11.4Z" fill="none" stroke="#e11d2e" stroke-width="1.75" />
+              <text class="splash-burgos__monogram" x="24" y="30" text-anchor="middle" font-family="Georgia" font-size="17" font-weight="700" fill="#ffffff">BC</text>
+            </svg>
+            <div class="splash-burgos__name">Burgos<span class="splash-burgos__corp">Corp</span></div>
+          </div>
+        </div>
+        <p class="splash-skip" aria-hidden="true">CLIC O CUALQUIER TECLA PARA SALTAR</p>
+      </div>
+      <canvas id="gameCanvas" width="960" height="540" aria-label="DOMI 2: PANCHO"></canvas>
+
+      <section id="authScreen" class="screen auth-screen">
+        <div class="auth-brand"><span>DOMI <b>2</b></span><strong>PANCHO</strong><small>ARCADE CLUB / TU TURNO EMPIEZA ACÁ</small><p class="auth-intro">Sobreviví al turno. Armá tu combo.</p></div>
+        <form id="authForm" class="auth-panel screen__panel">
+          <p class="eyebrow">TARJETA DE SOCIO</p>
+          <h2 id="authTitle">Entrá al club</h2>
+          <label class="field" for="authName">Nombre de socio
+            <input id="authName" name="username" autocomplete="username" autocapitalize="none" spellcheck="false" minlength="3" maxlength="16" aria-describedby="authNameHint" placeholder="Elegí tu nombre..." required />
+          </label>
+          <p id="authNameHint" class="field-hint" hidden>De 3 a 16 caracteres. Letras, números o espacios.</p>
+          <p id="authError" class="form-error" role="alert" tabindex="-1" hidden></p>
+          <button class="pixel-button" type="submit" id="authSubmit">ENTRAR</button>
+          <button class="pixel-button pixel-button--guest" type="button" id="authGuest">VOLVER AL LOCAL COMO INVITADO</button>
+          <div class="auth-links">
+            <button class="text-button" type="button" id="authSwitch">Crear cuenta</button>
+          </div>
+          <small class="save-note">El progreso queda guardado en este navegador.</small>
+        </form>
+      </section>
+
+      <!-- Pantalla de Introducción / Bienvenida -->
+      <section id="onboardingScreen" class="screen onboarding-screen" aria-labelledby="onboardingTitle">
+        <div class="screen__panel onboarding-panel">
+          <h2 id="onboardingTitle">HOLA, <span id="onboardingUserName">PANCHO</span></h2>
+          <div id="onboardingStatusBox" class="onboarding-status-box">
+            <span id="onboardingStatusBadge" class="onboarding-status-badge">✓ SOCIO REGISTRADO CON ÉXITO</span>
+            <span id="onboardingStatusDesc" class="onboarding-status-desc">Tu tarjeta de socio está lista. Tu progreso y monedas quedan guardados en este navegador.</span>
+          </div>
+
+          <div class="onboarding-cards">
+            <!-- Tarjeta 1 -->
+            <div class="onboarding-card">
+              <div class="onboarding-badge-num">1</div>
+              <div class="onboarding-art">
+                <img src="./1.png" alt="Sobreviví a los enemigos y jefes" class="onboarding-img" loading="eager" />
+              </div>
+              <strong class="onboarding-card-title">SOBREVIVÍ AL CAOS</strong>
+              <p class="onboarding-card-desc">Sobreviví a los enemigos y jefes esquivando sus ataques y dominando la cocina.</p>
+            </div>
+
+            <!-- Tarjeta 2 -->
+            <div class="onboarding-card">
+              <div class="onboarding-badge-num">2</div>
+              <div class="onboarding-art">
+                <img src="./copas.png" alt="Conseguí monedas y completá las misiones del Señor Domi" class="onboarding-img" loading="eager" />
+              </div>
+              <strong class="onboarding-card-title">MISIONES Y MONEDAS</strong>
+              <p class="onboarding-card-desc">Conseguí monedas y completá las misiones del Señor Domi para desbloquear trofeos y reliquias.</p>
+            </div>
+
+            <!-- Tarjeta 3 -->
+            <div class="onboarding-card">
+              <div class="onboarding-badge-num">3</div>
+              <div class="onboarding-art">
+                <img src="./2.png" alt="Comprá mapas, personajes, mascotas y más" class="onboarding-img" loading="eager" />
+              </div>
+              <strong class="onboarding-card-title">TIENDA Y ARMARIO</strong>
+              <p class="onboarding-card-desc">¡Comprá mapas, nuevos personajes, mascotas de combate, auras y accesorios únicos!</p>
+            </div>
+          </div>
+
+          <div class="onboarding-actions">
+            <button id="onboardingProceedBtn" type="button" class="pixel-button pixel-button--green onboarding-enter-btn">
+              <span>¡ENTRAR AL LOCAL!</span>
+              <kbd class="pixel-key">E</kbd>
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <section id="lobbyScreen" class="screen lobby-screen">
+        <header class="lobby-header"><span class="brand-mark">D<span>2</span></span><div><strong id="lobbyWelcome">PANCHO</strong><small id="lobbyRole">SOCIO DEL CLUB / EN EL LOCAL</small></div><span class="wallet"><i data-lucide="coins"></i><b id="lobbyBank">0</b><small>PT</small></span><button id="lobbyAchievements" class="lobby-achievements" title="Ver logros" aria-label="Ver logros y progreso"><i data-lucide="trophy"></i><span>LOGROS <b id="lobbyAchievementCount">0 / 6</b></span></button><button id="lobbyRegister" class="lobby-achievements lobby-register" title="Registro de socios" aria-label="Ir al registro de socios"><i data-lucide="user-plus"></i><span>REGISTRO</span></button><button id="lobbyHelp" class="icon-button" title="Guía y Presentación" aria-label="Ver guía del juego"><i data-lucide="help-circle"></i></button><button id="lobbyOptions" class="icon-button" title="Opciones" aria-label="Opciones"><i data-lucide="settings-2"></i></button><button id="logoutButton" class="icon-button" title="Cerrar sesion" aria-label="Cerrar sesion"><i data-lucide="log-out"></i></button></header>
+        <div class="lobby-stage"><canvas id="lobbyCanvas" width="960" height="540" aria-label="Lobby interactivo"></canvas><p class="lobby-controls"><kbd>WASD</kbd> / flechas: moverte <span>·</span> <kbd>E</kbd>: interactuar <span>·</span> También podés hacer clic en los lugares.</p><div class="lobby-tip" id="lobbyTip" hidden></div></div>
+      </section>
+
+      <section id="shopScreen" class="screen shop-screen" aria-labelledby="shopTitle">
+        <div class="screen__panel shop-panel">
+          <header class="shop-heading">
+            <button id="shopBackButton" class="icon-button" title="Volver al local" aria-label="Volver al local"><i data-lucide="arrow-left"></i></button>
+            <div class="shop-heading-copy"><p class="eyebrow">DOMI / CLUB DE COLECCIONISTAS</p><h2 id="shopTitle">Fuera de carta.</h2><p id="shopSubtitle">Elegí tu próximo favorito. Probalo antes de equiparlo.</p></div>
+            <div class="shop-balance"><small>TUS PUNTOS</small><span class="wallet"><i data-lucide="coins"></i><b id="shopBank">0</b><small>PT</small></span></div>
+          </header>
+          <div id="shopTabs" class="shop-tabs" role="group" aria-label="Categorías de artículos"></div>
+          <div id="shopLockedNotice" class="domi-guest-locked-notice" style="text-align:center;padding:48px 24px;background:#111a20;border:3px solid #284452;border-radius:4px;margin:24px auto;max-width:580px;box-shadow:0 0 35px rgba(0,0,0,0.85);" hidden></div>
+          <div class="shop-layout"><div class="shop-catalog"><div class="shop-catalog-heading"><h3 id="shopCategory">Personajes</h3><span id="shopCount" role="status"></span></div><div id="shopGrid" class="shop-grid"></div></div><aside id="shopDetail" class="shop-detail" aria-label="Probador del artículo"></aside></div>
+          <p id="shopFeedback" class="shop-feedback" role="status" aria-live="polite"></p>
+        </div>
+      </section>
+
+      <section id="atlasScreen" class="screen atlas-screen" aria-label="Atlas Interactivo de las Ocho Regiones">
+        <header class="atlas-topbar">
+          <button id="atlasBackButton" class="pixel-button pixel-button--secondary" title="Volver al local" aria-label="Volver al local">
+            ← VOLVER (ESC)
+          </button>
+          <div class="atlas-top-center">
+            <span class="brand-mark">D<span>2</span></span>
+            <div class="atlas-title-text">
+              <strong>ATLAS CARTOGRÁFICO</strong>
+              <small>ARCHIPIÉLAGO DE DON DOMI</small>
+            </div>
+          </div>
+          <div id="atlasQuickNav" class="atlas-quick-nav" role="toolbar" aria-label="Selección rápida de mapas"></div>
+          <div class="atlas-balance">
+            <span class="wallet"><i data-lucide="coins"></i><b id="atlasBank">0</b><small>PT</small></span>
+          </div>
+        </header>
+
+        <div class="atlas-stage">
+          <canvas id="atlasCanvas" width="960" height="540" aria-label="Mapa interactivo pixel art"></canvas>
+
+          <!-- Floating Region Info Card -->
+          <div id="atlasFloatingCard" class="atlas-floating-card">
+            <!-- Contenido dinámico renderizado por AtlasScreen -->
+          </div>
+
+          <div class="atlas-stage-hint">
+            <span>Arrastrá el mapa para explorar · Clic en una región para viajar · <kbd>WASD</kbd> / Flechas · <kbd>Espacio</kbd>: Jugar</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- MÁQUINA DE PREMIOS (PANCHOMÁTICA) -->
+      <section id="prizeScreen" class="screen prize-screen" aria-label="Máquina de Premios Arcade">
+        <div class="screen__panel prize-panel">
+          <header class="prize-header">
+            <button id="prizeBackButton" class="pixel-button pixel-button--secondary" title="Volver al local" aria-label="Volver al local">
+              ← VOLVER (ESC)
+            </button>
+            <div class="prize-title-wrap">
+              <span class="brand-mark">D<span>2</span></span>
+              <div>
+                <h2>PANCHOMÁTICA</h2>
+                <small>MÁQUINA DE PREMIOS Y SORPRESAS DE DON DOMI</small>
+              </div>
+            </div>
+            <div class="prize-wallet">
+              <span class="wallet"><i data-lucide="coins"></i><b id="prizeBank">0</b><small>PT</small></span>
+            </div>
+          </header>
+
+          <div class="prize-stage-layout">
+            <!-- Canvas interactivo de la máquina con física de cápsulas y animación fluida -->
+            <div class="prize-canvas-container">
+              <canvas id="prizeCanvas" width="560" height="480"></canvas>
+            </div>
+
+            <!-- Panel de control lateral -->
+            <div class="prize-control-panel">
+              <div class="prize-rules-card">
+                <div class="prize-badge-row">
+                  <span class="prize-chip prize-chip--skin"><i data-lucide="user-round"></i> PERSONAJES</span>
+                  <span class="prize-chip prize-chip--acc"><i data-lucide="sparkles"></i> ACCESORIOS</span>
+                  <span class="prize-chip prize-chip--pet"><i data-lucide="paw-print"></i> MASCOTAS</span>
+                </div>
+                <p class="prize-rules-desc">
+                  ¡Probá tu suerte! Cada tirada extrae una cápsula que desbloquea un <strong>personaje</strong>, <strong>accesorio</strong> o <strong>mascota</strong> no adquirido. Si ya tenés todo, ¡te llevás un <strong>Bote de 300 Puntos</strong>!
+                </p>
+                <div class="prize-cost-box">
+                  <span class="prize-cost-label">COSTO POR TIRADA:</span>
+                  <span class="prize-cost-val"><i data-lucide="coins"></i> 150 <small>PT</small></span>
+                </div>
+              </div>
+
+              <!-- Botón principal para girar palanca -->
+              <div class="prize-actions">
+                <button id="prizePullBtn" class="pixel-button pixel-button--gold prize-pull-btn">
+                  <i data-lucide="sparkles"></i><span class="prize-btn-text">GIRAR PALANCA · 150 PT</span>
+                </button>
+                <p id="prizeNotice" class="prize-notice"></p>
+              </div>
+
+            </div>
+
+            <div id="prizeRevealCard" class="prize-reveal-overlay" role="dialog" aria-modal="true" aria-labelledby="prizeItemName" hidden>
+              <div id="prizeRevealParticles" class="prize-reveal-particles" aria-hidden="true"></div>
+              <div class="prize-reveal-card">
+                <span class="prize-reveal-kicker">¡CÁPSULA ABIERTA!</span>
+                <div class="prize-reveal-header">
+                  <span id="prizeRarityPill" class="prize-rarity-pill">¡ÉPICO!</span>
+                  <h3 id="prizeItemName">Nombre del Ítem</h3>
+                </div>
+                <div class="prize-reveal-body">
+                  <div class="prize-item-frame"><canvas id="prizeItemCanvas" width="96" height="96"></canvas></div>
+                  <div class="prize-item-copy">
+                    <span id="prizeItemType" class="prize-item-type">NUEVO OBJETO</span>
+                    <p id="prizeItemDesc">Descripción del premio desbloqueado.</p>
+                    <span class="prize-saved-note">GUARDADO EN TU COLECCIÓN</span>
+                  </div>
+                </div>
+                <div class="prize-reveal-actions">
+                  <button id="prizeEquipBtn" class="pixel-button pixel-button--green">
+                    ✓ EQUIPAR AHORA
+                  </button>
+                  <button id="prizeNextBtn" class="pixel-button pixel-button--secondary">
+                    CONTINUAR
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="domiScreen" class="screen shop-screen domi-screen" aria-labelledby="domiTitle">
+        <div class="screen__panel shop-panel">
+          <header class="shop-heading">
+            <button id="domiBackButton" class="icon-button" title="Volver al local" aria-label="Volver al local"><i data-lucide="arrow-left"></i></button>
+            <div class="shop-heading-copy">
+              <p class="eyebrow">DOMI / EL DUEÑO DE LA CASA</p>
+              <h2 id="domiTitle">Don Domi</h2>
+              <p id="domiSubtitle">Consejos de combate, misiones exclusivas y estado de tu colección.</p>
+            </div>
+            <div class="shop-balance">
+              <small>TUS PUNTOS</small>
+              <span class="wallet"><i data-lucide="coins"></i><b id="domiBank">0</b><small>PT</small></span>
+            </div>
+          </header>
+          <div id="domiTabs" class="shop-tabs" role="group" aria-label="Categorías de Don Domi"></div>
+          <div id="domiContent" class="domi-content-area"></div>
+          <p id="domiFeedback" class="shop-feedback" role="status" aria-live="polite"></p>
+        </div>
+      </section>
+
+      <section id="menuScreen" class="screen">
+        <header class="brand-bar"><span class="brand-mark">D<span>2</span></span><span>DOMI / ARCADE CLUB</span><span class="edition">EDICION 02 <i></i> EN SERVICIO</span></header>
+        <div class="screen__panel menu-panel">
+          <p class="eyebrow"><span class="live-dot"></span> EL ULTIMO TURNO</p>
+          <h1>DOMI 2<span>PANCHO</span></h1>
+          <p class="menu-copy">La cocina cerro.<br />El menu se levanto.</p>
+          <div class="menu-actions">
+            <button id="playButton" class="pixel-button play-button arcade-action"><i data-lucide="play" aria-hidden="true"></i><span>A LA COCINA</span></button>
+            <button id="rankingButton" class="pixel-button pixel-button--secondary">HISTORIAL <span aria-hidden="true">&#8594;</span></button>
+          </div>
+          <nav class="menu-links" aria-label="Accesos directos">
+            <button id="skinsButton" class="pixel-button pixel-button--secondary">PERSONAJES</button>
+            <button id="achievementsButton" class="pixel-button pixel-button--secondary">LOGROS</button>
+            <button id="optionsButton" class="pixel-button pixel-button--secondary">OPCIONES</button>
+          </nav>
+        </div>
+        <aside class="scene-caption"><span>01 / LOCAL DOMI</span><strong>COMBO DEL DIA:<br />SOBREVIVIR.</strong><span class="scene-status">PEDIDOS PENDIENTES <b>99+</b></span></aside>
+        <div class="menu-footer"><span>FAST FOOD. FAST TROUBLE.</span><span>RECORD LOCAL <b id="menuBest">000000</b></span><span>ABIERTO HASTA EL ULTIMO PEDIDO</span></div>
+      </section>
+
+      <section id="setupScreen" class="screen">
+        <div class="screen__panel setup-panel">
+          <div class="setup-header">
+            <div>
+              <p class="eyebrow">ORDEN 0002 / NUEVA PARTIDA</p>
+              <h2>Arma tu combo.</h2>
+            </div>
+            <div class="setup-profile-pill">
+              <span class="setup-badge-label">SOCIO ACTIVO</span>
+              <div class="setup-badge-content">
+                <i data-lucide="user"></i>
+                <input id="playerNameInput" maxlength="16" value="Pancho" readonly />
+                <span class="live-dot" title="En servicio"></span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Pestañas de Paso: 1. Partida / 2. Equipamiento -->
+          <div class="setup-steps-nav">
+            <button type="button" id="tabStep1" class="setup-step-tab setup-step-tab--active"><span class="step-num">1</span> ELEGIR PARTIDA</button>
+            <span class="step-nav-arrow" aria-hidden="true">&#10148;</span>
+            <button type="button" id="tabStep2" class="setup-step-tab"><span class="step-num">2</span> PERSONAJE Y ARMAS</button>
+          </div>
+
+          <!-- PASO 1: Selección de Partida (Modo, Mapa, Mascota, Dificultad, Accesorio) -->
+          <div id="setupStep1" class="setup-step-view">
+            <!-- Cuadrícula 2x2 de Cuatro Barras Horizontales Independientes -->
+            <div class="setup-categories-grid">
+              <!-- BARRA 1: SELECTOR DE MODO (Ámbar Neón) -->
+              <section class="setup-category-bar setup-category--amber" id="catBarMode" aria-labelledby="catModeHeading">
+                <div class="setup-category-header">
+                  <div class="setup-category-title-wrap">
+                    <span class="setup-category-dot"></span>
+                    <h3 id="catModeHeading" class="setup-category-title">MODO DE JUEGO</h3>
+                  </div>
+                  <span class="setup-category-badge" id="badgeMode">8 OLEADAS</span>
+                </div>
+                <div class="setup-cards-row setup-cards-row--mode" id="rowMode" role="radiogroup" aria-label="Selector de modo"></div>
+              </section>
+
+              <!-- BARRA 2: SELECTOR DE MAPAS (Menta Neón) -->
+              <section class="setup-category-bar setup-category--mint" id="catBarMap" aria-labelledby="catMapHeading">
+                <div class="setup-category-header">
+                  <div class="setup-category-title-wrap">
+                    <span class="setup-category-dot"></span>
+                    <h3 id="catMapHeading" class="setup-category-title">ESCENARIOS</h3>
+                  </div>
+                  <div class="setup-category-nav-wrap">
+                    <button type="button" class="setup-row-nav-btn" id="mapNavPrev" aria-label="Mapa anterior">&#9664;</button>
+                    <span class="setup-category-badge" id="badgeMap">01 / LOCAL DOMI</span>
+                    <button type="button" class="setup-row-nav-btn" id="mapNavNext" aria-label="Mapa siguiente">&#9654;</button>
+                  </div>
+                </div>
+                <div class="setup-cards-row setup-cards-row--scroll setup-cards-row--maps" id="rowMap" role="radiogroup" aria-label="Selector de mapas"></div>
+              </section>
+
+              <!-- BARRA 3: SELECTOR DE MASCOTAS (Cian Neón) -->
+              <section class="setup-category-bar setup-category--cyan" id="catBarCompanion" aria-labelledby="catCompanionHeading">
+                <div class="setup-category-header">
+                  <div class="setup-category-title-wrap">
+                    <span class="setup-category-dot"></span>
+                    <h3 id="catCompanionHeading" class="setup-category-title">MASCOTAS</h3>
+                  </div>
+                  <div class="setup-category-nav-wrap">
+                    <button type="button" class="setup-row-nav-btn" id="petNavPrev" aria-label="Mascota anterior">&#9664;</button>
+                    <span class="setup-category-badge" id="badgeCompanion">SIN MASCOTA</span>
+                    <button type="button" class="setup-row-nav-btn" id="petNavNext" aria-label="Mascota siguiente">&#9654;</button>
+                  </div>
+                </div>
+                <div class="setup-cards-row setup-cards-row--scroll setup-cards-row--pets" id="rowCompanion" role="radiogroup" aria-label="Selector de mascotas"></div>
+              </section>
+
+              <!-- BARRA 4: SELECTOR DE DIFICULTAD (Rojo Neón) -->
+              <section class="setup-category-bar setup-category--red" id="catBarDifficulty" aria-labelledby="catDifficultyHeading">
+                <div class="setup-category-header">
+                  <div class="setup-category-title-wrap">
+                    <span class="setup-category-dot"></span>
+                    <h3 id="catDifficultyHeading" class="setup-category-title">DIFICULTAD</h3>
+                  </div>
+                  <span class="setup-category-badge" id="badgeDifficulty">PICANTE</span>
+                </div>
+                <div class="setup-cards-row setup-cards-row--difficulty" id="rowDifficulty" role="radiogroup" aria-label="Selector de dificultad"></div>
+              </section>
+            </div>
+
+            <!-- Proxy spans para compatibilidad con selectores heredados -->
+            <div class="sr-hidden" aria-hidden="true" inert style="display:none;">
+              <span id="cardModeVal"></span>
+              <span id="cardMapVal"></span>
+              <span id="cardCompanionVal"></span>
+              <span id="cardDifficultyVal"></span>
+            </div>
+
+            <!-- Briefing de Zona (Amenaza Nativa, Misión Acumulativa y Accesorio Exclusivo) -->
+            <div id="setupMapBriefing" class="setup-map-briefing" aria-live="polite"></div>
+
+            <!-- Accesorio card compact -->
+            <div class="setup-accessory-bar">
+              <button type="button" class="setup-card setup-card--purple setup-card--compact" id="cardAccessory" aria-label="Cambiar accesorio">
+                <div class="setup-card__icon-box">
+                  <svg viewBox="0 0 24 24" class="card-icon-pixel" shape-rendering="crispEdges" aria-hidden="true">
+                    <!-- Crown Tips -->
+                    <rect x="4" y="6" width="2" height="2" fill="#b844ff"/>
+                    <rect x="11" y="4" width="2" height="2" fill="#fff"/>
+                    <rect x="18" y="6" width="2" height="2" fill="#b844ff"/>
+                    <!-- Crown Body -->
+                    <rect x="4" y="8" width="3" height="7" fill="#b844ff"/>
+                    <rect x="10" y="6" width="4" height="9" fill="#d47aff"/>
+                    <rect x="17" y="8" width="3" height="7" fill="#b844ff"/>
+                    <rect x="7" y="11" width="3" height="4" fill="#9d22e8"/>
+                    <rect x="14" y="11" width="3" height="4" fill="#9d22e8"/>
+                    <!-- Jewels -->
+                    <rect x="5" y="13" width="1" height="1" fill="#00ffcc"/>
+                    <rect x="11" y="11" width="2" height="2" fill="#ffcc00"/>
+                    <rect x="18" y="13" width="1" height="1" fill="#00ffcc"/>
+                    <!-- Crown Rim -->
+                    <rect x="3" y="15" width="18" height="3" fill="#ffbe3b"/>
+                    <rect x="4" y="16" width="16" height="1" fill="#ffffff"/>
+                    <rect x="3" y="18" width="18" height="1" fill="#8c4400"/>
+                  </svg>
+                </div>
+                <div class="setup-card__content">
+                  <span class="setup-card__label">Accesorio Extra</span>
+                  <strong class="setup-card__value" id="cardAccessoryVal">Sin accesorio</strong>
+                  <span class="setup-card__hint">Clic para alternar</span>
+                </div>
+              </button>
+            </div>
+
+            <div class="menu-actions setup-step-actions">
+              <button id="setupNextBtn" type="button" class="pixel-button arcade-action"><i data-lucide="arrow-right" aria-hidden="true"></i><span>ELEGIR PERSONAJE Y ARMAS</span></button>
+              <button id="setupBackButton" type="button" class="pixel-button pixel-button--secondary arcade-action arcade-action--quiet"><i data-lucide="arrow-left" aria-hidden="true"></i><span>VOLVER</span></button>
+            </div>
+          </div>
+
+          <!-- PASO 2: Selección de Personaje, Armas e Instrucciones -->
+          <div id="setupStep2" class="setup-step-view" hidden>
+            <div>
+              <h3><span>01</span> El protagonista</h3>
+              <div id="skinOptions" class="option-grid"></div>
+            </div>
+            <div>
+              <h3><span>02</span> El ingrediente secreto</h3>
+              <div id="weaponOptions" class="option-grid"></div>
+            </div>
+            <details class="controls-guide">
+              <summary>Cómo jugar & Controles</summary>
+              <p>El ataque es automático. Movete para esquivar enemigos y recoger experiencia.</p>
+              <ul><li><kbd>WASD</kbd> o <kbd>↑ ↓ ← →</kbd> Moverte</li><li><kbd>Espacio</kbd> Esquivar / embestir</li><li><kbd>1</kbd> <kbd>2</kbd> <kbd>3</kbd> Elegir mejora</li><li><kbd>Esc</kbd> Pausar / seguir</li><li><kbd>Q</kbd> <kbd>E</kbd> <kbd>R</kbd> Poderes: niveles 10, 20 y 30</li></ul>
+              <p>Las mejoras aparecen durante la partida y tienen tiempo limitado. Para apuntar manualmente, activá la mira en la barra superior.</p>
+            </details>
+            <div class="menu-actions setup-step-actions">
+              <button id="startRunButton" type="button" class="pixel-button arcade-action"><i data-lucide="play" aria-hidden="true"></i><span>INICIAR TURNO</span></button>
+              <button id="setupPrevBtn" type="button" class="pixel-button pixel-button--secondary arcade-action arcade-action--quiet"><i data-lucide="arrow-left" aria-hidden="true"></i><span>VOLVER A PARTIDA</span></button>
+            </div>
+          </div>
+
+          <!-- Selects nativos ocultos para compatibilidad con logica de juego y accesibilidad -->
+          <div class="setup-fields sr-hidden" aria-hidden="true" inert>
+            <select id="difficultySelect" class="difficulty-select">
+              <option value="suave">Suave</option><option value="picante" selected>Picante</option>
+              <option value="extra">Extra picante</option><option value="quemado">Modo quemado</option>
+            </select>
+            <select id="mapSelect"><option value="diner">01 / Local DOMI</option><option value="kitchen">02 / Cocina industrial</option><option value="parking">03 / Estacionamiento</option><option value="snow">04 / Nevado</option><option value="desert">05 / Desierto</option><option value="football">06 / Cancha de futbol</option><option value="lava">07 / Caldero de Lava</option><option value="beach">08 / Playa Tropical</option></select>
+            <select id="modeSelect"><option value="survival">Supervivencia</option><option value="waves">8 oleadas</option><option value="rush">Duelo de jefes</option></select>
+            <select id="companionSelect">
+              <option value="none">Sin compañero</option>
+              <option value="ketchup">Mini Ketchup / Ataque y Charcos</option>
+              <option value="drone">Dron Delivery / Imán y Rayos</option>
+              <option value="taco">Taco Guardián / Escudo y Embestida</option>
+              <option value="soda">Botellita Soda / Curación y Furia</option>
+              <option value="parrilla">Mini Parrilla / Fuego de Don Domi</option>
+            </select>
+            <select id="accessorySelect">
+              <option value="none">Sin accesorio</option>
+              <option value="bowtie">Moño Elegante Azul</option>
+              <option value="shades">Gafas de Sol Retro</option>
+              <option value="party_hat">Bonete de Fiesta</option>
+              <option value="cap">Gorra Urbana Celeste</option>
+              <option value="headphones">Auriculares Gamer</option>
+              <option value="crown">Corona Real</option>
+              <option value="top_hat">Galera Elegante</option>
+              <option value="wizard_hat">Sombrero de Brujo</option>
+              <option value="chef_hat">Gorro de Chef</option>
+              <option value="leg_crown">Corona Imperial</option>
+              <option value="leg_halo">Aureola Celestial</option>
+              <option value="leg_viking">Casco Vikingo</option>
+              <option value="leg_horns">Cuernos Demoníacos</option>
+              <option value="leg_visor">Visor Cibernético</option>
+              <option value="leg_archmage">Sombrero de Arquimago</option>
+              <option value="leg_cape">Manto Real Carmesí</option>
+              <option value="leg_angel_wings">Alas de Ángel</option>
+              <option value="leg_fire_wings">Alas de Fénix Ígneo</option>
+              <option value="leg_excalibur">Espada Dorada Excalibur</option>
+              <option value="leg_medallion">Medallón Rubí Sagrado</option>
+              <option value="leg_lava_crown">Corona Magmática Imperial</option>
+              <option value="ticket_gold">Ticket Dorado</option>
+              <option value="thermal_gloves">Guantes Térmicos</option>
+              <option value="reflect_vest">Chaleco Reflectante</option>
+              <option value="thermal_scarf">Bufanda Térmica</option>
+              <option value="thorn_boots">Botas Anti-Espinas</option>
+              <option value="captain_cleats">Botines de Capitán</option>
+              <option value="tropical_visor">Visera Tropical</option>
+              <option value="pineapple_hat">Sombrero de Piña</option>
+            </select>
+          </div>
+        </div>
+      </section>
+
+      <section id="rankingScreen" class="screen">
+        <div class="screen__panel">
+          <h2>Top 10</h2>
+          <ol id="rankingList" class="ranking-list"></ol>
+          <div class="menu-actions">
+            <button id="rankingBackButton" class="pixel-button">Volver</button>
+          </div>
+        </div>
+      </section>
+
+      <section id="achievementsScreen" class="screen"><div class="screen__panel"><h2>Logros</h2><div id="achievementsList" class="achievement-list"></div><div class="menu-actions"><button id="achievementsBackButton" class="pixel-button">Volver</button></div></div></section>
+      <section id="optionsScreen" class="screen"><div class="screen__panel options-panel"><h2>Opciones</h2><label class="toggle-field">Musica<input id="musicToggle" type="checkbox"></label><label class="toggle-field">Efectos de sonido<input id="sfxToggle" type="checkbox"></label><label class="volume-field">Volumen<input id="volumeSlider" type="range" min="0" max="1" step="0.05" value="0.35"></label><label class="toggle-field">Controles táctiles en pantalla<input id="touchToggle" type="checkbox"></label><div class="menu-actions"><button id="clearRankingButton" class="pixel-button pixel-button--secondary">Borrar ranking</button><button id="clearAchievementsButton" class="pixel-button pixel-button--secondary">Borrar logros</button><button id="optionsBackButton" class="pixel-button">Volver</button></div></div></section>
+      <section id="skinsScreen" class="screen"><div class="screen__panel"><p class="eyebrow">EL EQUIPO DEL MOSTRADOR</p><h2>Fuera de carta.</h2><div id="skinsPreview" class="skins-preview"></div><div class="menu-actions"><button id="skinsBackButton" class="pixel-button">Volver</button></div></div></section>
+
+      <section id="pauseScreen" class="screen pause-screen" aria-labelledby="pauseTitle">
+        <div class="screen__panel pause-panel">
+          <header class="pause-header">
+            <span class="pause-emblem" aria-hidden="true"><i data-lucide="chef-hat"></i></span>
+            
+            <span class="pause-stamp">EN PAUSA</span>
+          </header>
+          <div class="pause-summary" aria-label="Resumen del turno">
+            <div class="pause-stat"><span>VIDA</span><strong id="pauseHp">100 / 100</strong></div>
+            <div class="pause-stat"><span>NIVEL</span><strong id="pauseLevel">1</strong></div>
+            <div class="pause-stat"><span>TIEMPO</span><strong id="pauseTime">00:00</strong></div>
+            <div class="pause-stat"><span>BAJAS</span><strong id="pauseKills">0</strong></div>
+            <div class="pause-stat"><span>PUNTOS</span><strong id="pauseScore">0</strong></div>
+            <div class="pause-stat"><span>RACHA</span><strong id="pauseCombo">0</strong></div>
+          </div>
+          <div class="pause-objective"><span>OBJETIVO DEL TURNO</span><p id="pauseGoal" class="pause-goal"></p></div>
+          <div class="pause-columns">
+            <section class="pause-section" aria-labelledby="pauseRecipeTitle">
+              <h3 id="pauseRecipeTitle"><i data-lucide="utensils-crossed" aria-hidden="true"></i> TU RECETA</h3>
+              <p id="pauseLoadout" class="pause-loadout"></p>
+              <div id="buildList" class="build-list"></div>
+            </section>
+            <section class="pause-section" aria-labelledby="pausePowersTitle">
+              <h3 id="pausePowersTitle"><i data-lucide="zap" aria-hidden="true"></i> PODERES</h3>
+              <div id="pausePowers" class="pause-powers"></div>
+            </section>
+          </div>
+          <div class="menu-actions">
+            <button id="resumeButton" class="pixel-button arcade-action"><i data-lucide="play" aria-hidden="true"></i><span>CONTINUAR</span></button>
+            <button id="abandonButton" class="pixel-button pixel-button--secondary arcade-action arcade-action--quiet"><i data-lucide="log-out" aria-hidden="true"></i><span>TERMINAR PARTIDA</span></button>
+          </div>
+        </div>
+      </section>
+
+      <section id="gameOverScreen" class="screen">
+        <div class="screen__panel gameOver-panel-enhanced">
+          <div id="gameOverPixelBanner" class="gameover-pixel-banner" aria-live="assertive">GAME OVER</div>
+          <p id="resultEyebrow" class="eyebrow">FIN DEL TURNO</p>
+          <h2 id="resultTitle">GAME OVER</h2>
+          <p id="gameOverPhrase" class="phrase"></p>
+          <div id="victoryCelebration" class="victory-celebration" hidden style="display: none;">
+            <div class="victory-gif-container">
+              <img id="victoryGif" src="./final.gif" alt="¡Ganaste! Victoria Final" class="victory-gif" />
+            </div>
+          </div>
+          <form id="topTenEntry" class="topten-entry" hidden autocomplete="off" novalidate>
+            <p class="topten-title">¡ENTRASTE AL TOP 10!</p>
+            <label for="topTenName" class="topten-label">Escribí tu nombre de arcade (hasta 5 letras)</label>
+            <div class="topten-row">
+              <input id="topTenName" class="topten-input" maxlength="5" spellcheck="false" autocapitalize="characters" inputmode="text" aria-describedby="topTenStatus" />
+              <button id="topTenSave" type="submit" class="pixel-button pixel-button--green">GUARDAR</button>
+            </div>
+            <p id="topTenStatus" class="topten-status" role="status"></p>
+          </form>
+          <div id="gameOverStats" class="stats"></div>
+          <div id="newAchievements" class="result-achievements"></div>
+          <div class="menu-actions">
+            <button id="retryButton" class="pixel-button pixel-button--green">OTRA PARTIDA <span aria-hidden="true">↺</span></button>
+            <button id="gameOverMenuButton" class="pixel-button pixel-button--secondary">VOLVER AL LOCAL</button>
+          </div>
+        </div>
+      </section>
+
+      <section id="abilityScreen" class="screen ability-screen" aria-labelledby="abilityTitle">
+        <div class="screen__panel ability-panel">
+          <p class="eyebrow">Nuevo nivel</p>
+          <h2 id="abilityTitle">Elegi una mejora</h2>
+          <p class="ability-help">Partida en pausa. Presioná 1, 2 o 3 o hacé clic en una carta.</p>
+          <div id="abilityOptions" class="ability-grid"></div>
+        </div>
+      </section>
+      <aside id="combatRail" class="combat-rail" hidden><div class="rail-brand">D<span>2</span><small>EL ULTIMO TURNO</small></div><div class="rail-section"><span class="rail-label">TU RECETA</span><div id="liveBuild" class="live-build"></div></div><div class="rail-next"><i data-lucide="sparkles"></i><span id="nextPrimeLabel">PRIME EN NIVEL 10</span></div></aside>
+
+      <div id="runTutorial" class="run-tutorial" role="status" aria-live="polite" hidden>
+        <span class="run-tutorial__title">TUTORIAL <b class="run-tutorial__step" id="runTutorialStep">1/2</b></span>
+        <span class="run-tutorial__keys" id="runTutorialKeys" aria-hidden="true"></span>
+        <span class="run-tutorial__text" id="runTutorialText"></span>
+        <span class="run-tutorial__bar" aria-hidden="true"><i id="runTutorialFill"></i></span>
+      </div>
+      <div id="primeIntro" class="prime-intro" role="dialog" aria-modal="true" aria-labelledby="primeIntroName" hidden>
+        <div class="prime-intro__card">
+          <p class="prime-intro__eyebrow">¡NUEVO PODER DESBLOQUEADO!</p>
+          <kbd class="prime-intro__key" id="primeIntroKey">Q</kbd>
+          <h2 id="primeIntroName" class="prime-intro__name">Ráfaga 360</h2>
+          <p id="primeIntroInfo" class="prime-intro__info"></p>
+          <p id="primeIntroHint" class="prime-intro__hint"></p>
+          <button id="primeIntroButton" type="button" class="pixel-button pixel-button--green">¡USARLO AHORA!</button>
+        </div>
+      </div>
+      <div id="hud" class="hud" hidden>
+        <div class="hud__bar hud__bar--hp">
+          <span>Vida <b id="hpValue">100 / 100</b></span>
+          <div class="meter"><div id="hpFill" class="meter__fill meter__fill--hp"></div></div>
+        </div>
+        <div class="hud__bar hud__bar--xp">
+          <span>XP <b id="levelValue">NV 1</b></span>
+          <div class="meter"><div id="xpFill" class="meter__fill meter__fill--xp"></div></div>
+        </div>
+        <div id="hudStats" class="hud__stats"></div>
+        <button id="aimButton" class="icon-button" title="Punteria automatica" aria-label="Alternar punteria manual" aria-pressed="false"><i data-lucide="crosshair"></i></button>
+        <button id="pauseButton" class="icon-button" title="Pausa (Esc)" aria-label="Pausar partida"><i data-lucide="pause"></i></button>
+      </div>
+      <button type="button" id="dashControl" class="dash-control prime-slot dash-box-pixel" hidden title="Acelerón (Espacio)" aria-label="Usar acelerón">
+        <div class="dash-inner-frame">
+          <kbd class="pixel-key dash-key">ESP</kbd>
+          <div class="dash-icon-well">
+            <svg class="dash-bolt-svg" viewBox="0 0 24 24" width="22" height="22" shape-rendering="crispEdges" aria-hidden="true">
+              <!-- Estelas de velocidad sci-fi cian -->
+              <rect x="1" y="6" width="4" height="2" fill="#38bdf8" opacity="0.65"/>
+              <rect x="0" y="11" width="5" height="2" fill="#38bdf8" opacity="0.85"/>
+              <rect x="2" y="16" width="3" height="2" fill="#38bdf8" opacity="0.55"/>
+              <!-- Rayo exterior cian neón -->
+              <polygon points="13,2 6,13 12,13 9,22 19,10 13,10" fill="#22d3ee"/>
+              <!-- Rayo interior amarillo eléctrico -->
+              <polygon points="13,4 8,12 12,12 10,19 17,11 13,11" fill="#ffe066"/>
+              <!-- Núcleo brillante blanco -->
+              <polygon points="13,6 10,12 12,12 11,16 15,12 13,12" fill="#ffffff"/>
+            </svg>
+            <span id="dashLabel" class="dash-cd-timer"></span>
+          </div>
+        </div>
+        <span class="dash-meter"><span class="meter"><i id="dashFill"></i></span></span>
+      </button>
+      <div id="primeBar" class="prime-bar" hidden></div>
+
+      <div id="toast" class="toast" role="status" hidden></div>
+
+      <!-- Bloqueador de orientación obligatorio para móviles (solo horizontal) -->
+      <div id="rotateDeviceOverlay" class="rotate-device-overlay" aria-live="assertive">
+        <div class="rotate-card">
+          <div class="rotate-icon-box">
+            <svg class="rotate-phone-svg" viewBox="0 0 64 64" width="72" height="72">
+              <g class="animated-phone">
+                <rect x="20" y="8" width="24" height="48" rx="4" fill="#0d1f23" stroke="#38bdf8" stroke-width="2.5" />
+                <rect x="23" y="14" width="18" height="34" rx="2" fill="#ffe066" />
+                <circle cx="32" cy="51" r="2" fill="#38bdf8" />
+                <line x1="28" y1="11" x2="36" y2="11" stroke="#38bdf8" stroke-width="2" stroke-linecap="round" />
+              </g>
+              <path class="animated-arrow" d="M 12 36 A 22 22 0 0 1 50 18" fill="none" stroke="#22d3ee" stroke-width="3" stroke-linecap="round" stroke-dasharray="6 3" />
+              <polygon class="animated-arrowhead" points="52,14 50,23 43,17" fill="#22d3ee" />
+            </svg>
+          </div>
+          <span class="rotate-tag">MODO HORIZONTAL REQUERIDO</span>
+          <h2>GIRÁ TU TELÉFONO</h2>
+          <p>Para jugar a <b>DOMI 2: PANCHO</b> debes poner el dispositivo en posición horizontal.</p>
+          <div class="rotate-hint">
+            <small>Activá el giro automático en los ajustes de tu celular si la pantalla no gira sola.</small>
+          </div>
+          <button type="button" id="rotateFullscreenBtn" class="pixel-button pixel-button--green rotate-fullscreen-btn">
+            <span>PANTALLA COMPLETA</span>
+          </button>
+        </div>
+      </div>
+    </main>
+
+    <!-- Íconos lucide v0.468.0 (licencia ISC, ver js/vendor/LICENSE-lucide.txt): incluidos en el proyecto, no hace falta npm -->
+    <script src="./js/vendor/lucide.min.js"></script>
+    <script type="module" src="./js/main.js"></script>
+  </body>
+</html>

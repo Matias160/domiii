@@ -1,0 +1,92 @@
+/* ========================================================================
+   FINAL OVERRIDES (se carga al último)
+   1) Cámara de partida a todo el ancho de la pantalla, sin franjas negras.
+   2) Títulos de la interfaz con la tipografía/estilo de "ENTRAR AL TURNO".
+   ======================================================================== */
+
+/* 1. Canvas de juego: ocupa todo el ancho y rellena (cover) en vez de letterbox */
+.app[data-playing="true"] #gameCanvas {
+  left: 0 !important;
+  width: 100% !important;
+  object-fit: cover !important;
+  background: #0c1013;
+}
+
+/* 2. Títulos: Press Start 2P blanco, contorno oscuro y sombra mint pixel */
+h2,
+.screen__panel h2,
+.setup-panel h2,
+.auth-panel h2,
+.shop-heading h2,
+.pause-screen .pause-panel h2,
+#resultTitle,
+#abilityTitle,
+#pauseTitle {
+  font-family: 'Press Start 2P', monospace !important;
+  font-weight: 400 !important;
+  letter-spacing: 0;
+  line-height: 1.3;
+  color: #ffffff;
+  text-shadow: 3px 3px 0 #000, 5px 5px 0 rgba(0, 255, 136, 0.35) !important;
+  image-rendering: pixelated;
+}
+
+h2 { font-size: clamp(18px, 2.4vw, 28px); }
+
+/* 3. Superficies del navegador temadas con la paleta arcade (Impeccable: browser surfaces) */
+::selection { background: #00ff88; color: #0c1013; text-shadow: none; }
+input, textarea, select { caret-color: #ffcc00; }
+:focus-visible { outline: 3px solid #ffcc00; outline-offset: 2px; }
+button:focus-visible, .pixel-button:focus-visible { outline-color: #00e5ff; }
+.hud b, .hud__stats b, #scoreValue, #timeValue, #killsValue, .wallet b, .stats p {
+  font-variant-numeric: tabular-nums;
+}
+* { scrollbar-width: thin; scrollbar-color: #ffcc00 #141c20; }
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: #141c20; }
+::-webkit-scrollbar-thumb { background: #ffcc00; border: 2px solid #141c20; }
+::-webkit-scrollbar-thumb:hover { background: #00ff88; }
+
+/* 4. Barra de Jefe Colosal (Domi Colosal - Game Feel Cinematográfico) */
+.boss-meter--colossus {
+  width: 480px !important;
+  max-width: 95vw !important;
+  border: 3px solid #ff4400 !important;
+  border-bottom: 5px solid #000 !important;
+  box-shadow: 0 0 26px rgba(255, 68, 0, 0.65), 5px 5px 0 #000 !important;
+  background: linear-gradient(180deg, #220606f0 0%, #0c0202fa 100%) !important;
+  padding: 10px 16px !important;
+}
+.boss-meter--colossus #bossName {
+  color: #ffb700 !important;
+  font-size: 11px !important;
+  font-weight: bold !important;
+  text-shadow: 0 0 10px rgba(255, 120, 0, 0.8), 2px 2px 0 #000 !important;
+  letter-spacing: 1.5px !important;
+}
+.boss-meter--colossus .meter {
+  height: 16px !important;
+  border: 2px solid #ff3300 !important;
+  position: relative !important;
+}
+.boss-meter--colossus .meter::before,
+.boss-meter--colossus .meter::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: rgba(255, 255, 255, 0.7);
+  z-index: 5;
+  box-shadow: 0 0 5px #fff;
+}
+.boss-meter--colossus .meter::before {
+  left: 35%; /* Marca de Fase 2 (65% HP) */
+}
+.boss-meter--colossus .meter::after {
+  left: 70%; /* Marca de Fase 3 (30% HP) */
+}
+.boss-meter--colossus .meter__fill {
+  background: linear-gradient(90deg, #ff0033 0%, #ff5500 50%, #ffd700 100%) !important;
+  box-shadow: 0 0 18px rgba(255, 85, 0, 0.95), inset 0 2px 0 rgba(255, 255, 255, 0.6) !important;
+}

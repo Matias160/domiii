@@ -1,0 +1,517 @@
+/* DOMI 2: PANCHO — controles táctiles y aviso de girar el teléfono.
+ * Solo la capa táctil: las pantallas conservan su diseño de escritorio. */
+@media (pointer: coarse) {
+  html, body, .app {
+    width: 100vw;
+    height: 100dvh;
+    max-height: 100dvh;
+    overflow: hidden;
+    touch-action: manipulation;
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+}
+
+/* ==========================================================================
+   CAPA DE CONTROLES TÁCTILES VIRTUALES
+   ========================================================================== */
+
+.mobile-controls-layer {
+  display: none;
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 15;
+  overflow: hidden;
+}
+
+/* --- JOYSTICK TÁCTIL (IZQUIERDA) --- */
+.mobile-joystick-zone {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 50%;
+  height: 100%;
+  pointer-events: auto;
+  touch-action: none;
+  z-index: 16;
+}
+
+.mobile-joystick-base {
+  position: absolute;
+  bottom: 40px;
+  left: 45px;
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(14, 28, 33, 0.85) 0%, rgba(7, 15, 18, 0.6) 100%);
+  border: 2px solid rgba(56, 189, 248, 0.45);
+  box-shadow: 0 0 16px rgba(56, 189, 248, 0.22), inset 0 0 12px rgba(56, 189, 248, 0.12);
+  transform: translate(0, 0);
+  pointer-events: none;
+  opacity: 0.55;
+  transition: opacity 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+  will-change: transform, left, top;
+}
+
+.mobile-joystick-base.is-active {
+  opacity: 0.95;
+  border-color: #38bdf8;
+  box-shadow: 0 0 24px rgba(56, 189, 248, 0.45), inset 0 0 16px rgba(56, 189, 248, 0.25);
+}
+
+.joystick-ring-outer {
+  position: absolute;
+  inset: 6px;
+  border-radius: 50%;
+  border: 1px dashed rgba(56, 189, 248, 0.35);
+}
+
+.joystick-crosshair-h {
+  position: absolute;
+  top: 50%;
+  left: 10px;
+  right: 10px;
+  height: 1px;
+  background: rgba(56, 189, 248, 0.25);
+  transform: translateY(-50%);
+}
+
+.joystick-crosshair-v {
+  position: absolute;
+  left: 50%;
+  top: 10px;
+  bottom: 10px;
+  width: 1px;
+  background: rgba(56, 189, 248, 0.25);
+  transform: translateX(-50%);
+}
+
+.mobile-joystick-knob {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 52px;
+  height: 52px;
+  margin: -26px 0 0 -26px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #38bdf8 0%, #0284c7 65%, #0369a1 100%);
+  border: 2px solid #e0f2fe;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.6), 0 0 14px rgba(56, 189, 248, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  will-change: transform;
+}
+
+.knob-pip {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #ffe066;
+  box-shadow: 0 0 6px #ffe066;
+}
+
+/* --- BARRA SUPERIOR RÁPIDA (PAUSA / APUNTADO) --- */
+.mobile-top-actions {
+  position: absolute;
+  top: 12px;
+  right: 14px;
+  display: flex;
+  gap: 10px;
+  pointer-events: auto;
+  z-index: 20;
+}
+
+.mobile-icon-btn {
+  width: 44px;
+  height: 44px;
+  border-radius: 8px;
+  background: rgba(20, 32, 36, 0.88);
+  border: 1px solid #38bdf8;
+  color: #f0fdf4;
+  display: grid;
+  place-items: center;
+  box-shadow: 0 3px 0 #0b1316, 0 0 10px rgba(56, 189, 248, 0.25);
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.mobile-icon-btn:active {
+  transform: translateY(2px);
+  box-shadow: 0 1px 0 #0b1316;
+}
+
+/* --- ZONA DE ACCIONES (DERECHA) --- */
+.mobile-actions-zone {
+  position: absolute;
+  right: 20px;
+  bottom: 25px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 14px;
+  pointer-events: none;
+  z-index: 18;
+}
+
+/* --- CLÚSTER DE PRIMES (Q, E, R) --- */
+.mobile-primes-cluster {
+  display: flex;
+  gap: 10px;
+  pointer-events: auto;
+}
+
+.mobile-prime-btn {
+  position: relative;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: rgba(18, 28, 32, 0.88);
+  border: 2px solid #52796f;
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 4px 0 #081114, 0 0 10px rgba(0, 0, 0, 0.5);
+  touch-action: manipulation;
+  overflow: hidden;
+  transition: transform 0.1s, border-color 0.15s;
+}
+
+.mobile-prime-btn:active {
+  transform: scale(0.92);
+}
+
+.mobile-prime-btn[data-status="ready"] {
+  border-color: #38bdf8;
+  box-shadow: 0 4px 0 #081114, 0 0 14px rgba(56, 189, 248, 0.45);
+}
+
+.mobile-prime-btn[data-status="locked"] {
+  opacity: 0.45;
+  border-color: #2d3b38;
+}
+
+.mobile-prime-btn[data-status="cooldown"] {
+  border-color: #d97706;
+  opacity: 0.85;
+}
+
+.prime-btn-badge {
+  position: absolute;
+  top: 2px;
+  left: 4px;
+  font: 900 9px monospace;
+  color: #ffe066;
+}
+
+.prime-btn-symbol {
+  font-size: 16px;
+  line-height: 1;
+  color: #38bdf8;
+  margin-top: 4px;
+}
+
+.prime-btn-cool {
+  font: 700 8px monospace;
+  color: #f1f5f9;
+  line-height: 1;
+  margin-top: 2px;
+}
+
+.prime-btn-meter {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 0%;
+  background: rgba(56, 189, 248, 0.25);
+  pointer-events: none;
+  transition: height 0.2s linear;
+}
+
+/* --- BOTÓN DE DASH / ACELERÓN TÁCTIL --- */
+.mobile-dash-btn {
+  pointer-events: auto;
+  position: relative;
+  width: 76px;
+  height: 76px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #0e3b43 0%, #062025 70%, #031013 100%);
+  border: 3px solid #22d3ee;
+  box-shadow: 0 6px 0 #02080a, 0 0 20px rgba(34, 211, 238, 0.45);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  touch-action: manipulation;
+  transition: transform 0.1s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+}
+
+.mobile-dash-btn:active,
+.mobile-dash-btn.dash-pressed {
+  transform: translateY(4px) scale(0.94);
+  box-shadow: 0 2px 0 #02080a, 0 0 25px rgba(254, 240, 138, 0.7);
+  border-color: #ffe066;
+}
+
+.mobile-dash-btn[data-ready="false"],
+.mobile-dash-btn:disabled {
+  border-color: #475569;
+  box-shadow: 0 4px 0 #02080a;
+  opacity: 0.7;
+}
+
+.mobile-dash-svg {
+  filter: drop-shadow(0 0 4px rgba(34, 211, 238, 0.7));
+  margin-top: -2px;
+}
+
+.mobile-dash-text {
+  font: 900 11px monospace;
+  letter-spacing: 0.5px;
+  color: #e0f2fe;
+  line-height: 1;
+  margin-top: 2px;
+}
+
+.mobile-dash-timer {
+  font: 700 8px monospace;
+  color: #ffe066;
+  line-height: 1;
+}
+
+.mobile-dash-cooldown-ring {
+  position: absolute;
+  inset: -3px;
+  width: calc(100% + 6px);
+  height: calc(100% + 6px);
+  pointer-events: none;
+  transform: rotate(-90deg);
+}
+
+.mobile-dash-cooldown-ring .ring-bg {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.08);
+  stroke-width: 3.5;
+}
+
+.mobile-dash-cooldown-ring .ring-fill {
+  fill: none;
+  stroke: #22d3ee;
+  stroke-width: 3.5;
+  stroke-dasharray: 188.5;
+  stroke-dashoffset: 0;
+  transition: stroke-dashoffset 0.1s linear;
+}
+
+/* --- BOTÓN DE INTERACCIÓN EN LOBBY (E) --- */
+.mobile-interact-btn {
+  pointer-events: auto;
+  min-height: 52px;
+  padding: 10px 20px;
+  border-radius: 8px;
+  background: #ffe066;
+  border: 2px solid #ca8a04;
+  box-shadow: 0 4px 0 #854d0e, 0 0 16px rgba(250, 204, 21, 0.4);
+  color: #0c1013;
+  font: 900 14px monospace;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  touch-action: manipulation;
+  animation: pulse-interact 1.2s infinite ease-in-out;
+}
+
+@keyframes pulse-interact {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); box-shadow: 0 4px 0 #854d0e, 0 0 24px rgba(250, 204, 21, 0.7); }
+}
+
+.mobile-interact-btn .pixel-key {
+  background: #111827;
+  color: #ffe066;
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-size: 11px;
+}
+
+
+@media screen and (max-height: 540px), screen and (orientation: landscape) and (max-height: 600px) {
+  /* 9. CONTROLES TÁCTILES DURANTE COMBATE (In-Game) */
+  .mobile-joystick-base {
+    bottom: 22px !important;
+    left: 28px !important;
+    width: 100px !important;
+    height: 100px !important;
+  }
+  .mobile-joystick-knob {
+    width: 44px !important;
+    height: 44px !important;
+    margin: -22px 0 0 -22px !important;
+  }
+  .mobile-actions-zone {
+    bottom: 18px !important;
+    right: 18px !important;
+    gap: 10px !important;
+  }
+  .mobile-dash-btn {
+    width: 66px !important;
+    height: 66px !important;
+  }
+  .mobile-prime-btn {
+    width: 42px !important;
+    height: 42px !important;
+  }
+  .mobile-top-actions {
+    top: 6px !important;
+    right: 10px !important;
+  }
+  .mobile-icon-btn {
+    width: 36px !important;
+    height: 36px !important;
+  }
+}
+
+
+/* ==========================================================================
+   BLOQUEADOR DE ORIENTACIÓN: OBLIGATORIO HORIZONTAL EN MÓVILES
+   ========================================================================== */
+
+.rotate-device-overlay {
+  display: none;
+}
+
+@media screen and (orientation: portrait) and (max-width: 950px) {
+  .rotate-device-overlay {
+    display: flex !important;
+    position: fixed !important;
+    inset: 0 !important;
+    width: 100vw !important;
+    height: 100dvh !important;
+    background: radial-gradient(circle at center, #102126 0%, #070e10 100%) !important;
+    z-index: 999999 !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 24px !important;
+    box-sizing: border-box !important;
+    text-align: center !important;
+  }
+}
+
+.rotate-card {
+  max-width: 360px;
+  width: 100%;
+  background: #0f1d21;
+  border: 3px solid #38bdf8;
+  border-bottom: 5px solid #0369a1;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8), 0 0 24px rgba(56, 189, 248, 0.35);
+  border-radius: 6px;
+  padding: 30px 22px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  color: #f1f5f9;
+}
+
+.rotate-icon-box {
+  width: 96px;
+  height: 96px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #16363f 0%, #09171b 100%);
+  border: 2px dashed #22d3ee;
+  display: grid;
+  place-items: center;
+  box-shadow: 0 0 20px rgba(34, 211, 238, 0.3);
+}
+
+.animated-phone {
+  transform-origin: 32px 32px;
+  animation: rotate-phone-cycle 2.8s infinite ease-in-out;
+}
+
+@keyframes rotate-phone-cycle {
+  0%, 15% {
+    transform: rotate(0deg);
+  }
+  45%, 75% {
+    transform: rotate(90deg);
+  }
+  100% {
+    transform: rotate(0deg);
+  }
+}
+
+.animated-arrow {
+  animation: pulse-arrow 1.4s infinite alternate ease-in-out;
+}
+
+@keyframes pulse-arrow {
+  from { opacity: 0.4; }
+  to { opacity: 1; }
+}
+
+.rotate-tag {
+  font: 900 10px monospace;
+  letter-spacing: 1px;
+  color: #ffe066;
+  background: #34280f;
+  border: 1px solid #eab308;
+  padding: 4px 10px;
+  border-radius: 3px;
+}
+
+.rotate-card h2 {
+  font-size: 24px !important;
+  font-weight: 900 !important;
+  color: #fff !important;
+  margin: 0 !important;
+  text-shadow: 0 0 12px rgba(56, 189, 248, 0.5);
+}
+
+.rotate-card p {
+  font-size: 13px;
+  line-height: 1.5;
+  color: #94a3b8;
+  margin: 0;
+}
+
+.rotate-card p b {
+  color: #38bdf8;
+}
+
+.rotate-hint {
+  background: rgba(14, 30, 36, 0.7);
+  border-left: 3px solid #ffe066;
+  padding: 8px 12px;
+  font-size: 11px;
+  color: #cbd5e1;
+  text-align: left;
+  border-radius: 2px;
+}
+
+.rotate-fullscreen-btn {
+  width: 100%;
+  margin-top: 6px;
+  min-height: 44px;
+}
+
+/* Con controles táctiles no se muestra la ayuda de teclado del local (tapaba el joystick) */
+body.touch-controls-on .lobby-controls { display: none; }
+/* En modo táctil los botones de escritorio (poderes, dash, mira y pausa) los reemplaza la capa táctil */
+body.touch-controls-on #primeBar,
+body.touch-controls-on #dashControl,
+body.touch-controls-on #dashControl.dash-control.prime-slot.dash-box-pixel:not([hidden]),
+body.touch-controls-on #aimButton,
+body.touch-controls-on #pauseButton { display: none !important; }

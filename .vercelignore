@@ -1,0 +1,4 @@
+server.cjs
+tests/
+.git/
+.agents/

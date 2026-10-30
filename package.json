@@ -1,0 +1,12 @@
+{
+  "name": "domi-2-pancho",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "node server.cjs",
+    "test": "node --test"
+  },
+  "dependencies": {
+    "lucide": "0.468.0"
+  }
+}
