@@ -10,7 +10,7 @@ export const abilities = [
   { id:'mustardRain',name:'Lluvia de mostaza',category:'Especial',rarity:'legendary',description:'Cada 8 segundos caen 7 gotas de mostaza (+2 por nivel): explotan en área, frenan y dejan charcos que queman.',maxStacks:3,apply:player=>{player.mustardLevel+=1;} },
   { id:'hotSauce',name:'Salsa picante',category:'Ataque',rarity:'epic',description:'Multiplica el daño de proyectiles un +50%.',maxStacks:5,apply:player=>{player.damageMultiplier*=1.5;} },
   { id:'deathBlast',name:'Salchicha explosiva',category:'Especial',rarity:'epic',description:'Los enemigos derrotados estallan: 40 de daño en área.',maxStacks:3,apply:player=>{player.explosionDamage+=40;} },
-  { id:'armor',name:'Pan más duro',category:'Defensa',rarity:'epic',description:'Reduce todo el daño recibido un 35%.',maxStacks:3,apply:player=>{player.defense*=1.35;} },
+  { id:'armor',name:'Pan más duro',category:'Defensa',rarity:'epic',description:'Reduce todo el daño recibido un 17.5% (nerfeado al 50%).',maxStacks:3,apply:player=>{player.defense*=1.175;} },
   { id:'bigShot',name:'Combo agrandado',category:'Ataque',rarity:'rare',description:'Proyectiles 50% más gigantescos y +30% de daño.',maxStacks:3,apply:player=>{player.projectileScale*=1.5;player.damageMultiplier*=1.3;} },
   { id:'rapidFire',name:'Manos veloces',category:'Ataque',rarity:'rare',description:'Aumenta tu cadencia de disparo un 35%.',maxStacks:4,apply:player=>{player.fireRateMultiplier*=0.65;} },
   { id:'piercing',name:'Tenedor afilado',category:'Ataque',rarity:'rare',description:'Tus proyectiles perforan a +2 enemigos adicionales.',maxStacks:2,apply:player=>{player.pierceBonus+=2;} },

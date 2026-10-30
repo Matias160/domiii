@@ -51,6 +51,18 @@ export function updateEnemies(state, delta, canvas) {
   const round = state.bossWaveRound || 0;
   const howManyBosses = isLavaMode ? 1 : (round < 4 ? 1 : 2 + (round - 4));
 
+    // Minuto 15 (900s): El Domi Colosal (último jefe) aparece en todos los mapas
+  if (!hold && state.time >= 900 && !state.minute15ColossusSpawned) {
+    state.minute15ColossusSpawned = true;
+    const colossus = enemyTypes.find(t => t.id === 'lava_boss');
+    if (colossus) {
+      spawnEnemy(state, canvas, true, false, 0, 1, colossus);
+      state.directorNotice = '💀 ¡EL DOMI COLOSAL HA APARECIDO EN EL MINUTO 15!';
+      state.audio?.play('bossEntrance');
+      state.shake = Math.max(state.shake || 0, 0.75);
+    }
+  }
+
   if (!hold && (state.time >= state.nextBossAt || waveBoss) && activeBossCount === 0) {
     if (state.modeId !== 'rush' || (state.bossesKilled || 0) < RUSH_BOSS_GOAL) {
       for (let b = 0; b < howManyBosses; b++) {
@@ -232,7 +244,7 @@ function updateBossZones(state,delta){
   }
 }
 
-function spawnEnemy(state, canvas, boss = false, nearEdge = false, bossSlot = 0, totalBosses = 1) {
+export function spawnEnemy(state, canvas, boss = false, nearEdge = false, bossSlot = 0, totalBosses = 1, overrideType = null) {
   const worldW = state.world?.width || 1920;
   const worldH = state.world?.height || 1080;
   const vw = state.view?.w || 960, vh = state.view?.h || 540;
@@ -242,10 +254,17 @@ function spawnEnemy(state, canvas, boss = false, nearEdge = false, bossSlot = 0,
   let px, py;
   if (boss) {
     if (totalBosses > 1) {
-      const spacing = Math.min(220, (vw - 160) / Math.max(1, totalBosses));
-      const startX = cam.x + vw / 2 - ((totalBosses - 1) * spacing) / 2;
-      px = startX + bossSlot * spacing;
-      py = Math.max(160, Math.min(worldH - 120, cam.y + vh * 0.32 + (bossSlot % 2 === 0 ? 0 : 25)));
+      if (totalBosses >= 10) {
+        const angle = (bossSlot / totalBosses) * Math.PI * 2;
+        const ringDist = 260 + (bossSlot % 3) * 110;
+        px = p.x + Math.cos(angle) * ringDist;
+        py = p.y + Math.sin(angle) * ringDist;
+      } else {
+        const spacing = Math.min(220, (vw - 160) / Math.max(1, totalBosses));
+        const startX = cam.x + vw / 2 - ((totalBosses - 1) * spacing) / 2;
+        px = startX + bossSlot * spacing;
+        py = Math.max(160, Math.min(worldH - 120, cam.y + vh * 0.32 + (bossSlot % 2 === 0 ? 0 : 25)));
+      }
     } else {
       px = Math.max(80, Math.min(worldW - 80, cam.x + vw / 2 + (Math.random() - 0.5) * 180));
       py = Math.max(170, Math.min(worldH - 120, cam.y + vh * 0.34));
@@ -292,7 +311,13 @@ function spawnEnemy(state, canvas, boss = false, nearEdge = false, bossSlot = 0,
 
   let chosenType;
   if (boss) {
-    chosenType = state.mapId === 'lava' ? colossusBoss : regularBosses[spawnedBossIndex % regularBosses.length];
+    if (overrideType) {
+      chosenType = overrideType;
+    } else if (state.mapId === 'lava') {
+      chosenType = colossusBoss;
+    } else {
+      chosenType = bosses[spawnedBossIndex % bosses.length];
+    }
   } else {
     // Si hay enemigos nativos exclusivos para este mapa, aparecen con un 32% de probabilidad
     if (nativeForMap.length > 0 && Math.random() < 0.32) {
@@ -311,7 +336,7 @@ function spawnEnemy(state, canvas, boss = false, nearEdge = false, bossSlot = 0,
   // En modo Duelo de Jefes ("rush"), los jefes son mucho más resistentes y escalan en cada ronda
   const rushBossHpMult = (boss && state.modeId === 'rush')
     ? (2.45 + spawnedBossIndex * 0.48)
-    : (boss ? (1.7 + (state.bossesKilled || 0) * 0.35) : 1);
+    : (boss ? (1.5 + (state.bossesKilled || 0) * 0.35 + (spawnedBossIndex || 0) * 0.22) : 1);
   const rushBossSpdMult = (boss && state.modeId === 'rush') ? (1.06 + spawnedBossIndex * 0.03) : 1;
   const nightSpdMult = state.nightShift ? (1.12 + ((state.nightShiftLevel || 1) - 1) * 0.06) : 1;
   const difficulty = {

@@ -5,7 +5,7 @@ import { drawWorldProps } from "./core/worldProps.js";
 import { skins } from "./data/skins.js";
 import { phrases } from "./data/phrases.js";
 import { getAbilityChoices, applyAbility, abilities as abilityCatalog, rarities } from "./data/abilities.js";
-import { updateEnemies } from "./systems/enemySystem.js";
+import { updateEnemies, spawnEnemy } from "./systems/enemySystem.js";
 import { updateProjectiles } from "./systems/projectileSystem.js";
 import { updatePlayer } from "./systems/playerSystem.js";
 import { addSurvivalScore, resolveDeaths } from "./systems/scoreSystem.js";
@@ -137,11 +137,15 @@ export class Game {
     let secretBuffer = '';
     window.unlockLavaMap = window.unlockLava = () => this.unlockLavaCheat();
     window.killBoss = window.killFinalBoss = () => this.killBossCheat();
+    window.cutPlayerHp = window.halfHp = () => this.cutPlayerHpHalfCheat();
+    window.spawn20Bosses = window.spawnBosses = () => this.spawnTwentyBossesCheat();
     window.addEventListener('keydown', event => {
       if (event.target.closest?.('input, select, textarea')) return;
       const key = event.key.toLowerCase();
       if (event.ctrlKey && event.shiftKey && key === 'l' && !this.running) { event.preventDefault(); this.unlockLavaCheat(); return; }
       if (event.ctrlKey && event.shiftKey && key === 'k' && this.running) { event.preventDefault(); this.killBossCheat(); return; }
+      if (event.ctrlKey && !event.shiftKey && !event.altKey && key === 'i' && this.running) { event.preventDefault(); this.cutPlayerHpHalfCheat(); return; }
+      if (event.ctrlKey && !event.shiftKey && !event.altKey && key === 'u' && this.running) { event.preventDefault(); this.spawnTwentyBossesCheat(); return; }
       if (key.length === 1) {
         secretBuffer = (secretBuffer + key).slice(-8);
         if (!this.running && secretBuffer.endsWith('domilava')) { secretBuffer = ''; this.unlockLavaCheat(); return; }
@@ -374,6 +378,40 @@ export class Game {
     damageEnemy(this.state, boss, boss.hp + 999999, 'crit');
     resolveDeaths(this.state, () => {});
     this.showToast('¡COMANDO SECRETO! Jefe aniquilado.');
+    return true;
+  }
+
+  cutPlayerHpHalfCheat() {
+    if (!this.running || !this.state?.player) return false;
+    const currentHp = this.state.player.hp;
+    const newHp = Math.max(1, Math.round(currentHp * 0.5));
+    this.state.player.hp = newHp;
+    this.state.shake = Math.max(this.state.shake || 0, 0.25);
+    this.audio?.play('damage');
+    this.showToast(`¡VIDA REDUCIDA AL 50%! (${newHp} / ${this.state.player.maxHp} HP)`);
+    if (this.state.floaters) {
+      this.state.floaters.push({
+        x: this.state.player.x,
+        y: this.state.player.y - 45,
+        text: `-${currentHp - newHp} HP (50%)`,
+        life: 1.2,
+        color: '#ff6c70',
+        scale: 1.25,
+        kind: 'crit'
+      });
+    }
+    return true;
+  }
+
+  spawnTwentyBossesCheat() {
+    if (!this.running || !this.state) return false;
+    const count = 20;
+    for (let i = 0; i < count; i++) {
+      spawnEnemy(this.state, this.canvas, true, false, i, count);
+    }
+    this.state.shake = Math.max(this.state.shake || 0, 0.85);
+    this.audio?.play('bossEntrance');
+    this.showToast('💀 ¡INVASIÓN DE 20 JEFES DESATADA!');
     return true;
   }
 
