@@ -128,3 +128,29 @@ test('lobby portal: label and action say JUGAR and portal/cuadro size is increas
   assert.match(lobbyArtSrc, /isPortal\?16:10/, 'Label font size is scaled up 50% for portal');
 });
 
+
+test('hud & pause: top-left portrait/weapon/abilities removed and streak moved to pause menu', () => {
+  const indexHtml = fs.readFileSync(path.resolve('index.html'), 'utf8');
+  const hudSrc = fs.readFileSync(path.resolve('js/ui/hud.js'), 'utf8');
+  const hudCanvasSrc = fs.readFileSync(path.resolve('js/ui/hudCanvas.js'), 'utf8');
+  const gameSrc = fs.readFileSync(path.resolve('js/game.js'), 'utf8');
+
+  // Verify removed elements in index.html
+  assert.ok(!indexHtml.includes('id="hudPortrait"'), 'hudPortrait canvas removed from index.html');
+  assert.ok(!indexHtml.includes('id="hudWeapon"'), 'hudWeapon removed from index.html');
+  assert.ok(!indexHtml.includes('id="weaponEvolutionStatus"'), 'weaponEvolutionStatus removed from index.html');
+
+  // Verify pause screen contains RACHA stat
+  assert.match(indexHtml, /id="pauseCombo"/, 'pauseCombo element is in pause summary');
+
+  // Verify hud.js does not update removed elements
+  assert.ok(!hudSrc.includes("'hudWeapon'"), 'hud.js does not track hudWeapon');
+  assert.ok(!hudSrc.includes("'weaponEvolutionStatus'"), 'hud.js does not track weaponEvolutionStatus');
+  assert.ok(!hudSrc.includes('#hudPortrait'), 'hud.js does not query hudPortrait');
+
+  // Verify hudCanvas.js removed drawCombo from render loop
+  assert.ok(!hudCanvasSrc.includes('this.drawCombo(ctx, combo'), 'drawCombo is not called in combat render loop');
+
+  // Verify game.js populates pauseCombo
+  assert.match(gameSrc, /pauseCombo:\s*combo\s*>\s*0/, 'game.js populates pauseCombo with streak/multiplier');
+});

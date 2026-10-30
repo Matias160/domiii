@@ -9,7 +9,7 @@ export class Hud {
     this.written = new Map();
     const stats = document.querySelector('#hudStats');
     stats.innerHTML = '<span>TIEMPO<b id="timeValue">00:00</b></span><span>KOs<b id="killsValue">0</b></span><span>PUNTOS<b id="scoreValue">000000</b></span>';
-    this.nodes = Object.fromEntries(['hpValue','levelValue','hudName','hudWeapon','weaponEvolutionStatus','scoreValue','timeValue','killsValue','dashLabel','dashFill'].map(id=>[id,document.getElementById(id)]));
+    this.nodes = Object.fromEntries(['hpValue','levelValue','hudName','scoreValue','timeValue','killsValue','dashLabel','dashFill'].map(id=>[id,document.getElementById(id)]));
     this.root.addEventListener('animationend',()=>this.root.classList.remove('hud--hit'));
   }
   show(isPaused = false) {
@@ -17,7 +17,7 @@ export class Hud {
     this.dashControl.hidden = isPaused;
   }
   hide() { this.root.hidden = true; this.dashControl.hidden = true; }
-  set(id, text) { if (this.nodes[id].textContent !== text) this.nodes[id].textContent = text; }
+  set(id, text) { if (this.nodes[id] && this.nodes[id].textContent !== text) this.nodes[id].textContent = text; }
   // Escribe estilos/atributos solo si cambiaron: evita que el navegador recalcule el HUD en cada cuadro
   style(element, prop, value) { const key = element.id + '|' + prop; if (this.written.get(key) === value) return; this.written.set(key, value); element.style.setProperty(prop, value); }
   data(element, name, value) { if (element.dataset[name] !== value) element.dataset[name] = value; }
@@ -39,13 +39,7 @@ export class Hud {
     this.style(this.hpFill,'width',`${Math.max(0,p.hp/p.maxHp*100).toFixed(1)}%`);
     this.style(this.xpFill,'width',`${(p.xp/p.xpToNext*100).toFixed(1)}%`);
     this.set('hpValue',`${Math.ceil(p.hp)} / ${p.maxHp}`); this.set('levelValue',`NV ${p.level}`);
-    this.set('hudName',p.skin.name); this.set('hudWeapon',p.weaponEvolution?.name||p.weapon.name);
-    this.set('weaponEvolutionStatus',p.weaponEvolution?'EVOLUCION ACTIVA':`EVOLUCION ${Math.min(p.level,15)} / 15`);
-    this.data(this.nodes.weaponEvolutionStatus,'ready',String(Boolean(p.weaponEvolution)));
-    const nextAbilities = [5, 10, 15].filter(lvl => lvl > p.level);
-    const nextAbilityLvl = nextAbilities.length > 0 ? nextAbilities[0] : null;
-    const abilityProgress = nextAbilityLvl ? `ACTIVA EN NV ${nextAbilityLvl}` : 'ACTIVAS MAX';
-    this.set('weaponEvolutionStatus', p.weaponEvolution ? `${p.weaponEvolution.name.toUpperCase()} · ${abilityProgress}` : `${abilityProgress} (NV ${p.level})`);
+    this.set('hudName',p.skin.name);
     this.set('scoreValue',String(Math.floor(state.score)).padStart(6,'0'));
     this.set('timeValue',formatTime(state.time)); this.set('killsValue',String(state.kills));
     // Combo, jefe, evento y mejoras activas ahora son imágenes en el canvas de carteles (hudCanvas.js)
@@ -68,9 +62,7 @@ export class Hud {
     if (this.nodes.dashFill) {
       this.style(this.nodes.dashFill,'width', `${Math.round(Math.max(0, Math.min(1, 1-p.dashCooldown/maxDashCd))*100)}%`);
     }
-    if(this.skin!==p.skin.id){
-      this.skin=p.skin.id;const c=document.querySelector('#hudPortrait').getContext('2d');c.clearRect(0,0,64,64);drawFood(c,p.skin.id,32,30,.85);
-    }
+    this.skin=p.skin.id;
   }
 }
 export function formatTime(seconds) { return `${String(Math.floor(seconds/60)).padStart(2,'0')}:${String(Math.floor(seconds%60)).padStart(2,'0')}`; }

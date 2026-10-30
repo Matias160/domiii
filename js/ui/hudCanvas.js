@@ -106,11 +106,11 @@ export class HudCanvas {
     const totalHp = activeBosses.reduce((s, b) => s + b.hp, 0);
     const totalMaxHp = activeBosses.reduce((s, b) => s + b.maxHp, 0) || 1;
     const bossFill = boss ? Math.round(Math.max(0, totalHp / totalMaxHp) * 200) : -1;
-    const signature = [this.w, this.h, layout.hudBottom, layout.minimapBottom, combo, (state.combo ? 1 : 0),
+    const signature = [this.w, this.h, layout.hudBottom, layout.minimapBottom,
       bossFill, activeBosses.length, boss?.type.name, boss?.enraged, boss?.bossRank, eventInfo?.text, buffs,
-      this.toast?.text, this.comboPop > 0, this.toast && (this.toast.t < 0.22 || this.toast.t > this.toast.life - 0.3)].join('|');
+      this.toast?.text, this.toast && (this.toast.t < 0.22 || this.toast.t > this.toast.life - 0.3)].join('|');
     // Sin cambios ni animaciones en curso: el canvas queda como está
-    if (signature === this.signature && !this.comboPop && !(this.toast && (this.toast.t < 0.22 || this.toast.t > this.toast.life - 0.3))) return;
+    if (signature === this.signature && !(this.toast && (this.toast.t < 0.22 || this.toast.t > this.toast.life - 0.3))) return;
     this.signature = signature;
 
     const ctx = this.ctx;
@@ -120,8 +120,8 @@ export class HudCanvas {
     ctx.imageSmoothingEnabled = false;
 
     const left = narrow ? 8 : 24;
-    this.drawCombo(ctx, combo, left, layout.minimapBottom + 12, narrow);
-    if (eventInfo) this.drawEvent(ctx, eventInfo, left, layout.minimapBottom + (narrow ? 70 : 96));
+    // El contador de racha se eliminó del HUD en combate por diseño; se mantiene en la pantalla de pausa
+    if (eventInfo) this.drawEvent(ctx, eventInfo, left, layout.minimapBottom + 12);
     if (boss) this.drawBossMeter(ctx, boss, narrow, layout.hudBottom, activeBosses);
     if (buffs) this.drawBuffs(ctx, buffs, narrow ? layout.hudBottom + 6 : 91);
     if (this.toast) this.drawToast(ctx, this.toast, narrow);

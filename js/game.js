@@ -406,12 +406,16 @@ export class Game {
     const state = this.state;
     const p = state.player;
     document.querySelector('#pauseScreen').dataset.danger = String(p.hp / p.maxHp < .25);
+    const combo = state.combo || 0;
+    const peakCombo = state.peakCombo || combo;
+    const multiplier = Math.min(3, 1 + Math.floor(combo / 5) * 0.25);
     const values = {
       pauseHp: Math.ceil(p.hp) + ' / ' + p.maxHp,
       pauseLevel: String(p.level),
       pauseTime: formatTime(state.time),
       pauseKills: String(state.kills),
       pauseScore: Math.floor(state.score).toLocaleString('es-AR'),
+      pauseCombo: combo > 0 ? `${combo} (x${multiplier.toFixed(2)})` : `${peakCombo} MÁX`,
       pauseLoadout: p.skin.name + ' / ' + (p.weaponEvolution?.name || p.weapon.name),
     };
     for (const [id, value] of Object.entries(values)) {

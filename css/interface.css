@@ -387,7 +387,7 @@
 }
 #pauseScreen .pause-summary {
   display: grid !important;
-  grid-template-columns: repeat(5,minmax(0,1fr)) !important;
+  grid-template-columns: repeat(6,minmax(0,1fr)) !important;
   gap: 7px !important;
   background: transparent !important;
   border: 0 !important;
@@ -1174,7 +1174,7 @@
 @media (max-height: 560px) {
   #pauseScreen .pause-objective { display: none !important; }
   #pauseScreen .pause-emblem { width: 30px !important; height: 30px !important; }
-  #pauseScreen .pause-summary { grid-template-columns: repeat(5, minmax(0, 1fr)) !important; }
+  #pauseScreen .pause-summary { grid-template-columns: repeat(6, minmax(0, 1fr)) !important; }
   #pauseScreen .pause-stat span { font-size: 7px !important; }
 }
 
