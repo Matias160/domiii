@@ -48,6 +48,58 @@ button, a, select, input[type="checkbox"], input[type="range"], .clickable, [rol
   cursor: var(--pixel-cursor-crosshair) !important;
 }
 
+/* Gran Recompensa Suprema del Señor Domi */
+.domi-grand-trophy-card {
+  margin: 14px 0 18px;
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.16) 0%, rgba(30, 18, 10, 0.85) 100%);
+  border: 2px solid #f59e0b;
+  box-shadow: 0 0 24px rgba(245, 158, 11, 0.35), inset 0 0 16px rgba(254, 240, 138, 0.12);
+  padding: 14px 18px;
+  border-radius: 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.domi-grand-trophy-badge {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 9px;
+  color: #fef08a;
+  letter-spacing: 0.5px;
+  text-shadow: 0 0 8px rgba(254, 240, 138, 0.6);
+}
+.domi-grand-trophy-content {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.domi-grand-trophy-canvas {
+  width: 56px;
+  height: 56px;
+  image-rendering: pixelated;
+  filter: drop-shadow(0 0 10px rgba(245, 158, 11, 0.65));
+  flex-shrink: 0;
+}
+.domi-grand-trophy-info {
+  flex: 1;
+}
+.domi-grand-trophy-title {
+  margin: 0 0 4px;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 11px;
+  color: #ffd700;
+}
+.domi-grand-trophy-desc {
+  margin: 0;
+  font-size: 11px;
+  color: #e2e8f0;
+  line-height: 1.4;
+}
+.domi-grand-equip-btn {
+  flex-shrink: 0;
+  padding: 10px 16px !important;
+  font-size: 10px !important;
+}
+
 * {
   image-rendering: pixelated;
   letter-spacing: 0;

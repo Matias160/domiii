@@ -47,3 +47,44 @@ test('awardRun persists combo, time and bossesKilled so all 14 Don Domi missions
   const slots=DomiScreen.prototype.getCollectionSlots(profile);
   assert.ok(slots.every(s=>s.stats && s.stats.spd !== undefined),'every almanac slot must define stats.spd');
 });
+
+test('completing all 14 Founder missions unlocks Señor Domi skin', async () => {
+  globalThis.localStorage = storage(); globalThis.sessionStorage = storage();
+  await register('FounderChampion', 'pass123');
+  for (let i = 0; i < 5; i++) {
+    awardRun({ id: 'f' + i, score: 2500, kills: 105, level: 12, time: 250, timeText: '04:10', peakCombo: 40, bossesKilled: 1, map: 'diner', outcome: 'victory' });
+  }
+  const prevDoc = globalThis.document;
+  const mockCtx = new Proxy({}, {
+    get: (_, prop) => {
+      if (prop === 'createRadialGradient' || prop === 'createLinearGradient') {
+        return () => ({ addColorStop() {} });
+      }
+      return typeof prop === 'string' ? () => {} : undefined;
+    },
+    set: () => true
+  });
+  const createMockNode = () => ({
+    className: '',
+    style: {},
+    append() {},
+    classList: { add() {} },
+    addEventListener() {},
+    querySelector: () => createMockNode(),
+    getContext: () => mockCtx
+  });
+  globalThis.document = {
+    querySelector: () => createMockNode(),
+    createElement: () => createMockNode()
+  };
+  try {
+    const domiScreen = new DomiScreen({ audio: { play() {} }, showScreen() {} });
+    const dummyEl = { append() {}, classList: { add() {} } };
+    domiScreen.renderMissions(dummyEl, currentAccount());
+
+    assert.ok(currentAccount().purchases.includes('skin:domi'), 'skin:domi should be granted upon completing all 14 missions');
+  } finally {
+    if (prevDoc === undefined) delete globalThis.document;
+    else globalThis.document = prevDoc;
+  }
+});

@@ -80,3 +80,17 @@ test('PrizeMachine: one pull gives one prize and reveals it after the animation'
   machine.pull();
   assert.equal(currentAccount().bank, 350, 'A pull behind the reward card must be ignored');
 });
+
+test('PrizeMachine never awards Señor Domi (skin:domi is strictly reserved for completing all missions)', () => {
+  resetStorage();
+  const profile = guestLogin();
+  profile.bank = 10000;
+  profile.purchases = [];
+
+  const machine = new PrizeMachine({ audio: { play() {} }, showScreen() {} });
+  // Verify 50 random prize picks never choose domi
+  for (let i = 0; i < 50; i++) {
+    const prize = machine.pickPrize(profile);
+    assert.notEqual(prize.item?.id, 'domi', 'Señor Domi must never be rolled in the prize machine');
+  }
+});

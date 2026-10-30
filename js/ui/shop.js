@@ -97,7 +97,7 @@ export class Shop{
       const isMysteryLava=item.type==='map'&&item.id==='lava'&&!owned;
       const displayName=isMysteryLava?'???':item.name;
       const displayDesc=isMysteryLava?'??? · ???':item.description;
-      const statusText=equipped?'Equipado':owned?'Listo para equipar':isMysteryLava?'???':item.cartographyExclusive?'Misión de Mapa':item.domiExclusive?'Misión Don Domi':`${item.cost.toLocaleString('es-AR')} PT`;
+      const statusText=equipped?'Equipado':owned?'Listo para equipar':isMysteryLava?'???':item.cartographyExclusive?'Misión de Mapa':item.domiExclusive?'Misión Don Domi':(item.type==='skin'&&item.id!=='pancho'?'PanchOMática':`${item.cost.toLocaleString('es-AR')} PT`);
       const button=node('button','catalog-item');button.type='button';button.dataset.item=item.id;button.dataset.type=item.type;button.dataset.owned=String(Boolean(owned));
       if(item.cartographyExclusive){
         button.dataset.cartography='true';
@@ -111,7 +111,7 @@ export class Shop{
       if(equipped) art.append(node('span','catalog-badge','✓ EN USO'));
       if(!owned){const lock=node('span','catalog-lock');lock.innerHTML=icon('LockKeyhole');lock.setAttribute('aria-hidden','true');art.append(lock);}
       const copy=node('div','catalog-copy');copy.append(node('strong','catalog-name',displayName),node('span','catalog-description',displayDesc));
-      const footer=node('span','catalog-status');footer.innerHTML=icon(equipped?'CircleCheck':owned?'Check':item.cartographyExclusive?'Map':item.domiExclusive?'Scroll':'Coins');footer.append(node('span','',statusText),node('span','catalog-arrow','↗'));
+      const footer=node('span','catalog-status');footer.innerHTML=icon(equipped?'CircleCheck':owned?'Check':item.cartographyExclusive?'Map':item.domiExclusive?'Scroll':(item.type==='skin'&&item.id!=='pancho'?'Gift':'Coins'));footer.append(node('span','',statusText),node('span','catalog-arrow','↗'));
       copy.append(footer);button.append(art,copy);
       button.onclick=()=>{
         this.selected=item;root.querySelectorAll('.catalog-item').forEach(card=>card.setAttribute('aria-pressed',String(card===button)));this.renderDetail();this.game.audio.play('navigate');
@@ -176,7 +176,7 @@ export class Shop{
     }
     if(!owned&&item.domiExclusive){
       const action=node('div','detail-action');
-      action.append(node('p','purchase-explainer',isMysteryLava?'??? · Completá todas las misiones del Señor Domi para revelar este secreto.':'Reliquia exclusiva del Señor Domi. Completá sus misiones para desbloquearla.'));
+      action.append(node('p','purchase-explainer',item.id==='domi'?'Skin animada legendaria del Señor Domi. Se desbloquea al completar todas las 14 misiones del Fundador.':isMysteryLava?'??? · Completá todas las misiones del Señor Domi para revelar este secreto.':'Reliquia exclusiva del Señor Domi. Completá sus misiones para desbloquearla.'));
       const domiBtn=node('button','pixel-button purchase-button arcade-action');domiBtn.type='button';
       domiBtn.innerHTML=icon('Scroll');
       const copy=node('span','purchase-copy');
@@ -189,6 +189,25 @@ export class Shop{
       };
       action.append(domiBtn);
       root.append(top,stage,body,action);drawItemPreview(canvas,item,profile);return;
+    }
+    if(!owned&&item.type==='skin'&&item.id!=='pancho'){
+      const action=node('div','detail-action');
+      action.append(node('p','purchase-explainer','Los personajes se obtienen exclusivamente como premios en la PanchOMática. ¡Hacé tu tirada para desbloquearlo!'));
+      const prizeBtn=node('button','pixel-button purchase-button arcade-action');
+      prizeBtn.type='button';
+      prizeBtn.innerHTML=icon('Gift');
+      const copy=node('span','purchase-copy');
+      copy.append(node('span','purchase-label','IR A LA PANCHOMÁTICA'),node('small','purchase-price','JUGAR POR PREMIOS'));
+      prizeBtn.append(copy);
+      prizeBtn.onclick=()=>{
+        this.game.audio?.play?.('navigate');
+        this.game.showScreen?.('lobbyScreen');
+        this.game.prizeMachine?.show?.();
+      };
+      action.append(prizeBtn);
+      root.append(top,stage,body,action);
+      drawItemPreview(canvas,item,profile);
+      return;
     }
     if(this.ownedOnly&&!owned){
       const locked=node('div','detail-action');locked.append(node('p','purchase-explainer','Todavía no lo tenés. Disponible para comprar en la tienda.'));

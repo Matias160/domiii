@@ -384,11 +384,12 @@ export class DomiScreen {
     return [
       // --- PERSONAJES JUGABLES ---
       { id: 'pancho', type: 'skin', name: 'Pancho Clásico', category: 'PERSONAJE', stats: { hp: '100', spd: '220', dmg: '100%', perk: 'Disparo Balanceado' }, desc: 'El héroe del mostrador. Equilibrado, preciso y fiel a la parrilla.', lockText: 'INICIAL', isUnlocked: true },
-      { id: 'nugget', type: 'skin', name: 'Nugget Veloz', category: 'PERSONAJE', stats: { hp: '78', spd: '270', dmg: '92%', perk: '+23% Velocidad' }, desc: 'Crujiente y escurridizo entre comandas apresuradas.', lockText: '450 PT', isUnlocked: isOwned(profile, 'skin', 'nugget') },
-      { id: 'papas', type: 'skin', name: 'Papas Fritas', category: 'PERSONAJE', stats: { hp: '86', spd: '235', dmg: '82%', perk: '+1 Proyectil Extra' }, desc: 'Dispara salvas dobles continuas de bastones dorados.', lockText: '650 PT', isUnlocked: isOwned(profile, 'skin', 'papas') },
-      { id: 'pizza', type: 'skin', name: 'Pizza Suprema', category: 'PERSONAJE', stats: { hp: '140', spd: '185', dmg: '112%', perk: '+40% Resistencia' }, desc: 'Masa gruesa horneada a la piedra. Absorbe castigo implacable.', lockText: '850 PT', isUnlocked: isOwned(profile, 'skin', 'pizza') },
-      { id: 'empanada', type: 'skin', name: 'Empanada Criolla', category: 'PERSONAJE', stats: { hp: '110', spd: '210', dmg: '105%', perk: 'Repulgue Defensivo' }, desc: 'Borde blindado de hojaldre y giros letales.', lockText: '950 PT', isUnlocked: isOwned(profile, 'skin', 'empanada') },
-      { id: 'choripan', type: 'skin', name: 'Choripán Bravo', category: 'PERSONAJE', stats: { hp: '120', spd: '200', dmg: '140%', perk: '+40% Daño a Jefes' }, desc: 'Asado al carbón con chimichurri casero. Destroza defensas enemigas.', lockText: '1600 PT', isUnlocked: isOwned(profile, 'skin', 'choripan') },
+      { id: 'nugget', type: 'skin', name: 'Nugget Veloz', category: 'PERSONAJE', stats: { hp: '78', spd: '270', dmg: '92%', perk: '+23% Velocidad' }, desc: 'Crujiente y escurridizo entre comandas apresuradas.', lockText: 'Premio PanchOMática', isUnlocked: isOwned(profile, 'skin', 'nugget') },
+      { id: 'papas', type: 'skin', name: 'Papas Fritas', category: 'PERSONAJE', stats: { hp: '86', spd: '235', dmg: '82%', perk: '+1 Proyectil Extra' }, desc: 'Dispara salvas dobles continuas de bastones dorados.', lockText: 'Premio PanchOMática', isUnlocked: isOwned(profile, 'skin', 'papas') },
+      { id: 'pizza', type: 'skin', name: 'Pizza Suprema', category: 'PERSONAJE', stats: { hp: '140', spd: '185', dmg: '112%', perk: '+40% Resistencia' }, desc: 'Masa gruesa horneada a la piedra. Absorbe castigo implacable.', lockText: 'Premio PanchOMática', isUnlocked: isOwned(profile, 'skin', 'pizza') },
+      { id: 'empanada', type: 'skin', name: 'Empanada Criolla', category: 'PERSONAJE', stats: { hp: '110', spd: '210', dmg: '105%', perk: 'Repulgue Defensivo' }, desc: 'Borde blindado de hojaldre y giros letales.', lockText: 'Premio PanchOMática', isUnlocked: isOwned(profile, 'skin', 'empanada') },
+      { id: 'choripan', type: 'skin', name: 'Choripán Bravo', category: 'PERSONAJE', stats: { hp: '120', spd: '200', dmg: '140%', perk: '+40% Daño a Jefes' }, desc: 'Asado al carbón con chimichurri casero. Destroza defensas enemigas.', lockText: 'Premio PanchOMática', isUnlocked: isOwned(profile, 'skin', 'choripan') },
+      { id: 'domi', type: 'skin', name: 'Señor Domi', category: 'PERSONAJE', stats: { hp: '125', spd: '270', dmg: '122%', perk: 'Sabiduría Gastronómica' }, desc: 'El maestro fundador animado. Desbloqueable al completar todas las 14 misiones.', lockText: 'Todas las Misiones', isUnlocked: isOwned(profile, 'skin', 'domi') },
 
       // --- CLIENTES Y ENEMIGOS REGULARES ---
       { id: 'burger', type: 'enemy', name: 'Hamburguesa Común', category: 'ENEMIGO', stats: { hp: '28', spd: '92', dmg: '11', perk: 'Avance en Horda' }, desc: 'Cliente hambriento estándar. Solitario es inofensivo; en masa abruma.', lockText: 'Visto en Turno 1', isUnlocked: true },
@@ -513,6 +514,13 @@ export class DomiScreen {
 
     const missions = this.getMissions(profile);
     const claimedCount = missions.filter(m => m.isClaimed).length;
+    const allDone = missions.every(m => m.isDone || m.isClaimed);
+    const domiOwned = isOwned(profile, 'skin', 'domi');
+
+    if (allDone && !domiOwned) {
+      try { grantItem('skin', 'domi'); } catch {}
+    }
+
     const pct = Math.round((claimedCount / missions.length) * 100);
 
     const header = document.createElement('div');
@@ -527,6 +535,38 @@ export class DomiScreen {
       </div>
     `;
     container.append(header);
+
+    if (allDone || domiOwned) {
+      const trophyCard = document.createElement('div');
+      trophyCard.className = 'domi-grand-trophy-card';
+      trophyCard.innerHTML = `
+        <div class="domi-grand-trophy-badge">👑 RECOMPENSA SUPREMA DEL FUNDADOR</div>
+        <div class="domi-grand-trophy-content">
+          <canvas width="56" height="56" class="domi-grand-trophy-canvas"></canvas>
+          <div class="domi-grand-trophy-info">
+            <h4 class="domi-grand-trophy-title">¡EL SEÑOR DOMI SE UNE AL EQUIPO!</h4>
+            <p class="domi-grand-trophy-desc">¡Completaste todas las 14 misiones del Fundador! Su skin animada legendaria está desbloqueada y lista para equipar.</p>
+          </div>
+          <button type="button" class="pixel-button pixel-button--claim domi-grand-equip-btn">
+            ${profile.loadout?.skin === 'domi' ? '✓ EN USO' : 'EQUIPAR'}
+          </button>
+        </div>
+      `;
+      const tc = trophyCard.querySelector('.domi-grand-trophy-canvas');
+      if (tc) {
+        drawFood(tc.getContext('2d'), 'domi', 28, 28, 1.2, 0);
+      }
+      const eqBtn = trophyCard.querySelector('.domi-grand-equip-btn');
+      if (eqBtn) {
+        eqBtn.onclick = () => {
+          equip('skin', 'domi');
+          this.game.audio?.play('purchase');
+          this.game.showToast?.('¡SEÑOR DOMI EQUIPADO!');
+          this.render();
+        };
+      }
+      container.append(trophyCard);
+    }
 
     const list = document.createElement('div');
     list.className = 'domi-missions-list';
@@ -975,8 +1015,20 @@ export class DomiScreen {
           this.render();
         };
       } else if (current.type === 'skin') {
-        actionBtn.textContent = 'VER EN ARMARIO';
-        actionBtn.onclick = () => this.game.shop.show('skin', true);
+        const ownedSkin = isOwned(profile, 'skin', current.id);
+        if (ownedSkin) {
+          actionBtn.textContent = 'VER EN ARMARIO';
+          actionBtn.onclick = () => this.game.shop.show('skin', true);
+        } else if (current.id === 'domi') {
+          actionBtn.textContent = 'VER MISIONES DEL FUNDADOR';
+          actionBtn.onclick = () => this.show('missions');
+        } else {
+          actionBtn.textContent = 'JUGAR EN PANCHOMÁTICA';
+          actionBtn.onclick = () => {
+            this.game.showScreen?.('lobbyScreen');
+            this.game.prizeMachine?.show?.();
+          };
+        }
       } else if (current.type === 'pet') {
         actionBtn.textContent = 'VER MASCOTAS';
         actionBtn.onclick = () => this.game.shop.show('pet', true);

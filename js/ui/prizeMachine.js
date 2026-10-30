@@ -227,8 +227,8 @@ export class PrizeMachine {
   }
 
   pickPrize(account) {
-    // Collect unowned items from shop
-    const unownedSkins = shopItems.filter(it => it.type === 'skin' && !isOwned(account, 'skin', it.id));
+    // Collect unowned items from shop (Señor Domi is strictly unlocked via completing all missions, not in prize machine)
+    const unownedSkins = shopItems.filter(it => it.type === 'skin' && it.id !== 'domi' && !isOwned(account, 'skin', it.id));
     const unownedAccs = shopItems.filter(it => it.type === 'accessory' && !isOwned(account, 'accessory', it.id));
     const unownedPets = shopItems.filter(it => it.type === 'pet' && !isOwned(account, 'pet', it.id));
 
@@ -265,9 +265,9 @@ export class PrizeMachine {
     const selected = pool[Math.floor(Math.random() * pool.length)];
 
     let rarity = 'common';
-    if (selected.domiExclusive || selected.id.startsWith('leg_') || selected.cost >= 1200) {
+    if (selected.domiExclusive || selected.id.startsWith('leg_') || selected.cost >= 1200 || selected.id === 'choripan') {
       rarity = 'legendary';
-    } else if (selected.cartographyExclusive || selected.type === 'pet' || selected.cost >= 600) {
+    } else if (selected.cartographyExclusive || selected.type === 'pet' || selected.type === 'skin' || selected.cost >= 600) {
       rarity = 'rare';
     }
 
