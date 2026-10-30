@@ -765,8 +765,8 @@ export class Game {
       this.endRun();
     } else if (state.victory || (state.modeId === 'rush' && state.bossesKilled >= RUSH_BOSS_GOAL)) {
       this.endRun('victory');
-    } else if (!this.choice && cardIsDue(state)) {
-      // El reparto de cartas (cardPacing.js) espacia las elecciones: ni seguidas ni con sequías
+    } else if (!this.choice && (state.pendingLevels > 0 || cardIsDue(state))) {
+      // Muestra la selección de mejora de inmediato al subir de nivel (cada 2 niveles)
       this.showAbilityChoices();
     }
     this.renderPrimeBar();
@@ -776,23 +776,24 @@ export class Game {
     this.renderLiveBuild();
   }
 
-  // isCard=true: la barra de cartas se llenó (solo encola la elección); false: subió de nivel
-  onLevelUp(isCard = true) {
-    if (isCard) {
-      bankCard(this.state);
-      return;
+  // isAbilityLevel=true: nivel con carta de mejora (cada 2 niveles: NV 2, 4, 6...); false: nivel regular
+  onLevelUp(isAbilityLevel = true) {
+    if (isAbilityLevel) {
+      this.state.pendingLevels = Math.min(1, (this.state.pendingLevels || 0) + 1);
     }
     this.state.score = (this.state.score || 0) + 50;
     // Recompensa pasiva normal al subir de nivel
     this.state.player.hp = Math.min(this.state.player.maxHp, this.state.player.hp + 12);
-    this.state.floaters?.push({
-      x: this.state.player.x,
-      y: this.state.player.y - 36,
-      text: `NV ${this.state.player.level} (+12 HP)`,
-      life: 0.9,
-      color: '#c084fc',
-      scale: 1.1
-    });
+    if (!isAbilityLevel) {
+      this.state.floaters?.push({
+        x: this.state.player.x,
+        y: this.state.player.y - 36,
+        text: `NV ${this.state.player.level} (+12 HP)`,
+        life: 0.9,
+        color: '#c084fc',
+        scale: 1.1
+      });
+    }
 
     const evolution=evolveWeapon(this.state.player);
     if(evolution){

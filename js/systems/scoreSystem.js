@@ -296,10 +296,11 @@ export function resolveDeaths(state, onLevelUp) {
 
     const prevLevel = state.player.level;
     const levels = state.player.gainXp(enemy.xp);
-    // onLevelUp(false) = subió de nivel (cura y puntos); onLevelUp(true) = ganó una carta de mejora
-    for (let level = 0; level < levels; level += 1) onLevelUp(false);
-    const cards = gainCardProgress(state.player, enemy.xp);
-    for (let card = 0; card < cards; card += 1) onLevelUp(true);
+    // Mejoras cada 2 niveles: NV 2, 4, 6, 8, 10...
+    for (let level = 0; level < levels; level += 1) {
+      const reachedLevel = prevLevel + level + 1;
+      onLevelUp(reachedLevel % 2 === 0);
+    }
   }
 
   // In-place enemy array compaction (zero GC)

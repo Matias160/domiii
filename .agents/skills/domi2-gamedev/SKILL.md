@@ -48,7 +48,7 @@ El juego corre sobre HTML5 Canvas y JavaScript ES Modules vanilla sin frameworks
 ## 2. Reglas de Balance y Combate
 
 1. **Desbloqueo de Habilidades**:
-   - Las cartas de habilidad (`showAbilityChoices`) se desbloquean estrictamente **cada 5 niveles** (NV 5, 10, 15, 20...).
+   - Las cartas de habilidad (`showAbilityChoices`) se desbloquean estrictamente **cada 2 niveles** (NV 2, 4, 6, 8, 10...).
    - En niveles regulares intermedios, el jugador gana +50 puntos y una curación pasiva de **+12 HP**.
 
 2. **Cámara y Coordenadas del Mundo**:

@@ -22,7 +22,7 @@ El juego es un *retro roguelite survivor* de ritmo frenético:
    - Por defecto: Dispara automáticamente al enemigo más cercano.
    - Manual: Con botón de retícula o clic, apunta hacia el cursor del mouse dentro del espacio de mundo.
 4. **Progresión de Niveles & Habilidades**:
-   - **Regla estricta**: Las cartas de habilidad se eligen cada 5 niveles (NV 5, 10, 15, 20...).
+   - **Regla estricta**: Las cartas de habilidad se eligen cada 2 niveles (NV 2, 4, 6, 8, 10...).
    - En niveles intermedios se otorga +50 puntos de score y +12 HP de curación pasiva.
    - Al nivel 15 el arma principal evoluciona automáticamente si se cumplen las condiciones.
 

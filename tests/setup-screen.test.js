@@ -171,3 +171,14 @@ test('combat mechanics: mini health bar above player, superwave halved, continuo
   // Verify continuous spawning during boss
   assert.ok(!enemySystemSrc.includes('(activeBossCount > 0 && !isPicante) ? false'), 'Spawning is not stopped when boss is alive');
 });
+
+test('upgrade progression: ability choices unlocked strictly every 2 levels (even levels)', () => {
+  const scoreSrc = fs.readFileSync(path.resolve('js/systems/scoreSystem.js'), 'utf8');
+  const gameSrc = fs.readFileSync(path.resolve('js/game.js'), 'utf8');
+
+  // Verify reachedLevel % 2 === 0 in scoreSystem.js
+  assert.ok(scoreSrc.includes('reachedLevel % 2 === 0'), 'scoreSystem grants ability flag on even levels');
+
+  // Verify game.js handles isAbilityLevel without returning early from stats
+  assert.ok(gameSrc.includes('this.state.pendingLevels = Math.min(1,'), 'game.js banks pending levels on ability levels');
+});

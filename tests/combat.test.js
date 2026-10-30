@@ -175,19 +175,16 @@ test('three simulated minutes keep combat state finite with all special abilitie
   for(const entity of [...state.enemies,...state.projectiles,state.player])assert.ok(Number.isFinite(entity.x)&&Number.isFinite(entity.y));
 });
 
-test('ability cards follow their own linear meter, separate from levels',()=>{
-  const state=createRunState();const flags=[];
-  let total=0;
-  for(let i=0;i<12;i++){
-    const target=enemy(state);target.hp=0;target.xp=60+i*15;total+=target.xp;
-    state.enemies=[target];resolveDeaths(state,isCard=>flags.push(isCard));
-  }
-  // Umbrales 140, 185, 230...: contar cuántos entran en la XP total
-  let expected=0,need=CARD_METER.start,left=total;
-  while(left>=need){left-=need;need+=CARD_METER.step;expected++;}
-  assert.equal(flags.filter(Boolean).length,expected);
-  assert.equal(flags.filter(f=>!f).length,state.player.level-1,'every level-up is reported as a plain level');
-  assert.ok(expected>=4);
+test('resolveDeaths grants ability level-up flag strictly every 2 levels even across multi-level jumps',()=>{
+  const state=createRunState();
+  const target=enemy(state);
+  target.hp=0;
+  target.xp=500;
+  state.enemies=[target];
+  const flags=[];
+  resolveDeaths(state,(isAbility)=>flags.push(isAbility));
+  assert.ok(flags.length>=5);
+  assert.deepEqual(flags.slice(0,5),[true,false,true,false,true],'levels 2, 4, 6 grant upgrade cards');
 });
 
 test('kamikaze chili arms near the player, charges along its warning line and explodes',()=>{
