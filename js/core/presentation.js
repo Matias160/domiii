@@ -6,7 +6,7 @@ import {isOwned} from '../data/shop.js';
 
 export { drawAccessory, drawAccessoryIcon, resolveAccessory };
 
-function drawOrangePixelSkull(c, w, h, time = 0) {
+export function drawOrangePixelSkull(c, w, h, time = 0) {
   // Fondo oscuro misterioso sin imagen del mapa
   const bg = c.createRadialGradient(w / 2, h / 2, 6, w / 2, h / 2, Math.max(w, h) * 0.65);
   bg.addColorStop(0, '#260e06');

@@ -1,13 +1,268 @@
 import { skins } from "../data/skins.js";
 import { weapons } from "../data/weapons.js";
-import { drawFood, drawWeapon } from "../core/art.js";
-import { drawItemPreview } from "../core/presentation.js";
+import { drawFood, drawWeapon, drawDiner } from "../core/art.js";
+import { drawItemPreview, drawPet, drawOrangePixelSkull } from "../core/presentation.js";
 import { unlockedAchievements, readAchievementStats, achievements } from "../systems/achievementSystem.js";
-import {currentAccount, clearAccountRuns, isGuest, getCartographyMissions, equip} from '../systems/accountSystem.js';
-import {isOwned} from '../data/shop.js';
-import {refreshIcons} from './icons.js';
-import {REGIONS} from './atlasScreen.js';
-import {drawAccessoryIcon} from '../core/accessories.js';
+import { currentAccount, clearAccountRuns, isGuest, getCartographyMissions, equip } from '../systems/accountSystem.js';
+import { isOwned } from '../data/shop.js';
+import { refreshIcons } from './icons.js';
+import { REGIONS } from './atlasScreen.js';
+import { drawAccessoryIcon } from '../core/accessories.js';
+import { drawWorldProps } from '../core/worldProps.js';
+
+export const MODES_DATA = [
+  { id: 'survival', name: 'SUPERVIVENCIA', short: 'SURVIVAL', tag: 'INF' },
+  { id: 'waves', name: '8 OLEADAS', short: '8 WAVES', tag: '8 RND' },
+  { id: 'rush', name: 'DUELO JEFES', short: 'BOSS RUSH', tag: 'BOSS' }
+];
+
+export const MAPS_DATA = [
+  { id: 'diner', num: '01', name: 'LOCAL' },
+  { id: 'kitchen', num: '02', name: 'COCINA' },
+  { id: 'parking', num: '03', name: 'PARKING' },
+  { id: 'snow', num: '04', name: 'NIEVE' },
+  { id: 'desert', num: '05', name: 'DESIERTO' },
+  { id: 'football', num: '06', name: 'CANCHA' },
+  { id: 'lava', num: '07', name: 'LAVA' },
+  { id: 'beach', num: '08', name: 'PLAYA' }
+];
+
+export const PETS_DATA = [
+  { id: 'none', name: 'NINGUNA' },
+  { id: 'ketchup', name: 'KETCHUP' },
+  { id: 'drone', name: 'DRON' },
+  { id: 'taco', name: 'TACO' },
+  { id: 'soda', name: 'SODA' },
+  { id: 'parrilla', name: 'PARRILLA' }
+];
+
+export const DIFFICULTIES_DATA = [
+  { id: 'suave', name: 'SUAVE', mult: '1.0x' },
+  { id: 'picante', name: 'PICANTE', mult: '1.5x' },
+  { id: 'extra', name: 'EXTRA', mult: '2.0x' },
+  { id: 'quemado', name: 'QUEMADO', mult: '2.5x' }
+];
+
+export function getModePixelSvg(modeId) {
+  if (modeId === 'survival') {
+    return `<svg viewBox="0 0 24 24" class="card-icon-pixel" shape-rendering="crispEdges" aria-hidden="true">
+      <rect x="5" y="2" width="14" height="2" fill="#ffcc00"/>
+      <rect x="6" y="2" width="12" height="1" fill="#fff9c4"/>
+      <rect x="7" y="4" width="10" height="1" fill="#cc8800"/>
+      <rect x="6" y="5" width="12" height="2" fill="#38bdf8" opacity="0.35"/>
+      <rect x="7" y="5" width="10" height="3" fill="#ffdd00"/>
+      <rect x="8" y="8" width="8" height="2" fill="#ffaa00"/>
+      <rect x="10" y="10" width="4" height="2" fill="#ffaa00"/>
+      <rect x="11" y="11" width="2" height="2" fill="#ffffff"/>
+      <rect x="11" y="13" width="2" height="1" fill="#ffdd00"/>
+      <rect x="6" y="15" width="12" height="4" fill="#38bdf8" opacity="0.35"/>
+      <rect x="10" y="14" width="4" height="2" fill="#e69500"/>
+      <rect x="8" y="16" width="8" height="2" fill="#ffaa00"/>
+      <rect x="7" y="17" width="10" height="2" fill="#ffcc00"/>
+      <rect x="7" y="19" width="10" height="1" fill="#cc8800"/>
+      <rect x="5" y="20" width="14" height="2" fill="#ffcc00"/>
+      <rect x="6" y="21" width="12" height="1" fill="#995500"/>
+      <rect x="5" y="4" width="1" height="16" fill="#ffaa00"/>
+      <rect x="18" y="4" width="1" height="16" fill="#ffaa00"/>
+    </svg>`;
+  }
+  if (modeId === 'rush') {
+    return `<svg viewBox="0 0 24 24" class="card-icon-pixel" shape-rendering="crispEdges" aria-hidden="true">
+      <rect x="4" y="2" width="3" height="3" fill="#ef4444"/>
+      <rect x="5" y="1" width="2" height="2" fill="#fca5a5"/>
+      <rect x="17" y="2" width="3" height="3" fill="#ef4444"/>
+      <rect x="17" y="1" width="2" height="2" fill="#fca5a5"/>
+      <rect x="7" y="4" width="10" height="3" fill="#ffd700"/>
+      <rect x="9" y="3" width="6" height="2" fill="#ffffff"/>
+      <rect x="11" y="2" width="2" height="2" fill="#ff0044"/>
+      <rect x="5" y="7" width="14" height="6" fill="#e2e8f0"/>
+      <rect x="7" y="9" width="3" height="3" fill="#180508"/>
+      <rect x="8" y="10" width="1" height="1" fill="#ff0022"/>
+      <rect x="14" y="9" width="3" height="3" fill="#180508"/>
+      <rect x="15" y="10" width="1" height="1" fill="#ff0022"/>
+      <rect x="11" y="12" width="2" height="1" fill="#180508"/>
+      <rect x="7" y="14" width="10" height="3" fill="#cbd5e1"/>
+      <rect x="8" y="15" width="2" height="2" fill="#180508"/>
+      <rect x="11" y="15" width="2" height="2" fill="#180508"/>
+      <rect x="14" y="15" width="2" height="2" fill="#180508"/>
+      <rect x="2" y="18" width="4" height="2" fill="#fbbf24"/>
+      <rect x="18" y="18" width="4" height="2" fill="#fbbf24"/>
+      <rect x="6" y="19" width="12" height="2" fill="#94a3b8"/>
+      <rect x="10" y="21" width="4" height="2" fill="#64748b"/>
+    </svg>`;
+  }
+  // 'waves'
+  return `<svg viewBox="0 0 24 24" class="card-icon-pixel" shape-rendering="crispEdges" aria-hidden="true">
+    <rect x="11" y="1" width="2" height="2" fill="#ffffff"/>
+    <rect x="10" y="2" width="4" height="2" fill="#ffd700"/>
+    <rect x="8" y="3" width="8" height="1" fill="#ffcc00"/>
+    <rect x="4" y="6" width="16" height="2" fill="#00e5ff"/>
+    <rect x="6" y="7" width="12" height="1" fill="#ffffff"/>
+    <rect x="3" y="9" width="18" height="2" fill="#00b4d8"/>
+    <rect x="5" y="12" width="14" height="2" fill="#0077b6"/>
+    <rect x="7" y="15" width="10" height="2" fill="#023e8a"/>
+    <rect x="4" y="19" width="2" height="2" fill="#ffd700"/>
+    <rect x="6" y="19" width="1" height="2" fill="#ffd700"/>
+    <rect x="8" y="19" width="2" height="2" fill="#ffd700"/>
+    <rect x="11" y="19" width="2" height="2" fill="#ffd700"/>
+    <rect x="14" y="19" width="2" height="2" fill="#ffd700"/>
+    <rect x="17" y="19" width="1" height="2" fill="#ffd700"/>
+    <rect x="19" y="19" width="2" height="2" fill="#ffd700"/>
+    <rect x="8" y="22" width="8" height="1" fill="#00ffcc"/>
+  </svg>`;
+}
+
+export function getDifficultySkullSvgByTier(diff) {
+  if (diff === 'quemado') {
+    return `<svg viewBox="0 0 24 24" class="card-icon-pixel" shape-rendering="crispEdges" aria-hidden="true">
+      <rect x="5" y="1" width="2" height="2" fill="#ff0033"/>
+      <rect x="17" y="1" width="2" height="2" fill="#ff0033"/>
+      <rect x="8" y="2" width="8" height="1" fill="#ef4444"/>
+      <rect x="6" y="3" width="12" height="2" fill="#dc2626"/>
+      <rect x="8" y="3" width="2" height="1" fill="#fca5a5"/>
+      <rect x="4" y="5" width="16" height="5" fill="#b91c1c"/>
+      <rect x="6" y="8" width="4" height="4" fill="#180508"/>
+      <rect x="7" y="9" width="2" height="2" fill="#ff0022"/>
+      <rect x="14" y="8" width="4" height="4" fill="#180508"/>
+      <rect x="15" y="9" width="2" height="2" fill="#ff0022"/>
+      <rect x="11" y="12" width="2" height="2" fill="#180508"/>
+      <rect x="5" y="11" width="3" height="3" fill="#7f1d1d"/>
+      <rect x="16" y="11" width="3" height="3" fill="#7f1d1d"/>
+      <rect x="7" y="15" width="10" height="1" fill="#b91c1c"/>
+      <rect x="8" y="16" width="8" height="3" fill="#fca5a5"/>
+      <rect x="9" y="16" width="1" height="3" fill="#180508"/>
+      <rect x="11" y="16" width="2" height="3" fill="#180508"/>
+      <rect x="14" y="16" width="1" height="3" fill="#180508"/>
+      <rect x="8" y="19" width="8" height="1" fill="#450a0a"/>
+    </svg>`;
+  }
+  if (diff === 'extra') {
+    return `<svg viewBox="0 0 24 24" class="card-icon-pixel" shape-rendering="crispEdges" aria-hidden="true">
+      <rect x="8" y="2" width="8" height="1" fill="#fb923c"/>
+      <rect x="6" y="3" width="12" height="2" fill="#f97316"/>
+      <rect x="8" y="3" width="2" height="1" fill="#fed7aa"/>
+      <rect x="4" y="5" width="16" height="5" fill="#ea580c"/>
+      <rect x="6" y="8" width="4" height="4" fill="#2a0c02"/>
+      <rect x="7" y="9" width="2" height="2" fill="#ff7700"/>
+      <rect x="14" y="8" width="4" height="4" fill="#2a0c02"/>
+      <rect x="15" y="9" width="2" height="2" fill="#ff7700"/>
+      <rect x="11" y="12" width="2" height="2" fill="#2a0c02"/>
+      <rect x="5" y="11" width="3" height="3" fill="#9a3412"/>
+      <rect x="16" y="11" width="3" height="3" fill="#9a3412"/>
+      <rect x="7" y="15" width="10" height="1" fill="#ea580c"/>
+      <rect x="8" y="16" width="8" height="3" fill="#fed7aa"/>
+      <rect x="9" y="16" width="1" height="3" fill="#2a0c02"/>
+      <rect x="11" y="16" width="2" height="3" fill="#2a0c02"/>
+      <rect x="14" y="16" width="1" height="3" fill="#2a0c02"/>
+      <rect x="8" y="19" width="8" height="1" fill="#431407"/>
+    </svg>`;
+  }
+  if (diff === 'suave') {
+    return `<svg viewBox="0 0 24 24" class="card-icon-pixel" shape-rendering="crispEdges" aria-hidden="true">
+      <rect x="8" y="2" width="8" height="1" fill="#4ade80"/>
+      <rect x="6" y="3" width="12" height="2" fill="#22c55e"/>
+      <rect x="8" y="3" width="2" height="1" fill="#ffffff"/>
+      <rect x="4" y="5" width="16" height="5" fill="#16a34a"/>
+      <rect x="6" y="8" width="4" height="4" fill="#052e16"/>
+      <rect x="7" y="9" width="2" height="2" fill="#86efac"/>
+      <rect x="14" y="8" width="4" height="4" fill="#052e16"/>
+      <rect x="15" y="9" width="2" height="2" fill="#86efac"/>
+      <rect x="11" y="12" width="2" height="2" fill="#052e16"/>
+      <rect x="5" y="11" width="3" height="3" fill="#15803d"/>
+      <rect x="16" y="11" width="3" height="3" fill="#15803d"/>
+      <rect x="7" y="15" width="10" height="1" fill="#16a34a"/>
+      <rect x="8" y="16" width="8" height="3" fill="#ffffff"/>
+      <rect x="9" y="16" width="1" height="3" fill="#052e16"/>
+      <rect x="11" y="16" width="2" height="3" fill="#052e16"/>
+      <rect x="14" y="16" width="1" height="3" fill="#052e16"/>
+      <rect x="8" y="19" width="8" height="1" fill="#064e3b"/>
+    </svg>`;
+  }
+  // 'picante'
+  return `<svg viewBox="0 0 24 24" class="card-icon-pixel" shape-rendering="crispEdges" aria-hidden="true">
+    <rect x="8" y="2" width="8" height="1" fill="#facc15"/>
+    <rect x="6" y="3" width="12" height="2" fill="#eab308"/>
+    <rect x="8" y="3" width="2" height="1" fill="#fef9c3"/>
+    <rect x="4" y="5" width="16" height="5" fill="#ca8a04"/>
+    <rect x="6" y="8" width="4" height="4" fill="#2a1802"/>
+    <rect x="7" y="9" width="2" height="2" fill="#fef08a"/>
+    <rect x="14" y="8" width="4" height="4" fill="#2a1802"/>
+    <rect x="15" y="9" width="2" height="2" fill="#fef08a"/>
+    <rect x="11" y="12" width="2" height="2" fill="#2a1802"/>
+    <rect x="5" y="11" width="3" height="3" fill="#a16207"/>
+    <rect x="16" y="11" width="3" height="3" fill="#a16207"/>
+    <rect x="7" y="15" width="10" height="1" fill="#ca8a04"/>
+    <rect x="8" y="16" width="8" height="3" fill="#ffffff"/>
+    <rect x="9" y="16" width="1" height="3" fill="#2a1802"/>
+    <rect x="11" y="16" width="2" height="3" fill="#2a1802"/>
+    <rect x="14" y="16" width="1" height="3" fill="#2a1802"/>
+    <rect x="8" y="19" width="8" height="1" fill="#713f12"/>
+  </svg>`;
+}
+
+function drawMapScenePreview(canvas, mapId, isOwned) {
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  ctx.imageSmoothingEnabled = false;
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  if (mapId === 'lava' && !isOwned) {
+    drawOrangePixelSkull(ctx, canvas.width, canvas.height, 0);
+    return;
+  }
+  try {
+    const buffer = document.createElement('canvas');
+    buffer.width = 960;
+    buffer.height = 540;
+    const bCtx = buffer.getContext('2d');
+    bCtx.imageSmoothingEnabled = false;
+    drawDiner(bCtx, 960, 540, 0, false, mapId);
+    drawWorldProps(bCtx, mapId, 0);
+
+    ctx.drawImage(buffer, 80, 95, 800, 420, 0, 0, canvas.width, canvas.height);
+  } catch (err) {
+    console.warn('Error rendering map scene:', mapId, err);
+  }
+}
+
+function drawPetThumbnail(canvas, petId) {
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  ctx.imageSmoothingEnabled = false;
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  const w = canvas.width;
+  const h = canvas.height;
+
+  const bg = ctx.createRadialGradient(w / 2, h / 2, 4, w / 2, h / 2, w * 0.46);
+  bg.addColorStop(0, 'rgba(0, 229, 255, 0.14)');
+  bg.addColorStop(1, 'transparent');
+  ctx.fillStyle = bg;
+  ctx.fillRect(0, 0, w, h);
+
+  if (petId === 'none') {
+    ctx.save();
+    ctx.translate(w / 2, h / 2 + 1);
+    ctx.fillStyle = '#162228';
+    ctx.beginPath();
+    ctx.ellipse(0, 5, 14, 7, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = '#2b3f49';
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+    ctx.fillStyle = '#64748b';
+    ctx.font = '800 11px monospace';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('—', 0, 2);
+    ctx.restore();
+    return;
+  }
+
+  try {
+    drawPet(ctx, petId, w / 2, h / 2 + 2, 0, 1.25);
+  } catch (err) {
+    console.warn('Error rendering pet thumbnail:', petId, err);
+  }
+}
 
 export class MenuScreen {
   constructor(game) {
@@ -21,19 +276,32 @@ export class MenuScreen {
     this.companionInput = document.querySelector('#companionSelect');
     this.accessoryInput = document.querySelector('#accessorySelect');
 
-    this.cardMode = document.querySelector('#cardMode');
-    this.cardMap = document.querySelector('#cardMap');
-    this.cardCompanion = document.querySelector('#cardCompanion');
-    this.cardDifficulty = document.querySelector('#cardDifficulty');
-    this.cardAccessory = document.querySelector('#cardAccessory');
+    this.rowMode = document.querySelector('#rowMode');
+    this.rowMap = document.querySelector('#rowMap');
+    this.rowCompanion = document.querySelector('#rowCompanion');
+    this.rowDifficulty = document.querySelector('#rowDifficulty');
 
+    this.badgeMode = document.querySelector('#badgeMode');
+    this.badgeMap = document.querySelector('#badgeMap');
+    this.badgeCompanion = document.querySelector('#badgeCompanion');
+    this.badgeDifficulty = document.querySelector('#badgeDifficulty');
+
+    this.catBarMode = document.querySelector('#catBarMode');
+    this.catBarMap = document.querySelector('#catBarMap');
+    this.catBarCompanion = document.querySelector('#catBarCompanion');
+    this.catBarDifficulty = document.querySelector('#catBarDifficulty');
+
+    this.cardAccessory = document.querySelector('#cardAccessory');
+    this.cardAccessoryVal = document.querySelector('#cardAccessoryVal');
+
+    // Legacy proxies
     this.cardModeVal = document.querySelector('#cardModeVal');
     this.cardMapVal = document.querySelector('#cardMapVal');
     this.cardCompanionVal = document.querySelector('#cardCompanionVal');
     this.cardDifficultyVal = document.querySelector('#cardDifficultyVal');
-    this.cardAccessoryVal = document.querySelector('#cardAccessoryVal');
 
-    this.bindCards();
+    this.buildSetupCategories();
+    this.bindInputs();
     this.restoreSetup();
     this.setSetupStep(1);
 
@@ -82,16 +350,190 @@ export class MenuScreen {
     this.renderOptions();
   }
 
-  bindCards() {
-    const bindCycle = (card, input) => {
-      if (!card || !input) return;
-      card.addEventListener('click', () => this.cycleOption(input));
-    };
-    bindCycle(this.cardMode, this.modeInput);
-    bindCycle(this.cardMap, this.mapInput);
-    bindCycle(this.cardCompanion, this.companionInput);
-    bindCycle(this.cardDifficulty, this.difficultyInput);
-    bindCycle(this.cardAccessory, this.accessoryInput);
+  buildSetupCategories() {
+    // 1. MODO (3 opciones)
+    if (this.rowMode) {
+      this.rowMode.innerHTML = '';
+      MODES_DATA.forEach(mode => {
+        const card = document.createElement('button');
+        card.type = 'button';
+        card.className = 'setup-option-card setup-option-card--amber';
+        card.dataset.category = 'mode';
+        card.dataset.value = mode.id;
+        card.setAttribute('role', 'radio');
+        card.setAttribute('aria-label', `Modo ${mode.name}`);
+        card.innerHTML = `
+          <div class="setup-option-card__visual">${getModePixelSvg(mode.id)}</div>
+          <div class="setup-option-card__info"><span class="setup-option-card__name">${mode.name}</span></div>
+          <span class="setup-option-card__check" aria-hidden="true">✓</span>
+        `;
+        card.addEventListener('click', () => this.selectCategoryOption('mode', mode.id));
+        this.rowMode.appendChild(card);
+      });
+    }
+
+    // 2. MAPAS (8 opciones)
+    if (this.rowMap) {
+      this.rowMap.innerHTML = '';
+      MAPS_DATA.forEach(map => {
+        const card = document.createElement('button');
+        card.type = 'button';
+        card.className = 'setup-option-card setup-option-card--mint';
+        card.dataset.category = 'map';
+        card.dataset.value = map.id;
+        card.setAttribute('role', 'radio');
+        card.setAttribute('aria-label', `Mapa ${map.num} ${map.name}`);
+        card.innerHTML = `
+          <div class="setup-option-card__visual">
+            <canvas class="setup-card-map-canvas" width="128" height="84" aria-hidden="true"></canvas>
+          </div>
+          <div class="setup-option-card__info"><span class="setup-option-card__name">${map.num} ${map.name}</span></div>
+          <span class="setup-option-card__check" aria-hidden="true">✓</span>
+        `;
+        card.addEventListener('click', () => this.selectCategoryOption('map', map.id));
+        this.rowMap.appendChild(card);
+      });
+    }
+
+    // 3. MASCOTAS (6 opciones)
+    if (this.rowCompanion) {
+      this.rowCompanion.innerHTML = '';
+      PETS_DATA.forEach(pet => {
+        const card = document.createElement('button');
+        card.type = 'button';
+        card.className = 'setup-option-card setup-option-card--cyan';
+        card.dataset.category = 'companion';
+        card.dataset.value = pet.id;
+        card.setAttribute('role', 'radio');
+        card.setAttribute('aria-label', `Mascota ${pet.name}`);
+        card.innerHTML = `
+          <div class="setup-option-card__visual">
+            <canvas class="setup-card-pet-canvas" width="84" height="60" aria-hidden="true"></canvas>
+          </div>
+          <div class="setup-option-card__info"><span class="setup-option-card__name">${pet.name}</span></div>
+          <span class="setup-option-card__check" aria-hidden="true">✓</span>
+        `;
+        card.addEventListener('click', () => this.selectCategoryOption('companion', pet.id));
+        this.rowCompanion.appendChild(card);
+      });
+    }
+
+    // 4. DIFICULTAD (4 opciones)
+    if (this.rowDifficulty) {
+      this.rowDifficulty.innerHTML = '';
+      DIFFICULTIES_DATA.forEach(diff => {
+        const card = document.createElement('button');
+        card.type = 'button';
+        card.className = `setup-option-card setup-option-card--red setup-option-card--diff-${diff.id}`;
+        card.dataset.category = 'difficulty';
+        card.dataset.value = diff.id;
+        card.setAttribute('role', 'radio');
+        card.setAttribute('aria-label', `Dificultad ${diff.name} (${diff.mult})`);
+        card.innerHTML = `
+          <div class="setup-option-card__visual">${getDifficultySkullSvgByTier(diff.id)}</div>
+          <div class="setup-option-card__info"><span class="setup-option-card__name">${diff.name}</span></div>
+          <span class="setup-option-card__check" aria-hidden="true">✓</span>
+        `;
+        card.addEventListener('click', () => this.selectCategoryOption('difficulty', diff.id));
+        this.rowDifficulty.appendChild(card);
+      });
+    }
+
+    // Scroll navigation arrows
+    document.querySelector('#mapNavPrev')?.addEventListener('click', () => {
+      this.rowMap?.scrollBy({ left: -160, behavior: 'smooth' });
+      this.game.audio?.play?.('navigate');
+    });
+    document.querySelector('#mapNavNext')?.addEventListener('click', () => {
+      this.rowMap?.scrollBy({ left: 160, behavior: 'smooth' });
+      this.game.audio?.play?.('navigate');
+    });
+    document.querySelector('#petNavPrev')?.addEventListener('click', () => {
+      this.rowCompanion?.scrollBy({ left: -160, behavior: 'smooth' });
+      this.game.audio?.play?.('navigate');
+    });
+    document.querySelector('#petNavNext')?.addEventListener('click', () => {
+      this.rowCompanion?.scrollBy({ left: 160, behavior: 'smooth' });
+      this.game.audio?.play?.('navigate');
+    });
+
+    this.renderAllCardCanvases();
+  }
+
+  renderAllCardCanvases() {
+    const profile = currentAccount();
+    if (this.rowMap) {
+      this.rowMap.querySelectorAll('.setup-option-card').forEach(card => {
+        const canvas = card.querySelector('canvas');
+        const mapId = card.dataset.value;
+        if (canvas && mapId) {
+          drawMapScenePreview(canvas, mapId, isOwned(profile, 'map', mapId));
+        }
+      });
+    }
+    if (this.rowCompanion) {
+      this.rowCompanion.querySelectorAll('.setup-option-card').forEach(card => {
+        const canvas = card.querySelector('canvas');
+        const petId = card.dataset.value;
+        if (canvas && petId) {
+          drawPetThumbnail(canvas, petId);
+        }
+      });
+    }
+  }
+
+  selectCategoryOption(category, value) {
+    const profile = currentAccount();
+    const guest = isGuest();
+    const isLava = this.mapInput?.value === 'lava';
+
+    if (category === 'mode') {
+      if (isLava) return;
+      if (this.modeInput) {
+        this.modeInput.value = value;
+        this.modeInput.dispatchEvent(new Event('change', { bubbles: true }));
+      }
+    } else if (category === 'map') {
+      const isUnlocked = isOwned(profile, 'map', value);
+      if (!isUnlocked) {
+        this.game.showToast?.(value === 'lava' ? '💀 ¡El Caldero de Lava requiere desbloqueo especial!' : '¡Mapa no adquirido! Compralo en la tienda o en el Atlas.');
+        this.game.audio?.play?.('error');
+        return;
+      }
+      if (this.mapInput) {
+        this.mapInput.value = value;
+        this.mapInput.dispatchEvent(new Event('change', { bubbles: true }));
+      }
+    } else if (category === 'companion') {
+      if (guest && value !== 'none') {
+        this.game.showToast?.('¡Solo para socios! Creá tu tarjeta en la recepción para desbloquear mascotas.');
+        this.game.audio?.play?.('error');
+        return;
+      }
+      const isUnlocked = (value === 'none') || isOwned(profile, 'pet', value);
+      if (!isUnlocked) {
+        this.game.showToast?.('¡Mascota no adquirida! Podés desbloquearla en la Máquina de Premios o en la Tienda.');
+        this.game.audio?.play?.('error');
+        return;
+      }
+      if (this.companionInput) {
+        this.companionInput.value = value;
+        this.companionInput.dispatchEvent(new Event('change', { bubbles: true }));
+      }
+    } else if (category === 'difficulty') {
+      if (isLava) return;
+      if (this.difficultyInput) {
+        this.difficultyInput.value = value;
+        this.difficultyInput.dispatchEvent(new Event('change', { bubbles: true }));
+      }
+    }
+
+    this.game.audio?.play?.('navigate');
+    this.syncCards();
+  }
+
+  bindInputs() {
+    this.cardAccessory?.addEventListener('click', () => this.cycleOption(this.accessoryInput));
 
     [this.modeInput, this.mapInput, this.companionInput, this.difficultyInput, this.accessoryInput].forEach(input => {
       input?.addEventListener('change', () => this.syncCards());
@@ -154,144 +596,94 @@ export class MenuScreen {
     }
   }
 
-  updateDifficultyCard(diff, isLava) {
-    if (!this.cardDifficulty) return;
-    const box = this.cardDifficulty.querySelector('.setup-card__icon-box');
-    if (!box) return;
-
-    this.cardDifficulty.classList.remove('setup-card--green', 'setup-card--amber', 'setup-card--orange', 'setup-card--red');
-
-    if (isLava || diff === 'quemado') {
-      this.cardDifficulty.classList.add('setup-card--red');
-    } else if (diff === 'extra') {
-      this.cardDifficulty.classList.add('setup-card--orange');
-    } else if (diff === 'suave') {
-      this.cardDifficulty.classList.add('setup-card--green');
-    } else {
-      this.cardDifficulty.classList.add('setup-card--amber');
-    }
-
-    box.innerHTML = this.getDifficultySkullSvg(diff, isLava);
-  }
-
   getDifficultySkullSvg(diff, isLava) {
-    if (isLava || diff === 'quemado') {
-      return `<svg viewBox="0 0 24 24" class="card-icon-pixel" shape-rendering="crispEdges" aria-hidden="true">
-        <rect x="8" y="2" width="8" height="1" fill="#ef4444"/>
-        <rect x="6" y="3" width="12" height="2" fill="#dc2626"/>
-        <rect x="8" y="3" width="2" height="1" fill="#fca5a5"/>
-        <rect x="4" y="5" width="16" height="5" fill="#b91c1c"/>
-        <rect x="6" y="8" width="4" height="4" fill="#180508"/>
-        <rect x="7" y="9" width="2" height="2" fill="#ff0022"/>
-        <rect x="14" y="8" width="4" height="4" fill="#180508"/>
-        <rect x="15" y="9" width="2" height="2" fill="#ff0022"/>
-        <rect x="11" y="12" width="2" height="2" fill="#180508"/>
-        <rect x="5" y="11" width="3" height="3" fill="#7f1d1d"/>
-        <rect x="16" y="11" width="3" height="3" fill="#7f1d1d"/>
-        <rect x="7" y="15" width="10" height="1" fill="#b91c1c"/>
-        <rect x="8" y="16" width="8" height="3" fill="#fca5a5"/>
-        <rect x="9" y="16" width="1" height="3" fill="#180508"/>
-        <rect x="11" y="16" width="2" height="3" fill="#180508"/>
-        <rect x="14" y="16" width="1" height="3" fill="#180508"/>
-        <rect x="8" y="19" width="8" height="1" fill="#450a0a"/>
-      </svg>`;
-    }
-    if (diff === 'extra') {
-      return `<svg viewBox="0 0 24 24" class="card-icon-pixel" shape-rendering="crispEdges" aria-hidden="true">
-        <rect x="8" y="2" width="8" height="1" fill="#fb923c"/>
-        <rect x="6" y="3" width="12" height="2" fill="#f97316"/>
-        <rect x="8" y="3" width="2" height="1" fill="#fed7aa"/>
-        <rect x="4" y="5" width="16" height="5" fill="#ea580c"/>
-        <rect x="6" y="8" width="4" height="4" fill="#2a0c02"/>
-        <rect x="7" y="9" width="2" height="2" fill="#ff7700"/>
-        <rect x="14" y="8" width="4" height="4" fill="#2a0c02"/>
-        <rect x="15" y="9" width="2" height="2" fill="#ff7700"/>
-        <rect x="11" y="12" width="2" height="2" fill="#2a0c02"/>
-        <rect x="5" y="11" width="3" height="3" fill="#9a3412"/>
-        <rect x="16" y="11" width="3" height="3" fill="#9a3412"/>
-        <rect x="7" y="15" width="10" height="1" fill="#ea580c"/>
-        <rect x="8" y="16" width="8" height="3" fill="#fed7aa"/>
-        <rect x="9" y="16" width="1" height="3" fill="#2a0c02"/>
-        <rect x="11" y="16" width="2" height="3" fill="#2a0c02"/>
-        <rect x="14" y="16" width="1" height="3" fill="#2a0c02"/>
-        <rect x="8" y="19" width="8" height="1" fill="#431407"/>
-      </svg>`;
-    }
-    if (diff === 'suave') {
-      return `<svg viewBox="0 0 24 24" class="card-icon-pixel" shape-rendering="crispEdges" aria-hidden="true">
-        <rect x="8" y="2" width="8" height="1" fill="#4ade80"/>
-        <rect x="6" y="3" width="12" height="2" fill="#22c55e"/>
-        <rect x="8" y="3" width="2" height="1" fill="#ffffff"/>
-        <rect x="4" y="5" width="16" height="5" fill="#16a34a"/>
-        <rect x="6" y="8" width="4" height="4" fill="#052e16"/>
-        <rect x="7" y="9" width="2" height="2" fill="#86efac"/>
-        <rect x="14" y="8" width="4" height="4" fill="#052e16"/>
-        <rect x="15" y="9" width="2" height="2" fill="#86efac"/>
-        <rect x="11" y="12" width="2" height="2" fill="#052e16"/>
-        <rect x="5" y="11" width="3" height="3" fill="#15803d"/>
-        <rect x="16" y="11" width="3" height="3" fill="#15803d"/>
-        <rect x="7" y="15" width="10" height="1" fill="#16a34a"/>
-        <rect x="8" y="16" width="8" height="3" fill="#ffffff"/>
-        <rect x="9" y="16" width="1" height="3" fill="#052e16"/>
-        <rect x="11" y="16" width="2" height="3" fill="#052e16"/>
-        <rect x="14" y="16" width="1" height="3" fill="#052e16"/>
-        <rect x="8" y="19" width="8" height="1" fill="#064e3b"/>
-      </svg>`;
-    }
-    // 'picante' (normal/amber)
-    return `<svg viewBox="0 0 24 24" class="card-icon-pixel" shape-rendering="crispEdges" aria-hidden="true">
-      <rect x="8" y="2" width="8" height="1" fill="#facc15"/>
-      <rect x="6" y="3" width="12" height="2" fill="#eab308"/>
-      <rect x="8" y="3" width="2" height="1" fill="#fef9c3"/>
-      <rect x="4" y="5" width="16" height="5" fill="#ca8a04"/>
-      <rect x="6" y="8" width="4" height="4" fill="#2a1802"/>
-      <rect x="7" y="9" width="2" height="2" fill="#fef08a"/>
-      <rect x="14" y="8" width="4" height="4" fill="#2a1802"/>
-      <rect x="15" y="9" width="2" height="2" fill="#fef08a"/>
-      <rect x="11" y="12" width="2" height="2" fill="#2a1802"/>
-      <rect x="5" y="11" width="3" height="3" fill="#a16207"/>
-      <rect x="16" y="11" width="3" height="3" fill="#a16207"/>
-      <rect x="7" y="15" width="10" height="1" fill="#ca8a04"/>
-      <rect x="8" y="16" width="8" height="3" fill="#ffffff"/>
-      <rect x="9" y="16" width="1" height="3" fill="#2a1802"/>
-      <rect x="11" y="16" width="2" height="3" fill="#2a1802"/>
-      <rect x="14" y="16" width="1" height="3" fill="#2a1802"/>
-      <rect x="8" y="19" width="8" height="1" fill="#713f12"/>
-    </svg>`;
+    if (isLava) return getDifficultySkullSvgByTier('quemado');
+    return getDifficultySkullSvgByTier(diff);
   }
 
   syncCards() {
     const isLava = this.mapInput?.value === 'lava';
+    const profile = currentAccount();
+    const guest = isGuest();
+
     const getCleanLabel = (sel) => {
       if (!sel || !sel.options || sel.selectedIndex < 0) return '';
       const opt = sel.options[sel.selectedIndex];
-      return opt ? opt.textContent.replace(/ \[TIENDA\]$/, '').replace(/ \[BLOQUEADO\]$/, '') : '';
+      return opt ? opt.textContent.replace(/ \[(TIENDA|SOLO SOCIOS|BLOQUEADO)\]$/, '') : '';
     };
 
-    if (this.cardModeVal) {
-      this.cardModeVal.textContent = isLava ? '???' : getCleanLabel(this.modeInput);
-    }
+    const modeVal = this.modeInput?.value || 'waves';
+    const mapVal = this.mapInput?.value || 'diner';
+    const compVal = this.companionInput?.value || 'none';
+    const diffVal = this.difficultyInput?.value || 'picante';
+
+    // Header Badges
+    if (this.badgeMode) this.badgeMode.textContent = isLava ? 'COLOSAL' : (getCleanLabel(this.modeInput) || modeVal.toUpperCase());
+    if (this.badgeMap) this.badgeMap.textContent = getCleanLabel(this.mapInput) || mapVal.toUpperCase();
+    if (this.badgeCompanion) this.badgeCompanion.textContent = getCleanLabel(this.companionInput) || compVal.toUpperCase();
+    if (this.badgeDifficulty) this.badgeDifficulty.textContent = isLava ? '???' : (getCleanLabel(this.difficultyInput) || diffVal.toUpperCase());
+
+    // Legacy proxies
+    if (this.cardModeVal) this.cardModeVal.textContent = isLava ? '???' : getCleanLabel(this.modeInput);
     if (this.cardMapVal) this.cardMapVal.textContent = getCleanLabel(this.mapInput);
     if (this.cardCompanionVal) this.cardCompanionVal.textContent = getCleanLabel(this.companionInput);
-    if (this.cardDifficultyVal) {
-      this.cardDifficultyVal.textContent = isLava ? '???' : getCleanLabel(this.difficultyInput);
-    }
+    if (this.cardDifficultyVal) this.cardDifficultyVal.textContent = isLava ? '???' : getCleanLabel(this.difficultyInput);
     if (this.cardAccessoryVal) this.cardAccessoryVal.textContent = getCleanLabel(this.accessoryInput);
 
-    if (this.cardMap) this.cardMap.classList.toggle('setup-card--lava', isLava);
-    if (this.cardMode) this.cardMode.classList.toggle('setup-card--locked-lava', isLava);
-    if (this.cardDifficulty) this.cardDifficulty.classList.toggle('setup-card--locked-lava', isLava);
+    // Update active states on cards
+    const updateRowCards = (row, currVal, category) => {
+      if (!row) return;
+      row.querySelectorAll('.setup-option-card').forEach(card => {
+        const val = card.dataset.value;
+        const isSel = (val === currVal);
+        card.classList.toggle('setup-option-card--selected', isSel);
+        card.setAttribute('aria-checked', String(isSel));
 
-    // Miniaturas visuales para mapa, mascota y accesorio
-    this.renderCardThumbnail(this.cardMap, 'map', this.mapInput?.value || 'diner');
-    this.renderCardThumbnail(this.cardCompanion, 'pet', this.companionInput?.value || 'none');
+        let locked = false;
+        if (category === 'map') {
+          locked = !isOwned(profile, 'map', val);
+        } else if (category === 'companion') {
+          locked = (guest && val !== 'none') || (!guest && val !== 'none' && !isOwned(profile, 'pet', val));
+        }
+        card.classList.toggle('setup-option-card--locked', locked);
+
+        if (category === 'map' && val === 'lava') {
+          card.classList.toggle('setup-option-card--lava', isLava && isSel);
+        }
+      });
+    };
+
+    updateRowCards(this.rowMode, isLava ? 'boss_legendary' : modeVal, 'mode');
+    updateRowCards(this.rowMap, mapVal, 'map');
+    updateRowCards(this.rowCompanion, compVal, 'companion');
+    updateRowCards(this.rowDifficulty, isLava ? 'quemado' : diffVal, 'difficulty');
+
+    // Lava state on bars
+    if (this.catBarMap) this.catBarMap.classList.toggle('setup-category--lava', isLava);
+    if (this.catBarMode) this.catBarMode.classList.toggle('setup-category--locked-lava', isLava);
+    if (this.catBarDifficulty) this.catBarDifficulty.classList.toggle('setup-category--locked-lava', isLava);
+
+    // Scroll active card into view in scrollable rows
+    const scrollSelectedIntoView = (row) => {
+      const sel = row?.querySelector('.setup-option-card--selected');
+      if (sel && row) {
+        const rLeft = row.scrollLeft;
+        const rWidth = row.clientWidth;
+        const cLeft = sel.offsetLeft;
+        const cWidth = sel.clientWidth;
+        if (cLeft < rLeft || (cLeft + cWidth) > (rLeft + rWidth)) {
+          row.scrollTo({ left: Math.max(0, cLeft - 10), behavior: 'smooth' });
+        }
+      }
+    };
+    scrollSelectedIntoView(this.rowMap);
+    scrollSelectedIntoView(this.rowCompanion);
+
+    // Thumbnail for accessory
     this.renderCardThumbnail(this.cardAccessory, 'accessory', this.accessoryInput?.value || 'none');
 
-    // Calavera dinámica y colores de tarjeta de dificultad
-    this.updateDifficultyCard(this.difficultyInput?.value || 'picante', isLava);
-
-    // Briefing de Zona del mapa activo (amenaza nativa, misión y accesorio)
-    this.renderMapBriefing(this.mapInput?.value || 'diner');
+    // Briefing de Zona del mapa activo
+    this.renderMapBriefing(mapVal);
 
     refreshIcons();
     this.fitSetup();
@@ -345,7 +737,6 @@ export class MenuScreen {
       drawAccessoryIcon(actx, r.accessoryId, 22, 22, 36);
     }
 
-    // Interacción botón equipar accesorio
     root.querySelector('[data-equip-acc]')?.addEventListener('click', (e) => {
       const accId = e.currentTarget.dataset.equipAcc;
       if (!accId) return;
@@ -379,8 +770,6 @@ export class MenuScreen {
     this.fitSetup();
   }
 
-  // El selector ocupa toda la pantalla sin scroll: se escala entero (zoom) para que entre justo,
-  // achicándose en pantallas bajas y agrandándose en las grandes
   fitSetup() {
     const screen = document.querySelector('#setupScreen');
     const panel = screen?.querySelector('.setup-panel');
@@ -449,6 +838,7 @@ export class MenuScreen {
         }
       }
     }
+    this.renderAllCardCanvases();
     this.renderOptions();
     this.syncCards();
   }
