@@ -19,7 +19,7 @@ export const events = [
   { id: 'sauces', name: 'LLUVIA DE ADEREZOS', duration: 14, color: '#ffcf4a', subtitle: '¡BOTINES Y SALSAS ESPECIALES!' },
   { id: 'happy', name: 'HORA FELIZ', duration: 16, color: '#86e3bf', subtitle: '¡BONIFICACIÓN DE SCORE Y VELOCIDAD!' },
   { id: 'promo', name: 'PROMO 2x1', duration: 18, color: '#ff8580', subtitle: '¡PUNTOS Y MULTIPLICADORES DOBLES!' },
-  { id: 'superwave', name: '¡SUPER OLEADA!', duration: 14, color: '#ff1144', subtitle: '¡ENJAMBRE MASIVO: EL TRIPLE DE ENEMIGOS!' },
+  { id: 'superwave', name: '¡SUPER OLEADA!', duration: 14, color: '#ff1144', subtitle: '¡ENJAMBRE MASIVO: OLEADA INTENSA!' },
   { id: 'delivery_truck', name: '🚚 CAMIÓN DE REPARTO', duration: 25, color: '#f59e0b', subtitle: '¡COFRE ACORAZADO EN LA ARENA! ¡ÁBRELO ANTES QUE EXPIRE!' },
   { id: 'health_inspection', name: '📋 INSPECCIÓN BROMATOLÓGICA', duration: 24, color: '#38bdf8', subtitle: '¡PATRULLA DE INSPECTORES! ¡DERROTALOS PARA PROPINAS GIGANTES!' },
 ];

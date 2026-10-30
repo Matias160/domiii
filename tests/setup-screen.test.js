@@ -155,3 +155,19 @@ test('hud & pause: top-left portrait/weapon/abilities removed and streak moved t
   // Verify game.js populates pauseCombo
   assert.match(gameSrc, /pauseCombo:\s*combo\s*>\s*0/, 'game.js populates pauseCombo with streak/multiplier');
 });
+
+test('combat mechanics: mini health bar above player, superwave halved, continuous spawning during boss', () => {
+  const playerSrc = fs.readFileSync(path.resolve('js/entities/Player.js'), 'utf8');
+  const enemySystemSrc = fs.readFileSync(path.resolve('js/systems/enemySystem.js'), 'utf8');
+
+  // Verify mini health bar drawn in Player.js
+  assert.ok(playerSrc.includes('barW = 34, barH = 4'), 'Mini health bar dimensions defined in Player.js');
+  assert.ok(playerSrc.includes("hpRatio > 0.5 ? '#35d9aa'"), 'Health bar has reactive color');
+
+  // Verify superwave halved
+  assert.ok(enemySystemSrc.includes('Math.min(15,'), 'Superwave initial swarm reduced to 15 (half of 30)');
+  assert.ok(enemySystemSrc.includes('batch = isSuperwave ? 3 :'), 'Superwave batch reduced to 3 (half of 6)');
+
+  // Verify continuous spawning during boss
+  assert.ok(!enemySystemSrc.includes('(activeBossCount > 0 && !isPicante) ? false'), 'Spawning is not stopped when boss is alive');
+});

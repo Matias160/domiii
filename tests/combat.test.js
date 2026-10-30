@@ -227,22 +227,22 @@ test('regular spawning stops at the enemy cap',()=>{
   assert.equal(state.enemies.filter(e=>e.hp>0).length,enemyCap());
 });
 
-test('boss entrance clears the arena without rewards and the boss summons helpers gradually',async()=>{
+test('boss entrance preserves regular enemies and spawning continues during boss fight',async()=>{
   const { startBossEntrance, updateBossEntrance } = await import('../js/ui/bossEntrance.js');
   const state=createRunState({difficultyId:'suave'});state.player.hp=state.player.maxHp=1e6;
   const boss=enemy(state,600,true);boss.spawnTime=1.6;
   state.enemies=[boss,...Array.from({length:12},()=>enemy(state,300))];
   const kills=state.kills,score=state.score;
   const entrance=startBossEntrance(state,boss,state.camera,{w:960,h:540});
-  assert.deepEqual(state.enemies,[boss]);assert.equal(boss.spawnTime,0);
+  assert.equal(state.enemies.length, 13, 'regular enemies are preserved on boss entrance');
+  assert.equal(boss.spawnTime,0);
   assert.equal(state.kills,kills);assert.equal(state.score,score);
   let frames=0;while(!updateBossEntrance(entrance,1/60,null))frames++;
   assert.ok(frames>60,'entrance lasts a moment');
   state.spawnTimer=0;state.nextBossAt=Infinity;
   const helperCounts=[];
   for(let s=0;s<16;s++){for(let i=0;i<60;i++)updateEnemies(state,1/60,bounds);helperCounts.push(state.enemies.filter(e=>!e.isBoss).length);}
-  assert.equal(helperCounts[1],0,'no regular spawns while the boss is alive');
-  assert.ok(helperCounts.at(-1)>0&&helperCounts.at(-1)<=BOSS_SUMMON.maxHelpers[0],'phase 1 helpers arrive little by little, up to the cap');
+  assert.ok(helperCounts.at(-1)>0,'enemies and helpers continue to spawn while the boss is alive');
 });
 
 test('mustard rain drops splash in an area, slow enemies and leave burning puddles',()=>{

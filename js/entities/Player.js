@@ -150,6 +150,23 @@ export class Player {
       ctx.beginPath();ctx.moveTo(-3,0);ctx.lineTo(5,-9);ctx.lineTo(8,-3);ctx.lineTo(23,0);ctx.lineTo(8,3);ctx.lineTo(5,9);ctx.closePath();ctx.fill();
       ctx.fillStyle='#fffbe8';ctx.fillRect(0,-2,12,4);
     }
+    // Mini barra de salud pixel art arriba del protagonista
+    const hpRatio = Math.max(0, Math.min(1, this.hp / (this.maxHp || 1)));
+    const barW = 34, barH = 4;
+    const barX = Math.round(this.x - barW / 2);
+    const barY = Math.round(this.y - 34);
+    ctx.fillStyle = '#060d10';
+    ctx.fillRect(barX - 1, barY - 1, barW + 2, barH + 2);
+    ctx.fillStyle = '#172225';
+    ctx.fillRect(barX, barY, barW, barH);
+    const hpColor = hpRatio > 0.5 ? '#35d9aa' : hpRatio > 0.25 ? '#ffe066' : '#ef414f';
+    ctx.fillStyle = hpColor;
+    const fillW = Math.round(barW * hpRatio);
+    if (fillW > 0) {
+      ctx.fillRect(barX, barY, fillW, barH);
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
+      ctx.fillRect(barX, barY, fillW, 1);
+    }
     ctx.restore();
   }
 }

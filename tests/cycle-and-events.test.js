@@ -88,7 +88,7 @@ test('in picante difficulty, boss entrance does not wipe regular enemies and spa
   assert.equal(state.enemies.length, 2, 'regular enemies are preserved in picante difficulty');
 });
 
-test('superwave event triggers boss-like cinematic intro and triples spawn rate', () => {
+test('superwave event triggers boss-like cinematic intro and triples spawn rate (half intensity)', () => {
   const state = createRunState();
   state.activeEvent = { id: 'superwave', name: '¡SUPER OLEADA!', duration: 14 };
   state.time = 10;
@@ -98,8 +98,8 @@ test('superwave event triggers boss-like cinematic intro and triples spawn rate'
   updateEnemies(state, 0.016, bounds);
   const countAfter = state.enemies.length;
 
-  // During superwave, massive burst + batch of 6 spawns enemies (dense flood)
-  assert.ok(countAfter - countBefore >= 30, 'superwave floods the arena with massive burst and dense batches');
+  // During superwave, reduced by half (initial burst of 15 + batch of 3)
+  assert.ok(countAfter - countBefore >= 15, 'superwave floods the arena with half-intensity burst and batches');
 });
 
 test('beach map initializes, is owned, spawns little crabs and interactive coconuts', () => {
