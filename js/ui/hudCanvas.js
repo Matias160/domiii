@@ -107,7 +107,7 @@ export class HudCanvas {
     const totalMaxHp = activeBosses.reduce((s, b) => s + b.maxHp, 0) || 1;
     const bossFill = boss ? Math.round(Math.max(0, totalHp / totalMaxHp) * 200) : -1;
     const signature = [this.w, this.h, layout.hudBottom, layout.minimapBottom,
-      bossFill, activeBosses.length, boss?.type.name, boss?.enraged, boss?.bossRank, eventInfo?.text, buffs,
+      bossFill, activeBosses.length, boss?.type?.name, boss?.enraged, boss?.bossRank, eventInfo?.text, buffs,
       this.toast?.text, this.toast && (this.toast.t < 0.22 || this.toast.t > this.toast.life - 0.3)].join('|');
     // Sin cambios ni animaciones en curso: el canvas queda como está
     if (signature === this.signature && !(this.toast && (this.toast.t < 0.22 || this.toast.t > this.toast.life - 0.3))) return;

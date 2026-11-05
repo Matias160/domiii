@@ -297,7 +297,7 @@ export class TouchControls {
     this.pauseBtn.addEventListener('pointerdown', (e) => {
       e.preventDefault();
       e.stopPropagation();
-      if (this.game.running) this.game.pause();
+      if (this.game.running) this.game.pause('manual');
     });
 
     // === BOTÓN DE APUNTADO MÓVIL ===
@@ -308,16 +308,17 @@ export class TouchControls {
     });
 
     // Resize / orientación
-    const handleOrientation = () => {
+    const handleOrientation = (e) => {
       const isPortrait = (window.innerHeight > window.innerWidth) && (window.innerWidth <= 950);
-      if (isPortrait && this.game.running) {
-        this.game.pause();
+      // Solo pausar si fue un giro físico explícito (orientationchange), nunca en un resize común de barra o teclado
+      if (e?.type === 'orientationchange' && isPortrait && this.game.running) {
+        this.game.pause('orientation');
       }
       this.updateVisibility();
     };
 
-    window.addEventListener('resize', handleOrientation);
-    window.addEventListener('orientationchange', () => setTimeout(handleOrientation, 150));
+    window.addEventListener('resize', () => handleOrientation());
+    window.addEventListener('orientationchange', (e) => setTimeout(() => handleOrientation(e), 150));
 
     // Botón de pantalla completa / bloqueo horizontal
     const fsBtn = document.querySelector('#rotateFullscreenBtn');

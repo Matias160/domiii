@@ -12,7 +12,7 @@ import {
   MenuScreen
 } from '../js/ui/menuScreen.js';
 
-test('setup menu: definitions contain 4 independent categories with real content', () => {
+test('setup menu: definitions contain independent categories with real content', () => {
   assert.equal(MODES_DATA.length, 3, '3 game modes');
   assert.deepEqual(MODES_DATA.map(m => m.id), ['survival', 'waves', 'rush']);
 
@@ -47,7 +47,7 @@ test('setup menu: SVGs and skull colors evolve progressively', () => {
   assert.match(quemadoSvg, /#ef4444|#dc2626/, 'Quemado skull has red tones');
 });
 
-test('setup menu: HTML preserves 4 horizontal bars, badges and lower reward/briefing section', () => {
+test('setup menu: HTML preserves visual selection bars, badges and reward briefing', () => {
   const indexHtml = fs.readFileSync(path.resolve('index.html'), 'utf8');
 
   // 4 category bars in 2x2 grid
@@ -56,22 +56,25 @@ test('setup menu: HTML preserves 4 horizontal bars, badges and lower reward/brie
   assert.match(indexHtml, /id="catBarMap"/, 'Has Mapas category bar');
   assert.match(indexHtml, /id="catBarCompanion"/, 'Has Mascotas category bar');
   assert.match(indexHtml, /id="catBarDifficulty"/, 'Has Dificultad category bar');
+  assert.match(indexHtml, /id="catBarAccessory"/, 'Has Accesorio category bar');
 
   // Independent horizontal rows
   assert.match(indexHtml, /id="rowMode"/, 'Has rowMode');
   assert.match(indexHtml, /id="rowMap"/, 'Has rowMap');
   assert.match(indexHtml, /id="rowCompanion"/, 'Has rowCompanion');
   assert.match(indexHtml, /id="rowDifficulty"/, 'Has rowDifficulty');
+  assert.match(indexHtml, /id="rowAccessory"/, 'Has rowAccessory');
 
   // Category badges
   assert.match(indexHtml, /id="badgeMode"/, 'Has badgeMode');
   assert.match(indexHtml, /id="badgeMap"/, 'Has badgeMap');
   assert.match(indexHtml, /id="badgeCompanion"/, 'Has badgeCompanion');
   assert.match(indexHtml, /id="badgeDifficulty"/, 'Has badgeDifficulty');
+  assert.match(indexHtml, /id="badgeAccessory"/, 'Has badgeAccessory');
 
   // Reward briefing section preserved in lower area
   assert.match(indexHtml, /id="setupMapBriefing"/, 'Preserves map briefing in lower area');
-  assert.match(indexHtml, /class="setup-accessory-bar"/, 'Preserves accessory bar');
+  assert.match(indexHtml, /class="setup-cards-row setup-cards-row--scroll setup-cards-row--accessories"/, 'Uses a real visual accessory picker');
 });
 
 test('setup menu: independent selection logic does not affect other categories', () => {
@@ -181,4 +184,28 @@ test('upgrade progression: ability choices unlocked strictly every 2 levels (eve
 
   // Verify game.js handles isAbilityLevel without returning early from stats
   assert.ok(gameSrc.includes('this.state.pendingLevels = Math.min(1,'), 'game.js banks pending levels on ability levels');
+});
+
+test('setup keeps character selection focused and enriches the match cards with game information', () => {
+  const indexHtml = fs.readFileSync(path.resolve('index.html'), 'utf8');
+  const menuSrc = fs.readFileSync(path.resolve('js/ui/menuScreen.js'), 'utf8');
+
+  assert.ok(!indexHtml.includes('comboPreviewCanvas'), 'the redundant combo banner is removed');
+  assert.match(indexHtml, /PARTIDA Y ESCENARIO/, 'the first step has a clearer arcade label');
+  assert.match(menuSrc, /region\?\.enemyName \|\| 'ZONA DOMI'/, 'map cards expose their native enemy');
+  assert.match(menuSrc, /<small>\$\{pet\.role\}<\/small>/, 'pet cards expose their gameplay role');
+  assert.match(menuSrc, /<small>PUNTOS \$\{diff\.mult\}<\/small>/, 'difficulty cards expose their score multiplier');
+  assert.match(menuSrc, /drawAccessoryIcon\(ctx, accessoryId/, 'accessories use their real game artwork');
+  assert.match(menuSrc, /selectCategoryOption\('accessory', id\)/, 'accessory cards are interactive');
+  assert.doesNotMatch(menuSrc, /availableH \/ neededH/, 'setup no longer shrinks itself to fit the viewport');
+});
+
+test('pause recovery ignores late automatic events and cannot loop forever after a frame error', () => {
+  const gameSrc = fs.readFileSync(path.resolve('js/game.js'), 'utf8');
+
+  assert.match(gameSrc, /pause\(reason = 'manual'\)/, 'pause records its origin');
+  assert.match(gameSrc, /performance\.now\(\) < this\.resumeGuardUntil/, 'late focus and visibility events are debounced');
+  assert.match(gameSrc, /this\.resumeGuardUntil = performance\.now\(\) \+ 900/, 'resume opens a short recovery window');
+  assert.match(gameSrc, /this\.pauseReason === 'engine'\) this\.errorPauseAcknowledged = true/, 'engine recovery is acknowledged');
+  assert.match(gameSrc, /this\.running && !this\.errorPauseAcknowledged/, 'the same frame error cannot force an endless pause loop');
 });

@@ -92,6 +92,9 @@ export class Game {
     this.state = null;
     this.lastTime = 0;
     this.running = false;
+    this.pauseReason = 'manual';
+    this.resumeGuardUntil = 0;
+    this.errorPauseAcknowledged = false;
     this.toast = document.querySelector("#toast");
     this.reducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
     refreshIcons();
@@ -111,7 +114,7 @@ export class Game {
         }
       }
     });
-    document.querySelector('#pauseButton').addEventListener('click', () => this.pause());
+    document.querySelector('#pauseButton').addEventListener('click', () => this.pause('manual'));
     document.querySelector('#dashControl').addEventListener('click', () => {
       if (this.running && !this.choice && !this.entrance && this.state.player.dashCooldown <= 0) this.input.pressed.add(' ');
       document.querySelector('#dashControl').blur();
@@ -158,15 +161,15 @@ export class Game {
         this.showScreen('lobbyScreen');
         return;
       }
-      if (event.key === 'Escape' && !event.repeat) { if (this.running) this.pause(); else if (this.screenId === 'pauseScreen') this.resume(); }
+      if (event.key === 'Escape' && !event.repeat) { if (this.running) this.pause('manual'); else if (this.screenId === 'pauseScreen') this.resume(); }
       if(this.running&&!event.repeat){
         if(this.choice&&['1','2','3'].includes(event.key))document.querySelectorAll('.ability-card')[Number(event.key)-1]?.click();
         if(['q','e','r'].includes(event.key.toLowerCase()))this.triggerPrime(event.key.toLowerCase());
         if(this.primeIntro&&event.key==='Enter')this.closePrimeIntro(true);
       }
     });
-    window.addEventListener('blur', () => this.pause());
-    document.addEventListener('visibilitychange', () => { if (document.hidden) this.pause(); });
+    window.addEventListener('blur', () => { if (typeof document !== 'undefined' && document.hidden) this.pause('focus'); });
+    document.addEventListener('visibilitychange', () => { if (document.hidden) this.pause('visibility'); });
     document.addEventListener('pointerdown', () => this.audio.unlock(), { once: true });
     document.addEventListener('keydown', () => this.audio.unlock(), { once: true });
 
@@ -224,8 +227,15 @@ export class Game {
     } else if (id === 'gameScreen') document.activeElement?.blur();
   }
 
-  pause() {
+  pause(reason = 'manual') {
+    const automatic = reason !== 'manual' && reason !== 'engine';
+    if (automatic && performance.now() < this.resumeGuardUntil) return;
+    // Si la pausa automática es por pérdida de foco pero la pestaña sigue visible en pantalla, no pausar
+    if (reason === 'focus' && typeof document !== 'undefined' && !document.hidden) return;
+    // Si es por orientación pero el ancho es mayor al alto (modo horizontal / PC), no pausar
+    if (reason === 'orientation' && typeof window !== 'undefined' && window.innerWidth > window.innerHeight) return;
     if (this.running) {
+      this.pauseReason = reason;
       this.pauseThemeIndex = ((this.pauseThemeIndex ?? -1) + 1) % PAUSE_THEMES.length;
       const theme = PAUSE_THEMES[this.pauseThemeIndex];
       const panel = document.querySelector('#pauseScreen .pause-panel');
@@ -234,6 +244,14 @@ export class Game {
         panel.style.setProperty('--pause-glow', theme.glow);
       }
       this.showScreen('pauseScreen');
+      const reasonLabel = document.querySelector('#pauseReason');
+      if (reasonLabel) reasonLabel.textContent = ({
+        manual: 'PAUSA MANUAL',
+        focus: 'VENTANA SIN FOCO',
+        visibility: 'PESTAÑA EN SEGUNDO PLANO',
+        orientation: 'ORIENTACIÓN VERTICAL',
+        engine: 'RECUPERACIÓN DEL MOTOR'
+      })[reason] || 'PAUSA MANUAL';
       document.querySelector('#resumeButton')?.focus();
     }
   }
@@ -435,7 +453,13 @@ export class Game {
   }
 
   skipEntrance() { if (this.entrance && this.running) skipBossEntrance(this.entrance); }
-  resume() { if (this.screenId === 'pauseScreen') this.showScreen('gameScreen'); }
+  resume() {
+    if (this.screenId !== 'pauseScreen') return;
+    this.resumeGuardUntil = performance.now() + 900;
+    if (this.pauseReason === 'engine') this.errorPauseAcknowledged = true;
+    this.frameErrors = 0;
+    this.showScreen('gameScreen');
+  }
 
   renderBuild() {
     const root = document.querySelector('#buildList');
@@ -576,7 +600,7 @@ export class Game {
     this.resizeView();
     resetQuality();
     this.warmUpRun();
-    this.choice=null;this.entrance=null;this.buildSignature=null;this.updateAimButton();
+    this.choice=null;this.entrance=null;this.buildSignature=null;this.errorPauseAcknowledged=false;this.pauseReason='manual';this.updateAimButton();
     this.audio.unlock();
     this.hud.update(this.state);
     this.showScreen("gameScreen");
@@ -641,10 +665,10 @@ export class Game {
       // Un dibujo cortado a la mitad no debe dejar el canvas movido o transparente
       this.ctx.setTransform(1, 0, 0, 1, 0, 0); this.ctx.globalAlpha = 1; this.ctx.globalCompositeOperation = 'source-over';
       // Si falla una y otra vez, se pausa con aviso en lugar de repetir el error 60 veces por segundo
-      if (this.frameErrors > 30 && this.running) {
+      if (this.frameErrors > 30 && this.running && !this.errorPauseAcknowledged) {
         this.frameErrors = 0;
         this.entrance = null;
-        this.pause();
+        this.pause('engine');
         this.showToast?.('Hubo un problema. La partida se pausó: podés seguir o volver al local.');
       }
     }
@@ -803,7 +827,7 @@ export class Game {
       this.endRun();
     } else if (state.victory || (state.modeId === 'rush' && state.bossesKilled >= RUSH_BOSS_GOAL)) {
       this.endRun('victory');
-    } else if (!this.choice && (state.pendingLevels > 0 || cardIsDue(state))) {
+    } else if (!this.choice && state.pendingLevels > 0) {
       // Muestra la selección de mejora de inmediato al subir de nivel (cada 2 niveles)
       this.showAbilityChoices();
     }

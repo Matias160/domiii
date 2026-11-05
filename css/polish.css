@@ -291,6 +291,7 @@ button:focus-visible, input:focus-visible, select:focus-visible {
 
 #setupScreen .setup-panel {
   position: relative;
+  width: min(100%, 1240px);
   background: rgba(11, 17, 21, 0.95);
   border: 4px solid #000;
   box-shadow: 
@@ -464,6 +465,23 @@ button:focus-visible, input:focus-visible, select:focus-visible {
   border: 1px solid var(--pixel-red);
   color: var(--pixel-red);
 }
+
+/* Category 5: Accesorios (Violeta) */
+.setup-category--purple {
+  outline: 2px solid rgba(192, 132, 252, 0.55);
+}
+.setup-category--purple .setup-category-dot,
+.setup-category--purple .setup-category-title { color: #d7a4ff; text-shadow: 0 0 8px rgba(192,132,252,.55); }
+.setup-category--purple .setup-category-badge { background: rgba(192,132,252,.14); border: 1px solid #d7a4ff; color: #e9d5ff; }
+.setup-category--purple .setup-option-card--selected {
+  opacity: 1;
+  background: #21102f;
+  border-color: #d7a4ff;
+  box-shadow: 0 0 15px rgba(192,132,252,.62), inset 0 0 8px rgba(192,132,252,.28);
+  transform: scale(1.02);
+}
+.setup-category--purple .setup-option-card--selected .setup-option-card__name,
+.setup-category--purple .setup-option-card--selected .setup-option-card__check { color: #e9c7ff; }
 
 /* Rows of square cards */
 .setup-cards-row {
@@ -717,10 +735,6 @@ button:focus-visible, input:focus-visible, select:focus-visible {
   animation: lavaPulse 2s ease-in-out infinite alternate;
 }
 
-/* Accessory Bar */
-.setup-accessory-bar {
-  margin-bottom: 20px;
-}
 .setup-card--purple {
   outline: 3px solid var(--pixel-purple);
   box-shadow: 4px 4px 0 #000, 0 0 12px rgba(184, 68, 255, 0.25);
@@ -4184,4 +4198,212 @@ kbd { display: inline-block; border: 1px solid #556771; border-bottom-width: 3px
   vertical-align: middle !important;
   display: inline-block !important;
   margin-right: 6px !important;
+}
+
+/* Armá tu combo: el primer paso usa módulos de selección arcade con arte del juego. */
+#setupStep1 .setup-categories-grid { gap: 18px; }
+#setupStep1 .setup-category-bar {
+  min-height: 166px;
+  padding: 10px 12px 12px;
+  border-width: 4px;
+  background:
+    repeating-linear-gradient(0deg, rgba(255,255,255,.025) 0 2px, transparent 2px 5px),
+    #0b1319;
+  box-shadow: 6px 6px 0 #030609, inset 0 0 0 2px #20313b;
+}
+#setupStep1 .setup-category-header { min-height: 31px; border-bottom-color: #334750; }
+#setupStep1 .setup-category-title { font-size: 10px; }
+#setupStep1 .setup-category-badge { padding: 5px 7px; box-shadow: 2px 2px 0 #000; }
+#setupStep1 .setup-cards-row { gap: 9px; }
+#setupStep1 .setup-option-card {
+  height: 110px;
+  padding: 5px;
+  border-width: 3px;
+  opacity: .84;
+  background: #101c23;
+  box-shadow: 3px 3px 0 #020507;
+}
+#setupStep1 .setup-option-card:hover { transform: translateY(-3px); opacity: 1; box-shadow: 4px 6px 0 #020507; }
+#setupStep1 .setup-cards-row--scroll .setup-option-card { flex-basis: 112px; width: 112px; }
+#setupStep1 .setup-option-card__visual { min-height: 65px; background: #091116; }
+#setupStep1 .setup-option-card__visual::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  box-shadow: inset 0 -12px 14px rgba(0,0,0,.22);
+}
+#setupStep1 .setup-option-card__visual svg { width: 52px; height: 52px; filter: drop-shadow(3px 3px 0 #000); }
+#setupStep1 .setup-option-card__info { min-height: 31px; padding-top: 4px; }
+#setupStep1 .setup-option-card__name { font-size: 7px; line-height: 1.35; }
+#setupStep1 .setup-option-card__info small {
+  display: block;
+  margin-top: 3px;
+  color: #8298a3;
+  font: 6px/1.3 'Press Start 2P', monospace;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+#setupStep1 .setup-option-card--selected { transform: translateY(-3px) !important; }
+#setupStep1 .setup-option-card--selected .setup-option-card__info small { color: #f4f8ef; }
+#setupStep1 .setup-option-card__check {
+  display: block;
+  top: 5px;
+  right: 5px;
+  width: 15px;
+  height: 15px;
+  padding: 2px;
+  border: 1px solid currentColor;
+  background: #071015;
+  opacity: 0;
+}
+#setupStep1 .setup-option-card--selected .setup-option-card__check { opacity: 1; }
+.setup-accessory-picker {
+  margin: 18px 0 20px;
+  min-height: 164px;
+  padding: 10px 12px 12px;
+  border: 4px solid #000;
+  background: repeating-linear-gradient(0deg, rgba(255,255,255,.025) 0 2px, transparent 2px 5px), #0b1319;
+  box-shadow: 6px 6px 0 #030609, inset 0 0 0 2px #2d2040;
+}
+.setup-accessory-picker .setup-cards-row--accessories { gap: 10px; }
+.setup-accessory-picker .setup-option-card { flex: 0 0 126px; width: 126px; height: 110px; padding: 5px; border-width: 3px; }
+.setup-accessory-picker .setup-option-card__visual { min-height: 65px; background: #100a18; }
+.setup-accessory-picker .setup-card-accessory-canvas { width: 72px; height: 60px; object-fit: contain; image-rendering: pixelated; filter: drop-shadow(3px 3px 0 #000); }
+.setup-none-accessory { color: #758691; font: 32px/1 monospace; text-shadow: 3px 3px #000; }
+.setup-accessory-picker .setup-option-card__info small { display:block; margin-top:3px; color:#8f83a0; font:6px/1.3 'Press Start 2P',monospace; }
+.setup-accessory-picker .setup-option-card--locked { opacity: .5 !important; cursor: pointer; }
+.setup-accessory-picker .setup-option-card--locked:hover { opacity: .75 !important; border-color: #72558a; }
+.setup-loadout-heading { display: flex; align-items: center; gap: 9px; padding-bottom: 8px; border-bottom: 2px solid #344c57; }
+.setup-loadout-heading::before { content: ''; width: 9px; height: 9px; background: #ffdc68; box-shadow: 2px 2px 0 #000; }
+
+#pauseScreen .pause-heading-copy { flex: 1; min-width: 0; }
+#pauseScreen .pause-heading-copy small { display: block; margin-bottom: 4px; color: #7ce5dc; font: 8px/1.5 'Press Start 2P', monospace; }
+#pauseScreen .pause-heading-copy h2 { margin: 0 !important; font-size: 17px !important; color: #fff0bd; }
+
+@media (max-width: 760px) {
+  #setupStep1 .setup-categories-grid { grid-template-columns: 1fr; }
+  #setupStep1 .setup-category-bar { min-height: 154px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .option-card * { animation: none !important; transition: none !important; }
+}
+
+/* Setup layout guardrails: keep the selector inside the viewport and in document flow. */
+#setupScreen.screen--active {
+  display: block !important;
+  padding: 28px clamp(18px, 3vw, 48px) 56px !important;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+}
+
+#setupScreen .setup-panel {
+  display: block !important;
+  width: min(1160px, 100%) !important;
+  max-width: 1160px !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  margin: 0 auto !important;
+  padding: 18px 22px 24px !important;
+  box-sizing: border-box !important;
+}
+
+#setupScreen .setup-header,
+#setupScreen .setup-steps-nav,
+#setupScreen .setup-step-view,
+#setupScreen .setup-categories-grid,
+#setupScreen .setup-category-bar,
+#setupScreen .setup-cards-row,
+#setupScreen .setup-accessory-picker {
+  min-width: 0 !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+#setupScreen .setup-header { margin: 0 0 14px !important; }
+#setupScreen .setup-steps-nav { margin: 0 0 18px !important; }
+#setupScreen .setup-step-view { width: 100% !important; }
+#setupScreen .setup-step-view[hidden] { display: none !important; }
+
+#setupStep1 .setup-categories-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  align-items: start !important;
+  gap: 14px !important;
+  margin: 0 0 14px !important;
+}
+
+#setupStep1 .setup-category-bar {
+  width: 100% !important;
+  min-height: 152px !important;
+  overflow: hidden !important;
+}
+
+#setupStep1 .setup-cards-row {
+  width: 100% !important;
+  overflow-y: hidden !important;
+}
+
+#setupStep1 .setup-cards-row--mode .setup-option-card,
+#setupStep1 .setup-cards-row--difficulty .setup-option-card {
+  flex: 1 1 0 !important;
+  width: auto !important;
+  min-width: 0 !important;
+}
+
+#setupStep1 .setup-cards-row--scroll {
+  overflow-x: auto !important;
+  overscroll-behavior-inline: contain;
+}
+
+#setupStep1 .setup-option-card {
+  min-width: 0;
+  height: 102px;
+}
+
+#setupStep1 .setup-cards-row--scroll .setup-option-card {
+  flex: 0 0 104px !important;
+  width: 104px !important;
+}
+
+#setupStep1 .setup-option-card__visual { min-height: 58px; }
+#setupStep1 .setup-option-card__visual svg { width: 46px; height: 46px; }
+
+#setupScreen .setup-map-briefing { max-width: 100% !important; box-sizing: border-box !important; }
+
+#setupScreen .setup-accessory-picker {
+  width: 100% !important;
+  min-height: 146px !important;
+  margin: 14px 0 18px !important;
+  overflow: hidden !important;
+}
+
+#setupScreen .setup-accessory-picker .setup-option-card {
+  flex-basis: 112px !important;
+  width: 112px !important;
+  height: 102px !important;
+}
+
+#setupScreen .setup-accessory-picker .setup-card-accessory-canvas {
+  width: 64px;
+  height: 54px;
+}
+
+@media (max-width: 900px) {
+  #setupScreen.screen--active { padding: 16px 12px 110px !important; }
+  #setupScreen .setup-panel { padding: 14px 14px 24px !important; }
+  #setupStep1 .setup-categories-grid { grid-template-columns: 1fr !important; }
+  #setupScreen .setup-header { align-items: flex-start; }
+}
+
+@media (max-width: 560px) {
+  #setupScreen .setup-header { display: block; }
+  #setupScreen .setup-profile-pill { align-items: flex-start; margin-top: 12px; }
+  #setupScreen .setup-steps-nav { justify-content: stretch; gap: 6px; }
+  #setupScreen .setup-step-tab { flex: 1 1 0; justify-content: center; padding: 9px 7px; font-size: 8px; }
+  #setupScreen .step-nav-arrow { display: none; }
+  #setupStep1 .setup-category-header { align-items: flex-start; }
+  #setupStep1 .setup-category-nav-wrap { max-width: 58%; }
+  #setupStep1 .setup-category-badge { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 }

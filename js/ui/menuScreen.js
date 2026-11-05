@@ -1,7 +1,7 @@
 import { skins } from "../data/skins.js";
 import { weapons } from "../data/weapons.js";
 import { drawFood, drawWeapon, drawDiner } from "../core/art.js";
-import { drawItemPreview, drawPet, drawOrangePixelSkull } from "../core/presentation.js";
+import { drawPet, drawOrangePixelSkull } from "../core/presentation.js";
 import { unlockedAchievements, readAchievementStats, achievements } from "../systems/achievementSystem.js";
 import { currentAccount, clearAccountRuns, isGuest, getCartographyMissions, equip } from '../systems/accountSystem.js';
 import { isOwned } from '../data/shop.js';
@@ -11,9 +11,9 @@ import { drawAccessoryIcon } from '../core/accessories.js';
 import { drawWorldProps } from '../core/worldProps.js';
 
 export const MODES_DATA = [
-  { id: 'survival', name: 'SUPERVIVENCIA', short: 'SURVIVAL', tag: 'INF' },
-  { id: 'waves', name: '8 OLEADAS', short: '8 WAVES', tag: '8 RND' },
-  { id: 'rush', name: 'DUELO JEFES', short: 'BOSS RUSH', tag: 'BOSS' }
+  { id: 'survival', name: 'SUPERVIVENCIA', short: 'SURVIVAL', tag: 'SIN LÍMITE' },
+  { id: 'waves', name: '8 OLEADAS', short: '8 WAVES', tag: '8 RONDAS' },
+  { id: 'rush', name: 'DUELO JEFES', short: 'BOSS RUSH', tag: 'SOLO JEFES' }
 ];
 
 export const MAPS_DATA = [
@@ -28,12 +28,12 @@ export const MAPS_DATA = [
 ];
 
 export const PETS_DATA = [
-  { id: 'none', name: 'NINGUNA' },
-  { id: 'ketchup', name: 'KETCHUP' },
-  { id: 'drone', name: 'DRON' },
-  { id: 'taco', name: 'TACO' },
-  { id: 'soda', name: 'SODA' },
-  { id: 'parrilla', name: 'PARRILLA' }
+  { id: 'none', name: 'NINGUNA', role: 'SIN APOYO' },
+  { id: 'ketchup', name: 'KETCHUP', role: 'ATAQUE' },
+  { id: 'drone', name: 'DRON', role: 'IMÁN' },
+  { id: 'taco', name: 'TACO', role: 'ESCUDO' },
+  { id: 'soda', name: 'SODA', role: 'CURACIÓN' },
+  { id: 'parrilla', name: 'PARRILLA', role: 'FUEGO' }
 ];
 
 export const DIFFICULTIES_DATA = [
@@ -280,19 +280,18 @@ export class MenuScreen {
     this.rowMap = document.querySelector('#rowMap');
     this.rowCompanion = document.querySelector('#rowCompanion');
     this.rowDifficulty = document.querySelector('#rowDifficulty');
+    this.rowAccessory = document.querySelector('#rowAccessory');
 
     this.badgeMode = document.querySelector('#badgeMode');
     this.badgeMap = document.querySelector('#badgeMap');
     this.badgeCompanion = document.querySelector('#badgeCompanion');
     this.badgeDifficulty = document.querySelector('#badgeDifficulty');
+    this.badgeAccessory = document.querySelector('#badgeAccessory');
 
     this.catBarMode = document.querySelector('#catBarMode');
     this.catBarMap = document.querySelector('#catBarMap');
     this.catBarCompanion = document.querySelector('#catBarCompanion');
     this.catBarDifficulty = document.querySelector('#catBarDifficulty');
-
-    this.cardAccessory = document.querySelector('#cardAccessory');
-    this.cardAccessoryVal = document.querySelector('#cardAccessoryVal');
 
     // Legacy proxies
     this.cardModeVal = document.querySelector('#cardModeVal');
@@ -364,7 +363,7 @@ export class MenuScreen {
         card.setAttribute('aria-label', `Modo ${mode.name}`);
         card.innerHTML = `
           <div class="setup-option-card__visual">${getModePixelSvg(mode.id)}</div>
-          <div class="setup-option-card__info"><span class="setup-option-card__name">${mode.name}</span></div>
+          <div class="setup-option-card__info"><span class="setup-option-card__name">${mode.name}</span><small>${mode.tag}</small></div>
           <span class="setup-option-card__check" aria-hidden="true">✓</span>
         `;
         card.addEventListener('click', () => this.selectCategoryOption('mode', mode.id));
@@ -376,6 +375,7 @@ export class MenuScreen {
     if (this.rowMap) {
       this.rowMap.innerHTML = '';
       MAPS_DATA.forEach(map => {
+        const region = REGIONS.find(item => item.id === map.id);
         const card = document.createElement('button');
         card.type = 'button';
         card.className = 'setup-option-card setup-option-card--mint';
@@ -387,7 +387,7 @@ export class MenuScreen {
           <div class="setup-option-card__visual">
             <canvas class="setup-card-map-canvas" width="128" height="84" aria-hidden="true"></canvas>
           </div>
-          <div class="setup-option-card__info"><span class="setup-option-card__name">${map.num} ${map.name}</span></div>
+          <div class="setup-option-card__info"><span class="setup-option-card__name">${map.num} ${map.name}</span><small>${region?.enemyName || 'ZONA DOMI'}</small></div>
           <span class="setup-option-card__check" aria-hidden="true">✓</span>
         `;
         card.addEventListener('click', () => this.selectCategoryOption('map', map.id));
@@ -410,7 +410,7 @@ export class MenuScreen {
           <div class="setup-option-card__visual">
             <canvas class="setup-card-pet-canvas" width="84" height="60" aria-hidden="true"></canvas>
           </div>
-          <div class="setup-option-card__info"><span class="setup-option-card__name">${pet.name}</span></div>
+          <div class="setup-option-card__info"><span class="setup-option-card__name">${pet.name}</span><small>${pet.role}</small></div>
           <span class="setup-option-card__check" aria-hidden="true">✓</span>
         `;
         card.addEventListener('click', () => this.selectCategoryOption('companion', pet.id));
@@ -431,11 +431,36 @@ export class MenuScreen {
         card.setAttribute('aria-label', `Dificultad ${diff.name} (${diff.mult})`);
         card.innerHTML = `
           <div class="setup-option-card__visual">${getDifficultySkullSvgByTier(diff.id)}</div>
-          <div class="setup-option-card__info"><span class="setup-option-card__name">${diff.name}</span></div>
+          <div class="setup-option-card__info"><span class="setup-option-card__name">${diff.name}</span><small>PUNTOS ${diff.mult}</small></div>
           <span class="setup-option-card__check" aria-hidden="true">✓</span>
         `;
         card.addEventListener('click', () => this.selectCategoryOption('difficulty', diff.id));
         this.rowDifficulty.appendChild(card);
+      });
+    }
+
+    // 5. ACCESORIOS: fila visual con el arte real y respuesta para bloqueados.
+    if (this.rowAccessory && this.accessoryInput) {
+      this.rowAccessory.innerHTML = '';
+      [...this.accessoryInput.options].forEach(option => {
+        const id = option.value;
+        const cleanName = option.textContent.replace(/ \[(TIENDA|SOLO SOCIOS|BLOQUEADO)\]$/, '');
+        const card = document.createElement('button');
+        card.type = 'button';
+        card.className = 'setup-option-card setup-option-card--purple';
+        card.dataset.category = 'accessory';
+        card.dataset.value = id;
+        card.setAttribute('role', 'radio');
+        card.setAttribute('aria-label', `Accesorio ${cleanName}`);
+        card.innerHTML = `
+          <div class="setup-option-card__visual setup-accessory-visual">
+            ${id === 'none' ? '<span class="setup-none-accessory">×</span>' : '<canvas class="setup-card-accessory-canvas" width="72" height="60" aria-hidden="true"></canvas>'}
+          </div>
+          <div class="setup-option-card__info"><span class="setup-option-card__name">${cleanName}</span><small>${id === 'none' ? 'SIN BONO' : 'EQUIPABLE'}</small></div>
+          <span class="setup-option-card__check" aria-hidden="true">✓</span>
+        `;
+        card.addEventListener('click', () => this.selectCategoryOption('accessory', id));
+        this.rowAccessory.appendChild(card);
       });
     }
 
@@ -454,6 +479,14 @@ export class MenuScreen {
     });
     document.querySelector('#petNavNext')?.addEventListener('click', () => {
       this.rowCompanion?.scrollBy({ left: 160, behavior: 'smooth' });
+      this.game.audio?.play?.('navigate');
+    });
+    document.querySelector('#accessoryNavPrev')?.addEventListener('click', () => {
+      this.rowAccessory?.scrollBy({ left: -240, behavior: 'smooth' });
+      this.game.audio?.play?.('navigate');
+    });
+    document.querySelector('#accessoryNavNext')?.addEventListener('click', () => {
+      this.rowAccessory?.scrollBy({ left: 240, behavior: 'smooth' });
       this.game.audio?.play?.('navigate');
     });
 
@@ -478,6 +511,16 @@ export class MenuScreen {
         if (canvas && petId) {
           drawPetThumbnail(canvas, petId);
         }
+      });
+    }
+    if (this.rowAccessory) {
+      this.rowAccessory.querySelectorAll('.setup-option-card').forEach(card => {
+        const canvas = card.querySelector('canvas');
+        const accessoryId = card.dataset.value;
+        if (!canvas || !accessoryId || accessoryId === 'none') return;
+        const ctx = canvas.getContext('2d');
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        drawAccessoryIcon(ctx, accessoryId, canvas.width / 2, canvas.height / 2, 48);
       });
     }
   }
@@ -526,6 +569,15 @@ export class MenuScreen {
         this.difficultyInput.value = value;
         this.difficultyInput.dispatchEvent(new Event('change', { bubbles: true }));
       }
+    } else if (category === 'accessory') {
+      const unlocked = value === 'none' || isOwned(profile, 'accessory', value);
+      if (!unlocked) {
+        this.game.showToast?.(guest ? 'Accesorio bloqueado. Creá un socio y conseguí accesorios en la tienda, misiones o premios.' : 'Accesorio bloqueado. Conseguílo en la tienda, misiones o la máquina de premios.');
+        this.game.audio?.play?.('error');
+        return;
+      }
+      this.accessoryInput.value = value;
+      this.accessoryInput.dispatchEvent(new Event('change', { bubbles: true }));
     }
 
     this.game.audio?.play?.('navigate');
@@ -533,67 +585,9 @@ export class MenuScreen {
   }
 
   bindInputs() {
-    this.cardAccessory?.addEventListener('click', () => this.cycleOption(this.accessoryInput));
-
     [this.modeInput, this.mapInput, this.companionInput, this.difficultyInput, this.accessoryInput].forEach(input => {
       input?.addEventListener('change', () => this.syncCards());
     });
-  }
-
-  cycleOption(select) {
-    if (!select || !select.options) return;
-    if (isGuest() && (select === this.companionInput || select === this.accessoryInput)) {
-      this.game.showToast?.('¡Solo para socios! Creá tu tarjeta en la recepción para desbloquear mascotas y accesorios.');
-      this.game.audio?.play?.('error');
-      return;
-    }
-    if ((select === this.modeInput || select === this.difficultyInput) && this.mapInput.value === 'lava') {
-      return;
-    }
-    const available = [...select.options].filter(opt => !opt.disabled);
-    if (available.length <= 1) return;
-    const currentVal = select.value;
-    const currIdx = available.findIndex(opt => opt.value === currentVal);
-    const nextIdx = (currIdx + 1) % available.length;
-    select.value = available[nextIdx].value;
-    select.dispatchEvent(new Event('change', { bubbles: true }));
-    this.syncCards();
-    this.game.audio?.play?.('navigate');
-  }
-
-  renderCardThumbnail(card, type, id) {
-    if (!card) return;
-    const box = card.querySelector('.setup-card__icon-box');
-    if (!box) return;
-    const profile = currentAccount();
-
-    let canvas = box.querySelector('canvas.card-icon-canvas');
-    if (!canvas) {
-      canvas = document.createElement('canvas');
-      canvas.className = 'card-icon-canvas';
-      canvas.width = (type === 'accessory') ? 44 : 68;
-      canvas.height = (type === 'accessory') ? 44 : 68;
-    }
-
-    if (id === 'none') {
-      canvas.remove();
-      const existingSvg = box.querySelector('svg');
-      if (existingSvg) existingSvg.style.display = 'block';
-      return;
-    }
-
-    const svg = box.querySelector('svg');
-    if (svg) svg.style.display = 'none';
-
-    if (!box.contains(canvas)) {
-      box.appendChild(canvas);
-    }
-
-    try {
-      drawItemPreview(canvas, { type, id, name: id }, profile, 0);
-    } catch (err) {
-      console.warn('Error rendering card preview:', err);
-    }
   }
 
   getDifficultySkullSvg(diff, isLava) {
@@ -622,14 +616,13 @@ export class MenuScreen {
     if (this.badgeMap) this.badgeMap.textContent = getCleanLabel(this.mapInput) || mapVal.toUpperCase();
     if (this.badgeCompanion) this.badgeCompanion.textContent = getCleanLabel(this.companionInput) || compVal.toUpperCase();
     if (this.badgeDifficulty) this.badgeDifficulty.textContent = isLava ? '???' : (getCleanLabel(this.difficultyInput) || diffVal.toUpperCase());
+    if (this.badgeAccessory) this.badgeAccessory.textContent = getCleanLabel(this.accessoryInput) || 'SIN ACCESORIO';
 
     // Legacy proxies
     if (this.cardModeVal) this.cardModeVal.textContent = isLava ? '???' : getCleanLabel(this.modeInput);
     if (this.cardMapVal) this.cardMapVal.textContent = getCleanLabel(this.mapInput);
     if (this.cardCompanionVal) this.cardCompanionVal.textContent = getCleanLabel(this.companionInput);
     if (this.cardDifficultyVal) this.cardDifficultyVal.textContent = isLava ? '???' : getCleanLabel(this.difficultyInput);
-    if (this.cardAccessoryVal) this.cardAccessoryVal.textContent = getCleanLabel(this.accessoryInput);
-
     // Update active states on cards
     const updateRowCards = (row, currVal, category) => {
       if (!row) return;
@@ -644,6 +637,8 @@ export class MenuScreen {
           locked = !isOwned(profile, 'map', val);
         } else if (category === 'companion') {
           locked = (guest && val !== 'none') || (!guest && val !== 'none' && !isOwned(profile, 'pet', val));
+        } else if (category === 'accessory') {
+          locked = val !== 'none' && !isOwned(profile, 'accessory', val);
         }
         card.classList.toggle('setup-option-card--locked', locked);
 
@@ -657,6 +652,7 @@ export class MenuScreen {
     updateRowCards(this.rowMap, mapVal, 'map');
     updateRowCards(this.rowCompanion, compVal, 'companion');
     updateRowCards(this.rowDifficulty, isLava ? 'quemado' : diffVal, 'difficulty');
+    updateRowCards(this.rowAccessory, this.accessoryInput?.value || 'none', 'accessory');
 
     // Lava state on bars
     if (this.catBarMap) this.catBarMap.classList.toggle('setup-category--lava', isLava);
@@ -678,9 +674,7 @@ export class MenuScreen {
     };
     scrollSelectedIntoView(this.rowMap);
     scrollSelectedIntoView(this.rowCompanion);
-
-    // Thumbnail for accessory
-    this.renderCardThumbnail(this.cardAccessory, 'accessory', this.accessoryInput?.value || 'none');
+    scrollSelectedIntoView(this.rowAccessory);
 
     // Briefing de Zona del mapa activo
     this.renderMapBriefing(mapVal);
@@ -774,25 +768,9 @@ export class MenuScreen {
     const screen = document.querySelector('#setupScreen');
     const panel = screen?.querySelector('.setup-panel');
     if (!panel || !screen.classList.contains('screen--active')) return;
-    if (window.innerWidth <= 768) {
-      panel.style.zoom = '1';
-      return;
-    }
-    const details = panel.querySelector('.controls-guide');
-    const wasOpen = details?.open;
-    if (wasOpen) details.open = false;
+    // La interfaz conserva tamaño legible y la pantalla desplaza el contenido.
+    // El ajuste anterior comprimía todo el selector para hacerlo entrar en una sola altura.
     panel.style.zoom = '1';
-    const style = getComputedStyle(screen);
-    const availableH = screen.clientHeight - parseFloat(style.paddingTop) - parseFloat(style.paddingBottom);
-    const availableW = screen.clientWidth - parseFloat(style.paddingLeft) - parseFloat(style.paddingRight);
-    const neededH = panel.scrollHeight, neededW = panel.scrollWidth;
-    if (!neededH || !neededW || availableH <= 0) {
-      if (wasOpen) details.open = true;
-      return;
-    }
-    const zoom = Math.max(0.65, Math.min(1.5, availableH / neededH, availableW / neededW));
-    panel.style.zoom = String(Math.floor(zoom * 100) / 100);
-    if (wasOpen) details.open = true;
   }
 
   restoreSetup() {
