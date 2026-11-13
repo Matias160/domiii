@@ -6,6 +6,8 @@ import {isOwned} from '../data/shop.js';
 
 export { drawAccessory, drawAccessoryIcon, resolveAccessory };
 
+const previewImages = new Map();
+
 export function drawOrangePixelSkull(c, w, h, time = 0) {
   // Fondo oscuro misterioso sin imagen del mapa
   const bg = c.createRadialGradient(w / 2, h / 2, 6, w / 2, h / 2, Math.max(w, h) * 0.65);
@@ -161,6 +163,16 @@ export function drawItemPreview(canvas,item,profile,time=0){
     else drawPet(c,item.id,w/2,h*.5,time,scale*1.6);
   }else{
     const skinId = item.type==='skin'?item.id:profile?.loadout.skin||'pancho';
+    if(item.type==='skin'&&item.animatedAsset){
+      let sprite=previewImages.get(item.id);
+      if(!sprite){sprite=new Image();sprite.src=item.animatedAsset;previewImages.set(item.id,sprite);}
+      if(sprite.complete&&sprite.naturalWidth){c.drawImage(sprite,w/2-36,h/2-39,72,72);}
+      else{
+        c.fillStyle='#9be8cb';c.fillRect(w/2-18,h/2-19,36,36);
+        c.fillStyle='#17252a';c.font='bold 12px monospace';c.textAlign='center';c.fillText('COSMO',w/2,h-20);
+      }
+      return;
+    }
     const accId = item.type==='accessory'?item.id:profile?.loadout.accessory;
     const py = h * 0.54;
     const bob = Math.round(Math.sin(time * 5) * 1.5);

@@ -1,4 +1,5 @@
 export const shopItems = [
+  {id:'cosmo',type:'skin',name:'Cosmo',cost:1100,icon:'C',animatedAsset:'./NEW personaje/personaje_quieto.gif',description:'Explorador veloz de otro mundo. Animado en todas sus direcciones.'},
   {id:'nugget',type:'skin',name:'Nugget',cost:450,icon:'N',description:'Rapido y escurridizo.'},
   {id:'papas',type:'skin',name:'Papas fritas',cost:650,icon:'P',description:'Un proyectil adicional.'},
   {id:'pizza',type:'skin',name:'Pizza',cost:850,icon:'Z',description:'Resistente y contundente.'},

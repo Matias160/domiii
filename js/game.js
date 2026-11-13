@@ -1642,7 +1642,7 @@ function resolveLoadout(run) {
     return table.find(([word]) => text.includes(word))?.[1] || fallback;
   };
   return {
-    skinId: pick(run.skinId, run.skin, [['nugget', 'nugget'], ['papa', 'papas'], ['pizza', 'pizza'], ['empanada', 'empanada'], ['chori', 'choripan'], ['domi', 'domi']], 'pancho'),
+    skinId: pick(run.skinId, run.skin, [['cosmo', 'cosmo'], ['nugget', 'nugget'], ['papa', 'papas'], ['pizza', 'pizza'], ['empanada', 'empanada'], ['chori', 'choripan'], ['domi', 'domi']], 'pancho'),
     weaponId: pick(run.weaponId, run.weapon, [['sniper', 'mustardSniper'], ['mostaza', 'mustardSniper'], ['lluvia', 'friesRain'], ['papa', 'friesRain'], ['explosiv', 'explosiveBread'], ['pan', 'explosiveBread'], ['salsa', 'sauce'], ['chimi', 'sauce'], ['brocheta', 'skewer'], ['espada', 'skewer']], 'fork'),
     companionId: pick(run.companionId, run.companion, [['ketchup', 'ketchup'], ['dron', 'drone'], ['taco', 'taco'], ['soda', 'soda'], ['botell', 'soda'], ['parrilla', 'parrilla']], 'none'),
   };

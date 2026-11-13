@@ -31,6 +31,10 @@ export class Player {
     this.dashTime = 0;
     this.dashSequence = 0;
     this.facing = { x: 1, y: 0 };
+    this.lastHorizontalDirection = 1;
+    this.spriteState = 'idle-right';
+    this.previousSpriteState = this.spriteState;
+    this.spriteBlend = 1;
     this.dashDirection = { x: 1, y: 0 };
     this.aimAngle = 0;
     this.regen = 0;
@@ -52,6 +56,15 @@ export class Player {
     }
     this.buffs.slowTime=Math.max(0,this.buffs.slowTime-delta);
     const axis = input.getAxis();
+    if (Math.abs(axis.x) > 0.12) this.lastHorizontalDirection = axis.x < 0 ? -1 : 1;
+    const spriteMoving = Math.hypot(axis.x, axis.y) > 0.08 || this.dashTime > 0;
+    const nextSpriteState = spriteMoving ? (this.lastHorizontalDirection < 0 ? 'left' : 'right') : (this.lastHorizontalDirection < 0 ? 'idle-left' : 'idle-right');
+    if (nextSpriteState !== this.spriteState) {
+      this.previousSpriteState = this.spriteState;
+      this.spriteState = nextSpriteState;
+      this.spriteBlend = 0;
+    }
+    this.spriteBlend = Math.min(1, this.spriteBlend + delta * 10);
     this.walkTime+=(axis.x||axis.y)?delta:0;
     this.muzzleTime=Math.max(0,this.muzzleTime-delta);
     this.dashCooldown = Math.max(0, this.dashCooldown - delta);
@@ -122,7 +135,18 @@ export class Player {
     const bob = Math.round(Math.sin(this.walkTime * 7 + this.x * .05) * 1.5);
     ctx.save();
     drawAccessory(ctx, this.accessory, this.x, this.y + bob, 0.85, 'back');
-    drawFood(ctx, this.skin.id, this.x, this.y, 0.85, this.walkTime);
+    if (this.skin.id === 'cosmo' && this.spriteBlend < 1) {
+      ctx.save();
+      ctx.globalAlpha *= 1 - this.spriteBlend;
+      drawFood(ctx, this.skin.id, this.x, this.y, 0.85, this.walkTime, false, false, false, this.previousSpriteState);
+      ctx.restore();
+      ctx.save();
+      ctx.globalAlpha *= this.spriteBlend;
+      drawFood(ctx, this.skin.id, this.x, this.y, 0.85, this.walkTime, false, false, false, this.spriteState);
+      ctx.restore();
+    } else {
+      drawFood(ctx, this.skin.id, this.x, this.y, 0.85, this.walkTime, false, false, false, this.spriteState);
+    }
     drawAccessory(ctx, this.accessory, this.x, this.y + bob, 0.85, 'front');
     ctx.restore();
     if (this.inLavaMap) {

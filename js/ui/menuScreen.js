@@ -838,12 +838,12 @@ export class MenuScreen {
         const beam = document.createElement('div');
         beam.className = 'pedestal-beam';
 
-        const portrait = document.createElement('canvas');
-        portrait.width = 128;
-        portrait.height = 120;
+        const portrait = document.createElement(record.animatedAsset ? 'img' : 'canvas');
+        if (record.animatedAsset) { portrait.src = record.animatedAsset; portrait.alt = ''; }
+        else { portrait.width = 128; portrait.height = 120; }
         portrait.className = 'option-portrait';
         portrait.setAttribute('aria-hidden', 'true');
-        drawFood(portrait.getContext('2d'), record.id, 64, 58, 1.8);
+        if (!record.animatedAsset) drawFood(portrait.getContext('2d'), record.id, 64, 58, 1.8);
 
         const base = document.createElement('div');
         base.className = 'pedestal-base';
@@ -910,7 +910,9 @@ export class MenuScreen {
     const root=document.querySelector('#skinsPreview');root.replaceChildren();
     for(const skin of Object.values(skins)){
       const card=document.createElement('article');card.className='skin-preview';
-      const image=document.createElement('canvas');image.width=128;image.height=110;drawFood(image.getContext('2d'),skin.id,64,54,1.7);
+      const image=document.createElement(skin.animatedAsset?'img':'canvas');
+      if(skin.animatedAsset){image.src=skin.animatedAsset;image.alt='';image.className='skin-sprite';}
+      else{image.width=128;image.height=110;drawFood(image.getContext('2d'),skin.id,64,54,1.7);}
       const owned=isOwned(currentAccount(),'skin',skin.id);
       const heading=document.createElement('strong');heading.textContent=owned?skin.name:'???';
       const detail=document.createElement('span');detail.textContent=owned?`Vida ${skin.maxHp} / Velocidad ${Math.round(skin.speed)} / Defensa ${skin.defense.toFixed(1)}`:'Disponible en la tienda.';

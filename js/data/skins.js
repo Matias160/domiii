@@ -10,6 +10,18 @@ export const skins = {
     defense: 1,
     extraProjectiles: 0,
   },
+  cosmo: {
+    id: 'cosmo',
+    name: 'Cosmo',
+    description: 'Explorador del turno. Ligero y veloz, con visor de otro mundo.',
+    color: '#9be8cb',
+    maxHp: 94,
+    speed: 285,
+    damageMultiplier: 1.04,
+    defense: 0.96,
+    extraProjectiles: 0,
+    animatedAsset: './NEW personaje/personaje_quieto.gif'
+  },
   nugget: {
     id: "nugget",
     name: "Nugget",
