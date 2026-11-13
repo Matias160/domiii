@@ -4,6 +4,8 @@
 // Hoja legendaria: accesorios legendarios.png (11 reliquias otorgadas por el Señor Domi)
 // ============================================================================
 
+import { createAnimatedGif } from './animatedGif.js';
+
 export const standardSheet = typeof Image !== 'undefined' ? new Image() : null;
 if (standardSheet) standardSheet.src = './accesorios.png';
 
@@ -478,12 +480,8 @@ export function resolveAccessory(id) {
 
 const animatedAccessoryImages = new Map();
 function getAnimatedAccessoryImage(asset) {
-  if (typeof Image === 'undefined' || !asset) return null;
-  if (!animatedAccessoryImages.has(asset)) {
-    const image = new Image();
-    image.src = asset;
-    animatedAccessoryImages.set(asset, image);
-  }
+  if (!asset) return null;
+  if (!animatedAccessoryImages.has(asset)) animatedAccessoryImages.set(asset, createAnimatedGif(asset));
   return animatedAccessoryImages.get(asset);
 }
 

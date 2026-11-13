@@ -1,6 +1,7 @@
 import { drawFood } from '../core/art.js';
 import { Projectile } from './Projectile.js';
 import { damageEnemy, burst, impactRing } from '../systems/effectSystem.js';
+import { createAnimatedGif } from '../core/animatedGif.js';
 
 const companionBuffer = [];
 
@@ -25,8 +26,8 @@ const animatedPetAssets = {
 };
 const animatedPetImages = new Map();
 function getAnimatedPetImage(id) {
-  if (typeof Image === 'undefined' || !animatedPetAssets[id]) return null;
-  if (!animatedPetImages.has(id)) { const image = new Image(); image.src = animatedPetAssets[id]; animatedPetImages.set(id, image); }
+  if (!animatedPetAssets[id]) return null;
+  if (!animatedPetImages.has(id)) animatedPetImages.set(id, createAnimatedGif(animatedPetAssets[id]));
   return animatedPetImages.get(id);
 }
 

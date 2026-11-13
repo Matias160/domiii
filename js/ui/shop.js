@@ -29,6 +29,7 @@ export class Shop{
   constructor(game,account={currentAccount,purchase,equip}){
     this.game=game;this.account=account;this.type='skin';this.selected=null;this.ownedOnly=false;
     this.query='';this.sort='featured';this.affordable=false;
+    this.animatedPreviews=[];this.lastAnimatedPreviewFrame=-1;
     document.querySelector('#shopBackButton').addEventListener('click',()=>game.showScreen('lobbyScreen'));
   }
   resetFilters(){this.query='';this.affordable=false;}
@@ -92,7 +93,7 @@ export class Shop{
     document.querySelector('#shopCategory').textContent=tabs.find(tab=>tab[0]===this.type)[1];
     const ownedCount=items.filter(item=>isOwned(profile,item.type,item.id)).length;
     document.querySelector('#shopCount').textContent=`${ownedCount} de ${items.length} en tu colección`;
-    const root=document.querySelector('#shopGrid');root.replaceChildren();
+    const root=document.querySelector('#shopGrid');root.replaceChildren();this.animatedPreviews=[];
     for(const item of items){
       const owned=isOwned(profile,item.type,item.id),equipped=profile.loadout[item.type]===item.id;
       const isMysteryLava=item.type==='map'&&item.id==='lava'&&!owned;
@@ -108,6 +109,7 @@ export class Shop{
       }
       button.setAttribute('aria-label',`${displayName}, ${statusText}. Ver detalle`);button.setAttribute('aria-pressed',String(this.selected?.id===item.id));button.setAttribute('aria-controls','shopDetail');
       const art=node('div','catalog-art');const canvas=document.createElement('canvas');canvas.width=280;canvas.height=180;canvas.setAttribute('aria-hidden','true');drawItemPreview(canvas,item,profile);
+      if(item.animatedAsset)this.animatedPreviews.push({canvas,item});
       art.append(canvas);
       if(equipped) art.append(node('span','catalog-badge','✓ EN USO'));
       if(!owned){const lock=node('span','catalog-lock');lock.innerHTML=icon('LockKeyhole');lock.setAttribute('aria-hidden','true');art.append(lock);}
@@ -233,5 +235,11 @@ export class Shop{
     };
     action.append(button);root.append(top,stage,body,action);drawItemPreview(canvas,item,profile);
   }
-  update(time){if(this.previewCanvas&&this.selected)drawItemPreview(this.previewCanvas,this.selected,this.profile,this.game.reducedMotion?0:time);}
+  update(time){
+    if(this.previewCanvas&&this.selected)drawItemPreview(this.previewCanvas,this.selected,this.profile,this.game.reducedMotion?0:time);
+    const frame=Math.floor(time*15);
+    if(frame===this.lastAnimatedPreviewFrame)return;
+    this.lastAnimatedPreviewFrame=frame;
+    for(const {canvas,item} of this.animatedPreviews)drawItemPreview(canvas,item,this.profile,time);
+  }
 }
