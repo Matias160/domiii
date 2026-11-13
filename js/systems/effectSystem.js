@@ -145,7 +145,9 @@ export function damageEnemy(state, enemy, damage, type = 'normal') {
   const critRoll = (state?.player?.critChance > 0) && (Math.random() < state.player.critChance);
   const isCrit = type === 'crit' || damage > 85 || critRoll;
   const finalDamage = isCrit ? damage * 1.35 : damage;
+  const effectiveDamage = Math.max(0, Math.min(enemy.hp, finalDamage));
   enemy.hp -= finalDamage;
+  state.damageDealt = (state.damageDealt || 0) + effectiveDamage;
   enemy.hitFlash = isCrit ? 0.20 : 0.10;
   if (isCrit) state.shake = Math.max(state.shake || 0, 0.08);
 

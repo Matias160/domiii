@@ -227,10 +227,11 @@ export class PrizeMachine {
   }
 
   pickPrize(account) {
-    // Collect unowned items from shop (Señor Domi is strictly unlocked via completing all missions, not in prize machine)
-    const unownedSkins = shopItems.filter(it => it.type === 'skin' && it.id !== 'domi' && !isOwned(account, 'skin', it.id));
-    const unownedAccs = shopItems.filter(it => it.type === 'accessory' && !isOwned(account, 'accessory', it.id));
-    const unownedPets = shopItems.filter(it => it.type === 'pet' && !isOwned(account, 'pet', it.id));
+    // La Panchomáquina entrega únicamente artículos comunes de tienda.
+    const isCommonPrize = it => !it.domiExclusive && !it.cartographyExclusive && !it.missionExclusive && !it.legendary && !String(it.id).startsWith('leg_');
+    const unownedSkins = shopItems.filter(it => it.type === 'skin' && isCommonPrize(it) && !isOwned(account, 'skin', it.id));
+    const unownedAccs = shopItems.filter(it => it.type === 'accessory' && isCommonPrize(it) && !isOwned(account, 'accessory', it.id));
+    const unownedPets = shopItems.filter(it => it.type === 'pet' && isCommonPrize(it) && !isOwned(account, 'pet', it.id));
 
     const totalUnowned = [...unownedSkins, ...unownedAccs, ...unownedPets];
 
@@ -249,31 +250,11 @@ export class PrizeMachine {
       };
     }
 
-    // Weighted roll: 55% normal/common, 35% rare, 10% legendary
-    const roll = Math.random();
-    let targetTier = 'common';
-    if (roll < 0.10) targetTier = 'legendary';
-    else if (roll < 0.45) targetTier = 'rare';
-
-    let pool = totalUnowned.filter(it => {
-      if (targetTier === 'legendary') return it.domiExclusive || it.id.startsWith('leg_') || it.cost >= 1200;
-      if (targetTier === 'rare') return it.cartographyExclusive || it.type === 'pet' || (it.cost >= 600 && it.cost < 1200);
-      return !it.domiExclusive && !it.cartographyExclusive && !it.id.startsWith('leg_') && it.cost < 600;
-    });
-
-    if (pool.length === 0) pool = totalUnowned;
-    const selected = pool[Math.floor(Math.random() * pool.length)];
-
-    let rarity = 'common';
-    if (selected.domiExclusive || selected.id.startsWith('leg_') || selected.cost >= 1200 || selected.id === 'choripan') {
-      rarity = 'legendary';
-    } else if (selected.cartographyExclusive || selected.type === 'pet' || selected.type === 'skin' || selected.cost >= 600) {
-      rarity = 'rare';
-    }
+    const selected = totalUnowned[Math.floor(Math.random() * totalUnowned.length)];
 
     return {
       isJackpot: false,
-      item: { ...selected, rarity }
+      item: { ...selected, rarity: 'common' }
     };
   }
 

@@ -7,7 +7,7 @@ import {achievements,unlockedAchievements} from '../systems/achievementSystem.js
 const stations=[
   {id:'portal',   x:960,  y:240, label:'JUGAR',           action:'JUGAR',     color:'#ffe068'},
   {id:'shop',     x:400,  y:290, label:'TIENDA ARCADE',   action:'TIENDA',    color:'#ffd000'},
-  {id:'pets',     x:1520, y:290, label:'MASCOTAS',        action:'MASCOTAS',  color:'#38ef7d'},
+  {id:'pets',     x:1520, y:290, label:'MULTIJUGADOR',     action:'MULTI',     color:'#38ef7d'},
   {id:'npc',      x:400,  y:760, label:'SEÑOR DOMI',      action:'CONSEJOS',  color:'#5ce1e6'},
   {id:'ranking',  x:960,  y:820, label:'HISTORIAL',       action:'RECORDS',   color:'#c084fc'},
   {id:'prize',    x:1520, y:760, label:'MÁQUINA DE PREMIOS', action:'PREMIOS', color:'#f43f5e'},
@@ -164,7 +164,7 @@ export class Lobby {
   activate(id){
     this.destination=null;this.game.audio.play('confirm');
     if(id==='portal'){this.game.menu.setSetupStep(1);this.game.menu.prepareAccount();this.game.showScreen('setupScreen');}
-    else if(id==='pets')this.game.shop.show('pet',true);
+    else if(id==='pets')this.game.showToast?.('MULTIJUGADOR / EN DESARROLLO...');
     else if(id==='shop')this.game.shop.show();
     else if(id==='ranking')this.game.showRanking();
     else if(id==='npc')this.game.domi.show();

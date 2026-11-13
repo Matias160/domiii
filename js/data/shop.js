@@ -15,6 +15,10 @@ export const shopItems = [
   {id:'taco',type:'pet',name:'Taco Guardián',cost:950,icon:'T',description:'Otorga escudo al jugador y embiste enemigos cercanos.'},
   {id:'soda',type:'pet',name:'Botellita Soda',cost:1100,icon:'S',description:'Burbujas curativas y salpicaduras de gas efervescente.'},
   {id:'parrilla',type:'pet',name:'Mini Parrilla',cost:0,domiExclusive:true,icon:'♨',description:'Exclusiva de Don Domi: lanza ascuas y genera ondas ardientes.'},
+  {id:'mate',type:'pet',name:'Mate Compañero',cost:900,icon:'M',animatedAsset:'./new mascotas/01_mate_x8.gif',description:'Pulso criollo: acelera movimiento y cadencia durante unos segundos.'},
+  {id:'dulce_leche',type:'pet',name:'Dulce de Leche',cost:1000,icon:'DL',animatedAsset:'./new mascotas/02_dulce_de_leche_x8.gif',description:'Derrama caramelo que ralentiza a los enemigos cercanos.'},
+  {id:'choco_heart',type:'pet',name:'Corazón de Chocolate',cost:1150,icon:'♥',animatedAsset:'./new mascotas/09_corazon_chocolate_x8.gif',description:'Recupera vida y concede una breve protección periódica.'},
+  {id:'icecream_pet',type:'pet',name:'Heladito Polar',cost:1250,icon:'H',animatedAsset:'./new mascotas/10_helado_x8.gif',description:'Congela grupos de enemigos con una ráfaga polar.'},
   // 8 Accesorios Estándar reales de accesorios.png
   {id:'bowtie',type:'accessory',name:'Moño Elegante Azul',cost:400,icon:'⋈',description:'+15% velocidad de proyectiles con distinción gourmet.'},
   {id:'shades',type:'accessory',name:'Gafas de Sol Retro',cost:450,icon:'◉',description:'+8% daño con estilo arcade.'},
@@ -24,6 +28,9 @@ export const shopItems = [
   {id:'crown',type:'accessory',name:'Corona Real',cost:650,icon:'♛',description:'+15 vida máxima para el rey del local.'},
   {id:'top_hat',type:'accessory',name:'Galera Elegante',cost:700,icon:'🎩',description:'+12% probabilidad de golpe crítico.'},
   {id:'wizard_hat',type:'accessory',name:'Sombrero de Brujo',cost:750,icon:'★',description:'+12% cadencia de ataque arcana.'},
+  {id:'gem_gauntlet',type:'accessory',name:'Guantelete de Gemas',cost:900,icon:'G',animatedAsset:'./new accesorios/01_guantelete_gemas_x8.gif',description:'+10% daño y +8% probabilidad de crítico.'},
+  {id:'shift_watch',type:'accessory',name:'Reloj Transformador',cost:1000,icon:'R',animatedAsset:'./new accesorios/02_reloj_transformador_x8.gif',description:'-15% recarga del acelerón y +6% velocidad.'},
+  {id:'orb_radar',type:'accessory',name:'Detector de Esferas',cost:1100,icon:'O',animatedAsset:'./new accesorios/03_radar_orbes_x8.gif',description:'+45% radio de imán y +12% velocidad de proyectiles.'},
   // Accesorio Especial de Misión Inicial
   {id:'chef_hat',type:'accessory',name:'Gorro de Chef',cost:0,domiExclusive:true,icon:'👨‍🍳',description:'Exclusivo de Don Domi: +12% daño y maestría gastronómica.'},
   // Accesorios Legendarios otorgados por el Señor Domi

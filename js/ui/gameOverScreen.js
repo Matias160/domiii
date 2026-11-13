@@ -150,12 +150,12 @@ export class GameOverScreen {
       const isRecord = result.score > previousBest;
       this.stats.innerHTML = `
         <div class="result-summary">
-          <span class="result-summary-label">${isRecord ? '¡NUEVO RÉCORD!' : 'PUNTOS GANADOS'}</span>
+          <span class="result-summary-label">${isRecord ? '¡NUEVO RÉCORD! / MONEDAS' : 'MONEDAS GANADAS'}</span>
           <div class="result-points">
-            <b>+${Math.max(0, Math.floor(result.score))} PT</b>
+            <b>+${result.coinsEarned || 0} PT</b>
             <i class="result-coin" aria-hidden="true"><span class="result-coin-glyph">$</span></i>
           </div>
-          <span class="result-summary-best">Tu mejor marca: ${Math.max(previousBest, result.score)}</span>
+          <span class="result-summary-best">Puntaje: ${Math.floor(result.score)} / Mejor marca: ${Math.max(previousBest, result.score)}</span>
         </div>
         <div class="result-stats-grid">
           <div class="result-stat-box"><strong>Tiempo</strong><b>${formatTime(result.time)}</b></div>

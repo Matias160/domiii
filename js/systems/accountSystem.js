@@ -154,9 +154,14 @@ export function grantItem(type,id){
     return p;
   });
 }
-export function awardRun(result){return mutate(p=>{
+export function awardRun(result){
+  const score=Math.max(0,Math.floor(Number(result.score)||0));
+  const dealt=Math.max(0,Number(result.damageDealt)||0);
+  const points=Math.min(50,Math.max(1,Math.floor((dealt/1000)*(Number(result.coinMultiplier)||1))));
+  result.coinsEarned=points;
+  return mutate(p=>{
   if(p.runs.some(x=>x.id===result.id))return p;
-  const points=Math.max(0,Math.floor(result.score));p.bank+=points;p.totalEarned+=points;
+  p.bank+=points;p.totalEarned+=points;
   const runTime = result.time ?? (() => { const [m, s] = String(result.timeText || '0:0').split(':').map(Number); return (m || 0) * 60 + (s || 0); })();
   const runCombo = result.peakCombo || result.combo || 0;
   const runBosses = result.bossesKilled || 0;
@@ -182,7 +187,7 @@ export function awardRun(result){return mutate(p=>{
   else ms.defeats += 1;
   ms.maxTime = Math.max(ms.maxTime, runTime);
   ms.kills += (result.kills || 0);
-  ms.maxScore = Math.max(ms.maxScore, points);
+  ms.maxScore = Math.max(ms.maxScore, score);
 
   // Misiones temáticas de cartografía acumulativas (y victoria en 1 partida para el Coloso)
   const DEFAULT_MISSIONS = {
@@ -228,7 +233,7 @@ export function awardRun(result){return mutate(p=>{
   p.runs.unshift({
     id: result.id,
     name: result.name || p.name,
-    score: points,
+    score,
     kills: result.kills,
     level: result.level,
     time: runTime,

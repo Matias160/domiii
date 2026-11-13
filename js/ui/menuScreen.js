@@ -923,15 +923,31 @@ export class MenuScreen {
     const unlocked=new Set(unlockedAchievements().map(item=>item.id)),stats=readAchievementStats(),root=document.querySelector('#achievementsList');
     document.querySelector('#achievementsScreen h2').textContent=`Logros ${unlocked.size} / ${achievements.length}`;
     root.replaceChildren();
-    for(const item of achievements){
-      const card=document.createElement('article');card.className=`achievement ${unlocked.has(item.id)?'achievement--unlocked':''}`;
-      const name=document.createElement('strong');name.textContent=`${unlocked.has(item.id)?'★':'◇'} ${item.name}`;
-      const description=document.createElement('span');description.textContent=item.description;
-      let progress=0,goal=1;if(item.id==='firstBite'){progress=stats.kills;goal=10;}if(item.id==='ketchupFan'){progress=stats.pickups.ketchup||0;goal=20;}if(item.id==='immortal'){progress=stats.seconds;goal=600;}if(item.id==='delivery'){progress=stats.distance;goal=1000000;}if(item.id==='chef'){progress=stats.bosses;goal=1;}if(item.id==='comboKing'){progress=stats.bosses;goal=3;}
-      const status=document.createElement('small');status.textContent=unlocked.has(item.id)?'Desbloqueado':item.id==='immortal'?`${Math.floor(progress/60)} / 10 min`:item.id==='firstBite'?`${progress} / 10`:item.id==='ketchupFan'?`${progress} / 20`:item.id==='delivery'?`${(progress/100).toFixed(0)} / 10.000 m`:`${stats.bosses} / ${item.id==='comboKing'?3:1} jefes`;
-      const meter=document.createElement('progress');meter.max=goal;meter.value=Math.min(progress,goal);meter.setAttribute('aria-label',`Progreso de ${item.name}`);
-      card.append(name,description,meter,status);root.append(card);
+    const pct=Math.round((unlocked.size/achievements.length)*100);
+    const progressText=document.querySelector('#achievementProgressText');
+    if(progressText)progressText.textContent=`COLECCIÓN COMPLETADA: ${pct}%`;
+    const tiers=[
+      {threshold:25,className:'violet',image:'./LOGROS/cuadro_violeta_512.png',title:'INICIADO',copy:'Primeras hazañas del turno desbloqueadas.'},
+      {threshold:60,className:'red',image:'./LOGROS/cuadro_rojo_512.png',title:'VETERANO',copy:'Dominio avanzado del local y sus peligros.'},
+      {threshold:100,className:'gold',image:'./LOGROS/cuadro_dorado_512.png',title:'LEYENDA DOMI',copy:'Colección completa. El turno es tuyo.'}
+    ];
+    for(const tier of tiers){
+      const isUnlocked=pct>=tier.threshold;
+      const card=document.createElement('article');card.className=`achievement-frame achievement-frame--${tier.className}${isUnlocked?'':' achievement-frame--locked'}`;
+      const image=document.createElement('img');image.src=tier.image;image.alt='';image.className='achievement-frame__sprite';
+      if(!isUnlocked){
+        const lock=document.createElement('span');lock.className='achievement-frame__lock';lock.innerHTML='<i data-lucide="lock-keyhole" aria-hidden="true"></i><small>DESBLOQUEA AL '+tier.threshold+'%</small>';
+        card.append(image,lock);root.append(card);continue;
+      }
+      const copy=document.createElement('div');copy.className='achievement-frame__copy';
+      const title=document.createElement('strong');title.textContent=tier.title;
+      const desc=document.createElement('span');desc.textContent=tier.copy;
+      const status=document.createElement('small');status.textContent=`DESBLOQUEADO AL ${tier.threshold}%`;
+      copy.append(title,desc,status);card.append(image,copy);
+      if(tier.className==='gold'){const particles=document.createElement('div');particles.className='achievement-frame__particles';for(let i=0;i<18;i++){const p=document.createElement('i');p.style.setProperty('--i',i);particles.append(p);}card.append(particles);}
+      root.append(card);
     }
+    refreshIcons();
     this.game.showScreen('achievementsScreen');
   }
 

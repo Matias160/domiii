@@ -18,8 +18,9 @@ export const catalog=[...basics,...shopItems];
 const normalize=value=>value.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLocaleLowerCase('es');
 export function filterCatalog(profile,{type='skin',ownedOnly=false,query='',affordable=false,sort='featured'}={}){
   const result=catalog.filter(item=>item.type===type&&(!ownedOnly||isOwned(profile,item.type,item.id))&&(!affordable||isOwned(profile,item.type,item.id)||((!item.domiExclusive&&!item.cartographyExclusive)&&item.cost<=profile.bank))&&normalize(item.name+' '+item.description).includes(normalize(query.trim())));
-  if(sort==='price')result.sort((a,b)=>a.cost-b.cost);
-  if(sort==='name')result.sort((a,b)=>a.name.localeCompare(b.name,'es'));
+  const tierRank=item=>item.cartographyExclusive?2:(item.domiExclusive||item.legendary||String(item.id).startsWith('leg_'))?1:0;
+  const withinTier=(a,b)=>sort==='price'?a.cost-b.cost:sort==='name'?a.name.localeCompare(b.name,'es'):0;
+  result.sort((a,b)=>tierRank(a)-tierRank(b)||withinTier(a,b));
   return result;
 }
 function node(tag,className,text){const el=document.createElement(tag);el.className=className;if(text!==undefined)el.textContent=text;return el;}

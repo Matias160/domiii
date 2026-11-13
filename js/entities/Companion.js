@@ -11,7 +11,24 @@ export const companions = {
   taco: { name: 'Taco Guardián', detail: 'Otorga un escudo protector periódico y arremete contra enemigos.' },
   soda: { name: 'Botellita Soda', detail: 'Lanza burbujas curativas periódicas y ráfagas de gas refrescante.' },
   parrilla: { name: 'Mini Parrilla', detail: 'Mascota exclusiva de Don Domi. Lanza chispas candentes y calcina enemigos.' },
+  mate: { name: 'Mate Compañero', detail: 'Activa pulsos criollos de velocidad y cadencia.' },
+  dulce_leche: { name: 'Dulce de Leche', detail: 'Ralentiza enemigos con caramelo pegajoso.' },
+  choco_heart: { name: 'Corazón de Chocolate', detail: 'Cura y protege al jugador periódicamente.' },
+  icecream_pet: { name: 'Heladito Polar', detail: 'Congela grupos de enemigos con una ráfaga polar.' },
 };
+
+const animatedPetAssets = {
+  mate: './new mascotas/01_mate_x8.gif',
+  dulce_leche: './new mascotas/02_dulce_de_leche_x8.gif',
+  choco_heart: './new mascotas/09_corazon_chocolate_x8.gif',
+  icecream_pet: './new mascotas/10_helado_x8.gif'
+};
+const animatedPetImages = new Map();
+function getAnimatedPetImage(id) {
+  if (typeof Image === 'undefined' || !animatedPetAssets[id]) return null;
+  if (!animatedPetImages.has(id)) { const image = new Image(); image.src = animatedPetAssets[id]; animatedPetImages.set(id, image); }
+  return animatedPetImages.get(id);
+}
 
 export class Companion {
   constructor(id, player) {
@@ -23,6 +40,7 @@ export class Companion {
     this.shieldTimer = 3.0;
     this.tacoDashTimer = 1.8;
     this.healTimer = 4.5;
+    this.specialTimer = 2.5;
   }
 
   update(state, delta) {
@@ -30,6 +48,48 @@ export class Companion {
     const p = state.player, blend = 1 - Math.exp(-delta * 6);
     this.x += (p.x - p.facing.x * 45 + Math.sin(state.time * 2) * 14 - this.x) * blend;
     this.y += (p.y - p.facing.y * 45 + 24 - this.y) * blend;
+
+    if (this.id === 'mate') {
+      this.specialTimer -= delta;
+      if (this.specialTimer <= 0) {
+        this.specialTimer = 8;
+        p.buffs.speedMultiplier = Math.max(p.buffs.speedMultiplier, 1.18);
+        p.buffs.speedTime = Math.max(p.buffs.speedTime, 3);
+        p.buffs.fireRateMultiplier = Math.min(p.buffs.fireRateMultiplier, 0.86);
+        p.buffs.fireTime = Math.max(p.buffs.fireTime, 3);
+        state.floaters?.push({x:p.x,y:p.y-30,text:'¡PULSO DE MATE!',life:1,color:'#7dff8a'});
+        burst(state,p.x,p.y,'#7dff8a',14,100);
+      }
+      return;
+    }
+    if (this.id === 'dulce_leche') {
+      this.specialTimer -= delta;
+      if (this.specialTimer <= 0) {
+        this.specialTimer = 4.5;
+        for (const enemy of state.enemies) if (enemy.hp>0 && Math.hypot(enemy.x-this.x,enemy.y-this.y)<150) enemy.slowTimer=Math.max(enemy.slowTimer||0,2.5);
+        impactRing(state,this.x,this.y,'#d9903d'); burst(state,this.x,this.y,'#f5b85c',12,85);
+      }
+      return;
+    }
+    if (this.id === 'choco_heart') {
+      this.specialTimer -= delta;
+      if (this.specialTimer <= 0) {
+        this.specialTimer = 7;
+        const before=p.hp; p.hp=Math.min(p.maxHp,p.hp+10+Math.round(p.level*.8)); p.invulnerable=Math.max(p.invulnerable,0.65);
+        if(p.hp>before) state.floaters?.push({x:p.x,y:p.y-30,text:`+${Math.round(p.hp-before)} HP`,kind:'heal',life:1,color:'#ff6fae'});
+        impactRing(state,p.x,p.y,'#ff6fae');
+      }
+      return;
+    }
+    if (this.id === 'icecream_pet') {
+      this.specialTimer -= delta;
+      if (this.specialTimer <= 0) {
+        this.specialTimer = 6;
+        for (const enemy of state.enemies) if (enemy.hp>0 && Math.hypot(enemy.x-this.x,enemy.y-this.y)<180) { enemy.slowTimer=Math.max(enemy.slowTimer||0,3); enemy.frozenTimer=Math.max(enemy.frozenTimer||0,1.1); }
+        impactRing(state,this.x,this.y,'#8ee7ff'); burst(state,this.x,this.y,'#c8f5ff',18,120);
+      }
+      return;
+    }
 
     if (this.id === 'drone') {
       // 1. Magnet: atrae aderezos/items
@@ -240,6 +300,11 @@ export class Companion {
 
   draw(ctx, time) {
     if (this.id === 'none') return;
+    if (animatedPetAssets[this.id]) {
+      const image=getAnimatedPetImage(this.id);
+      if(image?.complete&&image.naturalWidth>0){ctx.save();ctx.imageSmoothingEnabled=false;ctx.drawImage(image,Math.round(this.x-25),Math.round(this.y-25+Math.sin(time*5)*2),50,50);ctx.restore();}
+      return;
+    }
     if (this.id === 'parrilla') {
       const bob = Math.sin(time * 8) * 2;
       ctx.save(); ctx.translate(Math.round(this.x), Math.round(this.y + bob));

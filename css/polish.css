@@ -4291,6 +4291,31 @@ kbd { display: inline-block; border: 1px solid #556771; border-bottom-width: 3px
   .option-card * { animation: none !important; transition: none !important; }
 }
 
+/* Vitrina de logros progresiva. */
+.achievements-screen { background:radial-gradient(circle at 50% 35%,#17242a 0,#070b0e 72%) !important; }
+.achievements-panel { max-width:1180px !important; }
+.achievement-progress-text { color:#8debd5;font:10px/1.8 'Press Start 2P',monospace;text-align:center;margin:-12px 0 26px; }
+.achievement-showcase { display:flex;align-items:flex-end;justify-content:center;gap:28px;min-height:440px;padding:28px;overflow:hidden; }
+.achievement-frame { position:relative;display:grid;place-items:center;flex:none;filter:drop-shadow(8px 10px 0 #000);animation:achievementReveal .45s steps(5,end) both; }
+.achievement-frame--violet { width:220px;height:220px; }
+.achievement-frame--red { width:290px;height:290px; }
+.achievement-frame--gold { width:380px;height:380px;filter:drop-shadow(8px 10px 0 #000) drop-shadow(0 0 24px #ffd84a88); }
+.achievement-frame__sprite { position:absolute;inset:0;width:100%;height:100%;object-fit:contain;image-rendering:pixelated; }
+.achievement-frame__copy { position:relative;z-index:2;width:56%;display:flex;flex-direction:column;gap:10px;text-align:center;color:#f8f4e8; }
+.achievement-frame__copy strong { color:#fff1a8;font:11px/1.6 'Press Start 2P',monospace;text-shadow:2px 2px #000; }
+.achievement-frame__copy span { font:12px/1.4 'Segoe UI',sans-serif;color:#dbe7e5; }
+.achievement-frame__copy small { font:7px/1.6 'Press Start 2P',monospace;color:#7fffd4; }
+.achievement-frame__particles { position:absolute;inset:7%;pointer-events:none; }
+.achievement-frame__particles i { --angle:calc(var(--i)*20deg);position:absolute;left:50%;top:50%;width:5px;height:5px;background:#fff3a1;box-shadow:0 0 8px #ffd700;animation:achievementSpark 2s calc(var(--i)*-.09s) linear infinite; }
+.achievement-frame--locked .achievement-frame__sprite { filter:grayscale(1) brightness(.22);opacity:.55; }
+.achievement-frame__lock { position:relative;z-index:3;display:grid;place-items:center;gap:12px;width:86px;height:86px;color:#ffe2a1;background:#0b151ae8;border:3px solid #d8b56d;box-shadow:6px 6px 0 #000; }
+.achievement-frame__lock .ui-icon { width:34px;height:34px; }
+.achievement-frame__lock small { font:6px/1.6 'Press Start 2P',monospace;text-align:center;padding:0 5px; }
+.achievement-showcase__empty { align-self:center;color:#91a6ad;font:10px/1.8 'Press Start 2P',monospace;text-align:center;max-width:520px; }
+@keyframes achievementReveal { from{opacity:0;transform:scale(.55) translateY(40px)} to{opacity:1;transform:none} }
+@keyframes achievementSpark { from{transform:rotate(var(--angle)) translateX(40px) scale(.4);opacity:0} 35%{opacity:1} to{transform:rotate(var(--angle)) translateX(170px) scale(1.2);opacity:0} }
+@media(max-width:900px){.achievement-showcase{align-items:center;flex-direction:column;overflow:visible}.achievement-frame--gold{width:min(380px,90vw);height:min(380px,90vw)}}
+
 /* Setup layout guardrails: keep the selector inside the viewport and in document flow. */
 #setupScreen.screen--active {
   display: block !important;

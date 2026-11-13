@@ -94,3 +94,16 @@ test('PrizeMachine never awards Señor Domi (skin:domi is strictly reserved for 
     assert.notEqual(prize.item?.id, 'domi', 'Señor Domi must never be rolled in the prize machine');
   }
 });
+
+test('PrizeMachine only awards common items, never mission or legendary exclusives', () => {
+  resetStorage();
+  const profile = guestLogin();
+  profile.purchases = [];
+  const machine = new PrizeMachine({ audio: { play() {} }, showScreen() {} });
+  for (let i = 0; i < 100; i++) {
+    const item = machine.pickPrize(profile).item;
+    assert.ok(item && !item.domiExclusive && !item.cartographyExclusive);
+    assert.ok(!String(item.id).startsWith('leg_'));
+    assert.equal(item.rarity, 'common');
+  }
+});

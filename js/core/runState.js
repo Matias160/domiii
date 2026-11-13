@@ -36,7 +36,7 @@ export function createRunState(setup = {}, audio = null) {
     particles: [], floaters: [], rings: [], dashGhosts: [], manualAim: false, aimPoint: null, target: null,
     bossIntro: null,
     spatialGrid: new SpatialHashGrid(120, 120, world.width, world.height),
-    itemTimer: 4, pickups: {}, score: 0, time: 0, kills: 0, spawnTimer: .3,
+    itemTimer: 4, pickups: {}, score: 0, damageDealt: 0, time: 0, kills: 0, spawnTimer: .3,
     shake: 0, combo: 0, comboTime: 0, pendingLevels: 0, bossesKilled: 0, distance: 0,
   };
   initializeDirector(state);
@@ -62,6 +62,9 @@ export function createRunState(setup = {}, audio = null) {
   if (a === 'crown') { player.maxHp += 15; player.hp += 15; }
   if (a === 'top_hat') player.critChance = (player.critChance || 0) + 0.12;
   if (a === 'wizard_hat') player.fireRateMultiplier = (player.fireRateMultiplier || 1) * 0.88;
+  if (a === 'gem_gauntlet') { player.damageMultiplier *= 1.10; player.critChance = (player.critChance || 0) + 0.08; }
+  if (a === 'shift_watch') { player.dashCooldownMultiplier = (player.dashCooldownMultiplier || 1) * 0.85; player.speed *= 1.06; }
+  if (a === 'orb_radar') { player.magnetRadius = (player.magnetRadius || 80) * 1.45; player.projectileSpeedMultiplier = (player.projectileSpeedMultiplier || 1) * 1.12; }
 
   // --- Accesorio Especial ---
   if (a === 'chef_hat') player.damageMultiplier *= 1.12;

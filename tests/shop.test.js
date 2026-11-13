@@ -25,6 +25,8 @@ test('search ignores accents and case; sorting does not mutate the catalog',()=>
   assert.equal(filterCatalog(profile,{type:'skin',query:' RÁPIDO '})[0].id,'nugget');
   assert.equal(filterCatalog(profile,{type:'skin',query:'no existe'}).length,0);
   const sorted=filterCatalog(profile,{type:'skin',sort:'price'});
-  assert.ok(sorted.every((item,index)=>!index||item.cost>=sorted[index-1].cost));
+  const tier=item=>item.cartographyExclusive?2:(item.domiExclusive||item.legendary||String(item.id).startsWith('leg_'))?1:0;
+  assert.ok(sorted.every((item,index)=>!index||tier(item)>=tier(sorted[index-1])));
+  assert.ok(sorted.every((item,index)=>!index||tier(item)!==tier(sorted[index-1])||item.cost>=sorted[index-1].cost));
   assert.deepEqual(catalog.map(item=>item.id),before);
 });

@@ -5,6 +5,7 @@ import {createAnimatedGif} from '../core/animatedGif.js';
 
 export const portalGifImage = createAnimatedGif('./portal.gif');
 export const copaGifImage = createAnimatedGif('./copa rankin.gif');
+export const multiplayerGifImage = createAnimatedGif('./LOGROS/sprite multi.gif');
 
 function box(c,x,y,w,h,color,shadow=true){
   if(shadow){
@@ -329,17 +330,14 @@ export function drawStation(c,s,t,active){
     }
   }
   else if(id==='pets'){
-    // Day care enclosure
-    box(c,-72,-48,144,82,'#3e6f54');
-    box(c,-64,-40,128,66,'#8db37d');
-    // Grass patch
-    c.fillStyle='#5b9967';c.fillRect(-60,-36,120,58);
-    // Pet sprites
-    drawPet(c,'ketchup',-34,-10,t,1.4);
-    drawPet(c,'drone',36,-16,t,0.85);
-    // Fence pickets
-    c.fillStyle='#f0dfb2';
-    for(let i=0;i<6;i++)box(c,-66+i*24,14,12,28,'#ebd5a1',false);
+    c.save();
+    c.shadowColor='#38ef7d';c.shadowBlur=active?24:10;
+    if(multiplayerGifImage?.complete&&multiplayerGifImage.naturalWidth>0){c.imageSmoothingEnabled=false;c.drawImage(multiplayerGifImage,-92,-128,184,184);}
+    else box(c,-76,-92,152,132,'#173c37');
+    c.shadowBlur=0;
+    box(c,-82,35,164,30,'#07191a');
+    text(c,'MULTIJUGADOR',0,55,8,'#72ffd0');
+    c.restore();
   }
   else if(id==='shop'){
     // Bazaar stall

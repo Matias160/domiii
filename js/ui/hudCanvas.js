@@ -212,7 +212,7 @@ export class HudCanvas {
   }
 
   drawBossMeter(ctx, boss, narrow, hudBottom, activeBosses = [boss]) {
-    const W = narrow ? 220 : Math.min(360, this.w * 0.9), H = 52;
+    const W = narrow ? 180 : Math.min(360, this.w * 0.9), H = narrow ? 44 : 52;
     const x = narrow ? this.w - 8 - W : (this.w - W) / 2;
     const y = narrow ? hudBottom + 24 : Math.max(88, hudBottom + 22);
     const count = activeBosses?.length || 1;
@@ -224,7 +224,8 @@ export class HudCanvas {
     // El título se achica hasta entrar en la barra (nombres largos en pantallas angostas)
     let titleSize = 10;
     while (titleSize > 6 && this.measure(title, `${titleSize}px ${PIXEL_FONT}`) > W - 18) titleSize -= 1;
-    const frame = this.sprite(`boss|${title}|${W}|${titleSize}`, W + 24, H + 24, c => {
+    const titleY=narrow?14:16,trackY=narrow?23:27,trackH=narrow?14:16;
+    const frame = this.sprite(`boss|${title}|${W}|${H}|${titleSize}`, W + 24, H + 24, c => {
       c.translate(10, 8);
       c.save(); c.shadowColor = 'rgba(255, 51, 68, 0.45)'; c.shadowBlur = 18;
       c.fillStyle = '#0d161ae6'; c.fillRect(0, 0, W, H); c.restore();
@@ -233,10 +234,10 @@ export class HudCanvas {
       c.strokeStyle = border; c.lineWidth = 3; c.strokeRect(1.5, 1.5, W - 3, H - 3);
       c.fillStyle = '#000'; c.fillRect(0, H - 5, W, 5);
       c.font = `${titleSize}px ${PIXEL_FONT}`; c.textAlign = 'center'; c.textBaseline = 'middle';
-      c.fillStyle = '#000'; c.fillText(title, W / 2 + 1, 17);
-      c.fillStyle = '#ffcc00'; c.fillText(title, W / 2, 16);
-      c.fillStyle = '#000'; c.fillRect(13, 27, W - 26, 16);
-      c.fillStyle = '#180508'; c.fillRect(15, 29, W - 30, 12);
+      c.fillStyle = '#000'; c.fillText(title, W / 2 + 1, titleY+1);
+      c.fillStyle = '#ffcc00'; c.fillText(title, W / 2, titleY);
+      c.fillStyle = '#000'; c.fillRect(13, trackY, W - 26, trackH);
+      c.fillStyle = '#180508'; c.fillRect(15, trackY+2, W - 30, trackH-4);
     });
     ctx.drawImage(frame.canvas, x - 10, y - 8, frame.w, frame.h);
     // El relleno de vida se calcula con la suma de vida de todos los jefes activos
@@ -246,8 +247,8 @@ export class HudCanvas {
     if (fillW > 0) {
       const grad = ctx.createLinearGradient(x + 15, 0, x + W - 15, 0);
       grad.addColorStop(0, '#d00000'); grad.addColorStop(0.5, '#e85d04'); grad.addColorStop(1, '#ffba08');
-      ctx.fillStyle = grad; ctx.fillRect(x + 15, y + 29, fillW, 12);
-      ctx.fillStyle = 'rgba(255, 255, 255, 0.4)'; ctx.fillRect(x + 15, y + 29, fillW, 2);
+      ctx.fillStyle = grad; ctx.fillRect(x + 15, y + trackY+2, fillW, trackH-4);
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.4)'; ctx.fillRect(x + 15, y + trackY+2, fillW, 2);
     }
   }
 

@@ -10,14 +10,26 @@ function storage(){const map=new Map();return {getItem:k=>map.get(k)||null,setIt
 test('local profiles isolate points, purchases and run rewards',async()=>{
   globalThis.localStorage=storage();globalThis.sessionStorage=storage();
   await register('CuentaUno','clave123');
-  const result={id:'one',score:1000,kills:2,level:3,timeText:'01:00',map:'diner',outcome:'defeat'};
-  awardRun(result);awardRun(result);assert.equal(currentAccount().bank,1000);
-  purchase('skin','nugget');equip('skin','nugget');assert.equal(currentAccount().bank,550);
+  const result={id:'one',score:1000,kills:2,level:50,damageDealt:50000,timeText:'01:00',map:'diner',outcome:'defeat'};
+  awardRun(result);awardRun(result);assert.equal(currentAccount().bank,50);
+  assert.equal(currentAccount().runs.length,1);
+  for(let i=0;i<9;i++)awardRun({id:'extra'+i,score:1000,damageDealt:50000,map:'diner'});
+  assert.equal(currentAccount().bank,500);
+  purchase('skin','nugget');equip('skin','nugget');assert.equal(currentAccount().bank,50);
   assert.equal(currentAccount().loadout.skin,'nugget');
   logout();await register('CuentaDos','clave456');assert.equal(currentAccount().bank,0);
   assert.equal(currentAccount().purchases.length,0);
   logout();await assert.rejects(login('CuentaInexistente'));
-  await login('CuentaUno');assert.equal(currentAccount().bank,550);
+  await login('CuentaUno');assert.equal(currentAccount().bank,50);
+});
+
+test('run rewards grant scarce coins from effective damage and always grant at least one',async()=>{
+  globalThis.localStorage=storage();globalThis.sessionStorage=storage();
+  await register('Economia','clave123');
+  awardRun({id:'short',score:99999,level:1,damageDealt:12,map:'diner'});
+  awardRun({id:'fight',score:1,level:2,damageDealt:2600,map:'diner'});
+  awardRun({id:'long',score:1,level:20,damageDealt:100000,map:'diner'});
+  assert.equal(currentAccount().bank,53);
 });
 
 test('primes unlock at levels 10, 20 and 30 with cooldowns',()=>{
@@ -37,8 +49,8 @@ test('snow freezes periodically and moving hazards spawn only on special maps',(
 test('awardRun persists combo, time and bossesKilled so all 14 Don Domi missions can be completed',async()=>{
   globalThis.localStorage=storage();globalThis.sessionStorage=storage();
   await register('DomiTester','clave123');
-  for(let i=0;i<5;i++){
-    awardRun({id:'r'+i,score:2500,kills:105,level:12,time:250,timeText:'04:10',peakCombo:40,bossesKilled:1,map:'diner',outcome:'victory'});
+  for(let i=0;i<7;i++){
+    awardRun({id:'r'+i,score:2500,kills:150,level:15,time:320,timeText:'05:20',peakCombo:50,bossesKilled:1,map:'diner',outcome:'victory'});
   }
   const profile=currentAccount();
   const missions=DomiScreen.prototype.getMissions(profile);
@@ -51,8 +63,8 @@ test('awardRun persists combo, time and bossesKilled so all 14 Don Domi missions
 test('completing all 14 Founder missions unlocks Señor Domi skin', async () => {
   globalThis.localStorage = storage(); globalThis.sessionStorage = storage();
   await register('FounderChampion', 'pass123');
-  for (let i = 0; i < 5; i++) {
-    awardRun({ id: 'f' + i, score: 2500, kills: 105, level: 12, time: 250, timeText: '04:10', peakCombo: 40, bossesKilled: 1, map: 'diner', outcome: 'victory' });
+  for (let i = 0; i < 7; i++) {
+    awardRun({ id: 'f' + i, score: 2500, kills: 150, level: 15, time: 320, timeText: '05:20', peakCombo: 50, bossesKilled: 1, map: 'diner', outcome: 'victory' });
   }
   const prevDoc = globalThis.document;
   const mockCtx = new Proxy({}, {

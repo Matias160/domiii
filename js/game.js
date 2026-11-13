@@ -1064,6 +1064,8 @@ export class Game {
       id:crypto.randomUUID(),
       name: this.state.player.name,
       score: Math.floor(this.state.score),
+      damageDealt: Math.floor(this.state.damageDealt || 0),
+      coinMultiplier: this.state.player.goldTicketActive ? 1.10 : 1,
       time: Math.floor(this.state.time),
       timeText: this.formatTime(this.state.time),
       kills: this.state.kills,

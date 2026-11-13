@@ -42,6 +42,9 @@ function getMapAssetSource(sheetKey) {
 }
 
 export const ACCESSORIES = {
+  gem_gauntlet: { id:'gem_gauntlet', name:'Guantelete de Gemas', tier:'standard', category:'Guantelete', layer:'front', cost:900, icon:'G', desc:'+10% daño y +8% crítico.', stats:{hp:'-',spd:'-',dmg:'+10%',perk:'+8% Crítico'}, sheet:'animated_gif', asset:'./new accesorios/01_guantelete_gemas_x8.gif', dw:44, dh:44, ox:-28, oy:-8 },
+  shift_watch: { id:'shift_watch', name:'Reloj Transformador', tier:'standard', category:'Reloj', layer:'front', cost:1000, icon:'R', desc:'-15% recarga del acelerón y +6% velocidad.', stats:{hp:'-',spd:'+6%',dmg:'-',perk:'Acelerón -15%'}, sheet:'animated_gif', asset:'./new accesorios/02_reloj_transformador_x8.gif', dw:40, dh:40, ox:8, oy:-7 },
+  orb_radar: { id:'orb_radar', name:'Detector de Esferas', tier:'standard', category:'Detector', layer:'front', cost:1100, icon:'O', desc:'+45% imán y +12% velocidad de proyectiles.', stats:{hp:'-',spd:'-',dmg:'+12% Proy',perk:'Imán +45%'}, sheet:'animated_gif', asset:'./new accesorios/03_radar_orbes_x8.gif', dw:28, dh:28, ox:12, oy:-13 },
   // --- ACCESORIOS ESTÁNDAR (TIENDA Y ARMARIO - 8 ITEMS REALES DE accesorios.png) ---
   crown: {
     id: 'crown',
@@ -473,6 +476,17 @@ export function resolveAccessory(id) {
   return ACCESSORIES[resolvedId] || null;
 }
 
+const animatedAccessoryImages = new Map();
+function getAnimatedAccessoryImage(asset) {
+  if (typeof Image === 'undefined' || !asset) return null;
+  if (!animatedAccessoryImages.has(asset)) {
+    const image = new Image();
+    image.src = asset;
+    animatedAccessoryImages.set(asset, image);
+  }
+  return animatedAccessoryImages.get(asset);
+}
+
 function drawProceduralLavaCrown(ctx, ox, oy, dw, dh) {
   ctx.save();
   ctx.translate(ox + dw / 2, oy + dh);
@@ -688,6 +702,16 @@ export function drawAccessory(ctx, id, x, y, scale = 1, layerFilter = null) {
   ctx.translate(x, y);
   ctx.scale(scale, scale);
 
+  if (acc.sheet === 'animated_gif') {
+    const image = getAnimatedAccessoryImage(acc.asset);
+    if (image?.complete && image.naturalWidth > 0) {
+      ctx.imageSmoothingEnabled = false;
+      ctx.drawImage(image, acc.ox, acc.oy, acc.dw, acc.dh);
+    }
+    ctx.restore();
+    return;
+  }
+
   if (acc.sheet === 'procedural') {
     drawProceduralChefHat(ctx, acc.ox, acc.oy, acc.dw, acc.dh);
     ctx.restore();
@@ -758,6 +782,16 @@ export function drawAccessory(ctx, id, x, y, scale = 1, layerFilter = null) {
 export function drawAccessoryIcon(ctx, id, cx, cy, boxSize = 48) {
   const acc = resolveAccessory(id);
   if (!acc) return;
+
+  if (acc.sheet === 'animated_gif') {
+    const image = getAnimatedAccessoryImage(acc.asset);
+    if (image?.complete && image.naturalWidth > 0) {
+      const size = boxSize * 0.9;
+      ctx.imageSmoothingEnabled = false;
+      ctx.drawImage(image, cx - size / 2, cy - size / 2, size, size);
+    }
+    return;
+  }
 
   if (acc.sheet === 'procedural') {
     const s = boxSize / 48;
