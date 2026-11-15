@@ -31,6 +31,7 @@ import {Shop} from './ui/shop.js';
 import {DomiScreen} from './ui/domi.js';
 import {AtlasScreen} from './ui/atlasScreen.js';
 import {PrizeMachine} from './ui/prizeMachine.js';
+import {MultiplayerPrototype} from './ui/multiplayerPrototype.js';
 import {updateMap,drawMapObstacles} from './systems/mapSystem.js';
 import {primes,updatePrimes,activatePrime,drawPrimeEffects} from './systems/primeSystem.js';
 import {icon,refreshIcons,abilityIcons} from './ui/icons.js';
@@ -70,7 +71,7 @@ export class Game {
     this.audio = new AudioSystem();
     this.menu = new MenuScreen(this);
     this.gameOver = new GameOverScreen(this);
-    this.lobby=new Lobby(this);this.shop=new Shop(this);this.domi=new DomiScreen(this);this.atlas=new AtlasScreen(this);this.prizeMachine=new PrizeMachine(this);this.choice=null;
+    this.lobby=new Lobby(this);this.shop=new Shop(this);this.domi=new DomiScreen(this);this.atlas=new AtlasScreen(this);this.prizeMachine=new PrizeMachine(this);this.multiplayer=new MultiplayerPrototype(this);this.choice=null;
     this.renderSortBuffer = [];
     // Visor lógico de la partida: alto base 540, ancho según la proporción de la pantalla
     this.view = { w: 960, h: 540 };
@@ -219,6 +220,7 @@ export class Game {
     if (id !== 'gameScreen') { clearTimeout(this.toastTimer); this.toast.hidden = true; }
     document.querySelector('#primeBar').hidden=!inRun || isPaused;
     if(id==='lobbyScreen')this.lobby.enter();
+    if(id==='multiScreen')this.multiplayer.render();
     if(id==='setupScreen')requestAnimationFrame(()=>this.menu?.fitSetup?.());
     if (id === 'pauseScreen') this.renderBuild();
     if(id==='domiScreen')this.domi.render();
@@ -1642,8 +1644,8 @@ function resolveLoadout(run) {
     return table.find(([word]) => text.includes(word))?.[1] || fallback;
   };
   return {
-    skinId: pick(run.skinId, run.skin, [['cosmo', 'cosmo'], ['nugget', 'nugget'], ['papa', 'papas'], ['pizza', 'pizza'], ['empanada', 'empanada'], ['chori', 'choripan'], ['domi', 'domi']], 'pancho'),
+    skinId: run.skinId === 'cosmo' ? 'pancho' : pick(run.skinId, run.skin, [['nugget', 'nugget'], ['papa', 'papas'], ['pizza', 'pizza'], ['empanada', 'empanada'], ['chori', 'choripan'], ['domi', 'domi']], 'pancho'),
     weaponId: pick(run.weaponId, run.weapon, [['sniper', 'mustardSniper'], ['mostaza', 'mustardSniper'], ['lluvia', 'friesRain'], ['papa', 'friesRain'], ['explosiv', 'explosiveBread'], ['pan', 'explosiveBread'], ['salsa', 'sauce'], ['chimi', 'sauce'], ['brocheta', 'skewer'], ['espada', 'skewer']], 'fork'),
-    companionId: pick(run.companionId, run.companion, [['ketchup', 'ketchup'], ['dron', 'drone'], ['taco', 'taco'], ['soda', 'soda'], ['botell', 'soda'], ['parrilla', 'parrilla']], 'none'),
+    companionId: pick(run.companionId, run.companion, [['cosmo', 'cosmo'], ['ketchup', 'ketchup'], ['dron', 'drone'], ['taco', 'taco'], ['soda', 'soda'], ['botell', 'soda'], ['parrilla', 'parrilla']], 'none'),
   };
 }

@@ -88,7 +88,24 @@ async function digest(password,salt){
   return sha256Sync(password + ':' + salt);
 }
 function clean(name){return name.trim().toLocaleLowerCase('es');}
-export function currentAccount(){try{const id=sessionStorage.getItem(SESSION);return id?all()[id]||null:null;}catch{return null;}}
+export function currentAccount(){
+  try{
+    const id=sessionStorage.getItem(SESSION);
+    if(!id)return null;
+    const data=all(true),profile=data[id];
+    if(!profile)return null;
+    if(profile.purchases?.includes('skin:cosmo')){
+      profile.purchases=profile.purchases.filter(item=>item!=='skin:cosmo');
+      if(!profile.purchases.includes('pet:cosmo'))profile.purchases.push('pet:cosmo');
+      if(profile.loadout?.skin==='cosmo'){
+        profile.loadout.skin='pancho';
+        if(!profile.loadout.pet||profile.loadout.pet==='none')profile.loadout.pet='cosmo';
+      }
+      try{write(data);}catch{}
+    }
+    return profile;
+  }catch{return null;}
+}
 export function logout(){try{sessionStorage.removeItem(SESSION);}catch{}}
 // El invitado es la cuenta compartida 'invitado': no tiene nombre propio ni contraseña
 export function isGuest(){try{return sessionStorage.getItem(SESSION)==='invitado';}catch{return false;}}
@@ -157,7 +174,9 @@ export function grantItem(type,id){
 export function awardRun(result){
   const score=Math.max(0,Math.floor(Number(result.score)||0));
   const dealt=Math.max(0,Number(result.damageDealt)||0);
-  const points=Math.min(50,Math.max(1,Math.floor((dealt/1000)*(Number(result.coinMultiplier)||1))));
+  const level=Math.max(1,Math.floor(Number(result.level)||1));
+  const damageCoins=Math.max(1,Math.floor((dealt/1000)*(Number(result.coinMultiplier)||1)));
+  const points=Math.min(50,damageCoins+Math.floor(level/5));
   result.coinsEarned=points;
   return mutate(p=>{
   if(p.runs.some(x=>x.id===result.id))return p;

@@ -32,6 +32,15 @@ test('run rewards grant scarce coins from effective damage and always grant at l
   assert.equal(currentAccount().bank,53);
 });
 
+test('run rewards always include a base coin and add one per five levels',async()=>{
+  globalThis.localStorage=storage();globalThis.sessionStorage=storage();
+  await register('PremioNivel','clave123');
+  awardRun({id:'base',score:0,level:1,damageDealt:0});
+  awardRun({id:'level-five',score:0,level:5,damageDealt:0});
+  awardRun({id:'level-ten',score:0,level:10,damageDealt:0});
+  assert.equal(currentAccount().bank,6);
+});
+
 test('primes unlock at levels 10, 20 and 30 with cooldowns',()=>{
   const s=createRunState();assert.equal(activatePrime(s,'q'),false);
   s.player.level=10;assert.equal(activatePrime(s,'q'),true);assert.equal(s.projectiles.length,20);

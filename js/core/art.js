@@ -1,10 +1,5 @@
 import { createAnimatedGif } from './animatedGif.js';
 export const domiGifImage = createAnimatedGif('./don domi.gif');
-const cosmoImages = {
-  idle: createAnimatedGif('./NEW personaje/personaje_quieto.gif'),
-  left: createAnimatedGif('./NEW personaje/personaje_caminando_izquierda.gif'),
-  right: createAnimatedGif('./NEW personaje/personaje_caminando_derecha.gif')
-};
 const INK = '#161c20';
 const sprites = new Map();
 const floors = new Map();
@@ -406,25 +401,6 @@ export function drawFood(c, kind, x, y, scale = 1, time = 0, enemy = false, flas
       c.imageSmoothingEnabled = smoothing;
       return;
     }
-  }
-
-  if (kind === 'cosmo') {
-    const image = cosmoImages[motion.startsWith('idle') ? 'idle' : motion] || cosmoImages.idle;
-    if (image?.complete && image.naturalWidth > 0) {
-      const size = 78 * scale;
-      c.save();
-      if (motion === 'idle-left') {
-        c.translate(Math.round(x), 0);
-        c.scale(-1, 1);
-        c.drawImage(image, Math.round(-size / 2), Math.round(y - size / 2 - 4 * scale), size, size);
-      } else {
-        c.drawImage(image, Math.round(x - size / 2), Math.round(y - size / 2 - 4 * scale), size, size);
-      }
-      c.restore();
-      c.imageSmoothingEnabled = smoothing;
-      return;
-    }
-    kind = 'pancho';
   }
 
   c.drawImage(bitten ? bittenSprite(kind, flash) : foodSprite(kind, enemy, flash), Math.round(x - 32 * scale), Math.round(y - 36 * scale + bob), 64 * scale, 72 * scale);

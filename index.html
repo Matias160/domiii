@@ -16,6 +16,7 @@
     <link rel="stylesheet" href="./css/shop.css" />
     <link rel="stylesheet" href="./css/gameplay.css" />
     <link rel="stylesheet" href="./css/interface.css" />
+    <link rel="stylesheet" href="./css/multiplayer.css" />
     <link rel="stylesheet" href="./css/mobile.css" />
     <link rel="stylesheet" href="./css/setup-layout.css" />
     <!-- Última: su Ñ tiene que declararse después de Press Start 2P para ganarle solo en esa letra -->
@@ -119,6 +120,43 @@
       <section id="lobbyScreen" class="screen lobby-screen">
         <header class="lobby-header"><span class="brand-mark">D<span>2</span></span><div><strong id="lobbyWelcome">PANCHO</strong><small id="lobbyRole">SOCIO DEL CLUB / EN EL LOCAL</small></div><span class="wallet"><i data-lucide="coins"></i><b id="lobbyBank">0</b><small>PT</small></span><button id="lobbyAchievements" class="lobby-achievements" title="Ver logros" aria-label="Ver logros y progreso"><i data-lucide="trophy"></i><span>LOGROS <b id="lobbyAchievementCount">0 / 6</b></span></button><button id="lobbyRegister" class="lobby-achievements lobby-register" title="Registro de socios" aria-label="Ir al registro de socios"><i data-lucide="user-plus"></i><span>REGISTRO</span></button><button id="lobbyHelp" class="icon-button" title="Guía y Presentación" aria-label="Ver guía del juego"><i data-lucide="help-circle"></i></button><button id="lobbyOptions" class="icon-button" title="Opciones" aria-label="Opciones"><i data-lucide="settings-2"></i></button><button id="logoutButton" class="icon-button" title="Cerrar sesion" aria-label="Cerrar sesion"><i data-lucide="log-out"></i></button></header>
         <div class="lobby-stage"><canvas id="lobbyCanvas" width="960" height="540" aria-label="Lobby interactivo"></canvas><p class="lobby-controls"><kbd>WASD</kbd> / flechas: moverte <span>·</span> <kbd>E</kbd>: interactuar <span>·</span> También podés hacer clic en los lugares.</p><div class="lobby-tip" id="lobbyTip" hidden></div></div>
+      </section>
+
+      <section id="multiScreen" class="screen multi-screen" aria-labelledby="multiTitle">
+        <div class="multi-shell">
+          <header class="multi-header">
+            <button id="multiBackButton" class="icon-button" type="button" aria-label="Volver al lobby" title="Volver al lobby"><i data-lucide="arrow-left"></i></button>
+            <div><p class="eyebrow">MESA DE EQUIPO / PROTOTIPO</p><h1 id="multiTitle">Jugar en grupo.</h1><p>Elegí cómo quieren entrar al turno y el rol que vas a aportar.</p></div>
+            <span class="multi-status"><i></i> VISTA LOCAL · SIN CONEXIÓN ONLINE</span>
+          </header>
+
+          <section class="multi-block" aria-labelledby="multiModeTitle">
+            <div class="multi-block-heading"><span>01</span><div><h2 id="multiModeTitle">Modo de equipo</h2><p>Dos maneras de compartir la cocina.</p></div></div>
+            <div class="multi-mode-grid" role="group" aria-label="Elegir modo multijugador">
+              <button type="button" class="multi-choice multi-choice--coop is-selected" data-multi-mode="coop" aria-pressed="true"><i data-lucide="users"></i><strong>COOPERATIVO</strong><span>Un equipo, una oleada. Combinen sus auras para aguantar más.</span><small>2–4 JUGADORES</small></button>
+              <button type="button" class="multi-choice multi-choice--versus" data-multi-mode="versus" aria-pressed="false"><i data-lucide="swords"></i><strong>VERSUS</strong><span>Dos equipos compiten por puntos, objetivos y control del mapa.</span><small>1–4 POR EQUIPO</small></button>
+            </div>
+          </section>
+
+          <section class="multi-block" aria-labelledby="multiClassTitle">
+            <div class="multi-block-heading"><span>02</span><div><h2 id="multiClassTitle">Tu clase de apoyo</h2><p>La clase define una habilidad útil para todo el grupo.</p></div></div>
+            <div class="multi-class-grid" role="group" aria-label="Elegir clase de apoyo">
+              <button type="button" class="multi-class multi-class--red is-selected" data-support-class="red" aria-pressed="true"><span class="multi-class-mark">R</span><span><strong>ROJO / IMPULSOR</strong><small>Aura de daño para aliados cercanos.</small></span></button>
+              <button type="button" class="multi-class multi-class--green" data-support-class="green" aria-pressed="false"><span class="multi-class-mark">V</span><span><strong>VERDE / SANADOR</strong><small>Recupera vida de aliados dentro del aura.</small></span></button>
+              <button type="button" class="multi-class multi-class--blue" data-support-class="blue" aria-pressed="false"><span class="multi-class-mark">A</span><span><strong>AZUL / GUARDIÁN</strong><small>Escudo grupal y pulso que repele enemigos.</small></span></button>
+            </div>
+          </section>
+
+          <section class="multi-block multi-party" aria-labelledby="multiPartyTitle">
+            <div class="multi-block-heading"><span>03</span><div><h2 id="multiPartyTitle">Tu grupo</h2><p id="multiPartySummary" aria-live="polite">Cooperativo · Rojo / Impulsor</p></div></div>
+            <div class="multi-slots">
+              <div class="multi-slot multi-slot--local"><i data-lucide="user-round"></i><span><strong id="multiPlayerName">JUGADOR LOCAL</strong><small id="multiPlayerClass">ROJO / IMPULSOR</small></span><b>VOS</b></div>
+              <div class="multi-slot"><i data-lucide="user-round-plus"></i><span><strong>ESPACIO LIBRE</strong><small>Las invitaciones online llegarán más adelante.</small></span></div>
+              <div class="multi-slot"><i data-lucide="user-round-plus"></i><span><strong>ESPACIO LIBRE</strong><small>Las invitaciones online llegarán más adelante.</small></span></div>
+            </div>
+            <div class="multi-footer"><p id="multiFeedback" role="status" aria-live="polite">La sala es una maqueta interactiva; todavía no conecta jugadores.</p><button id="multiReadyButton" class="pixel-button arcade-action" type="button"><i data-lucide="check"></i><span>MARCAR LISTO</span></button></div>
+          </section>
+        </div>
       </section>
 
       <section id="shopScreen" class="screen shop-screen" aria-labelledby="shopTitle">

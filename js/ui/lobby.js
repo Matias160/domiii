@@ -164,7 +164,7 @@ export class Lobby {
   activate(id){
     this.destination=null;this.game.audio.play('confirm');
     if(id==='portal'){this.game.menu.setSetupStep(1);this.game.menu.prepareAccount();this.game.showScreen('setupScreen');}
-    else if(id==='pets')this.game.showToast?.('MULTIJUGADOR / EN DESARROLLO...');
+    else if(id==='pets')this.game.multiplayer.show();
     else if(id==='shop')this.game.shop.show();
     else if(id==='ranking')this.game.showRanking();
     else if(id==='npc')this.game.domi.show();

@@ -135,18 +135,7 @@ export class Player {
     const bob = Math.round(Math.sin(this.walkTime * 7 + this.x * .05) * 1.5);
     ctx.save();
     drawAccessory(ctx, this.accessory, this.x, this.y + bob, 0.85, 'back');
-    if (this.skin.id === 'cosmo' && this.spriteBlend < 1) {
-      ctx.save();
-      ctx.globalAlpha *= 1 - this.spriteBlend;
-      drawFood(ctx, this.skin.id, this.x, this.y, 0.85, this.walkTime, false, false, false, this.previousSpriteState);
-      ctx.restore();
-      ctx.save();
-      ctx.globalAlpha *= this.spriteBlend;
-      drawFood(ctx, this.skin.id, this.x, this.y, 0.85, this.walkTime, false, false, false, this.spriteState);
-      ctx.restore();
-    } else {
-      drawFood(ctx, this.skin.id, this.x, this.y, 0.85, this.walkTime, false, false, false, this.spriteState);
-    }
+    drawFood(ctx, this.skin.id, this.x, this.y, 0.85, this.walkTime, false, false, false, this.spriteState);
     drawAccessory(ctx, this.accessory, this.x, this.y + bob, 0.85, 'front');
     ctx.restore();
     if (this.inLavaMap) {

@@ -16,19 +16,28 @@ export const companions = {
   dulce_leche: { name: 'Dulce de Leche', detail: 'Ralentiza enemigos con caramelo pegajoso.' },
   choco_heart: { name: 'Corazón de Chocolate', detail: 'Cura y protege al jugador periódicamente.' },
   icecream_pet: { name: 'Heladito Polar', detail: 'Congela grupos de enemigos con una ráfaga polar.' },
+  cosmo: { name: 'Cosmo', detail: 'Mascota exploradora: atrae ingredientes y activa pulsos de velocidad.' },
 };
 
 const animatedPetAssets = {
   mate: './new mascotas/01_mate_x8.gif',
   dulce_leche: './new mascotas/02_dulce_de_leche_x8.gif',
   choco_heart: './new mascotas/09_corazon_chocolate_x8.gif',
-  icecream_pet: './new mascotas/10_helado_x8.gif'
+  icecream_pet: './new mascotas/10_helado_x8.gif',
+  cosmo: {
+    idle: './NEW personaje/personaje_quieto.gif',
+    left: './NEW personaje/personaje_caminando_izquierda.gif',
+    right: './NEW personaje/personaje_caminando_derecha.gif'
+  }
 };
 const animatedPetImages = new Map();
-function getAnimatedPetImage(id) {
-  if (!animatedPetAssets[id]) return null;
-  if (!animatedPetImages.has(id)) animatedPetImages.set(id, createAnimatedGif(animatedPetAssets[id]));
-  return animatedPetImages.get(id);
+function getAnimatedPetImage(id, direction = 'idle') {
+  const source = typeof animatedPetAssets[id] === 'string'
+    ? animatedPetAssets[id]
+    : animatedPetAssets[id]?.[direction] || animatedPetAssets[id]?.idle;
+  if (!source) return null;
+  if (!animatedPetImages.has(source)) animatedPetImages.set(source, createAnimatedGif(source));
+  return animatedPetImages.get(source);
 }
 
 export class Companion {
@@ -42,13 +51,39 @@ export class Companion {
     this.tacoDashTimer = 1.8;
     this.healTimer = 4.5;
     this.specialTimer = 2.5;
+    this.cosmoPulse = 3;
+    this.spriteDirection = 'right';
   }
 
   update(state, delta) {
     if (this.id === 'none') return;
     const p = state.player, blend = 1 - Math.exp(-delta * 6);
+    const previousX = this.x;
     this.x += (p.x - p.facing.x * 45 + Math.sin(state.time * 2) * 14 - this.x) * blend;
     this.y += (p.y - p.facing.y * 45 + 24 - this.y) * blend;
+    this.isMoving = Math.hypot(this.x - previousX, this.y - (this.previousY ?? this.y)) > 0.8;
+    if (Math.abs(this.x - previousX) > 0.8) this.spriteDirection = this.x < previousX ? 'left' : 'right';
+    this.previousY = this.y;
+
+    if (this.id === 'cosmo') {
+      for (const item of state.items) {
+        const dx = this.x - item.x, dy = this.y - item.y, distance = Math.hypot(dx, dy);
+        if (distance > 1 && distance < 105) {
+          const step = Math.min(distance, delta * 145);
+          item.x += dx / distance * step;
+          item.y += dy / distance * step;
+        }
+      }
+      this.cosmoPulse -= delta;
+      if (this.cosmoPulse <= 0) {
+        this.cosmoPulse = 10;
+        p.buffs.speedMultiplier = Math.max(p.buffs.speedMultiplier, 1.1);
+        p.buffs.speedTime = Math.max(p.buffs.speedTime, 2.5);
+        state.floaters?.push({ x: p.x, y: p.y - 30, text: '¡IMPULSO COSMO!', life: 1, color: '#9be8cb' });
+        burst(state, this.x, this.y, '#9be8cb', 12, 85);
+      }
+      return;
+    }
 
     if (this.id === 'mate') {
       this.specialTimer -= delta;
@@ -302,8 +337,9 @@ export class Companion {
   draw(ctx, time) {
     if (this.id === 'none') return;
     if (animatedPetAssets[this.id]) {
-      const image=getAnimatedPetImage(this.id);
-      if(image?.complete&&image.naturalWidth>0){ctx.save();ctx.imageSmoothingEnabled=false;ctx.drawImage(image,Math.round(this.x-25),Math.round(this.y-25+Math.sin(time*5)*2),50,50);ctx.restore();}
+      const direction = this.id === 'cosmo' ? (this.isMoving ? this.spriteDirection : 'idle') : 'idle';
+      const image=getAnimatedPetImage(this.id, direction);
+      if(image?.complete&&image.naturalWidth>0){ctx.save();ctx.imageSmoothingEnabled=false;ctx.drawImage(image,Math.round(this.x-29),Math.round(this.y-29+Math.sin(time*5)*2),58,58);ctx.restore();}
       return;
     }
     if (this.id === 'parrilla') {

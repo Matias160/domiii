@@ -1,5 +1,4 @@
 export const shopItems = [
-  {id:'cosmo',type:'skin',name:'Cosmo',cost:1100,icon:'C',animatedAsset:'./NEW personaje/personaje_quieto.gif',description:'Explorador veloz de otro mundo. Animado en todas sus direcciones.'},
   {id:'nugget',type:'skin',name:'Nugget',cost:450,icon:'N',description:'Rapido y escurridizo.'},
   {id:'papas',type:'skin',name:'Papas fritas',cost:650,icon:'P',description:'Un proyectil adicional.'},
   {id:'pizza',type:'skin',name:'Pizza',cost:850,icon:'Z',description:'Resistente y contundente.'},
@@ -20,6 +19,7 @@ export const shopItems = [
   {id:'dulce_leche',type:'pet',name:'Dulce de Leche',cost:1000,icon:'DL',animatedAsset:'./new mascotas/02_dulce_de_leche_x8.gif',description:'Derrama caramelo que ralentiza a los enemigos cercanos.'},
   {id:'choco_heart',type:'pet',name:'Corazón de Chocolate',cost:1150,icon:'♥',animatedAsset:'./new mascotas/09_corazon_chocolate_x8.gif',description:'Recupera vida y concede una breve protección periódica.'},
   {id:'icecream_pet',type:'pet',name:'Heladito Polar',cost:1250,icon:'H',animatedAsset:'./new mascotas/10_helado_x8.gif',description:'Congela grupos de enemigos con una ráfaga polar.'},
+  {id:'cosmo',type:'pet',name:'Cosmo',cost:1300,icon:'C',animatedAsset:'./NEW personaje/personaje_quieto.gif',description:'Mascota exploradora: atrae ingredientes y activa pulsos de velocidad.'},
   // 8 Accesorios Estándar reales de accesorios.png
   {id:'bowtie',type:'accessory',name:'Moño Elegante Azul',cost:400,icon:'⋈',description:'+15% velocidad de proyectiles con distinción gourmet.'},
   {id:'shades',type:'accessory',name:'Gafas de Sol Retro',cost:450,icon:'◉',description:'+8% daño con estilo arcade.'},
