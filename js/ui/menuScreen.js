@@ -2,7 +2,7 @@ import { skins } from "../data/skins.js";
 import { weapons } from "../data/weapons.js";
 import { drawFood, drawWeapon, drawDiner } from "../core/art.js";
 import { drawPet, drawOrangePixelSkull } from "../core/presentation.js";
-import { unlockedAchievements, readAchievementStats, achievements } from "../systems/achievementSystem.js";
+import { achievementTiers, achievementProgress } from "../systems/achievementSystem.js";
 import { currentAccount, clearAccountRuns, isGuest, getCartographyMissions, equip } from '../systems/accountSystem.js';
 import { isOwned } from '../data/shop.js';
 import { refreshIcons } from './icons.js';
@@ -924,31 +924,37 @@ export class MenuScreen {
   }
 
   showAchievements(){
-    const unlocked=new Set(unlockedAchievements().map(item=>item.id)),stats=readAchievementStats(),root=document.querySelector('#achievementsList');
-    document.querySelector('#achievementsScreen h2').textContent=`Logros ${unlocked.size} / ${achievements.length}`;
+    const progress=achievementProgress(),root=document.querySelector('#achievementsList');
+    document.querySelector('#achievementsScreen h2').textContent=`Logros ${progress.unlocked} / ${progress.total}`;
     root.replaceChildren();
-    const pct=Math.round((unlocked.size/achievements.length)*100);
+    const pct=progress.percentage;
     const progressText=document.querySelector('#achievementProgressText');
     if(progressText)progressText.textContent=`COLECCIÓN COMPLETADA: ${pct}%`;
-    const tiers=[
-      {threshold:25,className:'violet',image:'./LOGROS/cuadro_violeta_512.png',title:'INICIADO',copy:'Primeras hazañas del turno desbloqueadas.'},
-      {threshold:60,className:'red',image:'./LOGROS/cuadro_rojo_512.png',title:'VETERANO',copy:'Dominio avanzado del local y sus peligros.'},
-      {threshold:100,className:'gold',image:'./LOGROS/cuadro_dorado_512.png',title:'LEYENDA DOMI',copy:'Colección completa. El turno es tuyo.'}
-    ];
-    for(const tier of tiers){
+    for(const tier of achievementTiers){
       const isUnlocked=pct>=tier.threshold;
       const card=document.createElement('article');card.className=`achievement-frame achievement-frame--${tier.className}${isUnlocked?'':' achievement-frame--locked'}`;
+      const art=document.createElement('div');art.className='achievement-frame__art';
       const image=document.createElement('img');image.src=tier.image;image.alt='';image.className='achievement-frame__sprite';
+      art.append(image);card.append(art);
       if(!isUnlocked){
         const lock=document.createElement('span');lock.className='achievement-frame__lock';lock.innerHTML='<i data-lucide="lock-keyhole" aria-hidden="true"></i><small>DESBLOQUEA AL '+tier.threshold+'%</small>';
-        card.append(image,lock);root.append(card);continue;
+        art.append(lock);card.setAttribute('aria-label',`Cuadro bloqueado. Desbloquea al ${tier.threshold}%.`);root.append(card);continue;
       }
       const copy=document.createElement('div');copy.className='achievement-frame__copy';
       const title=document.createElement('strong');title.textContent=tier.title;
       const desc=document.createElement('span');desc.textContent=tier.copy;
       const status=document.createElement('small');status.textContent=`DESBLOQUEADO AL ${tier.threshold}%`;
-      copy.append(title,desc,status);card.append(image,copy);
-      if(tier.className==='gold'){const particles=document.createElement('div');particles.className='achievement-frame__particles';for(let i=0;i<18;i++){const p=document.createElement('i');p.style.setProperty('--i',i);particles.append(p);}card.append(particles);}
+      copy.append(title,desc,status);card.append(copy);
+      if(tier.className==='gold'){
+        const particles=document.createElement('div');particles.className='achievement-frame__particles';particles.setAttribute('aria-hidden','true');
+        for(let i=0;i<64;i++){
+          const p=document.createElement('i');
+          p.style.setProperty('--angle',`${i*137.5}deg`);p.style.setProperty('--distance',`${80+i%7*12}px`);
+          p.style.setProperty('--delay',`${-i*.113}s`);p.style.setProperty('--duration',`${1.6+i%6*.18}s`);
+          p.className=i%4===0?'achievement-frame__spark--star':'';particles.append(p);
+        }
+        art.append(particles);
+      }
       root.append(card);
     }
     refreshIcons();

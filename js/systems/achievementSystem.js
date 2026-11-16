@@ -32,3 +32,14 @@ export function recordRun(result){
 export function unlockedAchievements(){
   const stats=readAchievementStats();return achievements.filter(item=>item.test(stats));
 }
+
+export const achievementTiers = [
+  {threshold:25,className:'violet',image:'./LOGROS/cuadro_violeta_512.png',title:'INICIADO',copy:'Primeras hazañas del turno desbloqueadas.'},
+  {threshold:60,className:'red',image:'./LOGROS/cuadro_rojo_512.png',title:'VETERANO',copy:'Dominio avanzado del local y sus peligros.'},
+  {threshold:100,className:'gold',image:'./LOGROS/cuadro_dorado_512.png',title:'LEYENDA DOMI',copy:'Colección completa. El turno es tuyo.'}
+];
+
+export function achievementProgress(){
+  const percentage=unlockedAchievements().length/achievements.length*100;
+  return {percentage:Math.round(percentage),unlocked:achievementTiers.filter(tier=>percentage>=tier.threshold).length,total:achievementTiers.length};
+}

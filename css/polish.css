@@ -4309,28 +4309,36 @@ kbd { display: inline-block; border: 1px solid #556771; border-bottom-width: 3px
 
 /* Vitrina de logros progresiva. */
 .achievements-screen { background:radial-gradient(circle at 50% 35%,#17242a 0,#070b0e 72%) !important; }
-.achievements-panel { max-width:1180px !important; }
+#achievementsScreen { grid-template-columns:minmax(0,1fr); }
+.achievements-panel { max-width:1180px !important;min-width:0; }
 .achievement-progress-text { color:#8debd5;font:10px/1.8 'Press Start 2P',monospace;text-align:center;margin:-12px 0 26px; }
-.achievement-showcase { display:flex;align-items:flex-end;justify-content:center;gap:28px;min-height:440px;padding:28px;overflow:hidden; }
-.achievement-frame { position:relative;display:grid;place-items:center;flex:none;filter:drop-shadow(8px 10px 0 #000);animation:achievementReveal .45s steps(5,end) both; }
-.achievement-frame--violet { width:220px;height:220px; }
-.achievement-frame--red { width:290px;height:290px; }
-.achievement-frame--gold { width:380px;height:380px;filter:drop-shadow(8px 10px 0 #000) drop-shadow(0 0 24px #ffd84a88); }
+.achievement-showcase { display:flex;align-items:flex-start;justify-content:center;gap:24px;padding:24px 8px 30px; }
+.achievement-frame { position:relative;display:flex;flex-direction:column;align-items:center;flex:0 1 auto;min-width:0;animation:achievementReveal .45s steps(5,end) both; }
+.achievement-frame--violet { width:220px; }
+.achievement-frame--red { width:290px; }
+.achievement-frame--gold { width:380px; }
+.achievement-frame__art { position:relative;display:grid;place-items:center;width:100%;aspect-ratio:1;isolation:isolate;filter:drop-shadow(6px 8px 0 #000); }
+.achievement-frame--gold .achievement-frame__art { background:radial-gradient(ellipse,#ffe06624,transparent 70%);filter:drop-shadow(6px 8px 0 #000) drop-shadow(0 0 22px #ffd84a88); }
 .achievement-frame__sprite { position:absolute;inset:0;width:100%;height:100%;object-fit:contain;image-rendering:pixelated; }
-.achievement-frame__copy { position:relative;z-index:2;width:56%;display:flex;flex-direction:column;gap:10px;text-align:center;color:#f8f4e8; }
-.achievement-frame__copy strong { color:#fff1a8;font:11px/1.6 'Press Start 2P',monospace;text-shadow:2px 2px #000; }
-.achievement-frame__copy span { font:12px/1.4 'Segoe UI',sans-serif;color:#dbe7e5; }
-.achievement-frame__copy small { font:7px/1.6 'Press Start 2P',monospace;color:#7fffd4; }
-.achievement-frame__particles { position:absolute;inset:7%;pointer-events:none; }
-.achievement-frame__particles i { --angle:calc(var(--i)*20deg);position:absolute;left:50%;top:50%;width:5px;height:5px;background:#fff3a1;box-shadow:0 0 8px #ffd700;animation:achievementSpark 2s calc(var(--i)*-.09s) linear infinite; }
+.achievement-frame__copy { position:relative;z-index:2;width:100%;display:flex;flex-direction:column;gap:9px;padding:18px 8px 0;text-align:center;color:#f8f4e8;background:#0c1418;box-sizing:border-box; }
+.achievement-frame__copy strong { color:#fff1a8;font:10px/1.8 'Press Start 2P',monospace;text-shadow:2px 2px #000;overflow-wrap:anywhere; }
+.achievement-frame__copy span { font:15px/1.5 'Segoe UI',sans-serif;color:#e1eeea; }
+.achievement-frame__copy small { font:8px/1.8 'Press Start 2P',monospace;color:#7fffd4; }
+.achievement-frame__particles { position:absolute;inset:0;pointer-events:none;overflow:hidden; }
+.achievement-frame__particles i { position:absolute;left:50%;top:50%;width:4px;height:4px;background:#fff3a1;box-shadow:0 0 8px #ffd700,0 0 16px #ffbf3655;animation:achievementSpark var(--duration) var(--delay) linear infinite; }
+.achievement-frame__particles i:nth-child(3n) { width:3px;height:7px;background:#ffc53b; }
+.achievement-frame__spark--star::before,.achievement-frame__spark--star::after { content:'';position:absolute;background:#fff9d5;box-shadow:0 0 6px #ffd700; }
+.achievement-frame__spark--star::before { width:12px;height:2px;left:-4px;top:1px; }
+.achievement-frame__spark--star::after { height:12px;width:2px;top:-4px;left:1px; }
 .achievement-frame--locked .achievement-frame__sprite { filter:grayscale(1) brightness(.22);opacity:.55; }
 .achievement-frame__lock { position:relative;z-index:3;display:grid;place-items:center;gap:12px;width:86px;height:86px;color:#ffe2a1;background:#0b151ae8;border:3px solid #d8b56d;box-shadow:6px 6px 0 #000; }
 .achievement-frame__lock .ui-icon { width:34px;height:34px; }
 .achievement-frame__lock small { font:6px/1.6 'Press Start 2P',monospace;text-align:center;padding:0 5px; }
 .achievement-showcase__empty { align-self:center;color:#91a6ad;font:10px/1.8 'Press Start 2P',monospace;text-align:center;max-width:520px; }
 @keyframes achievementReveal { from{opacity:0;transform:scale(.55) translateY(40px)} to{opacity:1;transform:none} }
-@keyframes achievementSpark { from{transform:rotate(var(--angle)) translateX(40px) scale(.4);opacity:0} 35%{opacity:1} to{transform:rotate(var(--angle)) translateX(170px) scale(1.2);opacity:0} }
-@media(max-width:900px){.achievement-showcase{align-items:center;flex-direction:column;overflow:visible}.achievement-frame--gold{width:min(380px,90vw);height:min(380px,90vw)}}
+@keyframes achievementSpark { from{transform:rotate(var(--angle)) translateX(20px) scale(.4);opacity:0} 25%{opacity:1} to{transform:rotate(var(--angle)) translateX(var(--distance)) scale(1.1);opacity:0} }
+@media(max-width:900px){.achievement-showcase{align-items:center;flex-direction:column;gap:30px}.achievement-frame{max-width:100%}}
+@media(prefers-reduced-motion:reduce){.achievement-frame{animation:none}.achievement-frame__particles i{animation:none;transform:rotate(var(--angle)) translateX(var(--distance));opacity:.65}}
 
 /* Setup layout guardrails: keep the selector inside the viewport and in document flow. */
 #setupScreen.screen--active {

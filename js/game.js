@@ -213,7 +213,7 @@ export class Game {
       this.hud.hide();
     }
     this.running = id === "gameScreen";
-    this.input.enabled = this.running||id==='lobbyScreen';
+    this.input.enabled = this.running||id==='lobbyScreen'||id==='multiArenaScreen';
     this.input.clear();
     this.audio.setScene(id === 'gameScreen' && this.state?.enemies.some(enemy=>enemy.isBoss) ? 'boss' : id);
     if (id === 'menuScreen') document.querySelector('#menuBest').textContent = String(getBestScore()).padStart(6,'0');
@@ -682,6 +682,7 @@ export class Game {
     this.lastTime = time;
     this.drawBackground();
     if(this.screenId==='lobbyScreen'){this.lobby.update(delta,this.input);this.touchControls?.update(null);}
+    if(this.screenId==='multiArenaScreen')this.multiplayer.training?.update(delta);
     if(this.screenId==='shopScreen')this.shop.update(time/1000);
     if(this.screenId==='domiScreen')this.domi.update(time/1000);
     if (this.state && ['gameScreen','abilityScreen','pauseScreen'].includes(this.screenId)) {

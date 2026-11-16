@@ -1,10 +1,8 @@
 import { refreshIcons } from './icons.js';
+import { supportClasses as classInfo } from '../systems/teamTrainingSystem.js';
+import { TeamTraining } from './teamTraining.js';
+import { currentAccount } from '../systems/accountSystem.js';
 
-const classInfo = {
-  red: { name: 'Rojo / Impulsor', upper: 'ROJO / IMPULSOR' },
-  green: { name: 'Verde / Sanador', upper: 'VERDE / SANADOR' },
-  blue: { name: 'Azul / Guardián', upper: 'AZUL / GUARDIÁN' },
-};
 
 export class MultiplayerPrototype {
   constructor(game) {
@@ -44,6 +42,11 @@ export class MultiplayerPrototype {
       this.ready = false;
       this.render();
     });
+    document.querySelector('#multiTrainButton')?.addEventListener('click',()=>{
+      if(!this.ready||!this.simulatedPlayers.length)return;
+      this.training ||= new TeamTraining(this.game);
+      this.training.start({mode:this.mode,supportClass:this.supportClass,players:this.simulatedPlayers.map(player=>({...player})),skinId:currentAccount()?.loadout?.skin||'pancho'});
+    });
   }
 
   show() {
@@ -64,8 +67,6 @@ export class MultiplayerPrototype {
       button.setAttribute('aria-pressed', String(selected));
     });
     const name = document.querySelector('#lobbyWelcome')?.textContent || 'JUGADOR LOCAL';
-    document.querySelector('#multiPlayerName').textContent = name;
-    document.querySelector('#multiPlayerClass').textContent = role.upper;
     document.querySelector('#multiPartySummary').textContent = `${modeNames[this.mode]} · ${role.name}`;
     this.renderParty(name, role);
     const addBot = document.querySelector('#multiAddBot');
@@ -75,9 +76,10 @@ export class MultiplayerPrototype {
     button.classList.toggle('is-ready', this.ready);
     button.querySelector('span').textContent = this.ready ? 'LISTO PARA JUGAR' : 'MARCAR LISTO';
     button.setAttribute('aria-pressed', String(this.ready));
+    document.querySelector('#multiTrainButton').disabled=!this.ready||!this.simulatedPlayers.length;
     document.querySelector('#multiFeedback').textContent = this.ready
-      ? 'Configuración guardada en esta vista previa. La conexión entre jugadores todavía no está implementada.'
-      : 'Prototipo local: modos y clases ya se pueden explorar; no conecta jugadores todavía.';
+      ? this.simulatedPlayers.length?'Grupo listo. Entrenamiento local sin monedas ni progreso.':'Falta un aliado de prueba.'
+      : 'Preparando equipo. Conexión online pendiente.';
   }
 
   renderParty(name, role) {

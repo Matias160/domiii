@@ -30,7 +30,15 @@ Las cuentas y contraseñas se guardan exclusivamente en el navegador de este dis
 
 Es un juego de supervivencia pixel art hecho con HTML, CSS, JavaScript y Canvas. Hay tres modos de partida, jefes, armas, mascotas, logros e historial por usuario. El mapa nevado tiene ventiscas periodicas; desierto y cancha agregan peligros moviles. Ejecuta `npm test` para revisar las pruebas automatizadas.
 
-## Mejoras de acceso y usabilidad
+## Prototipo de equipo
+
+La estacion Multijugador abre la sala local: elegi Cooperativo o Versus, suma de uno a tres aliados simulados, selecciona una clase, marca Listo y entra a Entrenar. Todavia no hay conexion entre dispositivos.
+
+En la arena: WASD/flechas o clic para moverte, disparo automatico y Q (o el boton inferior) para el apoyo. Rojo aumenta 25% el dano de los aliados en su radio; Verde cura 6 HP por segundo; Azul da un escudo temporal de 28 HP y aparta rivales. Las auras no se acumulan para multiplicar sus efectos. Cooperativo busca 12 KOs en 90 segundos; Versus termina al lograr 5 KOs o al agotarse el tiempo. Hay pausa, reaparicion y revancha. Esta prueba no entrega monedas ni altera el progreso.
+
+`npm test` incluye las reglas de las clases y los tres cuadros de Logros. La prueba visual opcional `node tools/verify-team-ui.cjs` necesita Playwright; admite `PLAYWRIGHT_MODULE`, `QA_BROWSER`, `QA_URL` y `QA_OUTPUT` para usar una instalacion existente y guardar capturas fuera del proyecto.
+
+## Acceso y controles
 
 El acceso permite mostrar u ocultar la contraseña, avisa si está activo Bloq Mayús y muestra los requisitos al crear una cuenta. Durante el ingreso se bloquean los envíos repetidos y los cambios de formulario. Los errores de almacenamiento se explican sin reemplazar datos dañados.
 

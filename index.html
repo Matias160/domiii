@@ -118,7 +118,7 @@
       </section>
 
       <section id="lobbyScreen" class="screen lobby-screen">
-        <header class="lobby-header"><span class="brand-mark">D<span>2</span></span><div><strong id="lobbyWelcome">PANCHO</strong><small id="lobbyRole">SOCIO DEL CLUB / EN EL LOCAL</small></div><span class="wallet"><i data-lucide="coins"></i><b id="lobbyBank">0</b><small>PT</small></span><button id="lobbyAchievements" class="lobby-achievements" title="Ver logros" aria-label="Ver logros y progreso"><i data-lucide="trophy"></i><span>LOGROS <b id="lobbyAchievementCount">0 / 6</b></span></button><button id="lobbyRegister" class="lobby-achievements lobby-register" title="Registro de socios" aria-label="Ir al registro de socios"><i data-lucide="user-plus"></i><span>REGISTRO</span></button><button id="lobbyHelp" class="icon-button" title="Guía y Presentación" aria-label="Ver guía del juego"><i data-lucide="help-circle"></i></button><button id="lobbyOptions" class="icon-button" title="Opciones" aria-label="Opciones"><i data-lucide="settings-2"></i></button><button id="logoutButton" class="icon-button" title="Cerrar sesion" aria-label="Cerrar sesion"><i data-lucide="log-out"></i></button></header>
+        <header class="lobby-header"><span class="brand-mark">D<span>2</span></span><div><strong id="lobbyWelcome">PANCHO</strong><small id="lobbyRole">SOCIO DEL CLUB / EN EL LOCAL</small></div><span class="wallet"><i data-lucide="coins"></i><b id="lobbyBank">0</b><small>PT</small></span><button id="lobbyAchievements" class="lobby-achievements" title="Ver logros" aria-label="Ver logros y progreso"><i data-lucide="trophy"></i><span>LOGROS <b id="lobbyAchievementCount">0 / 3</b></span></button><button id="lobbyRegister" class="lobby-achievements lobby-register" title="Registro de socios" aria-label="Ir al registro de socios"><i data-lucide="user-plus"></i><span>REGISTRO</span></button><button id="lobbyHelp" class="icon-button" title="Guía y Presentación" aria-label="Ver guía del juego"><i data-lucide="help-circle"></i></button><button id="lobbyOptions" class="icon-button" title="Opciones" aria-label="Opciones"><i data-lucide="settings-2"></i></button><button id="logoutButton" class="icon-button" title="Cerrar sesion" aria-label="Cerrar sesion"><i data-lucide="log-out"></i></button></header>
         <div class="lobby-stage"><canvas id="lobbyCanvas" width="960" height="540" aria-label="Lobby interactivo"></canvas><p class="lobby-controls"><kbd>WASD</kbd> / flechas: moverte <span>·</span> <kbd>E</kbd>: interactuar <span>·</span> También podés hacer clic en los lugares.</p><div class="lobby-tip" id="lobbyTip" hidden></div></div>
       </section>
 
@@ -154,8 +154,22 @@
               <button id="multiAddBot" class="pixel-button pixel-button--secondary" type="button"><i data-lucide="user-round-plus"></i><span>SUMAR ALIADO DE PRUEBA</span></button>
               <button id="multiClearBots" class="icon-button" type="button" aria-label="Quitar aliados de prueba" title="Quitar aliados de prueba"><i data-lucide="users-round"></i></button>
             </div>
-            <div class="multi-footer"><p id="multiFeedback" role="status" aria-live="polite">La sala es una maqueta interactiva; todavía no conecta jugadores.</p><button id="multiReadyButton" class="pixel-button arcade-action" type="button"><i data-lucide="check"></i><span>MARCAR LISTO</span></button></div>
+            <div class="multi-footer"><p id="multiFeedback" role="status" aria-live="polite">Preparando equipo. Conexión online pendiente.</p><div class="multi-start-actions"><button id="multiReadyButton" class="pixel-button pixel-button--secondary" type="button"><i data-lucide="check"></i><span>MARCAR LISTO</span></button><button id="multiTrainButton" class="pixel-button arcade-action" type="button" disabled><i data-lucide="play"></i><span>ENTRENAR</span></button></div></div>
           </section>
+        </div>
+      </section>
+
+      <section id="multiArenaScreen" class="screen multi-arena-screen" aria-labelledby="multiArenaTitle">
+        <div class="multi-arena-shell">
+          <header class="multi-arena-header">
+            <button id="multiArenaBack" class="icon-button" type="button" aria-label="Volver a la sala" title="Volver a la sala"><i data-lucide="arrow-left"></i></button>
+            <div><p class="eyebrow">ENTRENAMIENTO LOCAL</p><h2 id="multiArenaTitle">Turno de equipo.</h2></div>
+            <div class="multi-arena-stats"><span>VIDA<b id="multiArenaHealth">100 / 100</b></span><span>TIEMPO<b id="multiArenaTime">90s</b></span><span>OBJETIVO<b id="multiArenaScore">0 / 12 KOs</b></span></div>
+            <button id="multiPauseButton" class="icon-button" type="button" aria-label="Pausar" title="Pausar" aria-pressed="false"><i data-lucide="pause"></i></button>
+          </header>
+          <canvas id="multiArenaCanvas" width="960" height="540" tabindex="0" aria-label="Arena de entrenamiento. WASD o flechas para moverte, clic para caminar, Q para habilidad de apoyo."></canvas>
+          <footer class="multi-arena-footer"><span id="multiArenaStatus">COOPERATIVO · ALIADOS SIMULADOS</span><button id="multiSkillButton" class="pixel-button" type="button" title="Q: habilidad de apoyo"><kbd>Q</kbd><span>IMPULSO +25%</span></button></footer>
+          <div id="multiArenaResult" class="multi-arena-result" role="status" hidden><strong>FIN DEL ENTRENAMIENTO</strong><span>Prueba local · sin recompensas</span><button id="multiReplayButton" class="pixel-button" type="button"><i data-lucide="rotate-ccw"></i><span>OTRO TURNO</span></button></div>
         </div>
       </section>
 

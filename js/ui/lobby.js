@@ -2,7 +2,7 @@ import {drawFood} from '../core/art.js';
 import {currentAccount,isGuest} from '../systems/accountSystem.js';
 import {drawAccessory,drawPet,canvasPoint,approachPoint,resolveAccessory} from '../core/presentation.js';
 import {makeRoom,drawStation,drawRoomLight,drawLobbyLife,lobbyNpcLayers} from './lobbyArt.js';
-import {achievements,unlockedAchievements} from '../systems/achievementSystem.js';
+import {achievementProgress} from '../systems/achievementSystem.js';
 
 const stations=[
   {id:'portal',   x:960,  y:240, label:'JUGAR',           action:'JUGAR',     color:'#ffe068'},
@@ -78,7 +78,8 @@ export class Lobby {
       register.title = isGuest() ? 'Registro de socios' : 'Gestión de cuenta / Cambiar';
     }
     document.querySelector('#lobbyBank').textContent=this.profile.bank.toLocaleString('es-AR');
-    document.querySelector('#lobbyAchievementCount').textContent=`${unlockedAchievements().length} / ${achievements.length}`;
+    const progress=achievementProgress();
+    document.querySelector('#lobbyAchievementCount').textContent=`${progress.unlocked} / ${progress.total}`;
     this.draw(0);
   }
   update(dt,input){
