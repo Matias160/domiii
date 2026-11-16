@@ -5,12 +5,13 @@
 Necesitás [Node.js](https://nodejs.org/) instalado (cualquier versión actual). Descomprimí la carpeta, abrí una terminal adentro y ejecutá:
 
 ```
-node server.cjs
+npm install
+npm start
 ```
 
 Después abrí en el navegador la dirección que muestra la consola (normalmente `http://127.0.0.1:4177/`; si el puerto está ocupado usa el siguiente libre). El servidor solo acepta conexiones de tu propia computadora.
 
-No hace falta instalar nada con npm: los íconos (librería [lucide](https://lucide.dev) v0.468.0, licencia ISC) ya vienen incluidos en `js/vendor/`. `npm start` también funciona y hace lo mismo que `node server.cjs`.
+Los iconos siguen incluidos en `js/vendor/`. La dependencia `ws` conecta las salas; solo hace falta instalarla una vez. `npm start` abre el juego y el servidor de salas juntos.
 
 No se puede abrir `index.html` con doble clic: el navegador bloquea los módulos de JavaScript fuera de un servidor.
 
@@ -26,15 +27,17 @@ El **Caldero de Lava** es el mapa final: se desbloquea completando las misiones 
 
 La preparación de partida va en dos pasos (partida, después personaje y arma) y el ranking muestra el combo con que se jugó cada partida.
 
-Las cuentas y contraseñas se guardan exclusivamente en el navegador de este dispositivo. La contraseña se deriva con PBKDF2 y no se almacena en texto plano, pero no hay servidor, sincronizacion ni recuperacion de cuenta. Borrar los datos del navegador elimina el progreso.
+Las cuentas y el progreso siguen guardados exclusivamente en el navegador de este dispositivo. El servidor sincroniza salas y partidas, no cuentas: no existe todavia autenticacion online ni recuperacion de compras entre dispositivos. Borrar los datos del navegador elimina el progreso.
 
 Es un juego de supervivencia pixel art hecho con HTML, CSS, JavaScript y Canvas. Hay tres modos de partida, jefes, armas, mascotas, logros e historial por usuario. El mapa nevado tiene ventiscas periodicas; desierto y cancha agregan peligros moviles. Ejecuta `npm test` para revisar las pruebas automatizadas.
 
 ## Prototipo de equipo
 
-La estacion Multijugador abre la sala local: elegi Cooperativo o Versus, suma de uno a tres aliados simulados, selecciona una clase, marca Listo y entra a Entrenar. Todavia no hay conexion entre dispositivos.
+Equipo permite crear una sala privada de dos jugadores, invitar por codigo y elegir clase. Ambos aparecen en el lobby con su personaje, accesorios y mascota. Para jugar usan el portal y la preparacion normales: el anfitrion elige mapa/modo/dificultad; cada jugador confirma su equipo y entonces arranca un unico mundo compartido. Sin compañero se mantiene la partida individual.
 
-En la arena: WASD/flechas o clic para moverte, disparo automatico y Q (o el boton inferior) para el apoyo. Rojo aumenta 25% el dano de los aliados en su radio; Verde cura 6 HP por segundo; Azul da un escudo temporal de 28 HP y aparta rivales. Las auras no se acumulan para multiplicar sus efectos. Cooperativo busca 12 KOs en 90 segundos; Versus termina al lograr 5 KOs o al agotarse el tiempo. Hay pausa, reaparicion y revancha. Esta prueba no entrega monedas ni altera el progreso.
+La simulacion cooperativa corre en el servidor y reutiliza los sistemas del juego. WASD/flechas, Espacio para esquivar, Q/E/R para las activas y F para apoyo: Rojo aumenta 25% el dano cercano, Verde cura 6 HP/s y Azul protege brevemente y aparta enemigos. Mantener E cerca de un compañero caido durante tres segundos lo revive. El menu personal y la eleccion de mejoras no congelan el mundo. Las recompensas se guardan en cada cuenta al terminar; abandonar o perder la conexion definitivamente cancela la partida sin premios. Hay veinte segundos de reserva para reconectar. Versus queda para otra etapa.
+
+Para probar dos jugadores en una PC, abrir dos perfiles/ventanas de navegador en la misma direccion. Para dos dispositivos de la misma red, iniciar en PowerShell con `$env:HOST='0.0.0.0'; npm start` y abrir en ambos `http://IP-DE-LA-PC:puerto/` (permitir Node en el firewall de red privada). Por defecto solo se escucha en 127.0.0.1. No se publica automaticamente en Internet ni en Vercel: el despliegue actual sigue siendo estatico. El campo Servidor de salas admite un backend publicado; debe permitir el origen exacto de la web mediante `ALLOWED_ORIGINS`. Este primer prototipo usa salas temporales en memoria y esta pensado para pruebas privadas, no para competir con cuentas verificadas.
 
 `npm test` incluye las reglas de las clases y los tres cuadros de Logros. La prueba visual opcional `node tools/verify-team-ui.cjs` necesita Playwright; admite `PLAYWRIGHT_MODULE`, `QA_BROWSER`, `QA_URL` y `QA_OUTPUT` para usar una instalacion existente y guardar capturas fuera del proyecto.
 

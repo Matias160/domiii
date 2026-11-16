@@ -3,6 +3,7 @@ import {currentAccount,isGuest} from '../systems/accountSystem.js';
 import {drawAccessory,drawPet,canvasPoint,approachPoint,resolveAccessory} from '../core/presentation.js';
 import {makeRoom,drawStation,drawRoomLight,drawLobbyLife,lobbyNpcLayers} from './lobbyArt.js';
 import {achievementProgress} from '../systems/achievementSystem.js';
+import {supportClasses} from '../systems/teamTrainingSystem.js';
 
 const stations=[
   {id:'portal',   x:960,  y:240, label:'JUGAR',           action:'JUGAR',     color:'#ffe068'},
@@ -26,6 +27,8 @@ export class Lobby {
     this.near=null;this.hover=null;this.destination=null;
     this.footsteps=[];
     this.sparkles=[];
+    this.peerPositions=new Map();
+    const teamBadge=document.createElement('button');teamBadge.id='lobbyTeamStatus';teamBadge.className='lobby-achievements';teamBadge.textContent='EQUIPO';teamBadge.onclick=()=>game.multiplayer.show();document.querySelector('.lobby-header').append(teamBadge);
     this.lastFootstepDist=0;
     this.lastStepX=this.x;this.lastStepY=this.y;
     this.tip=document.querySelector('#lobbyTip');
@@ -235,6 +238,22 @@ export class Lobby {
     }
     const layers=stations.map(station=>({y:station.y+42,draw:()=>drawStation(c,station,t,this.near?.id===station.id||this.hover?.id===station.id)}));
     layers.push({y:this.y+24,draw:drawPlayer});
+    const room=this.game.multiplayer?.room;
+    for(const member of room?.members||[]){
+      if(member.id===room.selfId||!member.connected)continue;
+      let pos=this.peerPositions.get(member.id);if(!pos){pos={x:member.x,y:member.y};this.peerPositions.set(member.id,pos);}
+      pos.x+=(member.x-pos.x)*.25;pos.y+=(member.y-pos.y)*.25;
+      layers.push({y:pos.y+24,draw:()=>{
+        const color=supportClasses[member.supportClass].color;
+        c.fillStyle='#0007';c.beginPath();c.ellipse(pos.x,pos.y+26,26,8,0,0,7);c.fill();
+        c.strokeStyle=color;c.lineWidth=2;c.strokeRect(pos.x-28,pos.y-30,56,60);
+        drawAccessory(c,member.gear.accessoryId,pos.x,pos.y,.9,'back');
+        drawFood(c,member.gear.skinId,pos.x,pos.y,.9,member.spriteState==='idle'?0:t);
+        drawAccessory(c,member.gear.accessoryId,pos.x,pos.y,.9,'front');
+        drawPet(c,member.gear.companionId,pos.x-37,pos.y+20,t,1,member.spriteState);
+        c.font="10px 'Press Start 2P',monospace";c.textAlign='center';c.lineWidth=4;c.strokeStyle='#000';c.strokeText(member.name,pos.x,pos.y-44);c.fillStyle=color;c.fillText(member.name,pos.x,pos.y-44);
+      }});
+    }
     layers.push(...lobbyNpcLayers(c,t));
     layers.sort((a,b)=>a.y-b.y).forEach(layer=>layer.draw());
     c.restore();

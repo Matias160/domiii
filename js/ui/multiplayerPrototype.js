@@ -1,118 +1,109 @@
 import { refreshIcons } from './icons.js';
-import { supportClasses as classInfo } from '../systems/teamTrainingSystem.js';
-import { TeamTraining } from './teamTraining.js';
+import { supportClasses } from '../systems/teamTrainingSystem.js';
 import { currentAccount } from '../systems/accountSystem.js';
-
+import { RoomClient } from '../core/roomClient.js';
+import { OnlineRun } from './onlineRun.js';
 
 export class MultiplayerPrototype {
-  constructor(game) {
-    this.game = game;
-    this.mode = 'coop';
-    this.supportClass = 'red';
-    this.ready = false;
-    this.simulatedPlayers = [];
-    document.querySelectorAll('[data-multi-mode]').forEach(button => {
-      button.addEventListener('click', () => {
-        this.mode = button.dataset.multiMode;
-        this.ready = false;
-        this.render();
-      });
-    });
-    document.querySelectorAll('[data-support-class]').forEach(button => {
-      button.addEventListener('click', () => {
-        this.supportClass = button.dataset.supportClass;
-        this.ready = false;
-        this.render();
-      });
-    });
-    document.querySelector('#multiBackButton')?.addEventListener('click', () => game.showScreen('lobbyScreen'));
-    document.querySelector('#multiReadyButton')?.addEventListener('click', () => {
-      this.ready = !this.ready;
+  constructor(game){
+    this.game=game;this.supportClass='red';this.status='Sin equipo';this.room=null;this.sendTimer=0;
+    this.client=new RoomClient({onRoom:room=>{
+      this.room=room;
+      const self=room?.members.find(m=>m.id===room.selfId);if(self)this.supportClass=self.supportClass;
+      this.syncSetup();
+      if(this.play.active&&(!room||room.phase!=='match'))this.play.stop();
       this.render();
-    });
-    document.querySelector('#multiAddBot')?.addEventListener('click', () => {
-      if (this.simulatedPlayers.length >= 3) return;
-      const botClasses = ['green', 'blue', 'red'];
-      this.simulatedPlayers.push({ id: `test-${Date.now()}-${this.simulatedPlayers.length}`, supportClass: botClasses[this.simulatedPlayers.length] });
-      this.ready = false;
-      this.render();
-    });
-    document.querySelector('#multiClearBots')?.addEventListener('click', () => {
-      this.simulatedPlayers = [];
-      this.ready = false;
-      this.render();
-    });
-    document.querySelector('#multiTrainButton')?.addEventListener('click',()=>{
-      if(!this.ready||!this.simulatedPlayers.length)return;
-      this.training ||= new TeamTraining(this.game);
-      this.training.start({mode:this.mode,supportClass:this.supportClass,players:this.simulatedPlayers.map(player=>({...player})),skinId:currentAccount()?.loadout?.skin||'pancho'});
-    });
-  }
-
-  show() {
-    this.game.showScreen('multiScreen');
-  }
-
-  render() {
-    const modeNames = { coop: 'Cooperativo', versus: 'Versus' };
-    const role = classInfo[this.supportClass];
-    document.querySelectorAll('[data-multi-mode]').forEach(button => {
-      const selected = button.dataset.multiMode === this.mode;
-      button.classList.toggle('is-selected', selected);
-      button.setAttribute('aria-pressed', String(selected));
-    });
-    document.querySelectorAll('[data-support-class]').forEach(button => {
-      const selected = button.dataset.supportClass === this.supportClass;
-      button.classList.toggle('is-selected', selected);
-      button.setAttribute('aria-pressed', String(selected));
-    });
-    const name = document.querySelector('#lobbyWelcome')?.textContent || 'JUGADOR LOCAL';
-    document.querySelector('#multiPartySummary').textContent = `${modeNames[this.mode]} · ${role.name}`;
-    this.renderParty(name, role);
-    const addBot = document.querySelector('#multiAddBot');
-    addBot.disabled = this.simulatedPlayers.length >= 3;
-    addBot.querySelector('span').textContent = addBot.disabled ? 'GRUPO COMPLETO' : 'SUMAR ALIADO DE PRUEBA';
-    const button = document.querySelector('#multiReadyButton');
-    button.classList.toggle('is-ready', this.ready);
-    button.querySelector('span').textContent = this.ready ? 'LISTO PARA JUGAR' : 'MARCAR LISTO';
-    button.setAttribute('aria-pressed', String(this.ready));
-    document.querySelector('#multiTrainButton').disabled=!this.ready||!this.simulatedPlayers.length;
-    document.querySelector('#multiFeedback').textContent = this.ready
-      ? this.simulatedPlayers.length?'Grupo listo. Entrenamiento local sin monedas ni progreso.':'Falta un aliado de prueba.'
-      : 'Preparando equipo. Conexión online pendiente.';
-  }
-
-  renderParty(name, role) {
-    const root = document.querySelector('#multiSlots');
-    root.replaceChildren();
-    const addSlot = ({ label, detail, badge = '', local = false }) => {
-      const slot = document.createElement('div');
-      slot.className = `multi-slot${local ? ' multi-slot--local' : ''}`;
-      const icon = document.createElement('i');
-      icon.dataset.lucide = local ? 'user-round' : 'user-round-check';
-      const copy = document.createElement('span');
-      const title = document.createElement('strong');
-      const subtitle = document.createElement('small');
-      title.textContent = label;
-      subtitle.textContent = detail;
-      copy.append(title, subtitle);
-      slot.append(icon, copy);
-      if (badge) {
-        const tag = document.createElement('b');
-        tag.textContent = badge;
-        slot.append(tag);
-      }
-      root.append(slot);
+    },onState:state=>this.play.receive(state),onStatus:status=>{this.status=status;this.render();}});
+    this.play=new OnlineRun(game,this.client);
+    this.serverInput=document.querySelector('#multiServer');
+    try{this.serverInput.value=localStorage.getItem('domi2pancho.roomServer')||'';}catch{}
+    document.querySelector('#multiCodeInput').value=new URL(location.href).searchParams.get('room')||'';
+    document.querySelector('#multiCreate').onclick=()=>this.enter('create');
+    document.querySelector('#multiJoinForm').onsubmit=event=>{event.preventDefault();this.enter('join');};
+    document.querySelector('#multiLeave').onclick=()=>this.client.leave().catch(e=>this.message(e.message));
+    document.querySelector('#multiInvite').onclick=async()=>{
+      if(!this.room)return;
+      const url=new URL(location.href);url.search='';url.searchParams.set('room',this.room.code);
+      const local=['localhost','127.0.0.1'].includes(location.hostname);
+      try{await navigator.clipboard.writeText(local?this.room.code:url.href);this.message(local?'Código de sala copiado.':'Invitación copiada.');}catch{this.message(`Código de sala: ${this.room.code}`);}
     };
-    addSlot({ label: name, detail: role.upper, badge: this.mode === 'versus' ? 'A' : 'VOS', local: true });
-    this.simulatedPlayers.forEach((player, index) => {
-      const playerRole = classInfo[player.supportClass];
-      const team = this.mode === 'versus' && index % 2 === 0 ? 'B' : this.mode === 'versus' ? 'A' : 'ALIADO';
-      addSlot({ label: `ALIADO DE PRUEBA ${index + 1}`, detail: `${playerRole.upper} · SIMULADO`, badge: team });
+    document.querySelector('#multiBackButton').onclick=()=>game.showScreen('lobbyScreen');
+    document.querySelectorAll('[data-support-class]').forEach(button=>button.onclick=()=>{
+      this.supportClass=button.dataset.supportClass;
+      if(this.room)this.client.request('profile',{supportClass:this.supportClass,gear:this.gear()}).catch(e=>this.message(e.message));
+      this.render();
     });
-    for (let i = this.simulatedPlayers.length + 1; i < 4; i++) {
-      addSlot({ label: 'ESPACIO LIBRE', detail: 'Invitaciones online, más adelante.' });
+    if(this.client.reservation)this.client.resume().catch(e=>this.message(e.message));
+  }
+  gear(){const p=currentAccount();return {skinId:p?.loadout.skin||'pancho',companionId:p?.loadout.pet||'none',accessoryId:p?.loadout.accessory||'none',weaponId:this.game.menu.selectedWeapon||'fork'};}
+  url(){const url=new URL(this.serverInput.value.trim()||location.origin);url.protocol=url.protocol==='https:'||url.protocol==='wss:'?'wss:':'ws:';url.pathname='/api/rooms';url.search='';url.hash='';return url.href;}
+  message(text){this.status=text;this.render();}
+  async enter(type){
+    if(this.busy)return;this.busy=true;this.message('Conectando…');
+    try{
+      const url=this.url();localStorage.setItem('domi2pancho.roomServer',this.serverInput.value.trim());
+      await this.client.connect(url);
+      await this.client.enter(type,{name:currentAccount()?.name||'Invitado',gear:this.gear(),supportClass:this.supportClass,code:document.querySelector('#multiCodeInput').value.trim().toUpperCase()});
+      this.status='Equipo conectado';this.game.showScreen('lobbyScreen');
+    }catch(error){this.status=error.message;}finally{this.busy=false;this.render();}
+  }
+  show(){this.game.showScreen('multiScreen');}
+  onScreen(id){
+    if(id==='setupScreen')this.syncSetup(true);
+    if(id==='lobbyScreen'&&this.room&&!this.play.active){
+      this.client.send('unready');this.client.request('profile',{supportClass:this.supportClass,gear:this.gear()}).catch(e=>this.message(e.message));
     }
+  }
+  syncSetup(force=false){
+    const guest=!!this.room&&this.room.members.length===2&&this.room.selfId!==this.room.hostId;
+    for(const id of ['catBarMap','catBarMode','catBarDifficulty']){const section=document.getElementById(id);if(section){section.inert=guest;section.title=guest?'El anfitrión elige esta opción':'';}}
+    const signature=guest?JSON.stringify(this.room.shared):'';
+    if(guest&&this.room.shared&&(force||this.setupSignature!==signature)){
+      const menu=this.game.menu;
+      menu.mapInput.value=this.room.shared.mapId;menu.modeInput.value=this.room.shared.modeId;menu.difficultyInput.value=this.room.shared.difficultyId;
+      menu.syncCards?.();
+    }
+    this.setupSignature=signature;
+  }
+  async prepare(setup){
+    if(this.pendingPrepare)return;
+    this.pendingPrepare=true;this.render();
+    try{await this.client.request('prepare',{setup});}catch(error){this.game.showToast(error.message);}
+    finally{this.pendingPrepare=false;this.render();}
+  }
+  update(delta){
+    if(!this.room||this.game.screenId!=='lobbyScreen')return;
+    this.sendTimer+=delta;if(this.sendTimer<.08)return;this.sendTimer=0;
+    this.client.send('lobby',{x:this.game.lobby.x,y:this.game.lobby.y,spriteState:this.game.lobby.petSpriteState});
+  }
+  render(){
+    const root=document.querySelector('#multiSlots');if(!root)return;
+    const signature=JSON.stringify([this.status,this.supportClass,this.busy,this.pendingPrepare,this.room?.code,this.room?.phase,this.room?.hostId,this.room?.members.map(m=>[m.id,m.name,m.supportClass,m.ready,m.connected,m.gear])]);
+    if(signature===this.signature)return;this.signature=signature;
+    document.querySelector('#multiCreate').disabled=!!this.room||this.busy;
+    document.querySelector('#multiJoin').disabled=!!this.room||this.busy;
+    document.querySelector('#multiCodeInput').disabled=!!this.room||this.busy;
+    this.serverInput.disabled=!!this.room||this.busy;
+    document.querySelector('#multiLeave').hidden=!this.room;document.querySelector('#multiInvite').hidden=!this.room;
+    document.querySelector('#multiRoomCode').textContent=this.room?.code||'—';
+    document.querySelector('#multiFeedback').textContent=this.status;
+    document.querySelector('#multiPartySummary').textContent=this.room?`${this.room.members.filter(m=>m.connected).length} / 2 jugadores · ${this.room.phase==='match'?'En partida':'Lobby compartido'}`:'Sin equipo';
+    document.querySelectorAll('[data-support-class]').forEach(button=>{
+      const selected=button.dataset.supportClass===this.supportClass;button.classList.toggle('is-selected',selected);button.setAttribute('aria-pressed',String(selected));
+    });
+    root.replaceChildren();
+    const members=this.room?.members||[{id:'self',name:currentAccount()?.name||'Invitado',supportClass:this.supportClass,connected:true}];
+    for(const m of members){
+      const slot=document.createElement('div');slot.className='multi-slot';
+      const copy=document.createElement('span'),name=document.createElement('strong'),detail=document.createElement('small');
+      name.textContent=m.name;detail.textContent=`${supportClasses[m.supportClass].upper} · ${m.connected?(m.ready?'LISTO':'EN EL LOBBY'):'RECONECTANDO'}`;
+      copy.append(name,detail);slot.append(copy);
+      if(m.id===this.room?.hostId){const tag=document.createElement('b');tag.textContent='ANFITRIÓN';slot.append(tag);}root.append(slot);
+    }
+    if(members.length===1){const slot=document.createElement('div');slot.className='multi-slot';slot.textContent='Esperando compañero';root.append(slot);}
+    const start=document.querySelector('#startRunButton'),me=this.room?.members.find(m=>m.id===this.room.selfId);
+    if(start){start.disabled=!!this.pendingPrepare||!!me?.ready;start.querySelector('span').textContent=this.room?.members.length===2?(me?.ready?'ESPERANDO AL EQUIPO':'CONFIRMAR EQUIPO'):'INICIAR TURNO';}
+    const badge=document.querySelector('#lobbyTeamStatus');if(badge)badge.textContent=this.room?`EQUIPO ${this.room.code} · ${this.room.members.filter(m=>m.connected).length}/2`:'EQUIPO';
     refreshIcons();
   }
 }

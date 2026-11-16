@@ -131,6 +131,7 @@ export class TouchControls {
     app.appendChild(layer);
 
     this.layer = layer;
+    this.supportBtn=document.createElement('button');this.supportBtn.type='button';this.supportBtn.className='mobile-support pixel-button';this.supportBtn.textContent='APOYO';this.supportBtn.hidden=true;this.supportBtn.onclick=()=>this.game.multiplayer?.client.send('action',{action:'support'});layer.append(this.supportBtn);
     this.joystickZone = layer.querySelector('#mobileJoystickZone');
     this.joystickBase = layer.querySelector('#mobileJoystickBase');
     this.joystickKnob = layer.querySelector('#mobileJoystickKnob');
@@ -258,7 +259,7 @@ export class TouchControls {
       e.stopPropagation();
       // Durante la entrada del jefe, el botón grande sirve para saltearla
       if (this.game.entrance) { this.game.skipEntrance?.(); return; }
-      if (this.game.running && this.game.state?.player) {
+      if ((this.game.running||this.currentScreen==='onlineRunScreen') && this.game.state?.player) {
         if (this.game.state.player.dashCooldown <= 0) {
           this.game.input.pressed.add(' ');
           this.dashBtn.classList.add('dash-pressed');
@@ -276,7 +277,7 @@ export class TouchControls {
       btn.addEventListener('pointerdown', (e) => {
         e.preventDefault();
         e.stopPropagation();
-        if (this.game.running) {
+        if (this.game.running||this.currentScreen==='onlineRunScreen') {
           const ok = this.game.triggerPrime(key);
           if (ok && navigator.vibrate) navigator.vibrate([15, 25, 20]);
         }
@@ -287,17 +288,20 @@ export class TouchControls {
     this.interactBtn.addEventListener('pointerdown', (e) => {
       e.preventDefault();
       e.stopPropagation();
+      if(this.currentScreen==='onlineRunScreen'){this.game.input.keys.add('e');return;}
       if (this.game.lobby?.near) {
         this.game.lobby.activate(this.game.lobby.near.id);
         if (navigator.vibrate) navigator.vibrate(15);
       }
     });
 
+    for(const event of ['pointerup','pointercancel'])this.interactBtn.addEventListener(event,()=>{if(this.currentScreen==='onlineRunScreen')this.game.input.keys.delete('e');});
+
     // === BOTÓN DE PAUSA MÓVIL ===
     this.pauseBtn.addEventListener('pointerdown', (e) => {
       e.preventDefault();
       e.stopPropagation();
-      if (this.game.running) this.game.pause('manual');
+      if (this.game.running||this.currentScreen==='onlineRunScreen') this.game.pause('manual');
     });
 
     // === BOTÓN DE APUNTADO MÓVIL ===
@@ -346,7 +350,7 @@ export class TouchControls {
   updateVisibility() {
     if (!this.layer) return;
     const shouldShow = (this.isTouch || this.forced === 'true') && 
-      ['gameScreen', 'lobbyScreen'].includes(this.currentScreen);
+      ['gameScreen', 'lobbyScreen','onlineRunScreen'].includes(this.currentScreen);
 
     this.layer.style.display = shouldShow ? 'block' : 'none';
     // Con controles táctiles, la ayuda de teclado del local sobra y tapa el joystick
@@ -354,6 +358,7 @@ export class TouchControls {
 
     // Ajustar visibilidad de botones según sea partida o lobby
     const inLobby = this.currentScreen === 'lobbyScreen';
+    this.supportBtn.hidden=this.currentScreen!=='onlineRunScreen';
     if (this.dashBtn) this.dashBtn.hidden = inLobby;
     if (this.primeBtns.q) this.primeBtns.q.parentElement.hidden = inLobby;
     if (this.pauseBtn) this.pauseBtn.parentElement.hidden = inLobby;
@@ -379,6 +384,12 @@ export class TouchControls {
 
     // Actualizar Dash en pantalla móvil
     const p = state.player;
+    if(this.currentScreen==='onlineRunScreen'){
+      this.supportBtn.disabled=state.online.supportCooldown>0||p.hp<=0;
+      setText(this.supportBtn,state.online.supportCooldown>0?`APOYO ${Math.ceil(state.online.supportCooldown)}s`:'APOYO');
+      const downed=state.players.find(m=>m.id!==this.game.multiplayer.room?.selfId&&m.player.hp<=0);
+      this.interactBtn.hidden=!downed;setText(this.interactBtn.querySelector('span'),'REVIVIR');
+    }
     if (p && this.dashBtn) {
       const isReady = p.dashCooldown <= 0;
       const maxDashCd = 2.8 * (p.dashCooldownMultiplier || 1);

@@ -81,10 +81,11 @@ export class Game {
       touchToggle.checked = this.touchControls.isTouch;
       touchToggle.addEventListener('change', () => this.touchControls.setForced(touchToggle.checked));
     }
-    window.addEventListener('resize', () => { if (this.state && ['gameScreen','pauseScreen'].includes(this.screenId)) this.resizeView(); if (this.screenId === 'setupScreen') this.menu?.fitSetup?.(); });
+    window.addEventListener('resize', () => { if (this.state && ['gameScreen','pauseScreen','onlineRunScreen'].includes(this.screenId)) this.resizeView(); if (this.screenId === 'setupScreen') this.menu?.fitSetup?.(); });
     bindAuth(this);
     modLoader.loadMod(FrostbiteMod);
     document.querySelector('#logoutButton').addEventListener('click',()=>{
+      this.multiplayer.client.leave().catch(()=>{});
       logout();
       this.openAuth?.('login');
       this.showToast('Cerraste sesión.');
@@ -117,6 +118,7 @@ export class Game {
     });
     document.querySelector('#pauseButton').addEventListener('click', () => this.pause('manual'));
     document.querySelector('#dashControl').addEventListener('click', () => {
+      if(this.multiplayer.play.active){this.input.pressed.add(' ');return;}
       if (this.running && !this.choice && !this.entrance && this.state.player.dashCooldown <= 0) this.input.pressed.add(' ');
       document.querySelector('#dashControl').blur();
     });
@@ -162,7 +164,7 @@ export class Game {
         this.showScreen('lobbyScreen');
         return;
       }
-      if (event.key === 'Escape' && !event.repeat) { if (this.running) this.pause('manual'); else if (this.screenId === 'pauseScreen') this.resume(); }
+      if (event.key === 'Escape' && !event.repeat) { if (this.multiplayer.play.active)this.multiplayer.play.menu(!this.multiplayer.play.menuOpen);else if (this.running) this.pause('manual'); else if (this.screenId === 'pauseScreen') this.resume(); }
       if(this.running&&!event.repeat){
         if(this.choice&&['1','2','3'].includes(event.key))document.querySelectorAll('.ability-card')[Number(event.key)-1]?.click();
         if(['q','e','r'].includes(event.key.toLowerCase()))this.triggerPrime(event.key.toLowerCase());
@@ -189,6 +191,7 @@ export class Game {
     else this.showScreen('authScreen');
     // Al cargar la página: presentación PanchOS x BurgosCorp encima del local
     playSplash({ reducedMotion: this.reducedMotion });
+    if(new URL(location.href).searchParams.has('room'))this.multiplayer.show();
     requestAnimationFrame((time) => this.loop(time));
   }
 
@@ -200,7 +203,7 @@ export class Game {
     });
     if(!['gameScreen','pauseScreen'].includes(id))this.choice=null;
     document.querySelector('#abilityScreen').classList.toggle('screen--active',id==='gameScreen'&&Boolean(this.choice));
-    const inRun = ['gameScreen','abilityScreen','pauseScreen'].includes(id);
+    const inRun = ['gameScreen','abilityScreen','pauseScreen','onlineRunScreen'].includes(id);
     const isPaused = id === 'pauseScreen';
     document.querySelector('#app').dataset.playing = String(inRun);
     document.querySelector('#app').dataset.screen=id;
@@ -208,18 +211,19 @@ export class Game {
     document.querySelector('#combatRail').hidden=!inRun || isPaused;
     if (inRun) {
       this.hud.show(isPaused);
-      if (id === 'gameScreen') this.layoutOverlays();
+      if (id === 'gameScreen'||id==='onlineRunScreen') this.layoutOverlays();
     } else {
       this.hud.hide();
     }
     this.running = id === "gameScreen";
-    this.input.enabled = this.running||id==='lobbyScreen'||id==='multiArenaScreen';
+    this.input.enabled = this.running||id==='lobbyScreen'||id==='multiArenaScreen'||id==='onlineRunScreen';
     this.input.clear();
     this.audio.setScene(id === 'gameScreen' && this.state?.enemies.some(enemy=>enemy.isBoss) ? 'boss' : id);
     if (id === 'menuScreen') document.querySelector('#menuBest').textContent = String(getBestScore()).padStart(6,'0');
     if (id !== 'gameScreen') { clearTimeout(this.toastTimer); this.toast.hidden = true; }
     document.querySelector('#primeBar').hidden=!inRun || isPaused;
     if(id==='lobbyScreen')this.lobby.enter();
+    this.multiplayer?.onScreen(id);
     if(id==='multiScreen')this.multiplayer.render();
     if(id==='setupScreen')requestAnimationFrame(()=>this.menu?.fitSetup?.());
     if (id === 'pauseScreen') this.renderBuild();
@@ -230,6 +234,7 @@ export class Game {
   }
 
   pause(reason = 'manual') {
+    if(this.multiplayer?.play?.active){if(reason==='manual')this.multiplayer.play.menu(true);return;}
     const automatic = reason !== 'manual' && reason !== 'engine';
     if (automatic && performance.now() < this.resumeGuardUntil) return;
     // Si la pausa automática es por pérdida de foco pero la pestaña sigue visible en pantalla, no pausar
@@ -456,6 +461,7 @@ export class Game {
 
   skipEntrance() { if (this.entrance && this.running) skipBossEntrance(this.entrance); }
   resume() {
+    if(this.multiplayer?.play?.active){this.multiplayer.play.menu(false);return;}
     if (this.screenId !== 'pauseScreen') return;
     this.resumeGuardUntil = performance.now() + 900;
     if (this.pauseReason === 'engine') this.errorPauseAcknowledged = true;
@@ -584,6 +590,7 @@ export class Game {
   }
 
   startRun(setup) {
+    if(this.multiplayer?.room?.members.length===2)return this.multiplayer.prepare(setup);
     this.closePrimeIntro?.(false, true);
     const account=currentAccount();if(!account){this.showScreen('authScreen');return;}
     setup={...setup,name:account.name,weaponId:weapons[setup.weaponId]?setup.weaponId:'fork',skinId:isOwned(account,'skin',setup.skinId)?setup.skinId:'pancho',mapId:isOwned(account,'map',setup.mapId)?setup.mapId:'diner',companionId:isOwned(account,'pet',setup.companionId)?setup.companionId:'none',accessoryId:isOwned(account,'accessory',setup.accessoryId)?setup.accessoryId:'none'};
@@ -681,11 +688,14 @@ export class Game {
     const delta = Math.min(0.033, (time - this.lastTime) / 1000 || 0);
     this.lastTime = time;
     this.drawBackground();
+    this.multiplayer.update(delta);
     if(this.screenId==='lobbyScreen'){this.lobby.update(delta,this.input);this.touchControls?.update(null);}
     if(this.screenId==='multiArenaScreen')this.multiplayer.training?.update(delta);
     if(this.screenId==='shopScreen')this.shop.update(time/1000);
     if(this.screenId==='domiScreen')this.domi.update(time/1000);
-    if (this.state && ['gameScreen','abilityScreen','pauseScreen'].includes(this.screenId)) {
+    if(this.multiplayer.play.active){
+      this.multiplayer.play.frame(delta);
+    } else if (this.state && ['gameScreen','abilityScreen','pauseScreen'].includes(this.screenId)) {
       // Mientras se elige una carta de mejora o entra un jefe la partida queda congelada
       if (this.running && this.entrance) {
         this.focusCameraOn(this.entrance.boss, delta);
@@ -922,6 +932,7 @@ export class Game {
   dismissAbility(){if(!this.choice)return;this.choice=null;this.input?.clear();this.state.pendingLevels=Math.max(0,this.state.pendingLevels-1);document.querySelector('#abilityScreen').classList.remove('screen--active');document.querySelector('#app').dataset.choosing='false';document.activeElement?.blur();}
 
   triggerPrime(key){
+    if(this.multiplayer?.play?.active){this.multiplayer.client.send('action',{action:'prime',value:key});return true;}
     if(this.primeIntro){if(key!==this.primeIntro.key)return false;this.closePrimeIntro(false);}
     if(!this.running||this.choice||this.entrance||!activatePrime(this.state,key))return false;
     this.audio.play('level');this.showToast(primes.find(prime=>prime.key===key).name.toUpperCase());return true;
@@ -1061,6 +1072,7 @@ export class Game {
   }
 
   endRun(outcome = 'defeat') {
+    if(this.multiplayer?.play?.active){this.multiplayer.client.request('abort').catch(error=>this.showToast(error.message));return;}
     if (!this.state || this.screenId === 'gameOverScreen') return;
     const previousBest = getBestScore();
     const result = {
@@ -1196,6 +1208,12 @@ export class Game {
       }
     }
     drawPickupAnimations(this.ctx, state);
+    if(state.online)for(const member of state.players){
+      if(member.auraTime>0&&member.player.hp>0){
+        this.ctx.save();this.ctx.globalAlpha=.2;this.ctx.fillStyle=member.supportClass==='red'?'#ff596d':member.supportClass==='green'?'#4bda9b':'#54aaff';
+        this.ctx.beginPath();this.ctx.arc(member.player.x,member.player.y,130,0,Math.PI*2);this.ctx.fill();this.ctx.restore();
+      }
+    }
     if (state.player.auraLevel) {
       this.ctx.strokeStyle='#86e3bf44';this.ctx.lineWidth=2;this.ctx.beginPath();this.ctx.arc(state.player.x,state.player.y,105,0,Math.PI*2);this.ctx.stroke();
     }
@@ -1244,6 +1262,10 @@ export class Game {
       }
     }
     this.renderSortBuffer.push(state.player);
+    if(state.online)for(const member of state.players){
+      if(member.id===this.multiplayer.room?.selfId)continue;
+      this.renderSortBuffer.push(member.player,member.companion);
+    }
     if (state.companion && state.companion.x >= cam.x - 70 && state.companion.x <= cam.x + vw + 70 && state.companion.y >= cam.y - 70 && state.companion.y <= cam.y + vh + 70) {
       this.renderSortBuffer.push(state.companion);
     }
@@ -1251,6 +1273,11 @@ export class Game {
     const actorLen = this.renderSortBuffer.length;
     for (let i = 0; i < actorLen; i++) {
       this.renderSortBuffer[i].draw(this.ctx, state.time);
+    }
+    if(state.online)for(const member of state.players){
+      this.ctx.save();this.ctx.textAlign='center';this.ctx.font="10px 'Press Start 2P',monospace";this.ctx.strokeStyle='#000';this.ctx.lineWidth=4;this.ctx.fillStyle=member.player.hp>0?'#fff1a8':'#ff7a8d';
+      const name=member.player.hp>0?member.player.name:`${member.player.name} · E`;
+      this.ctx.strokeText(name,member.player.x,member.player.y-42);this.ctx.fillText(name,member.player.x,member.player.y-42);this.ctx.restore();
     }
     drawPrimeEffects(this.ctx,state);
     this.ctx.save();this.ctx.globalCompositeOperation='lighter';

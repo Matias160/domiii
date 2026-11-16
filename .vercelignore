@@ -1,4 +1,6 @@
 server.cjs
+server/
+tools/
 tests/
 .git/
 .agents/
