@@ -18,6 +18,8 @@ export class Lobby {
     this.game=game;this.canvas=document.querySelector('#lobbyCanvas');this.ctx=this.canvas.getContext('2d');
     this.room=makeRoom();
     this.x=960;this.y=520;
+    this.lastHorizontalDirection=1;
+    this.petSpriteState='idle';
     this.camera={x:480,y:270};
     // Visor del local: alto base 540 y ancho según la proporción de la pantalla (ocupa todo)
     this.view={w:960,h:540};
@@ -80,7 +82,9 @@ export class Lobby {
     this.draw(0);
   }
   update(dt,input){
+    const previousX=this.x;
     const axis=input.getAxis();this.moving=Boolean(axis.x||axis.y||this.destination);
+    if(Math.abs(axis.x)>.05)this.lastHorizontalDirection=axis.x<0?-1:1;
     if(axis.x||axis.y){this.destination=null;this.x+=axis.x*260*dt;this.y+=axis.y*260*dt;}
     else if(this.destination){
       const next=approachPoint(this,this.destination,260,dt);this.x=next.x;this.y=next.y;
@@ -88,6 +92,8 @@ export class Lobby {
     }
     this.x=Math.max(90,Math.min(1830,this.x));
     this.y=Math.max(180,Math.min(1010,this.y));
+    if(!axis.x&&!axis.y&&this.destination&&Math.abs(this.x-previousX)>.05)this.lastHorizontalDirection=this.x<previousX?-1:1;
+    this.petSpriteState=this.moving?(this.lastHorizontalDirection<0?'left':'right'):'idle';
 
     // Huellas y brillos dorados para accesorios legendarios en el lobby
     const acc = resolveAccessory(this.profile?.loadout.accessory);
@@ -209,7 +215,7 @@ export class Lobby {
       drawAccessory(c,this.profile?.loadout.accessory,this.x,this.y + bob, 0.9, 'back');
       drawFood(c,this.profile?.loadout.skin||'pancho',this.x,this.y,.9,this.moving?t:0);
       drawAccessory(c,this.profile?.loadout.accessory,this.x,this.y + bob, 0.9, 'front');
-      if(this.profile?.loadout.pet&&this.profile.loadout.pet!=='none')drawPet(c,this.profile.loadout.pet,this.x-37,this.y+20,t);
+      if(this.profile?.loadout.pet&&this.profile.loadout.pet!=='none')drawPet(c,this.profile.loadout.pet,this.x-37,this.y+20,t,1,this.petSpriteState);
 
       // Dibujar destellos y chispas doradas flotantes sobre el personaje
       for (const sp of this.sparkles) {

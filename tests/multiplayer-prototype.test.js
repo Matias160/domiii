@@ -19,16 +19,21 @@ test('multiplayer prototype lets the player switch mode, support class and ready
   const modes = [button({ multiMode: 'coop' }), button({ multiMode: 'versus' })];
   const classes = [button({ supportClass: 'red' }), button({ supportClass: 'green' }), button({ supportClass: 'blue' })];
   const readyButton = button();
+  const addBot = button();
+  const clearBots = button();
+  const slots = { children: [], replaceChildren(...children) { this.children = children; }, append(child) { this.children.push(child); } };
+  const makeNode = () => ({ children: [], dataset: {}, append(...children) { this.children.push(...children); } });
   const nodes = {
-    '#multiBackButton': button(), '#multiReadyButton': readyButton,
+    '#multiBackButton': button(), '#multiReadyButton': readyButton, '#multiAddBot': addBot, '#multiClearBots': clearBots,
     '#lobbyWelcome': { textContent: 'MATI' }, '#multiPlayerName': { textContent: '' },
-    '#multiPlayerClass': { textContent: '' }, '#multiPartySummary': { textContent: '' },
+    '#multiPlayerClass': { textContent: '' }, '#multiPartySummary': { textContent: '' }, '#multiSlots': slots,
     '#multiFeedback': { textContent: '' },
   };
   const previous = globalThis.document;
   globalThis.document = {
     querySelectorAll(selector) { return selector === '[data-multi-mode]' ? modes : classes; },
     querySelector(selector) { return nodes[selector]; },
+    createElement() { return makeNode(); },
   };
   try {
     const prototype = new MultiplayerPrototype({ showScreen() {} });
@@ -41,6 +46,14 @@ test('multiplayer prototype lets the player switch mode, support class and ready
     assert.equal(nodes['#multiPlayerClass'].textContent, 'AZUL / GUARDIÁN');
     assert.equal(readyButton.label.textContent, 'LISTO PARA JUGAR');
     assert.match(nodes['#multiFeedback'].textContent, /todavía no está implementada/i);
+    addBot.listeners.click();
+    addBot.listeners.click();
+    assert.equal(slots.children.length, 4);
+    assert.equal(slots.children[1].children[1].children[0].textContent, 'ALIADO DE PRUEBA 1');
+    assert.equal(slots.children[1].children[2].textContent, 'B');
+    clearBots.listeners.click();
+    assert.equal(slots.children.length, 4);
+    assert.equal(slots.children[1].children[1].children[0].textContent, 'ESPACIO LIBRE');
   } finally {
     globalThis.document = previous;
   }

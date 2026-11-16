@@ -575,6 +575,14 @@ button:focus-visible, input:focus-visible, select:focus-visible {
   image-rendering: crisp-edges;
   display: block;
 }
+.setup-option-card__visual .setup-card-pet-image {
+  display: block;
+  width: auto;
+  max-width: 100%;
+  height: 58px;
+  object-fit: contain;
+  image-rendering: pixelated;
+}
 
 .setup-option-card__info {
   width: 100%;

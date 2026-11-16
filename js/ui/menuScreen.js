@@ -33,7 +33,8 @@ export const PETS_DATA = [
   { id: 'drone', name: 'DRON', role: 'IMÁN' },
   { id: 'taco', name: 'TACO', role: 'ESCUDO' },
   { id: 'soda', name: 'SODA', role: 'CURACIÓN' },
-  { id: 'parrilla', name: 'PARRILLA', role: 'FUEGO' }
+  { id: 'parrilla', name: 'PARRILLA', role: 'FUEGO' },
+  { id: 'cosmo', name: 'COSMO', role: 'IMÁN / IMPULSO', animatedAsset: './NEW personaje/personaje_quieto.gif' }
 ];
 
 export const DIFFICULTIES_DATA = [
@@ -395,7 +396,7 @@ export class MenuScreen {
       });
     }
 
-    // 3. MASCOTAS (6 opciones)
+    // 3. MASCOTAS
     if (this.rowCompanion) {
       this.rowCompanion.innerHTML = '';
       PETS_DATA.forEach(pet => {
@@ -407,8 +408,9 @@ export class MenuScreen {
         card.setAttribute('role', 'radio');
         card.setAttribute('aria-label', `Mascota ${pet.name}`);
         card.innerHTML = `
-          <div class="setup-option-card__visual">
-            <canvas class="setup-card-pet-canvas" width="84" height="60" aria-hidden="true"></canvas>
+          <div class="setup-option-card__visual">${pet.animatedAsset
+            ? `<img class="setup-card-pet-image" src="${pet.animatedAsset}" alt="" aria-hidden="true">`
+            : '<canvas class="setup-card-pet-canvas" width="84" height="60" aria-hidden="true"></canvas>'}
           </div>
           <div class="setup-option-card__info"><span class="setup-option-card__name">${pet.name}</span><small>${pet.role}</small></div>
           <span class="setup-option-card__check" aria-hidden="true">✓</span>

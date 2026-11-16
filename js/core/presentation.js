@@ -73,9 +73,9 @@ export function drawOrangePixelSkull(c, w, h, time = 0) {
   }
 }
 
-export function drawPet(ctx,id,x,y,time=0,scale=1){
+export function drawPet(ctx,id,x,y,time=0,scale=1,spriteState='idle'){
   ctx.save();ctx.translate(x,y);ctx.scale(scale,scale);
-  const pet=new Companion(id,{x:40,y:-30});pet.x=0;pet.y=0;pet.draw(ctx,time);ctx.restore();
+  const pet=new Companion(id,{x:40,y:-30});pet.x=0;pet.y=0;pet.spriteState=spriteState;pet.spriteBlend=1;pet.draw(ctx,time);ctx.restore();
 }
 
 export function drawItemPreview(canvas,item,profile,time=0){

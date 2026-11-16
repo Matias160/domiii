@@ -51,6 +51,10 @@
 .multi-slot small { color: #819297; font: 15px 'VT323', monospace; }
 .multi-slot > b { margin-left: auto; padding: 5px; color: #00e5a0; border: 1px solid #00e5a0; font: 7px 'Press Start 2P', monospace; }
 .multi-slot--local { border-style: solid; border-color: #377d68; }
+.multi-party-controls { display: flex; gap: 8px; margin-top: 10px; }
+.multi-party-controls .pixel-button { min-height: 38px; padding: 8px 12px; font-size: 8px; }
+.multi-party-controls .icon-button { min-width: 38px; min-height: 38px; color: #ff8a78; border-color: #7a3a34; }
+.multi-party-controls .pixel-button:disabled { opacity: .6; cursor: not-allowed; }
 .multi-footer { display: flex; justify-content: space-between; align-items: center; gap: 14px; margin-top: 15px; }
 .multi-footer p { max-width: 580px; margin: 0; color: #93a5aa; font: 17px 'VT323', monospace; }
 .multi-footer .pixel-button { flex: 0 0 auto; min-width: 210px; }
@@ -74,6 +78,7 @@
   .multi-class { padding: 9px; }
   .multi-slots { grid-template-columns: 1fr; }
   .multi-slot { min-height: 52px; }
+  .multi-party-controls .pixel-button { flex: 1; }
   .multi-footer { align-items: stretch; flex-direction: column; }
   .multi-footer .pixel-button { width: 100%; }
 }

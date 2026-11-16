@@ -52,18 +52,28 @@ export class Companion {
     this.healTimer = 4.5;
     this.specialTimer = 2.5;
     this.cosmoPulse = 3;
-    this.spriteDirection = 'right';
+    this.spriteState = 'idle';
+    this.previousSpriteState = 'idle';
+    this.spriteBlend = 1;
   }
 
   update(state, delta) {
     if (this.id === 'none') return;
     const p = state.player, blend = 1 - Math.exp(-delta * 6);
-    const previousX = this.x;
     this.x += (p.x - p.facing.x * 45 + Math.sin(state.time * 2) * 14 - this.x) * blend;
     this.y += (p.y - p.facing.y * 45 + 24 - this.y) * blend;
-    this.isMoving = Math.hypot(this.x - previousX, this.y - (this.previousY ?? this.y)) > 0.8;
-    if (Math.abs(this.x - previousX) > 0.8) this.spriteDirection = this.x < previousX ? 'left' : 'right';
-    this.previousY = this.y;
+    if (this.id === 'cosmo') {
+      const playerState = p.spriteState;
+      const nextSpriteState = p.dashTime > 0 || playerState === 'left' || playerState === 'right'
+        ? (playerState === 'left' ? 'left' : 'right')
+        : 'idle';
+      if (nextSpriteState !== this.spriteState) {
+        this.previousSpriteState = this.spriteState;
+        this.spriteState = nextSpriteState;
+        this.spriteBlend = 0;
+      }
+      this.spriteBlend = Math.min(1, this.spriteBlend + delta * 14);
+    }
 
     if (this.id === 'cosmo') {
       for (const item of state.items) {
@@ -337,9 +347,21 @@ export class Companion {
   draw(ctx, time) {
     if (this.id === 'none') return;
     if (animatedPetAssets[this.id]) {
-      const direction = this.id === 'cosmo' ? (this.isMoving ? this.spriteDirection : 'idle') : 'idle';
+      const direction = this.id === 'cosmo' ? this.spriteState : 'idle';
       const image=getAnimatedPetImage(this.id, direction);
-      if(image?.complete&&image.naturalWidth>0){ctx.save();ctx.imageSmoothingEnabled=false;ctx.drawImage(image,Math.round(this.x-29),Math.round(this.y-29+Math.sin(time*5)*2),58,58);ctx.restore();}
+      const previous=this.id==='cosmo'&&this.spriteBlend<1?getAnimatedPetImage(this.id,this.previousSpriteState):null;
+      const currentReady=image?.complete&&image.naturalWidth>0;
+      const previousReady=previous?.complete&&previous.naturalWidth>0;
+      if(currentReady||previousReady){
+        ctx.save();ctx.imageSmoothingEnabled=false;
+        const x=Math.round(this.x-29),y=Math.round(this.y-29+Math.sin(time*5)*2);
+        if(this.id==='cosmo'&&this.spriteBlend<1){
+          if(previousReady){ctx.globalAlpha=1-this.spriteBlend;ctx.drawImage(previous,x,y,58,58);}
+          if(currentReady){ctx.globalAlpha=this.spriteBlend;ctx.drawImage(image,x,y,58,58);}
+        }else if(currentReady)ctx.drawImage(image,x,y,58,58);
+        else ctx.drawImage(previous,x,y,58,58);
+        ctx.restore();
+      }
       return;
     }
     if (this.id === 'parrilla') {
