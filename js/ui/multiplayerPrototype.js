@@ -3,10 +3,11 @@ import { supportClasses } from '../systems/teamTrainingSystem.js';
 import { currentAccount } from '../systems/accountSystem.js';
 import { RoomClient } from '../core/roomClient.js';
 import { OnlineRun } from './onlineRun.js';
+import { drawTeamPortrait } from '../core/presentation.js';
 
 export class MultiplayerPrototype {
   constructor(game){
-    this.game=game;this.supportClass='red';this.status='Sin equipo';this.room=null;this.sendTimer=0;
+    this.game=game;this.supportClass='red';this.status='Sin equipo';this.room=null;this.sendTimer=0;this.portraits=[];this.previewTime=0;
     this.client=new RoomClient({onRoom:room=>{
       this.room=room;
       const self=room?.members.find(m=>m.id===room.selfId);if(self)this.supportClass=self.supportClass;
@@ -72,6 +73,11 @@ export class MultiplayerPrototype {
     finally{this.pendingPrepare=false;this.render();}
   }
   update(delta){
+    this.previewTime+=delta;
+    if(this.game.screenId==='multiScreen'){
+      const frame=Math.floor(this.previewTime*15);
+      if(frame!==this.previewFrame){this.previewFrame=frame;for(const {canvas,gear} of this.portraits)drawTeamPortrait(canvas,gear,this.game.reducedMotion?0:this.previewTime);}
+    }
     if(!this.room||this.game.screenId!=='lobbyScreen')return;
     this.sendTimer+=delta;if(this.sendTimer<.08)return;this.sendTimer=0;
     this.client.send('lobby',{x:this.game.lobby.x,y:this.game.lobby.y,spriteState:this.game.lobby.petSpriteState});
@@ -91,16 +97,23 @@ export class MultiplayerPrototype {
     document.querySelectorAll('[data-support-class]').forEach(button=>{
       const selected=button.dataset.supportClass===this.supportClass;button.classList.toggle('is-selected',selected);button.setAttribute('aria-pressed',String(selected));
     });
-    root.replaceChildren();
-    const members=this.room?.members||[{id:'self',name:currentAccount()?.name||'Invitado',supportClass:this.supportClass,connected:true}];
+    root.replaceChildren();this.portraits=[];
+    const members=this.room?.members||[{id:'self',name:currentAccount()?.name||'Invitado',supportClass:this.supportClass,connected:true,gear:this.gear()}];
     for(const m of members){
-      const slot=document.createElement('div');slot.className='multi-slot';
-      const copy=document.createElement('span'),name=document.createElement('strong'),detail=document.createElement('small');
-      name.textContent=m.name;detail.textContent=`${supportClasses[m.supportClass].upper} · ${m.connected?(m.ready?'LISTO':'EN EL LOBBY'):'RECONECTANDO'}`;
-      copy.append(name,detail);slot.append(copy);
-      if(m.id===this.room?.hostId){const tag=document.createElement('b');tag.textContent='ANFITRIÓN';slot.append(tag);}root.append(slot);
+      const slot=document.createElement('article');slot.className='multi-slot multi-slot--portrait';slot.dataset.connected=String(m.connected);slot.dataset.player=m.id;
+      const canvas=document.createElement('canvas');canvas.className='multi-slot__portrait';canvas.width=360;canvas.height=220;canvas.setAttribute('role','img');canvas.setAttribute('aria-label',`Personaje de ${m.name}`);
+      const copy=document.createElement('div');copy.className='multi-slot__copy';
+      const name=document.createElement('strong'),detail=document.createElement('small'),status=document.createElement('span');
+      name.textContent=m.name;detail.textContent=supportClasses[m.supportClass].upper;status.textContent=m.connected?(m.ready?'LISTO':'EN EL LOBBY'):'RECONECTANDO';status.className='multi-slot__status';
+      copy.append(name,detail,status);slot.append(canvas,copy);
+      if(m.id===this.room?.hostId){const tag=document.createElement('b');tag.textContent='ANFITRIÓN';slot.append(tag);}
+      root.append(slot);drawTeamPortrait(canvas,m.gear,this.previewTime);this.portraits.push({canvas,gear:m.gear});
     }
-    if(members.length===1){const slot=document.createElement('div');slot.className='multi-slot';slot.textContent='Esperando compañero';root.append(slot);}
+    if(members.length===1){
+      const slot=document.createElement('div');slot.className='multi-slot multi-slot--empty';
+      const symbol=document.createElement('i');symbol.dataset.lucide='user-round-plus';symbol.setAttribute('aria-hidden','true');
+      const label=document.createElement('strong');label.textContent='ESPERANDO COMPAÑERO';slot.append(symbol,label);root.append(slot);
+    }
     const start=document.querySelector('#startRunButton'),me=this.room?.members.find(m=>m.id===this.room.selfId);
     if(start){start.disabled=!!this.pendingPrepare||!!me?.ready;start.querySelector('span').textContent=this.room?.members.length===2?(me?.ready?'ESPERANDO AL EQUIPO':'CONFIRMAR EQUIPO'):'INICIAR TURNO';}
     const badge=document.querySelector('#lobbyTeamStatus');if(badge)badge.textContent=this.room?`EQUIPO ${this.room.code} · ${this.room.members.filter(m=>m.connected).length}/2`:'EQUIPO';

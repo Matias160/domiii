@@ -19,8 +19,8 @@ test('setup menu: definitions contain independent categories with real content',
   assert.equal(MAPS_DATA.length, 8, '8 maps available');
   assert.deepEqual(MAPS_DATA.map(m => m.id), ['diner', 'kitchen', 'parking', 'snow', 'desert', 'football', 'lava', 'beach']);
 
-  assert.equal(PETS_DATA.length, 7, '7 companion options');
-  assert.deepEqual(PETS_DATA.map(p => p.id), ['none', 'ketchup', 'drone', 'taco', 'soda', 'parrilla', 'cosmo']);
+  assert.equal(PETS_DATA.length, 11, 'all 11 companion options');
+  assert.deepEqual(PETS_DATA.map(p => p.id), ['none', 'ketchup', 'drone', 'taco', 'soda', 'parrilla','mate','dulce_leche','choco_heart','icecream_pet','cosmo']);
   assert.match(PETS_DATA.at(-1).animatedAsset, /personaje_quieto\.gif$/);
 
   assert.equal(DIFFICULTIES_DATA.length, 4, '4 progressive difficulty tiers');

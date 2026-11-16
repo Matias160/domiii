@@ -26,15 +26,15 @@
 .online-party-hud .pixel-button { min-width:0;min-height:36px;padding:8px;font-size:8px;gap:10px; }
 .online-choices { position:absolute;right:16px;bottom:110px;width:220px;display:grid;gap:8px;padding:10px;background:#0b151bef;border:2px solid #ffe066;pointer-events:auto; }
 .online-choices .pixel-button { min-width:0;min-height:45px;font-size:9px;padding:8px; }
-.multi-header { display: grid; grid-template-columns: 46px minmax(0, 1fr) auto; gap: 18px; align-items: center; padding: 8px 0 22px; border-bottom: 2px solid #28373d; }
+.multi-header { display: grid; grid-template-columns: 46px minmax(0, 1fr) auto; gap: 18px; align-items: center; padding: 8px 0 18px; border-bottom: 2px solid #28373d; }
 .multi-header > div { min-width: 0; }
 .multi-header .eyebrow { margin: 0 0 9px; color: #00e5a0; font: 10px 'Press Start 2P', monospace; line-height: 1.8; }
 .multi-header h1 { margin: 0; color: #f6f1df; font: 24px 'Press Start 2P', monospace; line-height: 1.6; }
 .multi-header p:last-child { margin: 6px 0 0; color: #a5b3b8; font: 18px 'VT323', monospace; }
 .multi-status { display: inline-flex; align-items: center; gap: 8px; padding: 9px 11px; border: 1px solid #3e4745; color: #b8c4c3; font: 8px 'Press Start 2P', monospace; line-height: 1.7; white-space: nowrap; }
 .multi-status i { width: 8px; height: 8px; background: #ffc247; box-shadow: 0 0 9px #ffc247; }
-.multi-block { margin-top: 21px; padding: 18px 0 20px; border-bottom: 1px solid #28373d; }
-.multi-block-heading { display: flex; gap: 13px; align-items: flex-start; margin-bottom: 15px; }
+.multi-block { margin-top: 16px; padding: 14px 0 16px; border-bottom: 1px solid #28373d; }
+.multi-block-heading { display: flex; gap: 13px; align-items: flex-start; margin-bottom: 12px; }
 .multi-block-heading > span { color: #ffcc00; font: 10px 'Press Start 2P', monospace; padding-top: 5px; }
 .multi-block-heading h2 { margin: 0; color: #f3f4ed; font: 12px 'Press Start 2P', monospace; line-height: 1.8; }
 .multi-block-heading p { margin: 4px 0 0; color: #93a5aa; font: 17px 'VT323', monospace; }
@@ -50,14 +50,14 @@
 .multi-choice--versus.is-selected { border-color: #ff705d; box-shadow: inset 4px 0 #ff705d; }
 .multi-choice--versus.is-selected > :is(i,svg), .multi-choice--versus.is-selected strong { color: #ff8068; }
 .multi-class-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
-.multi-class { display: flex; min-width: 0; align-items: center; gap: 11px; padding: 13px 11px; text-align: left; color: #e2e7e3; background: #121c20; border: 2px solid #2c3b40; border-radius: 3px; cursor: pointer; }
-.multi-class-mark { flex: 0 0 36px; width: 36px; height: 36px; display: grid; place-items: center; color: #fff; font: 14px 'Press Start 2P', monospace; image-rendering: pixelated; }
+.multi-class { display: flex; min-width: 0; min-height:128px; align-items: center; gap: 11px; padding: 13px 11px; text-align: left; color: #e2e7e3; background: #121c20; border: 2px solid #2c3b40; border-radius: 3px; cursor: pointer; }
+.multi-class-gif { flex:0 0 96px;width:96px;height:96px;object-fit:contain;image-rendering:pixelated; }
 .multi-class > span:last-child { display: grid; min-width: 0; gap: 6px; }
 .multi-class strong { font: 8px 'Press Start 2P', monospace; line-height: 1.7; }
 .multi-class small { color: #a2b0b3; font: 16px 'VT323', monospace; }
-.multi-class--red .multi-class-mark { background: #c83446; box-shadow: 3px 3px #651f2b; }
-.multi-class--green .multi-class-mark { background: #289766; box-shadow: 3px 3px #14553c; }
-.multi-class--blue .multi-class-mark { background: #2876c7; box-shadow: 3px 3px #174578; }
+.multi-class--red .multi-class-gif { filter:drop-shadow(0 0 6px #ff596d40); }
+.multi-class--green .multi-class-gif { filter:drop-shadow(0 0 6px #4bda9b40); }
+.multi-class--blue .multi-class-gif { filter:drop-shadow(0 0 6px #54aaff40); }
 .multi-class--red.is-selected { border-color: #ff596d; }
 .multi-class--green.is-selected { border-color: #4bda9b; }
 .multi-class--blue.is-selected { border-color: #54aaff; }
@@ -70,6 +70,16 @@
 .multi-slot small { color: #819297; font: 15px 'VT323', monospace; }
 .multi-slot > b { margin-left: auto; padding: 5px; color: #00e5a0; border: 1px solid #00e5a0; font: 7px 'Press Start 2P', monospace; }
 .multi-slot--local { border-style: solid; border-color: #377d68; }
+.multi-slot--portrait { position:relative;flex-direction:column;align-items:stretch;gap:0;padding:0;border-style:solid;border-color:#48646b;overflow:hidden; }
+.multi-slot__portrait { display:block;width:100%;height:220px;object-fit:contain;background:#091316;image-rendering:pixelated; }
+.multi-slot__copy { display:grid;gap:8px;min-width:0;padding:15px 12px;text-align:center;border-top:1px solid #2d4349; }
+.multi-slot__copy strong { color:#fff1a8;font:11px/1.8 'Press Start 2P',monospace;overflow-wrap:anywhere; }
+.multi-slot__copy small { font:8px/1.8 'Press Start 2P',monospace;color:#a3bdc2; }
+.multi-slot__status { color:#72efc0;font:8px/1.8 'Press Start 2P',monospace; }
+.multi-slot--portrait > b { position:absolute;top:10px;right:10px;margin:0;background:#0b171de8; }
+.multi-slot--portrait[data-connected="false"] .multi-slot__portrait { opacity:.45;filter:grayscale(.7); }
+.multi-slot--empty { flex-direction:column;justify-content:center;align-items:center;gap:20px;min-height:320px;text-align:center;color:#8ca4aa;background:repeating-linear-gradient(0deg,#0c171a,#0c171a 22px,#101e22 23px); }
+.multi-slot--empty .ui-icon { width:52px;height:52px;flex:none;color:#587d83; }
 .multi-party-controls { display: flex; gap: 8px; margin-top: 10px; }
 .multi-party-controls .pixel-button { min-height: 38px; padding: 8px 12px; font-size: 8px; }
 .multi-party-controls .icon-button { min-width: 38px; min-height: 38px; color: #ff8a78; border-color: #7a3a34; }
@@ -118,7 +128,8 @@
   .multi-choice span { font-size: 16px; }
   .multi-choice small { font-size: 6px; }
   .multi-class-grid { grid-template-columns: 1fr; gap: 7px; }
-  .multi-class { padding: 9px; }
+  .multi-class { padding: 9px;min-height:96px; }
+  .multi-class-gif { flex-basis:72px;width:72px;height:72px; }
   .multi-slots { grid-template-columns: 1fr; }
   .multi-slot { min-height: 52px; }
   .multi-party-controls .pixel-button { flex: 1; }

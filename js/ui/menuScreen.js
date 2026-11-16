@@ -9,6 +9,7 @@ import { refreshIcons } from './icons.js';
 import { REGIONS } from './atlasScreen.js';
 import { drawAccessoryIcon } from '../core/accessories.js';
 import { drawWorldProps } from '../core/worldProps.js';
+import { companions } from '../entities/Companion.js';
 
 export const MODES_DATA = [
   { id: 'survival', name: 'SUPERVIVENCIA', short: 'SURVIVAL', tag: 'SIN LÍMITE' },
@@ -27,15 +28,14 @@ export const MAPS_DATA = [
   { id: 'beach', num: '08', name: 'PLAYA' }
 ];
 
-export const PETS_DATA = [
-  { id: 'none', name: 'NINGUNA', role: 'SIN APOYO' },
-  { id: 'ketchup', name: 'KETCHUP', role: 'ATAQUE' },
-  { id: 'drone', name: 'DRON', role: 'IMÁN' },
-  { id: 'taco', name: 'TACO', role: 'ESCUDO' },
-  { id: 'soda', name: 'SODA', role: 'CURACIÓN' },
-  { id: 'parrilla', name: 'PARRILLA', role: 'FUEGO' },
-  { id: 'cosmo', name: 'COSMO', role: 'IMÁN / IMPULSO', animatedAsset: './NEW personaje/personaje_quieto.gif' }
-];
+export const PETS_DATA = Object.entries(companions).map(([id,pet])=>({id,name:id==='none'?'NINGUNA':pet.name.toLocaleUpperCase('es'),role:pet.role,animatedAsset:pet.animatedAsset}));
+
+export function populateCompanionSelect(select){
+  select.replaceChildren();
+  for(const pet of PETS_DATA){
+    const option=document.createElement('option');option.value=pet.id;option.textContent=pet.id==='none'?'Sin compañero':`${companions[pet.id].name} / ${pet.role}`;select.append(option);
+  }
+}
 
 export const DIFFICULTIES_DATA = [
   { id: 'suave', name: 'SUAVE', mult: '1.0x' },
@@ -275,6 +275,7 @@ export class MenuScreen {
     this.mapInput = document.querySelector('#mapSelect');
     this.modeInput = document.querySelector('#modeSelect');
     this.companionInput = document.querySelector('#companionSelect');
+    populateCompanionSelect(this.companionInput);
     this.accessoryInput = document.querySelector('#accessorySelect');
 
     this.rowMode = document.querySelector('#rowMode');

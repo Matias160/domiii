@@ -6,35 +6,22 @@ import { createAnimatedGif } from '../core/animatedGif.js';
 const companionBuffer = [];
 
 export const companions = {
-  none: { name: 'Sin companero', detail: 'Solo contra el menu.' },
-  ketchup: { name: 'Mini ketchup', detail: 'Dispara salsa y deja charcos pegajosos que frenan enemigos.' },
-  drone: { name: 'Dron delivery', detail: 'Atrae aderezos y electrocuta enemigos cercanos con rayos arc.' },
-  taco: { name: 'Taco Guardián', detail: 'Otorga un escudo protector periódico y arremete contra enemigos.' },
-  soda: { name: 'Botellita Soda', detail: 'Lanza burbujas curativas periódicas y ráfagas de gas refrescante.' },
-  parrilla: { name: 'Mini Parrilla', detail: 'Mascota exclusiva de Don Domi. Lanza chispas candentes y calcina enemigos.' },
-  mate: { name: 'Mate Compañero', detail: 'Activa pulsos criollos de velocidad y cadencia.' },
-  dulce_leche: { name: 'Dulce de Leche', detail: 'Ralentiza enemigos con caramelo pegajoso.' },
-  choco_heart: { name: 'Corazón de Chocolate', detail: 'Cura y protege al jugador periódicamente.' },
-  icecream_pet: { name: 'Heladito Polar', detail: 'Congela grupos de enemigos con una ráfaga polar.' },
-  cosmo: { name: 'Cosmo', detail: 'Mascota exploradora: atrae ingredientes y activa pulsos de velocidad.' },
+  none: { name: 'Sin companero', role:'SIN APOYO', detail: 'Solo contra el menu.' },
+  ketchup: { name: 'Mini ketchup', role:'ATAQUE', detail: 'Dispara salsa y deja charcos pegajosos que frenan enemigos.' },
+  drone: { name: 'Dron delivery', role:'IMÁN', detail: 'Atrae aderezos y electrocuta enemigos cercanos con rayos arc.' },
+  taco: { name: 'Taco Guardián', role:'ESCUDO', detail: 'Otorga un escudo protector periódico y arremete contra enemigos.' },
+  soda: { name: 'Botellita Soda', role:'CURACIÓN', detail: 'Lanza burbujas curativas periódicas y ráfagas de gas refrescante.' },
+  parrilla: { name: 'Mini Parrilla', role:'FUEGO', detail: 'Mascota exclusiva de Don Domi. Lanza chispas candentes y calcina enemigos.' },
+  mate: { name: 'Mate Compañero', role:'CADENCIA', animatedAsset:'./new mascotas/01_mate_x8.gif', detail: 'Activa pulsos criollos de velocidad y cadencia.' },
+  dulce_leche: { name: 'Dulce de Leche', role:'RALENTIZA', animatedAsset:'./new mascotas/02_dulce_de_leche_x8.gif', detail: 'Ralentiza enemigos con caramelo pegajoso.' },
+  choco_heart: { name: 'Corazón de Chocolate', role:'CURACIÓN', animatedAsset:'./new mascotas/09_corazon_chocolate_x8.gif', detail: 'Cura y protege al jugador periódicamente.' },
+  icecream_pet: { name: 'Heladito Polar', role:'CONGELACIÓN', animatedAsset:'./new mascotas/10_helado_x8.gif', detail: 'Congela grupos de enemigos con una ráfaga polar.' },
+  cosmo: { name: 'Cosmo', role:'IMÁN / IMPULSO', animatedAsset:'./NEW personaje/personaje_quieto.gif', animations:{left:'./NEW personaje/personaje_caminando_izquierda.gif',right:'./NEW personaje/personaje_caminando_derecha.gif'}, detail: 'Mascota exploradora: atrae ingredientes y activa pulsos de velocidad.' },
 };
 
-const animatedPetAssets = {
-  mate: './new mascotas/01_mate_x8.gif',
-  dulce_leche: './new mascotas/02_dulce_de_leche_x8.gif',
-  choco_heart: './new mascotas/09_corazon_chocolate_x8.gif',
-  icecream_pet: './new mascotas/10_helado_x8.gif',
-  cosmo: {
-    idle: './NEW personaje/personaje_quieto.gif',
-    left: './NEW personaje/personaje_caminando_izquierda.gif',
-    right: './NEW personaje/personaje_caminando_derecha.gif'
-  }
-};
 const animatedPetImages = new Map();
 function getAnimatedPetImage(id, direction = 'idle') {
-  const source = typeof animatedPetAssets[id] === 'string'
-    ? animatedPetAssets[id]
-    : animatedPetAssets[id]?.[direction] || animatedPetAssets[id]?.idle;
+  const source = companions[id]?.animations?.[direction] || companions[id]?.animatedAsset;
   if (!source) return null;
   if (!animatedPetImages.has(source)) animatedPetImages.set(source, createAnimatedGif(source));
   return animatedPetImages.get(source);
@@ -346,7 +333,7 @@ export class Companion {
 
   draw(ctx, time) {
     if (this.id === 'none') return;
-    if (animatedPetAssets[this.id]) {
+    if (companions[this.id].animatedAsset) {
       const direction = this.id === 'cosmo' ? this.spriteState : 'idle';
       const image=getAnimatedPetImage(this.id, direction);
       const previous=this.id==='cosmo'&&this.spriteBlend<1?getAnimatedPetImage(this.id,this.previousSpriteState):null;
@@ -354,12 +341,13 @@ export class Companion {
       const previousReady=previous?.complete&&previous.naturalWidth>0;
       if(currentReady||previousReady){
         ctx.save();ctx.imageSmoothingEnabled=false;
-        const x=Math.round(this.x-29),y=Math.round(this.y-29+Math.sin(time*5)*2);
+        const height=58,width=height*(currentReady?image.naturalWidth/image.naturalHeight:previous.naturalWidth/previous.naturalHeight);
+        const x=Math.round(this.x-width/2),y=Math.round(this.y-height/2+Math.sin(time*5)*2);
         if(this.id==='cosmo'&&this.spriteBlend<1){
-          if(previousReady){ctx.globalAlpha=1-this.spriteBlend;ctx.drawImage(previous,x,y,58,58);}
-          if(currentReady){ctx.globalAlpha=this.spriteBlend;ctx.drawImage(image,x,y,58,58);}
-        }else if(currentReady)ctx.drawImage(image,x,y,58,58);
-        else ctx.drawImage(previous,x,y,58,58);
+          if(previousReady){ctx.globalAlpha=1-this.spriteBlend;ctx.drawImage(previous,x,y,width,height);}
+          if(currentReady){ctx.globalAlpha=this.spriteBlend;ctx.drawImage(image,x,y,width,height);}
+        }else if(currentReady)ctx.drawImage(image,x,y,width,height);
+        else ctx.drawImage(previous,x,y,width,height);
         ctx.restore();
       }
       return;

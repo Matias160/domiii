@@ -335,8 +335,6 @@ export function drawStation(c,s,t,active){
     if(multiplayerGifImage?.complete&&multiplayerGifImage.naturalWidth>0){c.imageSmoothingEnabled=false;c.drawImage(multiplayerGifImage,-92,-128,184,184);}
     else box(c,-76,-92,152,132,'#173c37');
     c.shadowBlur=0;
-    box(c,-82,35,164,30,'#07191a');
-    text(c,'MULTIJUGADOR',0,55,8,'#72ffd0');
     c.restore();
   }
   else if(id==='shop'){

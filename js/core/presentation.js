@@ -1,5 +1,5 @@
 import {drawFood, drawDiner} from './art.js';
-import {Companion} from '../entities/Companion.js';
+import {Companion,companions} from '../entities/Companion.js';
 import {drawWorldProps} from './worldProps.js';
 import {drawAccessory, drawAccessoryIcon, resolveAccessory} from './accessories.js';
 import {isOwned} from '../data/shop.js';
@@ -160,7 +160,7 @@ export function drawItemPreview(canvas,item,profile,time=0){
   const scale=Math.min(w/115,h/84);
   if(item.type==='pet'){
     if(item.id==='none'){c.fillStyle='#9aafa1';c.font='bold 14px monospace';c.textAlign='center';c.fillText('SIN MASCOTA',w/2,h*.5);}
-    else drawPet(c,item.id,w/2,h*.5,time,scale*1.6);
+    else drawPet(c,item.id,w/2,h*.5,time,scale*(companions[item.id]?.animatedAsset?0.8:1.6));
   }else{
     const skinId = item.type==='skin'?item.id:profile?.loadout.skin||'pancho';
     if(item.type==='skin'&&item.animatedAsset){
@@ -180,6 +180,12 @@ export function drawItemPreview(canvas,item,profile,time=0){
     drawFood(c, skinId, w/2, py, scale, time);
     drawAccessory(c, accId, w/2, py + bob, scale, 'front');
   }
+}
+
+export function drawTeamPortrait(canvas,gear={},time=0){
+  const profile={loadout:{skin:gear.skinId||'pancho',accessory:gear.accessoryId||'none'}};
+  drawItemPreview(canvas,{type:'skin',id:profile.loadout.skin},profile,time);
+  if(gear.companionId&&gear.companionId!=='none')drawPet(canvas.getContext('2d'),gear.companionId,canvas.width*.8,canvas.height*.67,time,Math.min(canvas.width/300,canvas.height/200)*.75);
 }
 
 export function canvasPoint(rect,width,height,clientX,clientY){
